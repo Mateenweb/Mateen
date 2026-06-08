@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>تسجيل الدخول — متين العلمي</title>
+<link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.42.0/dist/tabler-icons.min.css" rel="stylesheet"/>
+<link href="../css/shared.css" rel="stylesheet"/>
+<link href="../css/login.css" rel="stylesheet"/>
+<link href="../css/islamic.css" rel="stylesheet"/>
+<link href="../css/mobile.css" rel="stylesheet"/>
+</head>
+<body>
+<!-- BASMALA -->
+<div class="basmala-bar"><span class="bsm-ornament">❦</span>بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ<span class="bsm-ornament">❦</span></div>
+<div class="login-page">
+<div>
+<div class="login-card">
+<div class="login-logo">
+<img alt="متين" onerror="this.style.display='none'" src="../logo.png"/>
+<h1>برنامج متين العلمي</h1>
+<p>سجّلي الدخول للوصول إلى حسابك</p>
+</div>
+<div class="login-tabs">
+<button class="login-tab active" id="tabLogin" onclick="switchTab('login')">تسجيل الدخول</button>
+<button class="login-tab" id="tabForgot" onclick="switchTab('forgot')">نسيت كلمة المرور</button>
+</div>
+<div class="error-msg" id="errorMsg">
+<i class="ti ti-alert-circle"></i>
+<span id="errorText"></span>
+</div>
+<!-- LOGIN FORM -->
+<div id="loginForm">
+<div class="form-group" style="margin-bottom:16px">
+<label>الدخول بصفة</label>
+<div class="role-grid">
+<button class="role-btn active" id="roleStudent" onclick="selectRole('student', this)">
+<div class="role-icon">🎓</div><div class="role-label">طالبة</div>
+</button>
+<button class="role-btn" id="roleTeacher" onclick="selectRole('teacher', this)">
+<div class="role-icon">👩‍🏫</div><div class="role-label">معلمة</div>
+</button>
+<button class="role-btn" id="roleAdmin" onclick="selectRole('admin', this)">
+<div class="role-icon">🛡️</div><div class="role-label">مشرفة</div>
+</button>
+</div>
+</div>
+<div class="login-form">
+<div class="form-group">
+<label>البريد الإلكتروني</label>
+<div class="form-input-wrap">
+<i class="ti ti-mail"></i>
+<input class="login-input" dir="ltr" id="emailInput" placeholder="example@email.com" type="email"/>
+</div>
+</div>
+<div class="form-group">
+<label>كلمة المرور</label>
+<div class="form-input-wrap">
+<i class="ti ti-lock"></i>
+<input class="login-input" dir="ltr" id="passInput" placeholder="••••••••" type="password"/>
+<button class="eye-toggle" onclick="togglePass()" type="button">
+<i class="ti ti-eye" id="eyeIcon"></i>
+</button>
+</div>
+<a class="forgot-link" href="#" onclick="switchTab('forgot'); return false;">نسيت كلمة المرور؟</a>
+</div>
+<button class="login-btn" id="loginBtn" onclick="doLogin()">
+<i class="ti ti-login"></i> دخول
+          </button>
+</div>
+</div>
+<!-- FORGOT FORM -->
+<div id="forgotForm" style="display:none">
+<div class="login-form">
+<div class="form-group">
+<label>أدخلي بريدك الإلكتروني المسجّل</label>
+<div class="form-input-wrap">
+<i class="ti ti-mail"></i>
+<input class="login-input" dir="ltr" id="resetEmail" placeholder="example@email.com" type="email"/>
+</div>
+</div>
+<button class="login-btn" id="resetBtn" onclick="doReset()">
+<i class="ti ti-send"></i> إرسال رابط الاستعادة
+          </button>
+</div>
+</div>
+<!-- SUCCESS -->
+<div class="success-screen" id="successScreen">
+<div class="success-icon"><i class="ti ti-check"></i></div>
+<h3 id="successTitle">تم!</h3>
+<p id="successMsg">جارٍ التحويل...</p>
+</div>
+</div>
+<a class="back-link" href="home.html">
+<i class="ti ti-arrow-right"></i> العودة إلى الصفحة الرئيسية
+    </a>
+</div>
+</div>
+<script src="../js/login-1.js" type="module"></script>
+</body>
+</html>
