@@ -1,0 +1,327 @@
+/* ===========================
+   صفحة الطالبة — عرض فقط — تصميم إسلامي
+   =========================== */
+
+@import url("https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;500;600;700&family=Amiri:wght@400;700&display=swap");
+
+:root {
+  --green-dark: #5c3d2e;
+  --green-mid: #8a5e3c;
+  --green-light: #b8966e;
+  --gold: #c9a227;
+  --gold-light: #e8c96a;
+  --beige: #f7efe3;
+  --beige2: #ede0cc;
+  --beige3: #d6c4a8;
+  --white: #fff;
+  --text-dark: #2c1a0e;
+  --text-mid: #8a6a52;
+  --border: #b8966e44;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Noto Naskh Arabic', serif;
+  background: var(--beige);
+  min-height: 100vh;
+  padding: 0;
+  direction: rtl;
+  color: var(--text-dark);
+}
+
+.page-wrap {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 12px 24px;
+}
+
+/* ── Top Nav ── */
+.sv-topnav {
+  background: var(--green-dark);
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 52px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.25);
+}
+
+.sv-logo {
+  font-family: Amiri, serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--gold-light);
+}
+
+/* ── Header ── */
+.sv-header {
+  background: linear-gradient(135deg, var(--green-dark) 0%, var(--green-mid) 50%, var(--green-dark) 100%);
+  border-radius: 14px;
+  padding: 22px 28px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  position: relative;
+  overflow: hidden;
+}
+
+.sv-header::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23c9a227' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+
+.sv-logo-wrap { position: relative; z-index: 1; }
+
+.sv-logo-circle {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1.5px solid var(--gold);
+  background: rgba(201,162,39,0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: Amiri, serif;
+  font-size: 10px;
+  color: var(--gold);
+  font-weight: 700;
+  text-align: center;
+}
+
+.sv-name-wrap { text-align: left; position: relative; z-index: 1; }
+
+.sv-name {
+  font-family: Amiri, serif;
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--gold-light);
+}
+
+.sv-status {
+  font-size: 12px;
+  color: rgba(255,255,255,0.7);
+  margin-top: 3px;
+}
+
+/* ── Stats ── */
+.stats-bar {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.stat-card {
+  background: var(--white);
+  border-radius: 12px;
+  padding: 14px;
+  text-align: center;
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--gold);
+  box-shadow: 0 2px 8px rgba(92,61,46,0.07);
+}
+
+.stat-card.absent { border-top-color: #c0392b; }
+.stat-card.pct    { border-top-color: var(--green-mid); }
+.stat-card.grade  { border-top-color: #e67e22; }
+
+.stat-num {
+  font-family: Amiri, serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--green-dark);
+}
+
+.stat-label {
+  font-size: 12px;
+  color: var(--text-mid);
+  margin-top: 4px;
+}
+
+/* ── Grid ── */
+.main-grid {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 14px;
+  align-items: start;
+}
+
+.side-col { display: flex; flex-direction: column; gap: 14px; }
+
+/* ── Cards ── */
+.card {
+  background: var(--white);
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.card-head {
+  background: var(--green-dark);
+  color: white;
+  font-family: Amiri, serif;
+  font-size: 15px;
+  font-weight: 700;
+  padding: 11px 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.card-head span { color: var(--gold-light); }
+
+.card-body { padding: 16px; }
+
+.empty-msg {
+  text-align: center;
+  color: #bbb;
+  font-size: 13px;
+  padding: 20px 0;
+}
+
+/* ── Attendance ── */
+.attendance-list { display: flex; flex-direction: column; gap: 8px; }
+
+.session-item {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.session-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--beige);
+  padding: 9px 14px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.session-header:hover { background: var(--beige2); }
+
+.session-day-date { font-weight: 700; font-size: 13px; color: var(--green-dark); }
+.session-summary  { font-size: 11.5px; color: var(--text-mid); }
+.session-toggle   { font-size: 11px; color: var(--gold); }
+
+.session-subjects {
+  padding: 10px 14px;
+  display: none;
+  flex-direction: column;
+  gap: 6px;
+  border-top: 1px solid var(--border);
+}
+
+.session-subjects.open { display: flex; }
+
+.subject-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+}
+
+.subject-name { color: var(--text-dark); }
+
+.att-badge {
+  padding: 3px 12px;
+  border-radius: 16px;
+  font-size: 11px;
+  font-weight: 700;
+}
+.att-badge.present { background: rgba(138,94,60,0.12); color: var(--green-mid); }
+.att-badge.absent  { background: rgba(192,57,43,0.1); color: #c0392b; }
+.att-badge.unknown { background: var(--beige2); color: #aaa; }
+
+/* ── Grades ── */
+.grades-list { display: flex; flex-direction: column; gap: 7px; }
+
+.grade-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  font-size: 13px;
+}
+
+.grade-info     { display: flex; flex-direction: column; gap: 2px; }
+.grade-label    { font-weight: 600; color: var(--green-dark); }
+.grade-subj-tag { font-size: 11px; color: var(--text-mid); }
+
+.grade-score-wrap { display: flex; align-items: center; gap: 7px; }
+.grade-score { font-family: Amiri, serif; font-size: 18px; font-weight: 700; color: var(--green-dark); }
+.grade-total { font-size: 12px; color: #aaa; }
+
+.grade-pct {
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 16px;
+  font-weight: 600;
+}
+.grade-pct.high { background: rgba(138,94,60,0.12); color: var(--green-mid); }
+.grade-pct.mid  { background: rgba(201,162,39,0.15); color: #7a5c00; }
+.grade-pct.low  { background: rgba(192,57,43,0.1); color: #c0392b; }
+
+/* ── Notes ── */
+.notes-content {
+  font-size: 13px;
+  color: var(--text-mid);
+  line-height: 1.8;
+  white-space: pre-wrap;
+}
+
+/* ── Footer ── */
+.footer {
+  background: var(--green-dark);
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 20px;
+  border-radius: 10px;
+}
+
+.footer-dua {
+  color: rgba(255,255,255,0.7);
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.footer-dua::before, .footer-dua::after { content: "✦"; color: var(--gold); font-size: 10px; }
+
+/* ── Responsive ── */
+@media (max-width: 700px) {
+  .main-grid  { grid-template-columns: 1fr; }
+  .stats-bar  { grid-template-columns: repeat(2,1fr); }
+  .sv-header  { flex-direction: column; gap: 12px; align-items: flex-start; }
+  .sv-name-wrap { text-align: right; }
+}
+
+/* ── موبايل شامل ── */
+@media (max-width: 768px) {
+  .sv-wrap            { padding: 12px !important; }
+  .sv-header          { flex-direction: column !important; gap: 10px !important; padding: 14px 12px !important; align-items: flex-start !important; }
+  .sv-name            { font-size: 18px !important; }
+  .sv-id              { font-size: 12px !important; }
+  .main-grid          { grid-template-columns: 1fr !important; }
+  .stats-bar          { grid-template-columns: 1fr 1fr !important; gap: 8px !important; }
+  .card-head          { padding: 10px 12px !important; font-size: 13px !important; }
+  .info-row           { padding: 8px 12px !important; font-size: 12px !important; flex-wrap: wrap; }
+  .tabs               { gap: 5px; flex-wrap: wrap; }
+  .tab                { padding: 7px 10px !important; font-size: 12px !important; flex: 1; text-align: center; }
+  .att-row, .grade-row{ font-size: 12px !important; padding: 8px 10px !important; }
+  .att-badge          { font-size: 11px !important; }
+  .grade-score        { font-size: 15px !important; }
+}
