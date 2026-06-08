@@ -1,77 +1,81 @@
 <!DOCTYPE html>
-
-<html dir="rtl" lang="ar">
+<html lang="ar" dir="rtl">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>المعلمات — برنامج متين العلمي</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;500;600;700&amp;family=Amiri:wght@400;700&amp;display=swap" rel="stylesheet"/>
-<link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.42.0/dist/tabler-icons.min.css" rel="stylesheet"/>
-<link href="../css/shared.css" rel="stylesheet"/>
-<link href="../css/teachers.css" rel="stylesheet"/>
-<link href="../css/islamic.css" rel="stylesheet"/>
-<link href="../css/mobile.css" rel="stylesheet"/>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>المعلمات — برنامج متين العلمي</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;500;600;700&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.42.0/dist/tabler-icons.min.css">
+  <link rel="stylesheet" href="../css/shared.css">
+  <link rel="stylesheet" href="../css/teachers.css">
+  <link rel="stylesheet" href="../css/islamic.css">
+  <link rel="stylesheet" href="../css/mobile.css">
 </head>
 <body>
 <!-- BASMALA -->
 <div class="basmala-bar"><span class="bsm-ornament">❦</span>بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ<span class="bsm-ornament">❦</span></div>
+
 <nav>
-<a class="nav-logo" href="home.html">
-<div class="logo-circle"><img alt="متين" src="../logo.png" style="width:100%;height:100%;border-radius:50%;object-fit:cover;"/></div>
-<div>
-<div class="nav-brand">برنامج متين العلمي</div>
-<div class="nav-tagline">نحو بناء علميٍّ متين</div>
-</div>
-</a>
-<ul class="nav-links">
-<li><a href="home.html">الرئيسية</a></li>
-<li><a href="about.html">عن البرنامج</a></li>
-<li><a href="courses.html">المسارات العلمية</a></li>
-<li><a class="active" href="teachers.html">المعلمات</a></li>
-<li><a href="#contact">تواصل معنا</a></li>
-</ul>
-<div class="nav-btns">
-<a class="btn-outline" href="login.html"><i class="ti ti-user"></i> تسجيل الدخول</a>
-</div>
-<button class="nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')">
-<i class="ti ti-menu-2"></i>
-</button>
+  <a href="home.html" class="nav-logo">
+    <div class="logo-circle"><img src="../logo.png" alt="متين" style="width:100%;height:100%;border-radius:50%;object-fit:cover;"></div>
+    <div>
+      <div class="nav-brand">برنامج متين العلمي</div>
+      <div class="nav-tagline">نحو بناء علميٍّ متين</div>
+    </div>
+  </a>
+  <ul class="nav-links">
+    <li><a href="home.html">الرئيسية</a></li>
+    <li><a href="about.html">عن البرنامج</a></li>
+    <li><a href="courses.html">المسارات العلمية</a></li>
+    <li><a href="teachers.html" class="active">المعلمات</a></li>
+    <li><a href="#contact">تواصل معنا</a></li>
+  </ul>
+  <div class="nav-btns">
+    <a href="login.html" class="btn-outline"><i class="ti ti-user"></i> تسجيل الدخول</a>
+  </div>
+  <button class="nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')">
+    <i class="ti ti-menu-2"></i>
+  </button>
 </nav>
+
 <div class="page-hero">
-<div class="hero-badge">👩‍🏫 كادر متين</div>
-<h1>المعلمات</h1>
-<p>تعرّفي على كادر المعلمات المتميزات في برنامج متين العلمي</p>
+  <div class="hero-badge">👩‍🏫 كادر متين</div>
+  <h1>المعلمات</h1>
+  <p>تعرّفي على كادر المعلمات المتميزات في برنامج متين العلمي</p>
 </div>
+
 <div class="breadcrumb">
-<a href="home.html">الرئيسية</a>
-<i class="ti ti-chevron-left" style="font-size:12px"></i>
-<span>المعلمات</span>
+  <a href="home.html">الرئيسية</a>
+  <i class="ti ti-chevron-left" style="font-size:12px"></i>
+  <span>المعلمات</span>
 </div>
+
 <div class="main-wrap">
-<div class="teachers-grid">
-<a class="teacher-card" href="teacher-tafseer.html"><div class="tc-icon">📖</div><div class="tc-name">معلمة التفسير</div><div class="tc-subj">التفسير</div><span class="tc-btn">عرض الصفحة</span></a>
-<a class="teacher-card" href="teacher-fiqh.html"><div class="tc-icon">⚖️</div><div class="tc-name">معلمة الفقه</div><div class="tc-subj">الفقه</div><span class="tc-btn">عرض الصفحة</span></a>
-<a class="teacher-card" href="teacher-aqeedah.html"><div class="tc-icon">🌙</div><div class="tc-name">معلمة العقيدة</div><div class="tc-subj">العقيدة</div><span class="tc-btn">عرض الصفحة</span></a>
-<a class="teacher-card" href="teacher-hadeeth.html"><div class="tc-icon">📜</div><div class="tc-name">معلمة الحديث</div><div class="tc-subj">الحديث</div><span class="tc-btn">عرض الصفحة</span></a>
-<a class="teacher-card" href="teacher-seera.html"><div class="tc-icon">🕌</div><div class="tc-name">معلمة السيرة</div><div class="tc-subj">السيرة النبوية</div><span class="tc-btn">عرض الصفحة</span></a>
-<a class="teacher-card" href="teacher-nahw.html"><div class="tc-icon">✍️</div><div class="tc-name">معلمة النحو</div><div class="tc-subj">النحو والصرف</div><span class="tc-btn">عرض الصفحة</span></a>
-<a class="teacher-card" href="teacher-tajweed.html"><div class="tc-icon">🎵</div><div class="tc-name">معلمة التجويد</div><div class="tc-subj">التجويد والتلاوة</div><span class="tc-btn">عرض الصفحة</span></a>
-<a class="teacher-card" href="teacher-mutoon.html"><div class="tc-icon">📚</div><div class="tc-name">معلمة المتون</div><div class="tc-subj">المتون العلمية</div><span class="tc-btn">عرض الصفحة</span></a>
-<a class="teacher-card" href="teacher-quran1.html"><div class="tc-icon">📗</div><div class="tc-name">معلمة القرآن الأولى</div><div class="tc-subj">القرآن الكريم</div><span class="tc-btn">عرض الصفحة</span></a>
-<a class="teacher-card" href="teacher-quran2.html"><div class="tc-icon">📗</div><div class="tc-name">معلمة القرآن الثانية</div><div class="tc-subj">القرآن الكريم</div><span class="tc-btn">عرض الصفحة</span></a>
-<a class="teacher-card" href="teacher-tarbawi.html"><div class="tc-icon">🌱</div><div class="tc-name">معلمة البرامج التربوية</div><div class="tc-subj">البرامج التربوية</div><span class="tc-btn">عرض الصفحة</span></a>
+  <div class="teachers-grid">
+    <a href="teacher-tafseer.html"  class="teacher-card"><div class="tc-icon">📖</div><div class="tc-name">معلمة التفسير</div><div class="tc-subj">التفسير</div><span class="tc-btn">عرض الصفحة</span></a>
+    <a href="teacher-fiqh.html"     class="teacher-card"><div class="tc-icon">⚖️</div><div class="tc-name">معلمة الفقه</div><div class="tc-subj">الفقه</div><span class="tc-btn">عرض الصفحة</span></a>
+    <a href="teacher-aqeedah.html"  class="teacher-card"><div class="tc-icon">🌙</div><div class="tc-name">معلمة العقيدة</div><div class="tc-subj">العقيدة</div><span class="tc-btn">عرض الصفحة</span></a>
+    <a href="teacher-hadeeth.html"  class="teacher-card"><div class="tc-icon">📜</div><div class="tc-name">معلمة الحديث</div><div class="tc-subj">الحديث</div><span class="tc-btn">عرض الصفحة</span></a>
+    <a href="teacher-seera.html"    class="teacher-card"><div class="tc-icon">🕌</div><div class="tc-name">معلمة السيرة</div><div class="tc-subj">السيرة النبوية</div><span class="tc-btn">عرض الصفحة</span></a>
+    <a href="teacher-nahw.html"     class="teacher-card"><div class="tc-icon">✍️</div><div class="tc-name">معلمة النحو</div><div class="tc-subj">النحو والصرف</div><span class="tc-btn">عرض الصفحة</span></a>
+    <a href="teacher-tajweed.html"  class="teacher-card"><div class="tc-icon">🎵</div><div class="tc-name">معلمة التجويد</div><div class="tc-subj">التجويد والتلاوة</div><span class="tc-btn">عرض الصفحة</span></a>
+    <a href="teacher-mutoon.html"   class="teacher-card"><div class="tc-icon">📚</div><div class="tc-name">معلمة المتون</div><div class="tc-subj">المتون العلمية</div><span class="tc-btn">عرض الصفحة</span></a>
+    <a href="teacher-quran1.html"   class="teacher-card"><div class="tc-icon">📗</div><div class="tc-name">معلمة القرآن الأولى</div><div class="tc-subj">القرآن الكريم</div><span class="tc-btn">عرض الصفحة</span></a>
+    <a href="teacher-quran2.html"   class="teacher-card"><div class="tc-icon">📗</div><div class="tc-name">معلمة القرآن الثانية</div><div class="tc-subj">القرآن الكريم</div><span class="tc-btn">عرض الصفحة</span></a>
+    <a href="teacher-tarbawi.html"  class="teacher-card"><div class="tc-icon">🌱</div><div class="tc-name">معلمة البرامج التربوية</div><div class="tc-subj">البرامج التربوية</div><span class="tc-btn">عرض الصفحة</span></a>
+  </div>
 </div>
-</div>
+
 <footer>
-<div style="display:flex;align-items:center;gap:8px">
-<img alt="متين" src="../logo.png" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:1px solid var(--gold);"/>
-<span style="color:rgba(255,255,255,0.7);font-family:Amiri,serif">متين العلمي</span>
-</div>
-<div class="footer-social">
-<a href="#"><i class="ti ti-brand-telegram"></i></a>
-<a href="#"><i class="ti ti-brand-twitter"></i></a>
-<a href="#"><i class="ti ti-brand-instagram"></i></a>
-</div>
+  <div style="display:flex;align-items:center;gap:8px">
+    <img src="../logo.png" alt="متين" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:1px solid var(--gold);">
+    <span style="color:rgba(255,255,255,0.7);font-family:Amiri,serif">متين العلمي</span>
+  </div>
+  <div class="footer-social">
+    <a href="#"><i class="ti ti-brand-telegram"></i></a>
+    <a href="#"><i class="ti ti-brand-twitter"></i></a>
+    <a href="#"><i class="ti ti-brand-instagram"></i></a>
+  </div>
 </footer>
 <script src="../js/teachers-1.js"></script>
 </body>

@@ -21,6 +21,14 @@ onAuthStateChanged(auth, async user => {
     return;
   }
 
+  // تحديث زراير الـ hero لما المستخدمة تسجّل دخول
+  const heroBtns = document.getElementById('heroBtns');
+  if (heroBtns) {
+    heroBtns.innerHTML = `
+      <button class="hero-btn-gold" onclick="document.getElementById('reg-modal').classList.add('open')">التسجيل في البرنامج</button>
+      <button class="hero-btn-white">المزيد عن البرنامج ←</button>`;
+  }
+
   // مسجلة دخول — اجلب بيانات المستخدمة
   guest.style.display   = 'none';
   userDiv.style.display = 'block';
@@ -33,6 +41,17 @@ onAuthStateChanged(auth, async user => {
   document.getElementById('sidebarRole').textContent =
     role === 'admin' ? 'مشرفة / معلمة' : 'الطالبة';
 
+  // إخفاء زرار "عرض صفحات المعلمات" من الطالبات
+  if (role === 'student' || role === 'mateen') {
+    const teachersLink = document.querySelector('a[href="teachers.html"]');
+    if (teachersLink) teachersLink.closest('.contact-card').style.display = 'none';
+  }
+
+  // إخفاء "ملفي الشخصي" من غير طالبات متين
+  const profileLink = document.getElementById('profileLink');
+  if (profileLink && role !== 'mateen') {
+    profileLink.style.display = 'none';
+  }
   // لو إدارية — أضيف رابط لوحة الإدارة
   if (role === 'admin') {
     const nav = userDiv.querySelector('.sidebar-nav');

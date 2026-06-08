@@ -1,60 +1,65 @@
 <!DOCTYPE html>
-
-<html dir="rtl" lang="ar">
+<html lang="ar" dir="rtl">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width,initial-scale=1.0" name="viewport"/>
-<title>المكتبة — متين العلمي</title>
-<link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.42.0/dist/tabler-icons.min.css" rel="stylesheet"/>
-<link href="../css/shared.css" rel="stylesheet"/>
-<link href="../css/library.css" rel="stylesheet"/>
-<link href="../css/islamic.css" rel="stylesheet"/>
-<link href="../css/mobile.css" rel="stylesheet"/>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>المكتبة — متين العلمي</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.42.0/dist/tabler-icons.min.css">
+  <link rel="stylesheet" href="../css/shared.css">
+  <link rel="stylesheet" href="../css/library.css">
+  <link rel="stylesheet" href="../css/islamic.css">
+  <link rel="stylesheet" href="../css/mobile.css">
 </head>
 <body>
 <!-- BASMALA -->
 <div class="basmala-bar"><span class="bsm-ornament">❦</span>بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ<span class="bsm-ornament">❦</span></div>
+
 <div id="nav-placeholder"></div>
+
 <div class="page-hero">
-<div class="hero-badge">📚 المكتبة العلمية</div>
-<h1>المكتبة العلمية</h1>
-<p>مصادر ومراجع علمية مختارة لطالبات برنامج متين</p>
+  <div class="hero-badge">📚 المكتبة العلمية</div>
+  <h1>المكتبة العلمية</h1>
+  <p>مصادر ومراجع علمية مختارة لطالبات برنامج متين</p>
 </div>
 <div class="breadcrumb">
-<a href="home.html">الرئيسية</a>
-<i class="ti ti-chevron-left"></i>
-<span>المكتبة</span>
+  <a href="home.html">الرئيسية</a>
+  <i class="ti ti-chevron-left"></i>
+  <span>المكتبة</span>
 </div>
+
 <div class="main-wrap">
-<div class="lib-filters">
-<button class="lib-btn active" onclick="filterLib(this,'all')">الكل</button>
-<button class="lib-btn" onclick="filterLib(this,'tafseer')">تفسير</button>
-<button class="lib-btn" onclick="filterLib(this,'fiqh')">فقه</button>
-<button class="lib-btn" onclick="filterLib(this,'aqeedah')">عقيدة</button>
-<button class="lib-btn" onclick="filterLib(this,'hadith')">حديث</button>
-<button class="lib-btn" onclick="filterLib(this,'quran')">قرآن</button>
+
+  <div class="lib-filters">
+    <button class="lib-btn active" onclick="filterLib(this,'all')">الكل</button>
+    <button class="lib-btn" onclick="filterLib(this,'tafseer')">تفسير</button>
+    <button class="lib-btn" onclick="filterLib(this,'fiqh')">فقه</button>
+    <button class="lib-btn" onclick="filterLib(this,'aqeedah')">عقيدة</button>
+    <button class="lib-btn" onclick="filterLib(this,'hadith')">حديث</button>
+    <button class="lib-btn" onclick="filterLib(this,'quran')">قرآن</button>
+  </div>
+
+  <div class="books-grid" id="booksGrid">
+    <div class="book-card" data-cat="tafseer"><div class="book-cover" style="background:linear-gradient(135deg,#1a4a2e,#2d6e45)">📖</div><div class="book-info"><div class="book-title">تفسير ابن كثير</div><div class="book-author">ابن كثير الدمشقي</div><div class="book-cat">تفسير</div></div></div>
+    <div class="book-card" data-cat="tafseer"><div class="book-cover" style="background:linear-gradient(135deg,#1a4a2e,#2d6e45)">📖</div><div class="book-info"><div class="book-title">تفسير السعدي</div><div class="book-author">عبدالرحمن السعدي</div><div class="book-cat">تفسير</div></div></div>
+    <div class="book-card" data-cat="fiqh"><div class="book-cover" style="background:linear-gradient(135deg,#1a3a5c,#2a5298)">⚖️</div><div class="book-info"><div class="book-title">زاد المستقنع</div><div class="book-author">الحجاوي</div><div class="book-cat">فقه</div></div></div>
+    <div class="book-card" data-cat="fiqh"><div class="book-cover" style="background:linear-gradient(135deg,#1a3a5c,#2a5298)">⚖️</div><div class="book-info"><div class="book-title">الملخص الفقهي</div><div class="book-author">صالح الفوزان</div><div class="book-cat">فقه</div></div></div>
+    <div class="book-card" data-cat="aqeedah"><div class="book-cover" style="background:linear-gradient(135deg,#4a2e1a,#8b5e3c)">🕌</div><div class="book-info"><div class="book-title">العقيدة الواسطية</div><div class="book-author">ابن تيمية</div><div class="book-cat">عقيدة</div></div></div>
+    <div class="book-card" data-cat="aqeedah"><div class="book-cover" style="background:linear-gradient(135deg,#4a2e1a,#8b5e3c)">🕌</div><div class="book-info"><div class="book-title">القواعد المثلى</div><div class="book-author">ابن عثيمين</div><div class="book-cat">عقيدة</div></div></div>
+    <div class="book-card" data-cat="hadith"><div class="book-cover" style="background:linear-gradient(135deg,#2e1a4a,#5e3c8b)">📜</div><div class="book-info"><div class="book-title">الأربعون النووية</div><div class="book-author">النووي</div><div class="book-cat">حديث</div></div></div>
+    <div class="book-card" data-cat="hadith"><div class="book-cover" style="background:linear-gradient(135deg,#2e1a4a,#5e3c8b)">📜</div><div class="book-info"><div class="book-title">بلوغ المرام</div><div class="book-author">ابن حجر العسقلاني</div><div class="book-cat">حديث</div></div></div>
+    <div class="book-card" data-cat="quran"><div class="book-cover" style="background:linear-gradient(135deg,#1a4a3a,#2d7a5a)">🌿</div><div class="book-info"><div class="book-title">تحفة الأطفال</div><div class="book-author">الجمزوري</div><div class="book-cat">قرآن</div></div></div>
+    <div class="book-card" data-cat="quran"><div class="book-cover" style="background:linear-gradient(135deg,#1a4a3a,#2d7a5a)">🌿</div><div class="book-info"><div class="book-title">متن الجزرية</div><div class="book-author">ابن الجزري</div><div class="book-cat">قرآن</div></div></div>
+  </div>
 </div>
-<div class="books-grid" id="booksGrid">
-<div class="book-card" data-cat="tafseer"><div class="book-cover" style="background:linear-gradient(135deg,#1a4a2e,#2d6e45)">📖</div><div class="book-info"><div class="book-title">تفسير ابن كثير</div><div class="book-author">ابن كثير الدمشقي</div><div class="book-cat">تفسير</div></div></div>
-<div class="book-card" data-cat="tafseer"><div class="book-cover" style="background:linear-gradient(135deg,#1a4a2e,#2d6e45)">📖</div><div class="book-info"><div class="book-title">تفسير السعدي</div><div class="book-author">عبدالرحمن السعدي</div><div class="book-cat">تفسير</div></div></div>
-<div class="book-card" data-cat="fiqh"><div class="book-cover" style="background:linear-gradient(135deg,#1a3a5c,#2a5298)">⚖️</div><div class="book-info"><div class="book-title">زاد المستقنع</div><div class="book-author">الحجاوي</div><div class="book-cat">فقه</div></div></div>
-<div class="book-card" data-cat="fiqh"><div class="book-cover" style="background:linear-gradient(135deg,#1a3a5c,#2a5298)">⚖️</div><div class="book-info"><div class="book-title">الملخص الفقهي</div><div class="book-author">صالح الفوزان</div><div class="book-cat">فقه</div></div></div>
-<div class="book-card" data-cat="aqeedah"><div class="book-cover" style="background:linear-gradient(135deg,#4a2e1a,#8b5e3c)">🕌</div><div class="book-info"><div class="book-title">العقيدة الواسطية</div><div class="book-author">ابن تيمية</div><div class="book-cat">عقيدة</div></div></div>
-<div class="book-card" data-cat="aqeedah"><div class="book-cover" style="background:linear-gradient(135deg,#4a2e1a,#8b5e3c)">🕌</div><div class="book-info"><div class="book-title">القواعد المثلى</div><div class="book-author">ابن عثيمين</div><div class="book-cat">عقيدة</div></div></div>
-<div class="book-card" data-cat="hadith"><div class="book-cover" style="background:linear-gradient(135deg,#2e1a4a,#5e3c8b)">📜</div><div class="book-info"><div class="book-title">الأربعون النووية</div><div class="book-author">النووي</div><div class="book-cat">حديث</div></div></div>
-<div class="book-card" data-cat="hadith"><div class="book-cover" style="background:linear-gradient(135deg,#2e1a4a,#5e3c8b)">📜</div><div class="book-info"><div class="book-title">بلوغ المرام</div><div class="book-author">ابن حجر العسقلاني</div><div class="book-cat">حديث</div></div></div>
-<div class="book-card" data-cat="quran"><div class="book-cover" style="background:linear-gradient(135deg,#1a4a3a,#2d7a5a)">🌿</div><div class="book-info"><div class="book-title">تحفة الأطفال</div><div class="book-author">الجمزوري</div><div class="book-cat">قرآن</div></div></div>
-<div class="book-card" data-cat="quran"><div class="book-cover" style="background:linear-gradient(135deg,#1a4a3a,#2d7a5a)">🌿</div><div class="book-info"><div class="book-title">متن الجزرية</div><div class="book-author">ابن الجزري</div><div class="book-cat">قرآن</div></div></div>
-</div>
-</div>
+
 <footer>
-<div class="footer-logo"><img alt="متين" src="../logo.png" style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:1.5px solid var(--gold);background:#fff;"/><span style="color:rgba(255,255,255,0.8);font-family:Amiri,serif;font-size:14px">متين العلمي</span></div>
-<div class="footer-dua">اللهم علمنا ما ينفعنا وانفعنا بما علمتنا</div>
-<div class="footer-social"><a href="#"><i class="ti ti-brand-telegram"></i></a><a href="#"><i class="ti ti-brand-twitter"></i></a></div>
+  <div class="footer-logo"><img src="../logo.png" alt="متين" style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:1.5px solid var(--gold);background:#fff;"><span style="color:rgba(255,255,255,0.8);font-family:Amiri,serif;font-size:14px">متين العلمي</span></div>
+  <div class="footer-dua">اللهم علمنا ما ينفعنا وانفعنا بما علمتنا</div>
+  <div class="footer-social"><a href="#"><i class="ti ti-brand-telegram"></i></a><a href="#"><i class="ti ti-brand-twitter"></i></a></div>
 </footer>
 <script src="../js/nav.js"></script>
 <script src="../js/library.js"></script>
-<script src="../js/library-3.js"></script>
+<script src="../js/library-1.js"></script>
 </body>
 </html>
 EOF

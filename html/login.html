@@ -1,102 +1,228 @@
 <!DOCTYPE html>
-
-<html dir="rtl" lang="ar">
+<html lang="ar" dir="rtl">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>تسجيل الدخول — متين العلمي</title>
-<link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.42.0/dist/tabler-icons.min.css" rel="stylesheet"/>
-<link href="../css/shared.css" rel="stylesheet"/>
-<link href="../css/login.css" rel="stylesheet"/>
-<link href="../css/islamic.css" rel="stylesheet"/>
-<link href="../css/mobile.css" rel="stylesheet"/>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>تسجيل الدخول — متين العلمي</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.42.0/dist/tabler-icons.min.css">
+  <link rel="stylesheet" href="../css/shared.css">
+  <link rel="stylesheet" href="../css/login.css">
+  <link rel="stylesheet" href="../css/islamic.css">
+  <link rel="stylesheet" href="../css/mobile.css">
 </head>
 <body>
-<!-- BASMALA -->
 <div class="basmala-bar"><span class="bsm-ornament">❦</span>بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ<span class="bsm-ornament">❦</span></div>
+
 <div class="login-page">
-<div>
-<div class="login-card">
-<div class="login-logo">
-<img alt="متين" onerror="this.style.display='none'" src="../logo.png"/>
-<h1>برنامج متين العلمي</h1>
-<p>سجّلي الدخول للوصول إلى حسابك</p>
-</div>
-<div class="login-tabs">
-<button class="login-tab active" id="tabLogin" onclick="switchTab('login')">تسجيل الدخول</button>
-<button class="login-tab" id="tabForgot" onclick="switchTab('forgot')">نسيت كلمة المرور</button>
-</div>
-<div class="error-msg" id="errorMsg">
-<i class="ti ti-alert-circle"></i>
-<span id="errorText"></span>
-</div>
-<!-- LOGIN FORM -->
-<div id="loginForm">
-<div class="form-group" style="margin-bottom:16px">
-<label>الدخول بصفة</label>
-<div class="role-grid">
-<button class="role-btn active" id="roleStudent" onclick="selectRole('student', this)">
-<div class="role-icon">🎓</div><div class="role-label">طالبة</div>
-</button>
-<button class="role-btn" id="roleTeacher" onclick="selectRole('teacher', this)">
-<div class="role-icon">👩‍🏫</div><div class="role-label">معلمة</div>
-</button>
-<button class="role-btn" id="roleAdmin" onclick="selectRole('admin', this)">
-<div class="role-icon">🛡️</div><div class="role-label">مشرفة</div>
-</button>
-</div>
-</div>
-<div class="login-form">
-<div class="form-group">
-<label>البريد الإلكتروني</label>
-<div class="form-input-wrap">
-<i class="ti ti-mail"></i>
-<input class="login-input" dir="ltr" id="emailInput" placeholder="example@email.com" type="email"/>
-</div>
-</div>
-<div class="form-group">
-<label>كلمة المرور</label>
-<div class="form-input-wrap">
-<i class="ti ti-lock"></i>
-<input class="login-input" dir="ltr" id="passInput" placeholder="••••••••" type="password"/>
-<button class="eye-toggle" onclick="togglePass()" type="button">
-<i class="ti ti-eye" id="eyeIcon"></i>
-</button>
-</div>
-<a class="forgot-link" href="#" onclick="switchTab('forgot'); return false;">نسيت كلمة المرور؟</a>
-</div>
-<button class="login-btn" id="loginBtn" onclick="doLogin()">
-<i class="ti ti-login"></i> دخول
-          </button>
-</div>
-</div>
-<!-- FORGOT FORM -->
-<div id="forgotForm" style="display:none">
-<div class="login-form">
-<div class="form-group">
-<label>أدخلي بريدك الإلكتروني المسجّل</label>
-<div class="form-input-wrap">
-<i class="ti ti-mail"></i>
-<input class="login-input" dir="ltr" id="resetEmail" placeholder="example@email.com" type="email"/>
-</div>
-</div>
-<button class="login-btn" id="resetBtn" onclick="doReset()">
-<i class="ti ti-send"></i> إرسال رابط الاستعادة
-          </button>
-</div>
-</div>
-<!-- SUCCESS -->
-<div class="success-screen" id="successScreen">
-<div class="success-icon"><i class="ti ti-check"></i></div>
-<h3 id="successTitle">تم!</h3>
-<p id="successMsg">جارٍ التحويل...</p>
-</div>
-</div>
-<a class="back-link" href="home.html">
-<i class="ti ti-arrow-right"></i> العودة إلى الصفحة الرئيسية
+  <div style="width:100%;max-width:480px;">
+    <div class="login-card">
+
+      <div class="login-logo">
+        <img src="../logo.png" alt="متين" onerror="this.style.display='none'">
+        <h1>برنامج متين العلمي</h1>
+        <p id="logoSub">سجّلي الدخول للوصول إلى حسابك</p>
+      </div>
+
+      <div class="login-tabs">
+        <button class="login-tab active" id="tabLogin"    onclick="switchTab('login')">تسجيل الدخول</button>
+        <button class="login-tab"        id="tabRegister" onclick="switchTab('register')">إنشاء حساب</button>
+        <button class="login-tab"        id="tabForgot"   onclick="switchTab('forgot')">نسيت كلمة المرور</button>
+      </div>
+
+      <div class="login-body">
+
+        <div class="error-msg" id="errorMsg">
+          <i class="ti ti-alert-circle"></i>
+          <span id="errorText"></span>
+        </div>
+
+        <!-- ══ تسجيل الدخول ══ -->
+        <div id="loginForm">
+          <div class="login-form">
+            <div class="form-group">
+              <label>الدخول بصفة</label>
+              <div class="role-grid">
+                <button class="role-btn active" onclick="selectLoginRole('student',this)">
+                  <div class="role-icon">🌺</div><div class="role-label"> أصدقاء متين </div>
+                </button>
+                <button class="role-btn" onclick="selectLoginRole('mateen',this)">
+                  <div class="role-icon">📖</div><div class="role-label">طالبات متين</div>
+                </button>
+                <button class="role-btn" onclick="selectLoginRole('teacher',this)">
+                  <div class="role-icon">👩‍🏫</div><div class="role-label"> معلمة </div>
+                </button>
+                <button class="role-btn" onclick="selectLoginRole('supervisor',this)">
+                  <div class="role-icon">🛡️</div><div class="role-label">مشرفة</div>
+                </button>
+                <button class="role-btn" onclick="selectLoginRole('admin',this)">
+                  <div class="role-icon">👑</div><div class="role-label">الإدارة</div>
+                </button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>البريد الإلكتروني</label>
+              <div class="form-input-wrap">
+                <i class="ti ti-mail"></i>
+                <input type="email" class="login-input" id="emailInput" placeholder="example@email.com" dir="ltr">
+              </div>
+            </div>
+            <div class="form-group">
+              <label>كلمة المرور</label>
+              <div class="form-input-wrap">
+                <i class="ti ti-lock"></i>
+                <input type="password" class="login-input" id="passInput" placeholder="••••••••" dir="ltr">
+                <button class="eye-toggle" onclick="togglePass('passInput','eyeIcon')" type="button">
+                  <i class="ti ti-eye" id="eyeIcon"></i>
+                </button>
+              </div>
+              <a href="#" class="forgot-link" onclick="switchTab('forgot');return false;">نسيت كلمة المرور؟</a>
+            </div>
+            <button class="login-btn" id="loginBtn" onclick="doLogin()">
+              <i class="ti ti-login"></i> دخول
+            </button>
+          </div>
+        </div>
+
+        <!-- ══ إنشاء حساب ══ -->
+        <div id="registerForm" style="display:none">
+          <div class="login-form">
+
+            <div class="form-group">
+              <label>نوع الحساب</label>
+              <div class="reg-role-grid">
+                <button class="reg-role-btn active" onclick="selectRegRole('student',this)">
+                  <div class="reg-role-icon">🌺</div>
+                  <div class="reg-role-label">أصدقاء متين</div>
+                  <div class="reg-role-desc">متابِعة للبرنامج</div>
+                </button>
+                <button class="reg-role-btn" onclick="selectRegRole('mateen',this)">
+                  <div class="reg-role-icon">📖</div>
+                  <div class="reg-role-label">طالبات متين</div>
+                  <div class="reg-role-desc">مسجّلة في البرنامج الدراسي</div>
+                </button>
+                <button class="reg-role-btn" onclick="selectRegRole('teacher',this)">
+                  <div class="reg-role-icon">👩‍🏫</div>
+                  <div class="reg-role-label">معلمة</div>
+                  <div class="reg-role-desc">تحتاج موافقة الأدمن</div>
+                </button>
+                <button class="reg-role-btn" onclick="selectRegRole('supervisor',this)">
+                  <div class="reg-role-icon">🛡️</div>
+                  <div class="reg-role-label">مشرفة</div>
+                  <div class="reg-role-desc">تحتاج موافقة الأدمن</div>
+                </button>
+              </div>
+            </div>
+
+            <div class="form-divider"><span>البيانات الشخصية</span></div>
+
+            <div class="form-group">
+              <label>الاسم الكامل</label>
+              <div class="form-input-wrap">
+                <i class="ti ti-user"></i>
+                <input type="text" class="login-input" id="regName" placeholder="الاسم الثلاثي">
+              </div>
+            </div>
+              <div class="form-group" id="regYearGroup">
+                <label> السنة الدراسية بمتين</label>
+                <select class="login-input no-icon" id="regYear">
+                  <option value="">اختاري</option>
+                  <option>الأولى</option><option>الثانية</option>
+                  <option>الثالثة</option><option>الرابعة</option>
+                  <option>خريجة</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>رقم الجوال</label>
+              <div class="form-input-wrap">
+                <i class="ti ti-phone"></i>
+                <input type="tel" class="login-input" id="regPhone" placeholder="05xxxxxxxx" dir="ltr">
+              </div>
+            </div>
+
+            <!-- حقل المادة — يظهر فقط عند اختيار معلمة -->
+            <div class="form-group" id="regSubjectGroup" style="display:none">
+              <label>المادة التي تدرّسينها</label>
+              <select class="login-input no-icon" id="regSubject">
+                <option value="">اختاري المادة</option>
+                <option value="quran1">القرآن الكريم (الأولى)</option>
+                <option value="quran2">القرآن الكريم (الثانية)</option>
+                <option value="hadeeth">الحديث الشريف</option>
+                <option value="fiqh">الفقه</option>
+                <option value="aqeedah">العقيدة</option>
+                <option value="tafseer">التفسير</option>
+              </select>
+            </div>
+
+            <div class="form-divider"><span>بيانات الحساب</span></div>
+
+            <div class="form-group">
+              <label>البريد الإلكتروني</label>
+              <div class="form-input-wrap">
+                <i class="ti ti-mail"></i>
+                <input type="email" class="login-input" id="regEmail" placeholder="example@email.com" dir="ltr">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>كلمة المرور</label>
+              <div class="form-input-wrap">
+                <i class="ti ti-lock"></i>
+                <input type="password" class="login-input" id="regPass" placeholder="٦ أحرف على الأقل" dir="ltr">
+                <button class="eye-toggle" onclick="togglePass('regPass','eyeIconReg')" type="button">
+                  <i class="ti ti-eye" id="eyeIconReg"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>تأكيد كلمة المرور</label>
+              <div class="form-input-wrap">
+                <i class="ti ti-lock-check"></i>
+                <input type="password" class="login-input" id="regPass2" placeholder="أعيدي كتابة كلمة المرور" dir="ltr">
+              </div>
+            </div>
+
+            <button class="login-btn" id="registerBtn" onclick="doRegister()">
+              <i class="ti ti-user-plus"></i> إنشاء الحساب
+            </button>
+
+          </div>
+        </div>
+
+        <!-- ══ نسيت كلمة المرور ══ -->
+        <div id="forgotForm" style="display:none">
+          <div class="login-form">
+            <div class="form-group">
+              <label>أدخلي بريدك الإلكتروني المسجّل</label>
+              <div class="form-input-wrap">
+                <i class="ti ti-mail"></i>
+                <input type="email" class="login-input" id="resetEmail" placeholder="example@email.com" dir="ltr">
+              </div>
+            </div>
+            <button class="login-btn" id="resetBtn" onclick="doReset()">
+              <i class="ti ti-send"></i> إرسال رابط الاستعادة
+            </button>
+          </div>
+        </div>
+
+        <!-- ══ نجاح ══ -->
+        <div class="success-screen" id="successScreen">
+          <div class="success-icon"><i class="ti ti-check"></i></div>
+          <h3 id="successTitle">تم!</h3>
+          <p id="successMsg">جارٍ التحويل...</p>
+        </div>
+
+      </div>
+    </div>
+
+    <a href="home.html" class="back-link">
+      <i class="ti ti-arrow-right"></i> العودة إلى الصفحة الرئيسية
     </a>
+  </div>
 </div>
-</div>
-<script src="../js/login-1.js" type="module"></script>
+
+<script type="module" src="../js/login-1.js"></script>
 </body>
 </html>

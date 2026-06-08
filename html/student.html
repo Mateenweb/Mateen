@@ -1,108 +1,123 @@
 <!DOCTYPE html>
-
-<html dir="rtl" lang="ar">
+<html lang="ar" dir="rtl">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport"/>
-<title>صفحة الطالبة</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;500;600;700&amp;family=Amiri:wght@400;700&amp;display=swap" rel="stylesheet"/>
-<link href="../css/student.css" rel="stylesheet"/>
-<link href="../css/islamic.css" rel="stylesheet"/>
-<link href="../css/mobile.css" rel="stylesheet"/>
-<link href="../css/student.css" rel="stylesheet"/>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+  <title>صفحة الطالبة</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;500;600;700&family=Amiri:wght@400;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="../css/student.css"/>
+  <link rel="stylesheet" href="../css/islamic.css">
+  <link rel="stylesheet" href="../css/mobile.css">
+  <link rel="stylesheet" href="../css/student.css">
 </head>
 <body>
+
 <div class="basmala-bar"><span class="bsm-ornament">❦</span>بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ<span class="bsm-ornament">❦</span></div>
+
 <!-- Auth Loading Gate -->
 <div id="authGate" style="display:flex;align-items:center;justify-content:center;min-height:100vh;flex-direction:column;gap:12px;background:var(--beige);">
-<img alt="متين" src="../logo.png" style="width:64px;height:64px;border-radius:50%;object-fit:cover;border:2px solid var(--gold);"/>
-<div style="font-family:Amiri,serif;font-size:16px;color:var(--green-dark)">جارٍ التحقق من الصلاحيات...</div>
+  <img src="../logo.png" alt="متين" style="width:64px;height:64px;border-radius:50%;object-fit:cover;border:2px solid var(--gold);">
+  <div style="font-family:Amiri,serif;font-size:16px;color:var(--green-dark)">جارٍ التحقق من الصلاحيات...</div>
 </div>
+
 <div class="page-wrap" id="mainContent" style="display:none">
-<!-- Header بار -->
-<div class="student-header-bar">
-<div class="logo-area">
-<img alt="متين" src="../logo.png"/>
-<span class="brand">برنامج متين العلمي</span>
-</div>
-<div style="display:flex;gap:8px;align-items:center;">
-<button class="delete-acc-btn" id="deleteAccBtn">🗑️ حذف حسابي</button>
-<button class="logout-btn-s" id="logoutBtn">🚪 خروج</button>
-</div>
-</div>
-<!-- Modal تأكيد حذف الحساب -->
-<div class="del-modal-overlay" id="delModal">
-<div class="del-modal">
-<div class="del-modal-icon">🗑️</div>
-<h3>حذف الحساب نهائياً</h3>
-<p>هذا الإجراء لا يمكن التراجع عنه.<br/>ستُحذف جميع بيانات حسابك من النظام.<br/>أدخلي كلمة المرور للتأكيد.</p>
-<div class="del-pass-wrap">
-<input dir="ltr" id="delPassInput" placeholder="كلمة المرور" type="password"/>
-</div>
-<div class="del-error" id="delError"></div>
-<div class="del-modal-btns">
-<button class="del-confirm-btn" id="delConfirmBtn">تأكيد الحذف</button>
-<button class="del-cancel-btn" id="delCancelBtn">إلغاء</button>
-</div>
-</div>
-</div>
-<!-- بطاقة ترحيب -->
-<div class="welcome-card">
-<div class="welcome-avatar">👩</div>
-<div>
-<div class="welcome-name" id="studentName">...</div>
-<div class="welcome-sub">أهلاً بكِ في برنامج متين العلمي</div>
-<span class="welcome-badge" id="studentStatus"></span>
-</div>
-</div>
-<!-- Stats Bar -->
-<div class="stats-bar">
-<div class="stat-card">
-<div class="stat-num" id="statPresent">0</div>
-<div class="stat-label">حاضرة</div>
-</div>
-<div class="stat-card absent">
-<div class="stat-num" id="statAbsent">0</div>
-<div class="stat-label">غائبة</div>
-</div>
-<div class="stat-card pct">
-<div class="stat-num" id="statPct">—</div>
-<div class="stat-label">نسبة الحضور</div>
-</div>
-<div class="stat-card grade">
-<div class="stat-num" id="statGrade">—</div>
-<div class="stat-label">متوسط الدرجات</div>
-</div>
-</div>
-<div class="main-grid">
-<!-- سجل الحضور — عرض فقط -->
-<div class="card attendance-card">
-<div class="card-head">
-<span>📅 سجل الحضور</span>
-</div>
-<div class="attendance-list" id="attendanceList">
-<div class="empty-msg">لا توجد جلسات مسجلة بعد</div>
-</div>
-</div>
-<!-- الدرجات والملاحظات — عرض فقط -->
-<div class="side-col">
-<div class="card grades-card">
-<div class="card-head">
-<span>📝 الاختبارات والدرجات</span>
-</div>
-<div class="grades-list" id="gradesList">
-<div class="empty-msg">لا توجد درجات مسجلة</div>
-</div>
-</div>
-<div class="card notes-card">
-<div class="card-head">
-<span>🗒️ ملاحظات المعلمة</span>
-</div>
-<textarea class="notes-area" id="notesArea" placeholder="لا توجد ملاحظات بعد..." readonly=""></textarea>
-</div>
-</div>
-</div>
+
+  <!-- Header بار -->
+  <div class="student-header-bar">
+    <div class="logo-area">
+      <img src="../logo.png" alt="متين">
+      <span class="brand">برنامج متين العلمي</span>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <button class="delete-acc-btn" id="deleteAccBtn">🗑️ حذف حسابي</button>
+      <button class="logout-btn-s" id="logoutBtn">🚪 خروج</button>
+    </div>
+  </div>
+
+  <!-- Modal تأكيد حذف الحساب -->
+  <div class="del-modal-overlay" id="delModal">
+    <div class="del-modal">
+      <div class="del-modal-icon">🗑️</div>
+      <h3>حذف الحساب نهائياً</h3>
+      <p>هذا الإجراء لا يمكن التراجع عنه.<br>ستُحذف جميع بيانات حسابك من النظام.<br>أدخلي كلمة المرور للتأكيد.</p>
+      <div class="del-pass-wrap">
+        <input type="password" id="delPassInput" placeholder="كلمة المرور" dir="ltr">
+      </div>
+      <div class="del-error" id="delError"></div>
+      <div class="del-modal-btns">
+        <button class="del-confirm-btn" id="delConfirmBtn">تأكيد الحذف</button>
+        <button class="del-cancel-btn" id="delCancelBtn">إلغاء</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- بطاقة ترحيب -->
+  <div class="welcome-card">
+    <div class="welcome-avatar">👩</div>
+    <div>
+      <div class="welcome-name" id="studentName">...</div>
+      <div class="welcome-sub">أهلاً بكِ في برنامج متين العلمي</div>
+      <span class="welcome-badge" id="studentStatus"></span>
+    </div>
+  </div>
+
+  <!-- Stats Bar -->
+  <div class="stats-bar">
+    <div class="stat-card">
+      <div class="stat-num" id="statPresent">0</div>
+      <div class="stat-label">حاضرة</div>
+    </div>
+    <div class="stat-card absent">
+      <div class="stat-num" id="statAbsent">0</div>
+      <div class="stat-label">غائبة</div>
+    </div>
+    <div class="stat-card pct">
+      <div class="stat-num" id="statPct">—</div>
+      <div class="stat-label">نسبة الحضور</div>
+    </div>
+    <div class="stat-card grade">
+      <div class="stat-num" id="statGrade">—</div>
+      <div class="stat-label">متوسط الدرجات</div>
+    </div>
+  </div>
+
+  <div class="main-grid">
+
+    <!-- سجل الحضور — عرض فقط -->
+    <div class="card attendance-card">
+      <div class="card-head">
+        <span>📅 سجل الحضور</span>
+      </div>
+      <div id="attendanceList" class="attendance-list">
+        <div class="empty-msg">لا توجد جلسات مسجلة بعد</div>
+      </div>
+    </div>
+
+    <!-- الدرجات والملاحظات — عرض فقط -->
+    <div class="side-col">
+
+      <div class="card grades-card">
+        <div class="card-head">
+          <span>📝 الاختبارات والدرجات</span>
+        </div>
+        <div id="gradesList" class="grades-list">
+          <div class="empty-msg">لا توجد درجات مسجلة</div>
+        </div>
+      </div>
+
+      <div class="card notes-card">
+        <div class="card-head">
+          <span>🗒️ ملاحظات المعلمة</span>
+        </div>
+        <textarea id="notesArea" class="notes-area" readonly
+          placeholder="لا توجد ملاحظات بعد..."></textarea>
+      </div>
+
+    </div>
+  </div>
+
 </div><!-- end mainContent -->
-<script src="../js/student-1.js" type="module"></script>
+
+<script type="module" src="../js/student-1.js"></script>
 </body>
 </html>

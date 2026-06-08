@@ -1,258 +1,283 @@
 <!DOCTYPE html>
-
-<html dir="rtl" lang="ar">
+<html lang="ar" dir="rtl">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>لوحة الإداريات — متين العلمي</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;500;600;700&amp;family=Amiri:wght@400;700&amp;display=swap" rel="stylesheet"/>
-<link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.42.0/dist/tabler-icons.min.css" rel="stylesheet"/>
-<link href="../css/shared.css" rel="stylesheet"/>
-<link href="../css/admin.css" rel="stylesheet"/>
-<link href="../css/islamic.css" rel="stylesheet"/>
-<link href="../css/mobile.css" rel="stylesheet"/>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>لوحة الإداريات — متين العلمي</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;500;600;700&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.42.0/dist/tabler-icons.min.css">
+  <link rel="stylesheet" href="../css/shared.css">
+  <link rel="stylesheet" href="../css/admin.css">
+  <link rel="stylesheet" href="../css/islamic.css">
+  <link rel="stylesheet" href="../css/mobile.css">
 </head>
 <body>
 <!-- BASMALA -->
 <div class="basmala-bar"><span class="bsm-ornament">❦</span>بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ<span class="bsm-ornament">❦</span></div>
+
 <!-- NAV -->
 <nav>
-<a class="nav-logo" href="home.html">
-<div class="logo-circle"><img alt="متين" src="../logo.png" style="width:100%;height:100%;border-radius:50%;object-fit:cover;"/></div>
-<div>
-<div class="nav-brand">برنامج متين العلمي</div>
-<div class="nav-tagline">نحو بناء علميٍّ متين</div>
-</div>
-</a>
-<div class="nav-btns">
-<div class="nav-user">
-<i class="ti ti-shield"></i>
-<span class="nav-user-name" id="navUserName">إدارية</span>
-</div>
-<button class="btn-logout" onclick="doLogout()"><i class="ti ti-logout"></i> خروج</button>
-</div>
+  <a href="home.html" class="nav-logo">
+    <div class="logo-circle"><img src="../logo.png" alt="متين" style="width:100%;height:100%;border-radius:50%;object-fit:cover;"></div>
+    <div>
+      <div class="nav-brand">برنامج متين العلمي</div>
+      <div class="nav-tagline">نحو بناء علميٍّ متين</div>
+    </div>
+  </a>
+  <div class="nav-btns">
+    <div class="nav-user">
+      <i class="ti ti-shield"></i>
+      <span class="nav-user-name" id="navUserName">إدارية</span>
+    </div>
+    <button class="btn-logout" onclick="doLogout()"><i class="ti ti-logout"></i> خروج</button>
+  </div>
 </nav>
+
 <!-- AUTH GATE -->
 <div id="authGate">
-<i class="ti ti-loader spin"></i>
-<p>جارٍ التحقق من الصلاحيات...</p>
+  <i class="ti ti-loader spin"></i>
+  <p>جارٍ التحقق من الصلاحيات...</p>
 </div>
+
 <!-- MAIN -->
 <div id="mainContent" style="display:none; flex-direction:column; flex:1;">
-<div class="hero">
-<div class="hero-badge">🛡️ لوحة الإداريات</div>
-<h1>إدارة المواد العلمية</h1>
-<p>إضافة وإدارة روابط مواد الدراسة لجميع المسارات</p>
-</div>
-<div class="container">
-<!-- STATS -->
-<div class="stats-row">
-<div class="stat-card"><div class="stat-num" id="sTotal">0</div><div class="stat-label">إجمالي المواد</div></div>
-<div class="stat-card"><div class="stat-num" id="sMah">0</div><div class="stat-label">محاضرات</div></div>
-<div class="stat-card"><div class="stat-num" id="sVid">0</div><div class="stat-label">فيديو</div></div>
-<div class="stat-card"><div class="stat-num" id="sOth">0</div><div class="stat-label">ملفات أخرى</div></div>
-</div>
-<!-- ADD FORM -->
-<div class="section">
-<div class="section-head">
-<div class="section-head-title"><i class="ti ti-plus"></i> إضافة مادة جديدة</div>
-</div>
-<div class="section-body">
-<div class="howto">
-<div class="howto-title"><i class="ti ti-info-circle"></i> كيف أحصل على الرابط؟</div>
-<div class="howto-steps">
-<div class="howto-step"><span class="step-num">1</span>ارفعي الملف على Google Drive أو Dropbox أو أي خدمة تخزين</div>
-<div class="howto-step"><span class="step-num">2</span>اضغطي "مشاركة" واجعليه "يمكن لأي شخص لديه الرابط العرض"</div>
-<div class="howto-step"><span class="step-num">3</span>انسخي الرابط والصقيه في الحقل أدناه</div>
-</div>
-</div>
-<div class="err-msg" id="errMsg"><i class="ti ti-alert-circle"></i><span id="errText"></span></div>
-<div class="add-form">
-<div class="field">
-<label>رابط الملف <span style="color:#c0392b">*</span></label>
-<div class="link-wrap">
-<i class="ti ti-link"></i>
-<input id="fUrl" placeholder="https://drive.google.com/file/d/..." type="url"/>
-</div>
-<div class="link-hint">Google Drive · Dropbox · OneDrive · YouTube · أي رابط مباشر</div>
-</div>
-<div class="form-row">
-<div class="field">
-<label>المادة / المسار <span style="color:#c0392b">*</span></label>
-<select id="fCourse">
-<option value="">اختاري المادة</option>
-<option>التفسير</option><option>الفقه</option><option>العقيدة</option>
-<option>الحديث</option><option>السيرة النبوية</option>
-<option>التجويد والتلاوة</option><option>النحو</option><option>أخرى</option>
-</select>
-</div>
-<div class="field">
-<label>نوع المحتوى</label>
-<select id="fType">
-<option value="محاضرة">محاضرة</option>
-<option value="ملخص">ملخص</option>
-<option value="واجب">واجب</option>
-<option value="اختبار">اختبار</option>
-<option value="مرجع">مرجع علمي</option>
-<option value="فيديو">فيديو</option>
-<option value="أخرى">أخرى</option>
-</select>
-</div>
-</div>
-<div class="field">
-<label>عنوان المادة <span style="color:#c0392b">*</span></label>
-<input id="fTitle" placeholder="مثال: محاضرة تفسير سورة الفاتحة — الأسبوع الأول" type="text"/>
-</div>
-<div class="field">
-<label>ملاحظات للطالبات (اختياري)</label>
-<textarea id="fNotes" placeholder="أي تعليمات أو ملاحظات..."></textarea>
-</div>
-<button class="btn-add" id="addBtn" onclick="doAdd()">
-<i class="ti ti-circle-plus"></i> إضافة المادة
+
+  <div class="hero">
+    <div class="hero-badge">🛡️ لوحة الإداريات</div>
+    <h1>إدارة المواد العلمية</h1>
+    <p>إضافة وإدارة روابط مواد الدراسة لجميع المسارات</p>
+  </div>
+
+  <div class="container">
+
+    <!-- STATS -->
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-num" id="sTotal">0</div><div class="stat-label">إجمالي المواد</div></div>
+      <div class="stat-card"><div class="stat-num" id="sMah">0</div><div class="stat-label">محاضرات</div></div>
+      <div class="stat-card"><div class="stat-num" id="sVid">0</div><div class="stat-label">فيديو</div></div>
+      <div class="stat-card"><div class="stat-num" id="sOth">0</div><div class="stat-label">ملفات أخرى</div></div>
+    </div>
+
+    <!-- ADD FORM -->
+    <div class="section">
+      <div class="section-head">
+        <div class="section-head-title"><i class="ti ti-plus"></i> إضافة مادة جديدة</div>
+      </div>
+      <div class="section-body">
+
+        <div class="howto">
+          <div class="howto-title"><i class="ti ti-info-circle"></i> كيف أحصل على الرابط؟</div>
+          <div class="howto-steps">
+            <div class="howto-step"><span class="step-num">1</span>ارفعي الملف على Google Drive أو Dropbox أو أي خدمة تخزين</div>
+            <div class="howto-step"><span class="step-num">2</span>اضغطي "مشاركة" واجعليه "يمكن لأي شخص لديه الرابط العرض"</div>
+            <div class="howto-step"><span class="step-num">3</span>انسخي الرابط والصقيه في الحقل أدناه</div>
+          </div>
+        </div>
+
+        <div class="err-msg" id="errMsg"><i class="ti ti-alert-circle"></i><span id="errText"></span></div>
+
+        <div class="add-form">
+          <div class="field">
+            <label>رابط الملف <span style="color:#c0392b">*</span></label>
+            <div class="link-wrap">
+              <i class="ti ti-link"></i>
+              <input type="url" id="fUrl" placeholder="https://drive.google.com/file/d/..."/>
+            </div>
+            <div class="link-hint">Google Drive · Dropbox · OneDrive · YouTube · أي رابط مباشر</div>
+          </div>
+
+          <div class="form-row">
+            <div class="field">
+              <label>المادة / المسار <span style="color:#c0392b">*</span></label>
+              <select id="fCourse">
+                <option value="">اختاري المادة</option>
+                <option>التفسير</option><option>الفقه</option><option>العقيدة</option>
+                <option>الحديث</option><option>السيرة النبوية</option>
+                <option>التجويد والتلاوة</option><option>النحو</option><option>أخرى</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>نوع المحتوى</label>
+              <select id="fType">
+                <option value="محاضرة">محاضرة</option>
+                <option value="ملخص">ملخص</option>
+                <option value="واجب">واجب</option>
+                <option value="اختبار">اختبار</option>
+                <option value="مرجع">مرجع علمي</option>
+                <option value="فيديو">فيديو</option>
+                <option value="أخرى">أخرى</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>عنوان المادة <span style="color:#c0392b">*</span></label>
+            <input type="text" id="fTitle" placeholder="مثال: محاضرة تفسير سورة الفاتحة — الأسبوع الأول"/>
+          </div>
+
+          <div class="field">
+            <label>ملاحظات للطالبات (اختياري)</label>
+            <textarea id="fNotes" placeholder="أي تعليمات أو ملاحظات..."></textarea>
+          </div>
+
+          <button class="btn-add" id="addBtn" onclick="doAdd()">
+            <i class="ti ti-circle-plus"></i> إضافة المادة
           </button>
-</div>
-</div>
-</div>
-<!-- PENDING ACCOUNTS SECTION (admin only) -->
-<div class="section" id="pendingSection" style="display:none">
-<div class="section-head">
-<div class="section-head-title">
-<i class="ti ti-user-check"></i> الحسابات المعلقة — بانتظار الموافقة
+        </div>
+      </div>
+    </div>
+
+    <!-- PENDING ACCOUNTS SECTION (admin only) -->
+    <div class="section" id="pendingSection" style="display:none">
+      <div class="section-head">
+        <div class="section-head-title">
+          <i class="ti ti-user-check"></i> الحسابات المعلقة — بانتظار الموافقة
           <span class="pending-badge" id="pendingBadge" style="display:none"></span>
+        </div>
+      </div>
+      <div id="pendingContainer">
+        <div class="empty-state"><i class="ti ti-inbox"></i>لا توجد حسابات معلقة</div>
+      </div>
+    </div>
+
+    <!-- STUDENTS / INTERVIEWS SECTION -->
+    <div class="section" id="studentsSection">
+      <div class="section-head">
+        <div class="section-head-title"><i class="ti ti-users"></i> قاعدة بيانات الطالبات والمقابلات</div>
+        <button class="btn-add-student" id="btnAddStudent"><i class="ti ti-user-plus"></i> إضافة طالبة</button>
+      </div>
+
+      <!-- Stats bar -->
+      <div class="stu-stats-row">
+        <div class="stu-stat"><span id="stuTotal">0</span><small>الإجمالي</small></div>
+        <div class="stu-stat done"><span id="stuDone">0</span><small>تمت المقابلة</small></div>
+        <div class="stu-stat pending"><span id="stuPending">0</span><small>لم تتم</small></div>
+        <div class="stu-stat accepted"><span id="stuAccepted">0</span><small>مقبولة</small></div>
+        <div class="stu-stat rejected"><span id="stuRejected">0</span><small>غير مقبولة</small></div>
+      </div>
+
+      <!-- Bulk add -->
+      <div class="stu-bulk-area">
+        <textarea id="bulkNames" placeholder="أضيفي عدة أسماء دفعة واحدة — كل اسم في سطر"></textarea>
+        <button class="btn-bulk-add" onclick="addBulkNames()"><i class="ti ti-list-check"></i> إضافة الكل</button>
+      </div>
+
+      <!-- Filters -->
+      <div class="stu-filter-bar">
+        <input type="text" id="stuSearch" placeholder="🔎 ابحثي عن طالبة..." oninput="applyStudentFilters()">
+        <select id="stuFilterInterview" onchange="applyStudentFilters()">
+          <option value="all">🎙️ كل المقابلات</option>
+          <option value="done">✅ تمت</option>
+          <option value="pending">⏳ لم تتم</option>
+        </select>
+        <select id="stuFilterResult" onchange="applyStudentFilters()">
+          <option value="all">📊 كل النتائج</option>
+          <option value="accepted">✔️ المقبولات</option>
+          <option value="rejected">✖️ غير المقبولات</option>
+          <option value="na">⏳ لم يحدد</option>
+        </select>
+        <select id="stuFilterStatus" onchange="applyStudentFilters()">
+          <option value="all">📖 كل الطالبات</option>
+          <option value="mateen">📖 بنات متين</option>
+          <option value="new">✨ المستجدات</option>
+        </select>
+      </div>
+
+      <!-- Bulk apply bar -->
+      <div class="stu-bulk-bar">
+        <div class="stu-bulk-info">
+          <input type="checkbox" id="selectAll" onchange="toggleSelectAll(this.checked)">
+          <label for="selectAll">تحديد الكل</label>
+          <span class="selected-badge" id="selectedCount">0 محددة</span>
+        </div>
+        <div class="stu-bulk-fields">
+          <select id="bulkDay" class="bulk-sel">
+            <option value="">-اليوم-</option>
+            <option>الأحد</option><option>الاثنين</option><option>الثلاثاء</option>
+            <option>الأربعاء</option><option>الخميس</option><option>الجمعة</option><option>السبت</option>
+          </select>
+          <input type="number" id="bulkDD" placeholder="يوم" min="1" max="30" class="bulk-num">
+          <select id="bulkMM" class="bulk-sel">
+            <option value="">-الشهر-</option>
+            <option value="01">محرم</option><option value="02">صفر</option>
+            <option value="03">ربيع الأول</option><option value="04">ربيع الثاني</option>
+            <option value="05">جمادى الأولى</option><option value="06">جمادى الثانية</option>
+            <option value="07">رجب</option><option value="08">شعبان</option>
+            <option value="09">رمضان</option><option value="10">شوال</option>
+            <option value="11">ذو القعدة</option><option value="12">ذو الحجة</option>
+          </select>
+          <input type="number" id="bulkYY" placeholder="سنة" class="bulk-num" style="width:60px">
+          <span style="color:var(--text-mid)">|</span>
+          <select id="bulkHour" class="bulk-sel" style="width:52px">
+            <option value="">-الساعة-</option>
+            <option>1</option><option>2</option><option>3</option><option>4</option>
+            <option>5</option><option>6</option><option>7</option><option>8</option>
+            <option>9</option><option>10</option><option>11</option><option>12</option>
+          </select>
+          <select id="bulkAmpm" class="bulk-sel" style="width:72px">
+            <option value="">-ص/م-</option>
+            <option value="ص">صباحاً</option>
+            <option value="م">مساءً</option>
+          </select>
+          <button class="bulk-apply-btn" onclick="applyBulkDateTime()">✅ تطبيق</button>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="stu-table-wrap">
+        <table class="stu-table">
+          <thead>
+            <tr>
+              <th style="width:32px"></th>
+              <th>#</th>
+              <th>اسم الطالبة</th>
+              <th>اليوم والتاريخ</th>
+              <th>الوقت</th>
+              <th>المقابلة</th>
+              <th>القبول</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="stuTableBody">
+            <tr><td colspan="8" style="text-align:center;padding:30px;color:var(--text-mid)"><i class="ti ti-loader spin" style="font-size:20px"></i></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div style="padding:12px 16px;border-top:1px solid var(--border)">
+        <button class="btn-add-row" onclick="addStudentRow()"><i class="ti ti-plus"></i> إضافة طالبة</button>
+      </div>
+    </div>
+
+    <!-- MATERIALS LIST -->
+    <div class="section">
+      <div class="section-head">
+        <div class="section-head-title"><i class="ti ti-files"></i> المواد المضافة</div>
+      </div>
+      <div class="filter-bar">
+        <input  type="text" id="searchQ"      placeholder="🔍 بحث..." oninput="renderMats()"/>
+        <select id="filterCourse" onchange="renderMats()">
+          <option value="">كل المواد</option>
+          <option>التفسير</option><option>الفقه</option><option>العقيدة</option>
+          <option>الحديث</option><option>السيرة النبوية</option>
+          <option>التجويد والتلاوة</option><option>النحو</option><option>أخرى</option>
+        </select>
+        <select id="filterType" onchange="renderMats()">
+          <option value="">كل الأنواع</option>
+          <option>محاضرة</option><option>ملخص</option><option>واجب</option>
+          <option>اختبار</option><option>مرجع</option><option>فيديو</option><option>أخرى</option>
+        </select>
+      </div>
+      <div id="matsContainer">
+        <div class="empty-state"><i class="ti ti-inbox"></i>لا توجد مواد مضافة بعد</div>
+      </div>
+    </div>
+
+  </div>
 </div>
-</div>
-<div id="pendingContainer">
-<div class="empty-state"><i class="ti ti-inbox"></i>لا توجد حسابات معلقة</div>
-</div>
-</div>
-<!-- STUDENTS / INTERVIEWS SECTION -->
-<div class="section" id="studentsSection">
-<div class="section-head">
-<div class="section-head-title"><i class="ti ti-users"></i> قاعدة بيانات الطالبات والمقابلات</div>
-<button class="btn-add-student" id="btnAddStudent"><i class="ti ti-user-plus"></i> إضافة طالبة</button>
-</div>
-<!-- Stats bar -->
-<div class="stu-stats-row">
-<div class="stu-stat"><span id="stuTotal">0</span><small>الإجمالي</small></div>
-<div class="stu-stat done"><span id="stuDone">0</span><small>تمت المقابلة</small></div>
-<div class="stu-stat pending"><span id="stuPending">0</span><small>لم تتم</small></div>
-<div class="stu-stat accepted"><span id="stuAccepted">0</span><small>مقبولة</small></div>
-<div class="stu-stat rejected"><span id="stuRejected">0</span><small>غير مقبولة</small></div>
-</div>
-<!-- Bulk add -->
-<div class="stu-bulk-area">
-<textarea id="bulkNames" placeholder="أضيفي عدة أسماء دفعة واحدة — كل اسم في سطر"></textarea>
-<button class="btn-bulk-add" onclick="addBulkNames()"><i class="ti ti-list-check"></i> إضافة الكل</button>
-</div>
-<!-- Filters -->
-<div class="stu-filter-bar">
-<input id="stuSearch" oninput="applyStudentFilters()" placeholder="🔎 ابحثي عن طالبة..." type="text"/>
-<select id="stuFilterInterview" onchange="applyStudentFilters()">
-<option value="all">🎙️ كل المقابلات</option>
-<option value="done">✅ تمت</option>
-<option value="pending">⏳ لم تتم</option>
-</select>
-<select id="stuFilterResult" onchange="applyStudentFilters()">
-<option value="all">📊 كل النتائج</option>
-<option value="accepted">✔️ المقبولات</option>
-<option value="rejected">✖️ غير المقبولات</option>
-<option value="na">⏳ لم يحدد</option>
-</select>
-<select id="stuFilterStatus" onchange="applyStudentFilters()">
-<option value="all">📖 كل الطالبات</option>
-<option value="mateen">📖 بنات متين</option>
-<option value="new">✨ المستجدات</option>
-</select>
-</div>
-<!-- Bulk apply bar -->
-<div class="stu-bulk-bar">
-<div class="stu-bulk-info">
-<input id="selectAll" onchange="toggleSelectAll(this.checked)" type="checkbox"/>
-<label for="selectAll">تحديد الكل</label>
-<span class="selected-badge" id="selectedCount">0 محددة</span>
-</div>
-<div class="stu-bulk-fields">
-<select class="bulk-sel" id="bulkDay">
-<option value="">-اليوم-</option>
-<option>الأحد</option><option>الاثنين</option><option>الثلاثاء</option>
-<option>الأربعاء</option><option>الخميس</option><option>الجمعة</option><option>السبت</option>
-</select>
-<input class="bulk-num" id="bulkDD" max="30" min="1" placeholder="يوم" type="number"/>
-<select class="bulk-sel" id="bulkMM">
-<option value="">-الشهر-</option>
-<option value="01">محرم</option><option value="02">صفر</option>
-<option value="03">ربيع الأول</option><option value="04">ربيع الثاني</option>
-<option value="05">جمادى الأولى</option><option value="06">جمادى الثانية</option>
-<option value="07">رجب</option><option value="08">شعبان</option>
-<option value="09">رمضان</option><option value="10">شوال</option>
-<option value="11">ذو القعدة</option><option value="12">ذو الحجة</option>
-</select>
-<input class="bulk-num" id="bulkYY" placeholder="سنة" style="width:60px" type="number"/>
-<span style="color:var(--text-mid)">|</span>
-<select class="bulk-sel" id="bulkHour" style="width:52px">
-<option value="">-الساعة-</option>
-<option>1</option><option>2</option><option>3</option><option>4</option>
-<option>5</option><option>6</option><option>7</option><option>8</option>
-<option>9</option><option>10</option><option>11</option><option>12</option>
-</select>
-<select class="bulk-sel" id="bulkAmpm" style="width:72px">
-<option value="">-ص/م-</option>
-<option value="ص">صباحاً</option>
-<option value="م">مساءً</option>
-</select>
-<button class="bulk-apply-btn" onclick="applyBulkDateTime()">✅ تطبيق</button>
-</div>
-</div>
-<!-- Table -->
-<div class="stu-table-wrap">
-<table class="stu-table">
-<thead>
-<tr>
-<th style="width:32px"></th>
-<th>#</th>
-<th>اسم الطالبة</th>
-<th>اليوم والتاريخ</th>
-<th>الوقت</th>
-<th>المقابلة</th>
-<th>القبول</th>
-<th></th>
-</tr>
-</thead>
-<tbody id="stuTableBody">
-<tr><td colspan="8" style="text-align:center;padding:30px;color:var(--text-mid)"><i class="ti ti-loader spin" style="font-size:20px"></i></td></tr>
-</tbody>
-</table>
-</div>
-<div style="padding:12px 16px;border-top:1px solid var(--border)">
-<button class="btn-add-row" onclick="addStudentRow()"><i class="ti ti-plus"></i> إضافة طالبة</button>
-</div>
-</div>
-<!-- MATERIALS LIST -->
-<div class="section">
-<div class="section-head">
-<div class="section-head-title"><i class="ti ti-files"></i> المواد المضافة</div>
-</div>
-<div class="filter-bar">
-<input id="searchQ" oninput="renderMats()" placeholder="🔍 بحث..." type="text">
-<select id="filterCourse" onchange="renderMats()">
-<option value="">كل المواد</option>
-<option>التفسير</option><option>الفقه</option><option>العقيدة</option>
-<option>الحديث</option><option>السيرة النبوية</option>
-<option>التجويد والتلاوة</option><option>النحو</option><option>أخرى</option>
-</select>
-<select id="filterType" onchange="renderMats()">
-<option value="">كل الأنواع</option>
-<option>محاضرة</option><option>ملخص</option><option>واجب</option>
-<option>اختبار</option><option>مرجع</option><option>فيديو</option><option>أخرى</option>
-</select>
-</input></div>
-<div id="matsContainer">
-<div class="empty-state"><i class="ti ti-inbox"></i>لا توجد مواد مضافة بعد</div>
-</div>
-</div>
-</div>
-</div>
+
 <div class="toast" id="toast"></div>
-<script src="../js/admin-1.js" type="module"></script>
+
+<script type="module" src="../js/admin-1.js"></script>
 </body>
 </html>

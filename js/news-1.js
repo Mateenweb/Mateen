@@ -1,0 +1,1 @@
+renderNav('news.html')
