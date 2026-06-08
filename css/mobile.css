@@ -1,0 +1,518 @@
+/* ================================================
+   برنامج متين العلمي — موبايل أول
+   mobile.css
+   ================================================ */
+
+/* ════════════════════════════════════════
+   متغيرات الموبايل
+   ════════════════════════════════════════ */
+:root {
+  --mob-pad: 14px;
+  --mob-radius: 10px;
+  --mob-font-base: 13.5px;
+}
+
+/* ════════════════════════════════════════
+   1. NAV — موبايل
+   ════════════════════════════════════════ */
+@media (max-width: 768px) {
+
+  nav {
+    padding: 0 14px;
+    height: 52px;
+  }
+
+  /* ── إخفاء الروابط وإظهار زر الهامبرغر ── */
+  .nav-links {
+    display: none !important;
+  }
+  .nav-links.open {
+    display: flex !important;
+    flex-direction: column !important;
+    /* position:absolute بدل fixed عشان overflow:hidden على body */
+    position: absolute !important;
+    top: 52px !important;
+    right: 0 !important;
+    left: 0 !important;
+    background: var(--green-dark) !important;
+    padding: 8px 0 14px !important;
+    gap: 0 !important;
+    z-index: 9999 !important;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.35) !important;
+    border-top: 2px solid var(--gold) !important;
+    list-style: none !important;
+  }
+  .nav-links.open li {
+    border-bottom: 1px solid rgba(255,255,255,0.07) !important;
+    margin: 0 !important;
+  }
+  .nav-links.open li:last-child { border-bottom: none !important; }
+  .nav-links.open a {
+    padding: 12px 20px !important;
+    font-size: 14px !important;
+    display: flex !important;
+    align-items: center !important;
+    color: rgba(255,255,255,0.88) !important;
+    text-decoration: none !important;
+    transition: background 0.15s !important;
+  }
+  .nav-links.open a:hover,
+  .nav-links.open a.active {
+    background: rgba(201,162,39,0.15) !important;
+    color: var(--gold-light) !important;
+  }
+  .nav-toggle { display: flex !important; align-items: center; justify-content: center; }
+  .nav-btns   { display: none !important; }
+
+  .nav-brand   { font-size: 13px; }
+  .nav-tagline { display: none; }
+  .logo-circle { width: 32px; height: 32px; }
+
+  /* ── البسملة ── */
+  .basmala-bar { font-size: 13px; padding: 7px 12px; letter-spacing: 1px; }
+  .bsm-ornament { display: none; }
+}
+
+/* ════════════════════════════════════════
+   2. HERO — موبايل
+   ════════════════════════════════════════ */
+@media (max-width: 768px) {
+
+  .hero {
+    padding: 24px var(--mob-pad) !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    min-height: unset !important;
+  }
+  .hero::before { inset: 5px; }
+  .hero-img     { display: none !important; }
+  .hero-logo-mobile { display: block !important; }
+  .hero-text h1 { font-size: 34px !important; }
+  .hero-text h2 { font-size: 17px !important; }
+  .hero-btns    { flex-direction: column; gap: 8px; }
+  .hero-btn-gold,
+  .hero-btn-white { width: 100%; text-align: center; padding: 11px; font-size: 13px; }
+
+  .page-hero    { padding: 24px var(--mob-pad) !important; }
+  .page-hero h1 { font-size: 22px !important; }
+
+  .teacher-hero { flex-direction: column; text-align: center; padding: 24px var(--mob-pad) !important; gap: 14px; }
+  .teacher-avatar { width: 72px; height: 72px; font-size: 32px; }
+  .teacher-name { font-size: 20px; }
+}
+
+/* ════════════════════════════════════════
+   3. LAYOUT — الشبكة الرئيسية
+   ════════════════════════════════════════ */
+@media (max-width: 768px) {
+
+  /* home main-wrap: إزالة الـ sidebar */
+  .main-wrap {
+    grid-template-columns: 1fr !important;
+    padding: 0 !important;
+    gap: 0 !important;
+  }
+  .sidebar { display: none !important; }
+  .content-area { min-width: 0; }
+
+  /* padding عام للأقسام */
+  .section       { padding: 16px var(--mob-pad) !important; }
+  .teacher-wrap  { padding: 14px var(--mob-pad) !important; }
+  .section-wrap  { padding: 0 var(--mob-pad) 20px !important; }
+  .main-wrap.standalone { padding: 14px var(--mob-pad) !important; }
+}
+
+/* ════════════════════════════════════════
+   4. GRIDS — شبكات البطاقات
+   ════════════════════════════════════════ */
+@media (max-width: 768px) {
+
+  /* مسارات الرئيسية */
+  .paths-grid     { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
+
+  /* المعلمات */
+  .teachers-grid  { grid-template-columns: 1fr 1fr !important; gap: 12px !important; }
+
+  /* الإعلانات */
+  .ann-grid       { grid-template-columns: 1fr !important; }
+  .ann-img        { display: none !important; }
+
+  /* إحصائيات */
+  .stats-bar      { grid-template-columns: 1fr 1fr !important; gap: 10px !important; padding: 14px var(--mob-pad) !important; }
+  .stat-item      { border-left: none !important; padding: 12px 8px !important; }
+
+  /* جدول المعلمة */
+  .schedule-grid  { grid-template-columns: 1fr 1fr !important; gap: 8px !important; }
+
+  /* نموذج */
+  .t-form-row     { grid-template-columns: 1fr !important; }
+  .contact-grid   { grid-template-columns: 1fr !important; }
+  .form-row       { grid-template-columns: 1fr !important; }
+
+  /* إحصاء stats page */
+  .charts-grid    { grid-template-columns: 1fr !important; }
+  .summary-bar    { grid-template-columns: 1fr 1fr !important; }
+
+  /* صفحة الطالبة */
+  .cards-grid     { grid-template-columns: 1fr !important; }
+  .main-grid      { grid-template-columns: 1fr !important; }
+  .msg-meta-grid  { grid-template-columns: 1fr 1fr !important; }
+}
+
+@media (max-width: 420px) {
+  .paths-grid    { grid-template-columns: 1fr !important; }
+  .teachers-grid { grid-template-columns: 1fr !important; }
+  .schedule-grid { grid-template-columns: 1fr !important; }
+  .stats-bar     { grid-template-columns: 1fr 1fr !important; }
+}
+
+/* ════════════════════════════════════════
+   5. TABLE — الجدول الرئيسي (admin/database)
+   ════════════════════════════════════════ */
+@media (max-width: 768px) {
+
+  .table-wrapper {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+    border-radius: var(--mob-radius);
+    border: 1px solid var(--border);
+  }
+
+  /* تلميح السحب للمستخدم */
+  .table-wrapper::before {
+    content: '← اسحبي للمشاهدة →';
+    display: block;
+    text-align: center;
+    font-size: 11px;
+    color: var(--text-mid);
+    padding: 5px;
+    background: var(--beige2);
+    border-bottom: 1px solid var(--border);
+  }
+
+  table     { min-width: 700px !important; }
+  th, td    { padding: 8px 8px !important; font-size: 12px !important; white-space: nowrap; }
+
+  /* inputs داخل الجدول */
+  .name-cell input { font-size: 12px !important; padding: 5px 7px !important; }
+  .status-select,
+  .day-select      { font-size: 11px !important; padding: 4px !important; }
+  .date-day-sel    { width: 32px !important; font-size: 11px !important; }
+  .date-month-sel  { width: 60px !important; font-size: 11px !important; }
+  .date-year-sel   { width: 48px !important; font-size: 11px !important; }
+  .time-hour,
+  .time-minute     { width: 36px !important; font-size: 11px !important; }
+  .time-ampm       { width: 44px !important; font-size: 11px !important; }
+
+  /* أزرار الصفوف */
+  .row-btns { gap: 4px !important; flex-wrap: nowrap; }
+  .row-btns button { padding: 4px 7px !important; font-size: 11px !important; }
+}
+
+/* ════════════════════════════════════════
+   6. TOPBAR / FILTERS — شريط الأدوات
+   ════════════════════════════════════════ */
+@media (max-width: 768px) {
+
+  .topbar,
+  .filter-bar,
+  .search-bar {
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+    padding: 10px var(--mob-pad) !important;
+  }
+
+  .search-modern,
+  .topbar input[type="text"],
+  .search-bar input {
+    width: 100% !important;
+    min-width: 0 !important;
+    font-size: 13px !important;
+  }
+
+  .modern-select,
+  select.filter {
+    flex: 1 !important;
+    min-width: 0 !important;
+    font-size: 12px !important;
+  }
+
+  /* أزرار الأدوات تمتلئ عرضياً */
+  .topbar-actions { width: 100%; display: flex; gap: 8px; flex-wrap: wrap; }
+  .topbar-actions button,
+  .topbar-actions a { flex: 1; justify-content: center; font-size: 12px !important; }
+}
+
+/* ════════════════════════════════════════
+   7. CARDS — بطاقات عامة
+   ════════════════════════════════════════ */
+@media (max-width: 768px) {
+
+  .card,
+  .t-section,
+  .section-card,
+  .ann-card,
+  .path-card,
+  .teacher-card {
+    border-radius: var(--mob-radius) !important;
+  }
+
+  .path-card   { padding: 16px 12px !important; }
+  .path-icon   { font-size: 28px !important; margin-bottom: 8px !important; }
+  .path-name   { font-size: 13px !important; }
+
+  .teacher-card { padding: 18px 12px !important; }
+  .tc-icon      { font-size: 30px !important; margin-bottom: 8px !important; }
+  .tc-name      { font-size: 15px !important; }
+  .tc-btn       { padding: 6px 14px !important; font-size: 11px !important; }
+
+  .ann-card { padding: 14px !important; }
+  .ann-card h4 { font-size: 14px !important; }
+  .ann-card p  { font-size: 12px !important; }
+}
+
+/* ════════════════════════════════════════
+   8. SECTION-TITLE & BREADCRUMB
+   ════════════════════════════════════════ */
+@media (max-width: 768px) {
+
+  .section-title {
+    font-size: 17px !important;
+    gap: 6px !important;
+    padding: 0 var(--mob-pad) !important;
+  }
+
+  .breadcrumb {
+    padding: 8px var(--mob-pad) !important;
+    font-size: 11px !important;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+}
+
+/* ════════════════════════════════════════
+   9. MODALS — نوافذ منبثقة
+   ════════════════════════════════════════ */
+@media (max-width: 768px) {
+
+  /* export modal, message modal, reg modal */
+  .export-modal-box,
+  .msg-modal-box,
+  .reg-modal-content {
+    width: calc(100vw - 24px) !important;
+    max-width: unset !important;
+    max-height: 92vh !important;
+    overflow-y: auto;
+    margin: 12px !important;
+  }
+
+  .msg-modal-body,
+  .modal-body { padding: 14px var(--mob-pad) !important; }
+
+  .msg-meta-grid { grid-template-columns: 1fr 1fr !important; gap: 8px !important; }
+
+  /* stepper تسجيل */
+  .stepper { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 4px; }
+  .step-label { font-size: 10px !important; }
+}
+
+/* ════════════════════════════════════════
+   10. FORMS — نماذج
+   ════════════════════════════════════════ */
+@media (max-width: 768px) {
+
+  .t-field input,
+  .t-field textarea,
+  .t-field select,
+  .login-input,
+  .form-input { font-size: 14px !important; padding: 10px 12px !important; }
+
+  .t-submit,
+  .login-btn,
+  .btn-submit {
+    width: 100% !important;
+    justify-content: center !important;
+    padding: 12px !important;
+    font-size: 14px !important;
+  }
+
+  .role-grid { gap: 6px !important; }
+  .role-btn  { padding: 8px 4px !important; }
+  .role-icon { font-size: 20px !important; }
+  .role-label{ font-size: 10px !important; }
+}
+
+/* ════════════════════════════════════════
+   11. STUDENT PAGE — صفحة الطالبة
+   ════════════════════════════════════════ */
+@media (max-width: 768px) {
+
+  .sv-header {
+    flex-direction: column !important;
+    gap: 10px !important;
+    align-items: flex-start !important;
+    padding: 14px var(--mob-pad) !important;
+  }
+
+  .tabs { gap: 6px !important; flex-wrap: wrap !important; }
+  .tab  { padding: 7px 12px !important; font-size: 12px !important; flex: 1; text-align: center; }
+
+  .grade-row,
+  .att-row { font-size: 12px !important; padding: 8px 12px !important; }
+
+  .att-badge { font-size: 11px !important; padding: 2px 8px !important; }
+}
+
+/* ════════════════════════════════════════
+   12. TEACHER PAGE TABS
+   ════════════════════════════════════════ */
+@media (max-width: 768px) {
+
+  .page-tabs {
+    padding: 0 var(--mob-pad) !important;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    gap: 0;
+  }
+
+  .page-tab {
+    padding: 11px 14px !important;
+    font-size: 12px !important;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  /* جدول الطالبات في صفحة المعلمة */
+  #studentsTableWrap table { min-width: 550px !important; }
+  #studentsTableWrap th,
+  #studentsTableWrap td   { font-size: 12px !important; padding: 8px 8px !important; }
+
+  /* قائمة الرسائل */
+  .msg-item    { padding: 12px var(--mob-pad) !important; }
+  .msg-sender  { font-size: 12px !important; }
+  .msg-preview { font-size: 11px !important; }
+  .msg-filters { padding: 10px var(--mob-pad) !important; flex-wrap: wrap; }
+
+  /* stats في صفحة المعلمة */
+  .stats-bar.teacher-stats { grid-template-columns: 1fr 1fr !important; }
+}
+
+/* ════════════════════════════════════════
+   13. AYA BANNER
+   ════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .aya-banner      { padding: 14px var(--mob-pad) !important; }
+  .aya-text        { font-size: 16px !important; }
+  .aya-banner::after { display: none !important; }
+}
+
+/* ════════════════════════════════════════
+   14. FOOTER
+   ════════════════════════════════════════ */
+@media (max-width: 768px) {
+  footer {
+    flex-direction: column !important;
+    text-align: center !important;
+    padding: 16px var(--mob-pad) !important;
+    gap: 10px !important;
+  }
+  footer::before { font-size: 9px !important; letter-spacing: 2px !important; white-space: normal; text-align: center; }
+  .footer-social { justify-content: center; }
+}
+
+/* ════════════════════════════════════════
+   15. ISLAMIC DIVIDER
+   ════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .islamic-divider { margin: 6px var(--mob-pad) !important; }
+  .islamic-divider span { font-size: 16px !important; letter-spacing: 4px !important; }
+}
+
+/* ════════════════════════════════════════
+   16. ADMIN PAGE
+   ════════════════════════════════════════ */
+@media (max-width: 768px) {
+
+  /* الـ bulk apply panel */
+  .bulk-panel,
+  .bulk-bar {
+    flex-direction: column !important;
+    gap: 10px !important;
+    padding: 12px var(--mob-pad) !important;
+  }
+  .bulk-panel > * { width: 100%; }
+
+  /* export button */
+  .export-btn,
+  #openExportBtn {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+
+  /* selected count */
+  #selectedCount { font-size: 12px; }
+}
+
+/* ════════════════════════════════════════
+   17. LOGIN PAGE
+   ════════════════════════════════════════ */
+@media (max-width: 480px) {
+  .login-card { padding: 24px 16px !important; border-radius: 14px !important; }
+  .login-logo h1 { font-size: 18px !important; }
+}
+
+/* ════════════════════════════════════════
+   18. SCROLL IMPROVEMENTS
+   ════════════════════════════════════════ */
+@media (max-width: 768px) {
+  html { scroll-behavior: smooth; }
+
+  /* منع overflow أفقي */
+  body { overflow-x: hidden !important; }
+
+  /* تحسين اللمس */
+  button, a, input, select, textarea {
+    -webkit-tap-highlight-color: transparent;
+  }
+  button { touch-action: manipulation; }
+}
+
+/* ════════════════════════════════════════
+   إضافة: جدول admin (mat-table)
+   ════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .mat-table-wrap,
+  .table-wrap {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 8px;
+  }
+  .mat-table {
+    min-width: 580px !important;
+  }
+  .mat-table th,
+  .mat-table td {
+    padding: 8px 8px !important;
+    font-size: 11.5px !important;
+    white-space: nowrap;
+  }
+  /* أزرار صغيرة */
+  .action-btn,
+  .view-btn,
+  .edit-btn,
+  .delete-btn {
+    padding: 4px 8px !important;
+    font-size: 11px !important;
+  }
+  /* الـ hero في admin */
+  .hero h1   { font-size: 19px !important; }
+  .hero      { padding: 18px 14px !important; }
+  /* filter bar */
+  .filter-bar {
+    flex-direction: column !important;
+    gap: 8px !important;
+    padding: 12px !important;
+  }
+  .filter-bar input,
+  .filter-bar select { width: 100% !important; min-width: 0 !important; }
+}
