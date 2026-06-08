@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>إحصائيات — برنامج متين العلمي</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;500;600;700&family=Amiri:wght@400;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="../css/stats.css"/>
+  <link rel="stylesheet" href="../css/islamic.css">
+  <link rel="stylesheet" href="../css/mobile.css">
+</head>
+<body>
+<!-- BASMALA -->
+<div class="basmala-bar"><span class="bsm-ornament">❦</span>بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ<span class="bsm-ornament">❦</span></div>
+
+  <!-- Top Nav -->
+  <nav class="s-topnav">
+    <div class="logo" style="display:flex;align-items:center;gap:10px"><img src="../logo.png" alt="متين" style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:1.5px solid var(--gold);background:#fff;"> برنامج متين العلمي</div>
+    <a href="index.html" class="back-btn">← العودة</a>
+  </nav>
+
+<div class="page-wrap">
+
+  <!-- Header -->
+  <div class="s-header">
+    <div class="header-right">
+      <div class="header-title">📊 الإحصائيات العامة</div>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div id="loadingMsg" class="loading-msg">جاري تحميل البيانات...</div>
+
+  <div id="mainContent" style="display:none">
+
+    <!-- Summary Cards -->
+    <div class="summary-bar">
+      <div class="sum-card">
+        <div class="sum-num" id="sumStudents">0</div>
+        <div class="sum-label">إجمالي الطالبات</div>
+      </div>
+      <div class="sum-card blue">
+        <div class="sum-num" id="sumSessions">0</div>
+        <div class="sum-label">إجمالي الجلسات</div>
+      </div>
+      <div class="sum-card green">
+        <div class="sum-num" id="sumAvgAtt">—</div>
+        <div class="sum-label">متوسط الحضور</div>
+      </div>
+      <div class="sum-card orange">
+        <div class="sum-num" id="sumAvgGrade">—</div>
+        <div class="sum-label">متوسط الدرجات</div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('attendance')">🗓 الحضور</button>
+      <button class="tab" onclick="switchTab('grades')">📝 الدرجات</button>
+      <button class="tab" onclick="switchTab('subjects')">📚 المواد</button>
+      <button class="tab" onclick="switchTab('ranking')">🏆 الترتيب</button>
+    </div>
+
+    <!-- Tab: Attendance -->
+    <div class="tab-panel active" id="tab_attendance">
+      <div class="card">
+        <div class="card-title">نسبة حضور الطالبات</div>
+        <div id="attList" class="bar-list"></div>
+      </div>
+    </div>
+
+    <!-- Tab: Grades -->
+    <div class="tab-panel" id="tab_grades">
+      <div class="card">
+        <div class="card-title">مقارنة درجات الطالبات</div>
+        <div class="filter-row">
+          <label>المادة:</label>
+          <select id="gradeSubjectFilter" onchange="renderGradesTab()">
+            <option value="">كل المواد</option>
+            <option>تفسير</option>
+            <option>فقه</option>
+            <option>عقيدة</option>
+            <option>حديث</option>
+            <option>قرآن</option>
+          </select>
+        </div>
+        <div id="gradesList" class="bar-list"></div>
+      </div>
+    </div>
+
+    <!-- Tab: Subjects -->
+    <div class="tab-panel" id="tab_subjects">
+      <div class="card">
+        <div class="card-title">إجمالي الغياب لكل مادة</div>
+        <div id="subjectsList" class="subjects-grid"></div>
+      </div>
+    </div>
+
+    <!-- Tab: Ranking -->
+    <div class="tab-panel" id="tab_ranking">
+      <div class="ranks-grid">
+        <div class="card">
+          <div class="card-title">🏆 الأعلى حضوراً</div>
+          <div id="rankAttList" class="rank-list"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">🥇 الأعلى درجات</div>
+          <div id="rankGradeList" class="rank-list"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">⚠️ أكثر غياباً</div>
+          <div id="rankAbsentList" class="rank-list"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script type="module" src="../js/stats.js"></script>
+</body>
+</html>
