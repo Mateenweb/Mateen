@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport"/>
+<title>قاعدة بيانات طالبات برنامج متين العلمي</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;500;600;700&amp;family=Amiri:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<link href="../css/styles.css" rel="stylesheet"/>
+<link href="../css/islamic.css" rel="stylesheet"/>
+<link href="../css/mobile.css" rel="stylesheet"/>
+</head>
+<body>
+<!-- BASMALA -->
+<div class="basmala-bar"><span class="bsm-ornament">❦</span>بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ<span class="bsm-ornament">❦</span></div>
+<div id="authGate" style="display:flex;align-items:center;justify-content:center;min-height:100vh;flex-direction:column;gap:12px;background:#f5f0e8;">
+<img alt="متين" src="../logo.png" style="width:64px;height:64px;border-radius:50%;object-fit:cover;border:2px solid #c9a227;"/>
+<div style="font-family:Amiri,serif;font-size:16px;color:#1a4a2e">جارٍ التحقق من الصلاحيات...</div>
+</div>
+<div id="mainContent" style="display:none">
+<!-- Top Nav -->
+<nav class="top-nav">
+<div class="nav-logo">
+<div class="logo-circle"><img alt="متين" src="../logo.png" style="width:100%;height:100%;border-radius:50%;object-fit:cover;"/></div>
+<div>
+<div class="nav-title">برنامج متين العلمي</div>
+<div class="nav-subtitle">قاعدة بيانات الطالبات</div>
+</div>
+</div>
+<div style="display:flex;gap:8px">
+<a href="stats.html" style="background:rgba(201,162,39,0.15);color:var(--gold-light);text-decoration:none;padding:6px 14px;border-radius:7px;font-size:13px;border:1px solid rgba(201,162,39,0.3)">📊 الإحصائيات</a>
+</div>
+</nav>
+<div class="container">
+<!-- Page Hero -->
+<div class="page-header">
+<div>
+<h1>📖 قاعدة بيانات طالبات برنامج متين العلمي</h1>
+<div class="sub">إدارة المقابلات والقبول</div>
+</div>
+</div>
+<div class="stats">
+<div class="stat-card"><div class="stat-number" id="total">0</div><div class="stat-label">إجمالي الطالبات</div></div>
+<div class="stat-card"><div class="stat-number" id="interviewed">0</div><div class="stat-label">تمت المقابلة</div></div>
+<div class="stat-card"><div class="stat-number" id="pendingCount">0</div><div class="stat-label">لم تتم</div></div>
+<div class="stat-card"><div class="stat-number" id="accepted">0</div><div class="stat-label">مقبولة</div></div>
+<div class="stat-card"><div class="stat-number" id="rejected">0</div><div class="stat-label">غير مقبولة</div></div>
+</div>
+<div class="bulk-area">
+<textarea id="bulkNames" placeholder="كل اسم في سطر"></textarea>
+<button onclick="addBulkNames()">➕ إضافة الكل</button>
+</div>
+<div class="top-filters">
+<button class="filter-btn danger-btn" onclick="clearAll()">مسح الكل 🗑️</button>
+<select class="modern-select" id="resultFilter" onchange="applyFilters()">
+<option value="all">📊 كل النتائج</option>
+<option value="accepted">✔️ المقبولات</option>
+<option value="rejected">✖️ غير المقبولات</option>
+<option value="na">⏳ لم يحدد</option>
+</select>
+<select class="modern-select" id="interviewFilter" onchange="applyFilters()">
+<option value="all">🎙️ كل المقابلات</option>
+<option value="done">✅ تمت</option>
+<option value="pending">⏳ لم تتم</option>
+</select>
+<select class="modern-select" id="statusFilter" onchange="applyFilters()">
+<option value="all">📖 كل الطالبات</option>
+<option value="mateen">📖 بنات متين</option>
+<option value="new">✨ المستجدات</option>
+</select>
+<input class="search-modern" id="search" onkeyup="applyFilters()" placeholder="🔎 إبحثي عن طالبة..." type="text"/>
+</div>
+<div class="bulk-apply-bar">
+<div class="bulk-apply-info">
+<input id="selectAll" onchange="toggleSelectAll(this.checked)" type="checkbox"/>
+<label for="selectAll" style="cursor:pointer;font-size:13px">تحديد الكل</label>
+<span class="selected-badge" id="selectedCount">0 محددة</span>
+</div>
+<div class="bulk-apply-fields">
+<select class="bulk-sel" id="bulkDay">
+<option value="">-اليوم-</option>
+<option>الأحد</option><option>الاثنين</option><option>الثلاثاء</option>
+<option>الأربعاء</option><option>الخميس</option><option>الجمعة</option><option>السبت</option>
+</select>
+<input class="bulk-num" id="bulkDD" max="30" min="1" placeholder="يوم" type="number"/>
+<select class="bulk-sel" id="bulkMM">
+<option value="">-الشهر-</option>
+<option value="01">محرم</option><option value="02">صفر</option>
+<option value="03">ربيع الأول</option><option value="04">ربيع الثاني</option>
+<option value="05">جمادى الأولى</option><option value="06">جمادى الثانية</option>
+<option value="07">رجب</option><option value="08">شعبان</option>
+<option value="09">رمضان</option><option value="10">شوال</option>
+<option value="11">ذو القعدة</option><option value="12">ذو الحجة</option>
+</select>
+<input class="bulk-num" id="bulkYY" placeholder="سنة" style="width:62px" type="number"/>
+<span style="color:#aaa">|</span>
+<select class="bulk-sel" id="bulkHour" style="width:52px">
+<option value="">-الساعة-</option>
+<option>1</option><option>2</option><option>3</option><option>4</option>
+<option>5</option><option>6</option><option>7</option><option>8</option>
+<option>9</option><option>10</option><option>11</option><option>12</option>
+</select>
+<span>:</span>
+<select class="bulk-sel" id="bulkAmpm" style="width:74px">
+<option value="">-ص/ م-</option>
+<option value="ص">صباحاً</option>
+<option value="م">مساءً</option>
+</select>
+<button class="bulk-apply-btn" onclick="applyBulkDateTime()">✅ تطبيق</button>
+</div>
+</div>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr>
+<th style="width:32px"></th>
+<th>#</th>
+<th>اسم الطالبة</th>
+<th>اليوم والتاريخ</th>
+<th>الوقت</th>
+<th>المقابلة</th>
+<th>القبول</th>
+<th></th>
+</tr>
+</thead>
+<tbody id="tableBody"></tbody>
+</table>
+</div>
+<div class="action-btns">
+<button class="add-btn" onclick="addRow()">+ إضافة طالبة</button>
+<button class="add-btn" onclick="openExportModal()">⬇️ تصدير Word</button>
+</div>
+</div>
+<!-- Export Modal -->
+<div class="modal-overlay" id="exportModal">
+<div class="modal-box">
+<h3>⬇️ إعدادات التصدير</h3>
+<div class="modal-section">
+<label>الأعمدة المطلوبة:</label>
+<div class="col-checks">
+<label><input checked="" id="col_name" type="checkbox"/> اسم الطالبة</label>
+<label><input checked="" id="col_day" type="checkbox"/> اليوم</label>
+<label><input checked="" id="col_dateH" type="checkbox"/> التاريخ الهجري</label>
+<label><input checked="" id="col_dateG" type="checkbox"/> التاريخ الميلادي</label>
+<label><input checked="" id="col_time" type="checkbox"/> الوقت</label>
+<label><input id="col_interview" type="checkbox"/> المقابلة</label>
+<label><input id="col_result" type="checkbox"/> القبول</label>
+</div>
+</div>
+<hr class="modal-divider"/>
+<div class="modal-section">
+<label>تجميع الصفحات حسب وقت المقابلة:</label>
+<div class="group-row">
+<input id="groupByTime" onchange="toggleGroupOptions()" type="checkbox"/>
+<label for="groupByTime">تقسيم كل نطاق وقت في صفحة مستقلة</label>
+</div>
+<div id="groupOptions" style="display:none;margin-top:8px">
+<div class="group-row">
+<label>حجم النطاق الزمني:</label>
+<select id="rangeSize">
+<option value="60">ساعة واحدة</option>
+<option value="30">نصف ساعة</option>
+<option value="120">ساعتين</option>
+</select>
+</div>
+<div class="group-row" style="margin-top:6px;font-size:12px;color:#888">
+            مثال: لو اخترتِ ساعة → الطالبات من 11:00 لـ 11:59 في صفحة، ومن 12:00 لـ 12:59 في صفحة ثانية
+          </div>
+</div>
+</div>
+<div class="modal-actions">
+<button class="btn-export-go" onclick="doExport('word')">⬇️ Word</button>
+<button class="btn-export-go" onclick="doExport('pdf')" style="background:#e65100;border-color:#e65100">🖨️ PDF</button>
+<button class="btn-cancel" onclick="closeExportModal()">إلغاء</button>
+</div>
+</div>
+</div>
+</div><!-- end mainContent -->
+<script src="../js/firebase.js" type="module"></script>
+<script src="../js/database-2.js"></script>
+</body>
+</html>
