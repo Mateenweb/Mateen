@@ -6,7 +6,7 @@ import { getFirestore, doc, getDoc, collection, onSnapshot, query, orderBy, dele
 import { getAuth, onAuthStateChanged, signOut,
          EmailAuthProvider, reauthenticateWithCredential, deleteUser }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
-import { FIREBASE_CONFIG } from "./js/config.js";
+import { FIREBASE_CONFIG } from "./config.js";
 
 const app  = initializeApp(FIREBASE_CONFIG);
 const db   = getFirestore(app);
