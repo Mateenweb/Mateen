@@ -157,6 +157,12 @@ window.doLogin = async () => {
     /* التوجيه حسب الـ role */
     let redirect = ROLE_CONFIG[role]?.redirect || 'home.html';
 
+    /* طالبة متين: استخدم الـ linkedStudentId المحفوظ */
+    if (role === 'mateen') {
+      const linkedId = data.linkedStudentId || null;
+      redirect = linkedId ? `student.html?id=${linkedId}` : 'student-general.html';
+    }
+
     /* الطالبة العادية (student): ابحث عنها في students collection */
     if (role === 'student') {
       const fullName  = (data.name || '').trim();

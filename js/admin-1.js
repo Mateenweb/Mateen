@@ -224,8 +224,92 @@ function renderPending(list) {
 }
 
 window.approveUser = async id => {
-  await updateDoc(doc(db, 'users', id), { status: 'active' });
-  showToast('✓ تم قبول الحساب');
+  // Find the user data
+  const userSnap = await getDoc(doc(db, 'users', id));
+  if (!userSnap.exists()) return;
+  const userData = userSnap.data();
+
+  // If mateen student, show link modal first
+  if (userData.role === 'mateen') {
+    showLinkModal(id, userData);
+  } else {
+    await updateDoc(doc(db, 'users', id), { status: 'active' });
+    showToast('✓ تم قبول الحساب');
+  }
+};
+
+// ── Link Modal ────────────────────────────────────────
+function showLinkModal(userId, userData) {
+  // Remove existing modal if any
+  const old = document.getElementById('linkModal');
+  if (old) old.remove();
+
+  const options = allStudents.map(s =>
+    `<option value="${s.id}">${s.name || '—'}</option>`
+  ).join('');
+
+  const modal = document.createElement('div');
+  modal.id = 'linkModal';
+  modal.style.cssText = `
+    position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;
+    display:flex;align-items:center;justify-content:center;padding:16px;
+  `;
+  modal.innerHTML = `
+    <div style="background:#fff;border-radius:16px;padding:28px;max-width:460px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.2)">
+      <h3 style="margin:0 0 6px;font-family:Amiri,serif;font-size:20px">ربط الحساب بملف الطالبة</h3>
+      <p style="color:var(--text-mid);font-size:13px;margin:0 0 20px">
+        <strong>${userData.name || ''}</strong> — ${userData.email || ''}
+      </p>
+      <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px">اختاري الطالبة المقابلة من قاعدة البيانات:</label>
+      <select id="linkStudentSelect" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;margin-bottom:20px">
+        <option value="">— اختاري —</option>
+        ${options}
+      </select>
+      <p style="font-size:12px;color:var(--text-mid);margin:0 0 20px">
+        أو يمكنك القبول بدون ربط الآن وتربطها لاحقاً.
+      </p>
+      <div style="display:flex;gap:10px;justify-content:flex-end">
+        <button onclick="document.getElementById('linkModal').remove()" 
+          style="padding:8px 18px;border-radius:8px;border:1px solid var(--border);background:#fff;cursor:pointer;font-family:inherit">
+          إلغاء
+        </button>
+        <button onclick="approveMateenWithoutLink('${userId}')"
+          style="padding:8px 18px;border-radius:8px;border:1px solid var(--border);background:#fff;cursor:pointer;font-family:inherit;font-size:13px">
+          قبول بدون ربط
+        </button>
+        <button onclick="approveMateenWithLink('${userId}')"
+          style="padding:8px 18px;border-radius:8px;border:none;background:var(--green-mid);color:#fff;cursor:pointer;font-family:inherit;font-weight:600">
+          <i class="ti ti-link"></i> قبول وربط
+        </button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+}
+
+window.approveMateenWithoutLink = async userId => {
+  await updateDoc(doc(db, 'users', userId), { status: 'active' });
+  document.getElementById('linkModal').remove();
+  showToast('✓ تم قبول الحساب بدون ربط');
+};
+
+window.approveMateenWithLink = async userId => {
+  const studentId = document.getElementById('linkStudentSelect').value;
+  if (!studentId) { showToast('⚠ اختاري طالبة أولاً'); return; }
+
+  // Approve user and save studentId in her profile
+  await updateDoc(doc(db, 'users', userId), {
+    status: 'active',
+    linkedStudentId: studentId,
+  });
+
+  // Save uid in the student record
+  await updateDoc(doc(db, 'students', studentId), {
+    uid: userId,
+  });
+
+  document.getElementById('linkModal').remove();
+  showToast('✓ تم القبول وربط الملف بنجاح');
 };
 
 window.rejectUser = async id => {
