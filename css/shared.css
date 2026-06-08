@@ -1,0 +1,469 @@
+/* ===========================
+   برنامج متين العلمي — shared styles
+   =========================== */
+
+@import url("https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;500;600;700&family=Amiri:wght@400;700&display=swap");
+
+:root {
+  /* بني للـ nav/footer/basmala فقط */
+  --green-dark:  #5c3d2e;
+  /* بني متوسط للأزرار والـ hover */
+  --green-mid:   #8a5e3c;
+  /* بني فاتح للحدود والتفاصيل */
+  --green-light: #b8966e;
+  /* ذهبي */
+  --gold:        #c9a227;
+  --gold-light:  #e8c96a;
+  /* تدرج البيج من فاتح لغامق */
+  --beige:       #f7efe3;   /* خلفية الصفحة */
+  --beige2:      #ede0cc;   /* البطاقات والـ sidebar */
+  --beige3:      #d6c4a8;   /* حدود، section-head، hover */
+  --white:       #fff;
+  /* النصوص */
+  --text-dark:   #2c1a0e;
+  --text-mid:    #8a6a52;
+  --border:      #b8966e44;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: "Noto Naskh Arabic", serif;
+  direction: rtl;
+  background: var(--beige);
+  color: var(--text-dark);
+  font-size: 13px;
+  /* overflow-x على الـ html بدل body عشان لا يكسر position:fixed على iOS */
+}
+html { overflow-x: hidden; }
+
+/* ===== NAVBAR ===== */
+nav {
+  background: var(--green-dark);
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 56px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+  gap: 12px;
+  overflow: visible !important;
+}
+
+.nav-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+  text-decoration: none;
+}
+
+.logo-circle {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1.5px solid var(--gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(201,162,39,0.15);
+  flex-shrink: 0;
+}
+
+.logo-circle span {
+  color: var(--gold);
+  font-size: 9px;
+  font-family: Amiri, serif;
+  font-weight: 700;
+  text-align: center;
+  line-height: 1.2;
+}
+
+.nav-brand {
+  font-family: Amiri, serif;
+  color: var(--gold-light);
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.nav-tagline {
+  color: rgba(255,255,255,0.5);
+  font-size: 10px;
+}
+
+.nav-links {
+  display: flex;
+  gap: 18px;
+  list-style: none;
+  align-items: center;
+  flex: 1;
+  justify-content: center;
+}
+
+.nav-links a {
+  color: rgba(255,255,255,0.82);
+  text-decoration: none;
+  font-size: 12.5px;
+  transition: color 0.2s;
+  white-space: nowrap;
+}
+
+.nav-links a:hover,
+.nav-links a.active {
+  color: var(--gold-light);
+}
+
+.nav-btns {
+  display: flex;
+  gap: 7px;
+  flex-shrink: 0;
+  align-items: center;
+}
+
+.btn-admin {
+  background: rgba(201,162,39,0.12);
+  color: var(--gold-light);
+  border: 1px solid rgba(201,162,39,0.3);
+  padding: 5px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 12px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.btn-outline {
+  border: 1px solid var(--gold);
+  color: var(--gold);
+  background: transparent;
+  padding: 5px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.btn-solid {
+  background: var(--gold);
+  color: var(--green-dark);
+  border: none;
+  padding: 5px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.nav-toggle {
+  display: none;
+  background: none;
+  border: none;
+  color: white;
+  font-size: 22px;
+  cursor: pointer;
+}
+
+/* ===== PAGE HERO ===== */
+.page-hero {
+  background: linear-gradient(135deg, var(--green-dark) 0%, var(--green-mid) 100%);
+  padding: 36px 32px;
+  text-align: center;
+  color: white;
+}
+
+.page-hero h1 {
+  font-family: Amiri, serif;
+  font-size: 28px;
+  color: var(--gold-light);
+  margin: 8px 0 6px;
+}
+
+.page-hero p {
+  color: rgba(255,255,255,0.7);
+  font-size: 13px;
+}
+
+.hero-badge {
+  display: inline-block;
+  background: rgba(201,162,39,0.2);
+  border: 1px solid rgba(201,162,39,0.4);
+  color: var(--gold-light);
+  padding: 4px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  margin-bottom: 6px;
+}
+
+/* ===== BREADCRUMB ===== */
+.breadcrumb {
+  background: var(--beige2);
+  border-bottom: 1px solid var(--border);
+  padding: 8px 32px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-mid);
+}
+
+.breadcrumb a {
+  color: var(--green-mid);
+  text-decoration: none;
+}
+
+.breadcrumb a:hover { text-decoration: underline; }
+
+/* ===== MAIN LAYOUT ===== */
+.main-wrap {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 28px 24px;
+}
+
+/* ===== CARD ===== */
+.card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 20px;
+}
+
+/* ===== FOOTER ===== */
+footer {
+  background: var(--green-dark);
+  color: rgba(255,255,255,0.6);
+  padding: 14px 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  margin-top: 32px;
+}
+
+.footer-social { display: flex; gap: 12px; }
+.footer-social a { color: rgba(255,255,255,0.5); font-size: 16px; text-decoration: none; }
+.footer-social a:hover { color: var(--gold-light); }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .nav-links { display: none; }
+  .nav-links.open {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    top: 56px;
+    right: 0;
+    left: 0;
+    background: var(--green-dark);
+    padding: 12px 20px;
+    gap: 12px;
+    z-index: 200;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  }
+  .nav-toggle { display: block; }
+  .nav-btns   { display: none; }
+  footer { flex-direction: column; text-align: center; gap: 8px; }
+}
+
+/* ════════════════════════════════════════════════
+   توازن الألوان — الفاتح هو الغالب
+   اللون الغامق فقط في: nav, footer, basmala
+   ════════════════════════════════════════════════ */
+
+/* page-hero — فاتح بدل غامق */
+.page-hero {
+  background: linear-gradient(135deg, var(--beige2) 0%, var(--beige) 100%) !important;
+  border-bottom: 3px solid var(--gold) !important;
+}
+.page-hero h1  { color: var(--green-dark) !important; }
+.page-hero p   { color: var(--text-mid) !important; }
+.hero-badge {
+  background: rgba(92,61,46,0.1) !important;
+  border-color: rgba(92,61,46,0.25) !important;
+  color: var(--green-dark) !important;
+}
+
+/* section-head / card-head / t-section-head — بيج ذهبي بدل غامق */
+.section-head,
+.card-head,
+.t-section-head,
+.ann-head,
+.modal-head-dark {
+  background: linear-gradient(to left, var(--beige3), var(--beige2)) !important;
+  color: var(--green-dark) !important;
+  border-bottom: 2px solid var(--gold) !important;
+}
+.section-head *,
+.card-head *,
+.t-section-head * { color: var(--green-dark) !important; }
+
+/* teacher-hero — بيج ذهبي */
+.teacher-hero {
+  background: linear-gradient(135deg, var(--beige2) 0%, var(--beige) 100%) !important;
+  border-bottom: 3px solid var(--gold) !important;
+  color: var(--text-dark) !important;
+}
+.teacher-name { color: var(--green-dark) !important; }
+.teacher-subj { color: var(--text-mid) !important; }
+.teacher-badge {
+  background: rgba(92,61,46,0.1) !important;
+  color: var(--green-dark) !important;
+  border-color: rgba(92,61,46,0.25) !important;
+}
+
+/* sidebar header — بيج */
+.sidebar-header { background: var(--beige3) !important;
+}
+.sidebar { background: var(--beige2) !important; border-left: 2px solid var(--gold) !important; }
+.sidebar-logo-text { color: var(--green-dark) !important; }
+
+/* أزرار الـ path / teachers  */
+.path-btn {
+  background: var(--beige2) !important;
+  color: var(--green-dark) !important;
+  border: 1px solid var(--border) !important;
+}
+.path-btn:hover {
+  background: var(--gold) !important;
+  color: var(--white) !important;
+  border-color: var(--gold) !important;
+}
+
+/* ann-section header */
+.section-header {
+  background: transparent !important;
+  border-bottom: 2px solid var(--gold) !important;
+  padding-bottom: 8px !important;
+}
+.section-header h2 { color: var(--green-dark) !important; }
+
+/* contact submit button  */
+.contact-submit {
+  background: var(--gold) !important;
+  color: var(--green-dark) !important;
+}
+.contact-submit:hover {
+  background: var(--green-dark) !important;
+  color: var(--gold-light) !important;
+}
+
+/* tabs في teacher / stats  */
+.page-tab.active,
+.tab.active {
+  background: var(--beige) !important;
+  color: var(--green-dark) !important;
+  border-bottom-color: var(--gold) !important;
+}
+.page-tab:not(.active),
+.tab:not(.active) {
+  background: transparent !important;
+  color: var(--text-mid) !important;
+}
+
+/* page-tabs bar نفسه */
+.page-tabs {
+  background: var(--white) !important;
+  border-bottom: 2px solid var(--gold) !important;
+}
+
+/* msg-modal-head — بيج */
+.msg-modal-head {
+  background: linear-gradient(to left, var(--beige2), var(--beige)) !important;
+  border-bottom: 2px solid var(--gold) !important;
+}
+.msg-modal-head h3   { color: var(--green-dark) !important; }
+.msg-modal-close     { color: var(--text-mid) !important; }
+.msg-modal-close:hover { color: var(--green-dark) !important; }
+
+/* export modal head */
+.export-modal-head,
+.modal-header {
+  background: linear-gradient(to left, var(--beige2), var(--beige)) !important;
+  border-bottom: 2px solid var(--gold) !important;
+  color: var(--green-dark) !important;
+}
+
+/* reg-modal header */
+.reg-modal-header { background: var(--beige2) !important; }
+.reg-modal-header h2 { color: var(--green-dark) !important; }
+
+/* stepper active  */
+.step.active .step-num {
+  background: var(--gold) !important;
+  color: var(--green-dark) !important;
+}
+.step.done .step-num {
+  background: var(--accent-green, #3a7a4a) !important;
+}
+
+/* أزرار submit عامة  */
+.btn-solid,
+.t-submit,
+.reg-next,
+.reg-submit {
+  background: var(--gold) !important;
+  color: var(--green-dark) !important;
+  font-weight: 700 !important;
+  border: none !important;
+}
+.btn-solid:hover,
+.t-submit:hover,
+.reg-next:hover { opacity: 0.88 !important; }
+
+/* login btn */
+.login-btn {
+  background: var(--gold) !important;
+  color: var(--green-dark) !important;
+  font-weight: 700 !important;
+}
+
+/* login card */
+.login-header { background: linear-gradient(135deg, var(--beige2), var(--beige)) !important; }
+.login-header h1 { color: var(--green-dark) !important; }
+
+/* mark read btn */
+.btn-mark-read {
+  background: var(--gold) !important;
+  color: var(--green-dark) !important;
+  font-weight: 700 !important;
+}
+
+/* hero الرئيسية */
+.hero {
+  background: linear-gradient(135deg, var(--beige2) 0%, var(--beige) 60%, #fff5e8 100%) !important;
+  border-bottom: 3px solid var(--gold) !important;
+}
+.hero-text h1 { color: var(--green-dark) !important; }
+.hero-text h2 { color: var(--text-mid) !important; }
+.hero-text p  { color: var(--text-mid) !important; }
+.hero-btn-gold  { background: var(--gold) !important; color: var(--green-dark) !important; }
+.hero-btn-white {
+  background: transparent !important;
+  color: var(--green-dark) !important;
+  border: 1.5px solid var(--green-dark) !important;
+}
+.hero-btn-white:hover { background: var(--green-dark) !important; color: var(--gold-light) !important; }
+
+/* basmala تبقى غامقة — nav + basmala هم فقط الغامقين */
+.basmala-bar { background: linear-gradient(135deg, var(--green-dark), var(--green-mid)) !important; }
+
+/* aya-banner — بيج ذهبي بدل غامق */
+.aya-banner {
+  background: linear-gradient(135deg, var(--beige2) 0%, #fff9ee 100%) !important;
+  border-top: 2px solid var(--gold) !important;
+  border-bottom: 2px solid var(--gold) !important;
+}
+.aya-text   { color: var(--green-dark) !important; text-shadow: none !important; }
+.aya-ref    { color: var(--text-mid) !important; }
+.aya-banner::before { opacity: 0.06 !important; }
+.aya-banner::after  { color: rgba(92,61,46,0.3) !important; }
+
+/* nav links dropdown موبايل يبقى غامق — ok */
