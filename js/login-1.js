@@ -22,7 +22,7 @@ const ROLE_CONFIG = {
   mateen:     { redirect: 'student.html',         status: 'pending', needsApproval: true,  approvedBy: 'supervisor' },
   teacher:    { redirect: 'teacher.html',         status: 'pending', needsApproval: true,  approvedBy: 'admin' },
   supervisor: { redirect: 'supervisor.html',      status: 'pending', needsApproval: true,  approvedBy: 'admin' },
-  admin:      { redirect: 'admin.html',           status: 'active',  needsApproval: false },
+  admin:      { redirect: 'home.html',            status: 'active',  needsApproval: false },
 };
 
 const ERRORS = {
