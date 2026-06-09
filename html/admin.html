@@ -6,10 +6,317 @@
   <title>لوحة الإداريات — متين العلمي</title>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;500;600;700&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.42.0/dist/tabler-icons.min.css">
-  <link rel="stylesheet" href="../css/shared.css">
-  <link rel="stylesheet" href="../css/admin.css">
-  <link rel="stylesheet" href="../css/islamic.css">
-  <link rel="stylesheet" href="../css/mobile.css">
+  <link rel="stylesheet" href="css/shared.css">
+  <style>
+    /* ─── PAGE LAYOUT ─── */
+    body { background: var(--beige); min-height: 100vh; display: flex; flex-direction: column; }
+    .hero { background: linear-gradient(135deg, var(--green-dark) 0%, var(--green-mid) 100%); padding: 28px 32px; }
+    .hero-badge { display: inline-block; background: rgba(201,162,39,0.2); border: 1px solid rgba(201,162,39,0.35); color: var(--gold-light); padding: 3px 14px; border-radius: 20px; font-size: 12px; margin-bottom: 8px; }
+    .hero h1 { font-family: Amiri, serif; font-size: 24px; color: var(--gold-light); margin-bottom: 4px; }
+    .hero p  { color: rgba(255,255,255,0.65); font-size: 13px; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 24px 20px; flex: 1; display: flex; flex-direction: column; gap: 24px; }
+
+    /* ─── STATS ─── */
+    .stats-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; }
+    .stat-card { background: var(--white); border: 1px solid var(--border); border-radius: 10px; padding: 16px; text-align: center; }
+    .stat-num   { font-family: Amiri, serif; font-size: 28px; color: var(--green-dark); font-weight: 700; }
+    .stat-label { font-size: 11.5px; color: var(--text-mid); margin-top: 2px; }
+
+    /* ─── SECTION ─── */
+    .section { background: var(--white); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+    .section-head { background: var(--green-dark); padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; }
+    .section-head-title { font-family: Amiri, serif; color: var(--gold-light); font-size: 16px; display: flex; align-items: center; gap: 8px; }
+    .section-body { padding: 20px; }
+
+    /* ─── HOW TO ─── */
+    .howto { background: rgba(45,110,69,0.06); border: 1px solid rgba(45,110,69,0.18); border-radius: 10px; padding: 14px 16px; margin-bottom: 20px; }
+    .howto-title { font-size: 13px; font-weight: 600; color: var(--green-dark); margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+    .howto-steps { display: flex; flex-direction: column; gap: 6px; }
+    .howto-step  { font-size: 12.5px; color: var(--text-mid); display: flex; align-items: flex-start; gap: 8px; line-height: 1.6; }
+    .step-num { background: var(--green-dark); color: var(--gold-light); width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; flex-shrink: 0; margin-top: 2px; }
+
+    /* ─── FORM ─── */
+    .add-form { display: flex; flex-direction: column; gap: 14px; }
+    .form-row  { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .field { display: flex; flex-direction: column; gap: 5px; }
+    .field label { font-size: 12.5px; color: var(--text-mid); font-weight: 500; }
+    .field input, .field select, .field textarea {
+      width: 100%; padding: 9px 12px; border: 1px solid var(--border);
+      border-radius: 8px; font-family: "Noto Naskh Arabic", serif;
+      font-size: 13px; color: var(--text-dark); background: var(--beige);
+      outline: none; transition: border-color .2s;
+    }
+    .field input:focus, .field select:focus, .field textarea:focus { border-color: var(--green-mid); background: var(--white); }
+    .field textarea { resize: vertical; min-height: 68px; }
+    .field input.err { border-color: #c0392b; }
+
+    .link-wrap { position: relative; }
+    .link-wrap input { padding-left: 36px; direction: ltr; text-align: left; }
+    .link-wrap i { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--text-mid); font-size: 15px; pointer-events: none; }
+    .link-hint { font-size: 11px; color: var(--text-mid); margin-top: 3px; }
+
+    .err-msg { background: #fde8e8; border: 1px solid #f5c6c6; border-radius: 8px; padding: 9px 12px; font-size: 12.5px; color: #c0392b; display: none; align-items: center; gap: 7px; }
+    .err-msg.show { display: flex; }
+
+    .btn-add {
+      background: var(--green-dark); color: var(--gold-light); border: none;
+      border-radius: 8px; padding: 11px 24px; font-family: "Noto Naskh Arabic", serif;
+      font-size: 14px; font-weight: 600; cursor: pointer;
+      display: flex; align-items: center; gap: 7px;
+      transition: background .2s; align-self: flex-start;
+    }
+    .btn-add:hover    { background: var(--green-mid); }
+    .btn-add:disabled { opacity: .55; cursor: not-allowed; }
+
+    /* ─── FILTER BAR ─── */
+    .filter-bar { display: flex; gap: 8px; flex-wrap: wrap; padding: 12px 20px; border-bottom: 1px solid var(--border); background: var(--beige); }
+    .filter-bar input, .filter-bar select {
+      padding: 7px 11px; border: 1px solid var(--border); border-radius: 7px;
+      font-family: "Noto Naskh Arabic", serif; font-size: 12.5px;
+      color: var(--text-dark); background: var(--white); outline: none;
+    }
+    .filter-bar input { flex: 1; min-width: 160px; }
+
+    /* ─── TABLE ─── */
+    .mat-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .mat-table th { background: var(--beige2); color: var(--text-mid); font-weight: 500; padding: 9px 14px; text-align: right; border-bottom: 1px solid var(--border); white-space: nowrap; }
+    .mat-table td { padding: 11px 14px; border-bottom: 1px solid var(--border); color: var(--text-dark); vertical-align: middle; }
+    .mat-table tr:last-child td { border-bottom: none; }
+    .mat-table tr:hover td { background: var(--beige); }
+
+    .type-icon { width: 32px; height: 32px; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+    .ic-yt      { background: rgba(192,57,43,0.1);  color: #c0392b; }
+    .ic-drive   { background: rgba(45,110,69,0.1);  color: var(--green-mid); }
+    .ic-pdf     { background: rgba(192,57,43,0.1);  color: #c0392b; }
+    .ic-video   { background: rgba(201,162,39,0.12);color: var(--gold); }
+    .ic-link    { background: var(--beige2);         color: var(--text-mid); }
+
+    .badge       { display: inline-block; border-radius: 4px; padding: 2px 9px; font-size: 11px; }
+    .badge-green { background: rgba(45,110,69,0.1); color: var(--green-dark); border: 1px solid rgba(45,110,69,0.2); }
+    .badge-gray  { background: var(--beige2); color: var(--text-mid); border: 1px solid var(--border); }
+
+    .btn-icon { background: none; border: none; cursor: pointer; font-size: 17px; padding: 3px; transition: color .2s; }
+    .btn-open { color: var(--green-mid); } .btn-open:hover { color: var(--green-dark); }
+    .btn-del  { color: #ccc; }             .btn-del:hover  { color: #c0392b; }
+
+    .empty-state { text-align: center; padding: 40px; color: var(--text-mid); font-size: 13px; }
+    .empty-state i { font-size: 36px; color: var(--border); display: block; margin-bottom: 10px; }
+
+    /* ─── TOAST ─── */
+    .toast {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
+      background: var(--green-dark); color: var(--gold-light);
+      padding: 10px 20px; border-radius: 8px; font-size: 13px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.25); transition: transform .3s; z-index: 999;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .toast.show  { transform: translateX(-50%) translateY(0); }
+    .toast.error { background: #c0392b; color: white; }
+
+    /* ─── AUTH GATE ─── */
+    #authGate { display: flex; align-items: center; justify-content: center; min-height: 70vh; flex-direction: column; gap: 12px; color: var(--text-mid); }
+    #authGate i { font-size: 40px; color: var(--border); }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spin { animation: spin .8s linear infinite; }
+
+    /* ─── NAV USER ─── */
+    .nav-user { display: flex; align-items: center; gap: 8px; }
+    .nav-user-name { color: rgba(255,255,255,0.85); font-size: 12.5px; }
+    .nav-user i { color: var(--gold); }
+    .btn-logout { background: rgba(192,57,43,0.15); border: 1px solid rgba(192,57,43,0.3); color: #e88; padding: 5px 12px; border-radius: 6px; font-family: inherit; font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 5px; }
+    .btn-logout:hover { background: rgba(192,57,43,0.25); }
+
+
+    /* ── PENDING ACCOUNTS ── */
+    .pending-badge {
+      background: #c0392b; color: white; border-radius: 20px;
+      padding: 1px 9px; font-size: 11px; font-weight: 700; margin-right: 6px;
+    }
+    .pending-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .pending-table th {
+      background: var(--beige2); color: var(--text-mid); font-weight: 500;
+      padding: 9px 14px; text-align: right; border-bottom: 1px solid var(--border); white-space: nowrap;
+    }
+    .pending-table td { padding: 11px 14px; border-bottom: 1px solid var(--border); color: var(--text-dark); vertical-align: middle; }
+    .pending-table tr:last-child td { border-bottom: none; }
+    .pending-table tr:hover td { background: var(--beige); }
+    .btn-approve {
+      background: rgba(45,110,69,0.1); color: var(--green-dark);
+      border: 1px solid rgba(45,110,69,0.3); border-radius: 6px;
+      padding: 5px 12px; font-family: inherit; font-size: 12px;
+      cursor: pointer; font-weight: 600; transition: background .2s;
+    }
+    .btn-approve:hover { background: rgba(45,110,69,0.2); }
+    .btn-reject {
+      background: rgba(192,57,43,0.08); color: #c0392b;
+      border: 1px solid rgba(192,57,43,0.25); border-radius: 6px;
+      padding: 5px 12px; font-family: inherit; font-size: 12px;
+      cursor: pointer; font-weight: 600; transition: background .2s;
+    }
+    .btn-reject:hover { background: rgba(192,57,43,0.15); }
+
+    /* ── STUDENTS SECTION ── */
+    .btn-add-student {
+      background: rgba(201,162,39,0.15); border: 1px solid var(--gold);
+      color: var(--gold-light); border-radius: 7px; padding: 6px 14px;
+      font-family: inherit; font-size: 12px; cursor: pointer;
+      display: flex; align-items: center; gap: 5px; transition: background .2s;
+    }
+    .btn-add-student:hover { background: rgba(201,162,39,0.28); }
+
+    .stu-stats-row {
+      display: grid; grid-template-columns: repeat(5,1fr); gap: 10px;
+      padding: 14px 16px; border-bottom: 1px solid var(--border); background: var(--beige);
+    }
+    .stu-stat { text-align: center; }
+    .stu-stat span { font-family: Amiri, serif; font-size: 22px; font-weight: 700; color: var(--green-dark); display: block; }
+    .stu-stat small { font-size: 11px; color: var(--text-mid); }
+    .stu-stat.done span     { color: #27ae60; }
+    .stu-stat.pending span  { color: #e67e22; }
+    .stu-stat.accepted span { color: #2980b9; }
+    .stu-stat.rejected span { color: #c0392b; }
+
+    .stu-bulk-area {
+      display: flex; gap: 10px; padding: 12px 16px;
+      border-bottom: 1px solid var(--border); background: var(--beige);
+    }
+    .stu-bulk-area textarea {
+      flex: 1; min-height: 60px; padding: 8px 10px;
+      border: 1px solid var(--border); border-radius: 8px;
+      font-family: inherit; font-size: 12.5px; resize: vertical;
+    }
+    .btn-bulk-add {
+      background: var(--green-dark); color: var(--gold-light); border: none;
+      border-radius: 8px; padding: 10px 14px; font-family: inherit;
+      font-size: 12.5px; font-weight: 600; cursor: pointer;
+      display: flex; align-items: center; gap: 6px; white-space: nowrap; align-self: flex-start;
+    }
+    .btn-bulk-add:hover { background: var(--green-mid); }
+
+    .stu-filter-bar {
+      display: flex; gap: 8px; flex-wrap: wrap; padding: 10px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .stu-filter-bar input, .stu-filter-bar select {
+      padding: 7px 10px; border: 1px solid var(--border); border-radius: 7px;
+      font-family: inherit; font-size: 12.5px; background: var(--white); outline: none;
+    }
+    .stu-filter-bar input { flex: 1; min-width: 160px; }
+    .stu-filter-bar select { min-width: 120px; }
+
+    .stu-bulk-bar {
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+      padding: 8px 16px; background: #f0f6ff; border-bottom: 1px solid var(--border);
+      font-size: 12.5px;
+    }
+    .stu-bulk-info { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    .stu-bulk-info label { cursor: pointer; }
+    .selected-badge {
+      background: var(--green-dark); color: var(--gold-light);
+      border-radius: 20px; padding: 1px 10px; font-size: 11px; font-weight: 600;
+    }
+    .stu-bulk-fields { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; flex: 1; }
+    .bulk-sel {
+      padding: 4px 4px; border: 1px solid var(--border); border-radius: 6px;
+      font-family: inherit; font-size: 11.5px; background: var(--white);
+    }
+    .bulk-num {
+      padding: 4px 4px; border: 1px solid var(--border); border-radius: 6px;
+      font-family: inherit; font-size: 11.5px; width: 44px; text-align: center;
+    }
+    .bulk-apply-btn {
+      background: var(--green-dark); color: var(--gold-light); border: none;
+      border-radius: 7px; padding: 5px 12px; font-family: inherit;
+      font-size: 12px; font-weight: 600; cursor: pointer;
+    }
+    .bulk-apply-btn:hover { background: var(--green-mid); }
+
+    .stu-table-wrap { overflow-x: auto; }
+    .stu-table { width: 100%; border-collapse: collapse; min-width: 860px; font-size: 12.5px; }
+    .stu-table th {
+      background: var(--green-dark); color: var(--gold-light);
+      padding: 10px 10px; text-align: right; font-weight: 500; white-space: nowrap;
+    }
+    .stu-table td {
+      padding: 6px 8px; border-bottom: 1px solid var(--border);
+      text-align: right; vertical-align: middle;
+    }
+    .stu-table tr:hover td { background: var(--beige); }
+    .stu-table tr:last-child td { border-bottom: none; }
+    .stu-table input[type=text], .stu-table input[type=number] {
+      padding: 5px 7px; border: 1px solid var(--border); border-radius: 6px;
+      font-family: inherit; font-size: 12px; background: var(--white); outline: none;
+    }
+    .stu-table input[type=text]:focus { border-color: var(--green-mid); }
+    .stu-table select {
+      padding: 4px 5px; border: 1px solid var(--border); border-radius: 6px;
+      font-family: inherit; font-size: 11.5px; background: var(--white); outline: none;
+    }
+
+    .stu-name-cell { display: flex; align-items: center; gap: 5px; }
+    .stu-name-cell input { flex: 1; min-width: 90px; }
+    .btn-stu-link {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 26px; height: 26px; background: #e8f0fb; border-radius: 6px;
+      text-decoration: none; font-size: 13px; flex-shrink: 0; border: none; cursor: pointer;
+      color: var(--green-dark); transition: background .2s;
+    }
+    .btn-stu-link:hover { background: #c5d8f8; }
+
+    .arabic-date { display: flex; gap: 2px; align-items: center; }
+    .date-day-sel   { width: 36px !important; font-size: 11px !important; }
+    .date-month-sel { width: 64px !important; font-size: 11px !important; }
+    .date-year-sel  { width: 50px !important; font-size: 11px !important; }
+
+    .time-cell { display: flex; align-items: center; gap: 3px; justify-content: center; }
+    .time-hour   { width: 42px !important; }
+    .time-minute { width: 42px !important; }
+    .time-ampm   { width: 64px !important; }
+
+    .btn-interview, .btn-accept {
+      padding: 4px 9px; border: none; border-radius: 20px; cursor: pointer;
+      font-weight: 600; font-family: inherit; font-size: 11.5px; white-space: nowrap;
+    }
+    .btn-pending  { background: #ff9800; color: white; }
+    .btn-done     { background: #27ae60; color: white; }
+    .btn-na       { background: #9e9e9e; color: white; }
+    .btn-accepted { background: #2980b9; color: white; }
+    .btn-rejected { background: #c0392b; color: white; }
+    .btn-del-stu  { background: none; border: none; font-size: 17px; color: #ddd; cursor: pointer; padding: 3px; }
+    .btn-del-stu:hover { color: #c0392b; }
+
+    .btn-add-row {
+      background: var(--beige); border: 1.5px dashed var(--border); color: var(--text-mid);
+      border-radius: 7px; padding: 8px 16px; font-family: inherit; font-size: 13px;
+      cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all .2s;
+    }
+    .btn-add-row:hover { border-color: var(--green-mid); color: var(--green-dark); }
+
+    @media (max-width: 768px) {
+      .container    { padding: 12px 12px; gap: 14px; }
+      .hero         { padding: 18px 14px !important; }
+      .hero h1      { font-size: 19px !important; }
+      .stats-row    { grid-template-columns: 1fr 1fr !important; gap: 8px; }
+      .stat-num     { font-size: 22px; }
+      .section-head { padding: 11px 14px !important; flex-wrap: wrap; gap: 6px; }
+      .section-head-title { font-size: 14px !important; }
+      .section-body { padding: 12px !important; }
+      .filter-bar   { flex-wrap: wrap !important; gap: 8px !important; }
+      .filter-bar input { min-width: 0 !important; width: 100% !important; }
+      .filter-bar select { flex: 1 !important; font-size: 12px !important; }
+      .table-scroll { overflow-x: auto !important; -webkit-overflow-scrolling: touch; }
+      .mat-table    { min-width: 600px !important; }
+      .mat-table th,
+      .mat-table td { padding: 8px 8px !important; font-size: 11.5px !important; white-space: nowrap; }
+      .add-form     { gap: 10px; }
+      .form-row     { grid-template-columns: 1fr !important; }
+      .howto        { padding: 10px 12px; }
+      .howto-title  { font-size: 12px; }
+      .howto-step   { font-size: 11.5px; }
+    }
+  </style>
+  <link rel="stylesheet" href="css/islamic.css">
+  <link rel="stylesheet" href="css/mobile.css">
 </head>
 <body>
 <!-- BASMALA -->
@@ -18,7 +325,7 @@
 <!-- NAV -->
 <nav>
   <a href="home.html" class="nav-logo">
-    <div class="logo-circle"><img src="../logo.png" alt="متين" style="width:100%;height:100%;border-radius:50%;object-fit:cover;"></div>
+    <div class="logo-circle"><img src="logo.png" alt="متين" style="width:100%;height:100%;border-radius:50%;object-fit:cover;"></div>
     <div>
       <div class="nav-brand">برنامج متين العلمي</div>
       <div class="nav-tagline">نحو بناء علميٍّ متين</div>
@@ -137,16 +444,6 @@
       </div>
       <div id="pendingContainer">
         <div class="empty-state"><i class="ti ti-inbox"></i>لا توجد حسابات معلقة</div>
-      </div>
-    </div>
-
-    <!-- ALL ACCOUNTS SECTION -->
-    <div class="section" id="allAccountsSection">
-      <div class="section-head">
-        <div class="section-head-title"><i class="ti ti-users"></i> جميع الحسابات المسجلة</div>
-      </div>
-      <div id="allAccountsContainer">
-        <div class="empty-state"><i class="ti ti-loader"></i> جارٍ التحميل...</div>
       </div>
     </div>
 
@@ -288,6 +585,434 @@
 
 <div class="toast" id="toast"></div>
 
-<script type="module" src="../js/admin-1.js"></script>
+<script type="module">
+import { initializeApp }
+  from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut }
+  from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
+import { getFirestore, collection, addDoc, deleteDoc, doc,
+         onSnapshot, query, orderBy, getDoc, updateDoc, getDocs }
+  from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
+import { FIREBASE_CONFIG } from "./js/config.js";
+
+const app  = initializeApp(FIREBASE_CONFIG);
+const auth = getAuth(app);
+const db   = getFirestore(app);
+let allMats = [];
+
+// ── AUTH GUARD ────────────────────────────────────────
+onAuthStateChanged(auth, async user => {
+  if (!user) { window.location.href = 'login.html'; return; }
+  const snap = await getDoc(doc(db, 'users', user.uid));
+  const role = snap.exists() ? snap.data().role : 'student';
+  // فقط الأدمن يدخل
+  if (role !== 'admin') {
+    window.location.href = 'login.html'; return;
+  }
+  document.getElementById('navUserName').textContent   = user.displayName || user.email.split('@')[0];
+  document.getElementById('authGate').style.display    = 'none';
+  document.getElementById('mainContent').style.display = 'flex';
+  document.getElementById('pendingSection').style.display = 'block';
+  loadPendingAccounts();
+  loadMats();
+});
+
+window.doLogout = () => signOut(auth).then(() => window.location.href = 'login.html');
+
+// ── ADD ───────────────────────────────────────────────
+window.doAdd = async () => {
+  hideErr();
+  const url    = document.getElementById('fUrl').value.trim();
+  const course = document.getElementById('fCourse').value;
+  const title  = document.getElementById('fTitle').value.trim();
+  if (!url)    { showErr('يرجى إدخال رابط الملف'); return; }
+  if (!url.startsWith('http')) { showErr('الرابط يجب أن يبدأ بـ https://'); return; }
+  if (!course) { showErr('يرجى اختيار المادة'); return; }
+  if (!title)  { showErr('يرجى إدخال عنوان المادة'); return; }
+
+  const btn = document.getElementById('addBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="ti ti-loader spin"></i> جارٍ الحفظ...';
+
+  try {
+    await addDoc(collection(db, 'materials'), {
+      url, course, title,
+      type:     document.getElementById('fType').value,
+      notes:    document.getElementById('fNotes').value.trim(),
+      linkType: detectType(url),
+      addedAt:  Date.now(),
+      addedBy:  auth.currentUser.email,
+    });
+    showToast('✓ تمت إضافة المادة بنجاح');
+    ['fUrl','fTitle','fNotes'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('fCourse').value = '';
+  } catch(e) { showErr('خطأ: ' + e.message); }
+
+  btn.disabled = false;
+  btn.innerHTML = '<i class="ti ti-circle-plus"></i> إضافة المادة';
+};
+
+// ── LOAD ──────────────────────────────────────────────
+function loadMats() {
+  onSnapshot(query(collection(db, 'materials'), orderBy('addedAt','desc')), snap => {
+    allMats = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderMats();
+    updateStats();
+  });
+}
+
+window.renderMats = () => {
+  const q  = document.getElementById('searchQ').value.toLowerCase();
+  const fc = document.getElementById('filterCourse').value;
+  const ft = document.getElementById('filterType').value;
+  const list = allMats.filter(m =>
+    (!q  || m.title.toLowerCase().includes(q) || (m.course||'').includes(q)) &&
+    (!fc || m.course === fc) && (!ft || m.type === ft)
+  );
+  const c = document.getElementById('matsContainer');
+  if (!list.length) { c.innerHTML = '<div class="empty-state"><i class="ti ti-inbox"></i>لا توجد نتائج</div>'; return; }
+  c.innerHTML = `
+  <table class="mat-table">
+    <thead><tr><th>المادة</th><th>المسار</th><th>النوع</th><th>المصدر</th><th>التاريخ</th><th></th></tr></thead>
+    <tbody>${list.map(m=>`
+    <tr>
+      <td><div style="display:flex;align-items:center;gap:10px">
+        <div class="type-icon ${icClass(m.linkType)}">${icHtml(m.linkType)}</div>
+        <div>
+          <div style="font-weight:500">${esc(m.title)}</div>
+          ${m.notes?`<div style="font-size:11px;color:var(--text-mid)">${esc(m.notes)}</div>`:''}
+        </div></div></td>
+      <td><span class="badge badge-green">${esc(m.course)}</span></td>
+      <td><span class="badge badge-gray">${esc(m.type)}</span></td>
+      <td style="font-size:12px;color:var(--text-mid)">${srcName(m.url)}</td>
+      <td style="font-size:12px;color:var(--text-mid);white-space:nowrap">${fmtDate(m.addedAt)}</td>
+      <td><div style="display:flex;gap:2px">
+        <a href="${esc(m.url)}" target="_blank" class="btn-icon btn-open" title="فتح"><i class="ti ti-external-link"></i></a>
+        <button class="btn-icon btn-del" title="حذف" onclick="delMat('${m.id}')"><i class="ti ti-trash"></i></button>
+      </div></td>
+    </tr>`).join('')}</tbody>
+  </table>`;
+};
+
+function updateStats() {
+  document.getElementById('sTotal').textContent = allMats.length;
+  document.getElementById('sMah').textContent   = allMats.filter(m=>m.type==='محاضرة').length;
+  document.getElementById('sVid').textContent   = allMats.filter(m=>m.type==='فيديو'||m.linkType==='youtube').length;
+  document.getElementById('sOth').textContent   = allMats.filter(m=>m.type!=='محاضرة'&&m.type!=='فيديو'&&m.linkType!=='youtube').length;
+}
+
+window.delMat = async id => {
+  if (!confirm('هل تريدين حذف هذه المادة نهائياً؟')) return;
+  await deleteDoc(doc(db, 'materials', id));
+  showToast('تم الحذف');
+};
+
+// ── HELPERS ───────────────────────────────────────────
+function detectType(url) {
+  if (url.includes('youtube.com')||url.includes('youtu.be')) return 'youtube';
+  if (url.includes('drive.google.com'))  return 'drive';
+  if (url.includes('dropbox.com'))       return 'dropbox';
+  if (url.match(/\.pdf$/i))              return 'pdf';
+  if (url.match(/\.(mp4|mov)$/i))        return 'video';
+  return 'link';
+}
+function srcName(url='') {
+  if (url.includes('youtube.com')||url.includes('youtu.be')) return 'YouTube';
+  if (url.includes('drive.google.com'))  return 'Google Drive';
+  if (url.includes('dropbox.com'))       return 'Dropbox';
+  if (url.includes('onedrive'))          return 'OneDrive';
+  try { return new URL(url).hostname.replace('www.',''); } catch { return 'رابط'; }
+}
+function icClass(t){ return {youtube:'ic-yt',drive:'ic-drive',pdf:'ic-pdf',video:'ic-video'}[t]||'ic-link'; }
+function icHtml(t){ return {youtube:'<i class="ti ti-brand-youtube"></i>',drive:'<i class="ti ti-brand-google-drive"></i>',pdf:'<i class="ti ti-file-type-pdf"></i>',video:'<i class="ti ti-video"></i>'}[t]||'<i class="ti ti-link"></i>'; }
+function fmtDate(ts){ if(!ts)return'—'; return new Date(ts).toLocaleDateString('ar-EG',{year:'numeric',month:'short',day:'numeric'}); }
+function esc(s){ return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+// ══════════════════════════════════════
+//  الحسابات المعلقة (admin فقط)
+// ══════════════════════════════════════
+
+const ROLE_LABELS = {
+  student:    '🎓 طالبة عادية',
+  mateen:     '📖 طالبة متين',
+  teacher:    '👩‍🏫 معلمة',
+  supervisor: '🛡️ مشرفة',
+  admin:      '👑 أدمن',
+};
+
+function loadPendingAccounts() {
+  // الأدمن يشوف كل الحسابات المعلقة (معلمات + مشرفات + طالبات متين)
+  onSnapshot(
+    query(collection(db, 'users'), orderBy('createdAt', 'desc')),
+    snap => {
+      const pending = snap.docs
+        .map(d => ({ id: d.id, ...d.data() }))
+        .filter(u => u.status === 'pending');
+      renderPending(pending);
+    }
+  );
+}
+
+function renderPending(list) {
+  const badge = document.getElementById('pendingBadge');
+  const cont  = document.getElementById('pendingContainer');
+
+  if (!list.length) {
+    badge.style.display = 'none';
+    cont.innerHTML = '<div class="empty-state"><i class="ti ti-inbox"></i>لا توجد حسابات معلقة</div>';
+    return;
+  }
+
+  badge.style.display = 'inline';
+  badge.textContent   = list.length;
+
+  // فصل: طالبات متين (موافقة مشرفة) والباقي (موافقة أدمن)
+  const mateen = list.filter(u => u.role === 'mateen');
+  const others = list.filter(u => u.role !== 'mateen');
+
+  const tableHTML = (rows) => `<div style="overflow-x:auto">
+    <table class="pending-table">
+      <thead><tr>
+        <th>الاسم</th><th>الصفة</th><th>العمر</th><th>السنة</th>
+        <th>الجوال</th><th>البريد الإلكتروني</th><th>تاريخ التسجيل</th><th></th>
+      </tr></thead>
+      <tbody>${rows.map(u => `
+        <tr>
+          <td style="font-weight:600">${esc(u.name||'—')}</td>
+          <td><span style="font-size:12px;background:var(--beige2);padding:2px 8px;border-radius:4px">${ROLE_LABELS[u.role]||u.role}</span></td>
+          <td>${u.age||'—'}</td>
+          <td>${esc(u.year||'—')}</td>
+          <td dir="ltr">${esc(u.phone||'—')}</td>
+          <td dir="ltr" style="font-size:12px">${esc(u.email||'—')}</td>
+          <td style="font-size:12px;color:var(--text-mid)">${u.createdAt ? new Date(u.createdAt.seconds*1000).toLocaleDateString('ar-EG',{year:'numeric',month:'short',day:'numeric'}) : '—'}</td>
+          <td><div style="display:flex;gap:6px">
+            <button class="btn-approve" onclick="approveUser('${u.id}')"><i class="ti ti-check"></i> قبول</button>
+            <button class="btn-reject"  onclick="rejectUser('${u.id}')"><i class="ti ti-x"></i> رفض</button>
+          </div></td>
+        </tr>`).join('')}
+      </tbody>
+    </table>
+  </div>`;
+
+  let html = '';
+  if (mateen.length) {
+    html += `<div style="padding:10px 16px 4px;font-size:12px;font-weight:600;color:var(--text-mid);border-bottom:1px solid var(--border)">
+      📖 طالبات متين — تحتاج موافقة المشرفة (${mateen.length})
+    </div>${tableHTML(mateen)}`;
+  }
+  if (others.length) {
+    html += `<div style="padding:10px 16px 4px;font-size:12px;font-weight:600;color:var(--text-mid);border-top:${mateen.length?'2px':'0'} solid var(--border)">
+      🛡️ معلمات ومشرفات — تحتاج موافقة الأدمن (${others.length})
+    </div>${tableHTML(others)}`;
+  }
+  cont.innerHTML = html;
+}
+
+window.approveUser = async id => {
+  await updateDoc(doc(db, 'users', id), { status: 'active' });
+  showToast('✓ تم قبول الحساب');
+};
+
+window.rejectUser = async id => {
+  if (!confirm('هل تريدين رفض هذا الحساب وحذفه نهائياً؟')) return;
+  await deleteDoc(doc(db, 'users', id));
+  showToast('تم رفض الحساب وحذفه');
+};
+
+// ══════════════════════════════════════
+//  قاعدة بيانات الطالبات والمقابلات
+// ══════════════════════════════════════
+
+let allStudents = [];
+const stuDateParts = {};
+
+const MONTHS_HIJRI = ['محرم','صفر','ربيع الأول','ربيع الثاني','جمادى الأولى','جمادى الثانية','رجب','شعبان','رمضان','شوال','ذو القعدة','ذو الحجة'];
+const MONTHS_AR    = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+const YEARS_HIJRI  = Array.from({length:11},(_,i)=>1442+i);
+
+function hijriToGregorian(hd,hm,hy) {
+  hd=parseInt(hd); hm=parseInt(hm); hy=parseInt(hy);
+  if(!hd||!hm||!hy) return null;
+  const jdn = Math.floor((11*hy+3)/30)+354*hy+30*hm-Math.floor((hm-1)/2)+hd+1948440-385;
+  let l=jdn+68569;
+  const n=Math.floor((4*l)/146097);
+  l=l-Math.floor((146097*n+3)/4);
+  const ii=Math.floor((4000*(l+1))/1461001);
+  l=l-Math.floor((1461*ii)/4)+31;
+  const j=Math.floor((80*l)/2447);
+  const day=l-Math.floor((2447*j)/80);
+  l=Math.floor(j/11);
+  const month=j+2-12*l;
+  const year=100*(n-49)+ii+l;
+  return {d:String(day).padStart(2,'0'),m:String(month).padStart(2,'0'),y:String(year)};
+}
+
+function parseDateParts(s){if(!s)return{d:'',m:'',y:''};const[d,m,y]=s.split('-');return{d:d||'',m:m||'',y:y||''};}
+
+function makeDatePicker(sid, dateStr) {
+  const {d,m,y}=parseDateParts(dateStr||'');
+  const days=Array.from({length:30},(_,i)=>i+1);
+  const dayOpts=days.map(n=>{const v=String(n).padStart(2,'0');return`<option value="${v}"${d===v?' selected':''}>${n}</option>`;}).join('');
+  const monthOpts=MONTHS_HIJRI.map((mn,i)=>{const v=String(i+1).padStart(2,'0');return`<option value="${v}"${m===v?' selected':''}>${mn}</option>`;}).join('');
+  const yearOpts=YEARS_HIJRI.map(yr=>`<option value="${yr}"${y===String(yr)?' selected':''}>${yr}</option>`).join('');
+  return `<div class="arabic-date">
+    <select class="date-day-sel" onchange="stuUpdateDatePart('${sid}','hd',this.value)"><option value="">يوم</option>${dayOpts}</select>
+    <select class="date-month-sel" onchange="stuUpdateDatePart('${sid}','hm',this.value)"><option value="">شهر</option>${monthOpts}</select>
+    <select class="date-year-sel" onchange="stuUpdateDatePart('${sid}','hy',this.value)"><option value="">سنة</option>${yearOpts}</select>
+  </div>`;
+}
+
+const stuQuery = query(collection(db,'students'), orderBy('order'));
+onSnapshot(stuQuery, snap => {
+  allStudents = snap.docs.map(d=>({id:d.id,...d.data()}));
+  renderStudents(allStudents);
+  updateStuStats(allStudents);
+});
+
+function updateStuStats(list) {
+  document.getElementById('stuTotal').textContent    = list.length;
+  document.getElementById('stuDone').textContent     = list.filter(s=>s.interview==='done').length;
+  document.getElementById('stuPending').textContent  = list.filter(s=>s.interview==='pending').length;
+  document.getElementById('stuAccepted').textContent = list.filter(s=>s.accepted==='accepted').length;
+  document.getElementById('stuRejected').textContent = list.filter(s=>s.accepted==='rejected').length;
+}
+
+window.applyStudentFilters = () => {
+  const q  = (document.getElementById('stuSearch').value||'').toLowerCase();
+  const fi = document.getElementById('stuFilterInterview').value;
+  const fr = document.getElementById('stuFilterResult').value;
+  const fs = document.getElementById('stuFilterStatus').value;
+  renderStudents(allStudents.filter(s=>
+    (!q  || (s.name||'').toLowerCase().includes(q)) &&
+    (fi==='all' || s.interview===fi) &&
+    (fr==='all' || s.accepted===fr) &&
+    (fs==='all' || s.status===fs)
+  ));
+};
+
+function renderStudents(list) {
+  const tb = document.getElementById('stuTableBody');
+  if(!list.length){tb.innerHTML=`<tr><td colspan="8" class="empty-state"><i class="ti ti-inbox"></i>لا توجد طالبات</td></tr>`;return;}
+  tb.innerHTML = list.map((s,i)=>{
+    const intClass = s.interview==='done'?'btn-done':'btn-pending';
+    const intLabel = s.interview==='done'?'✅ تمت':'⏳ لم تتم';
+    let accClass='btn-na', accLabel='— لم يحدد';
+    if(s.accepted==='accepted'){accClass='btn-accepted';accLabel='✔️ مقبولة';}
+    if(s.accepted==='rejected'){accClass='btn-rejected';accLabel='✖️ مرفوضة';}
+    const statusSel = `<select class="status-sel" onchange="stuField('${s.id}','status',this.value)">
+      <option value=""${!s.status?' selected':''}>🏷️ التصنيف</option>
+      <option value="mateen"${s.status==='mateen'?' selected':''}>📖 بنات متين</option>
+      <option value="new"${s.status==='new'?' selected':''}>✨ المستجدات</option>
+    </select>`;
+    const daySel=`<select class="day-sel" onchange="stuField('${s.id}','day',this.value)">
+      <option value="">-اليوم-</option>
+      ${['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'].map(d=>`<option${s.day===d?' selected':''}>${d}</option>`).join('')}
+    </select>`;
+    const timeSel=`<div class="time-cell">
+      <select class="time-hour" onchange="stuField('${s.id}','hour',this.value)">
+        <option value="">-</option>${[1,2,3,4,5,6,7,8,9,10,11,12].map(h=>`<option${s.hour==h?' selected':''}>${h}</option>`).join('')}
+      </select>:
+      <select class="time-ampm" onchange="stuField('${s.id}','ampm',this.value)">
+        <option value="ص"${s.ampm==='ص'?' selected':''}>صباحاً</option>
+        <option value="م"${s.ampm==='م'?' selected':''}>مساءً</option>
+      </select>
+    </div>`;
+    return `<tr>
+      <td><input type="checkbox" class="row-check" data-id="${s.id}" onchange="onRowCheck()"></td>
+      <td style="color:var(--text-mid);font-size:12px">${i+1}</td>
+      <td><div class="stu-name-cell">
+        <a class="btn-stu-link" href="student-view.html?id=${s.id}" target="_blank" title="صفحة الطالبة">👤</a>
+        <input type="text" value="${esc(s.name||'')}" oninput="stuAutoName('${s.id}',this.value)" style="min-width:100px">
+        ${statusSel}
+      </div></td>
+      <td><div style="display:flex;flex-direction:column;gap:4px">${daySel}${makeDatePicker(s.id,s.dateH)}</div></td>
+      <td>${timeSel}</td>
+      <td><button class="btn-interview ${intClass}" onclick="stuToggleInterview('${s.id}','${s.interview}')">${intLabel}</button></td>
+      <td><button class="btn-accept ${accClass}" onclick="stuToggleAccept('${s.id}','${s.accepted}','${s.interview}')">${accLabel}</button></td>
+      <td><button class="btn-del-stu" onclick="stuDelete('${s.id}')" title="حذف"><i class="ti ti-trash"></i></button></td>
+    </tr>`;
+  }).join('');
+}
+
+const stuDefault = () => ({order:Date.now(), name:'طالبة جديدة', status:'', day:'', dateH:'', dateG:'', hour:'', minute:'00', ampm:'ص', interview:'pending', accepted:'na'});
+
+window.addStudentRow = async () => { await addDoc(collection(db,'students'), stuDefault()); };
+
+window.addBulkNames = async () => {
+  const txt = document.getElementById('bulkNames').value;
+  if(!txt.trim()) return;
+  const names = txt.split('\n').filter(n=>n.trim());
+  for(let i=0;i<names.length;i++) await addDoc(collection(db,'students'),{...stuDefault(),order:Date.now()+i,name:names[i].trim()});
+  document.getElementById('bulkNames').value='';
+  showToast('✓ تمت إضافة الأسماء');
+};
+
+window.stuAutoName = async (id,v) => updateDoc(doc(db,'students',id),{name:v});
+window.stuField    = async (id,f,v) => updateDoc(doc(db,'students',id),{[f]:v});
+
+window.stuUpdateDatePart = async (id,key,value) => {
+  const s = allStudents.find(s=>s.id===id)||{};
+  if(!stuDateParts[id]) stuDateParts[id]=parseDateParts(s.dateH||'');
+  const pk={hd:'d',hm:'m',hy:'y'}[key];
+  if(pk) stuDateParts[id][pk]=value;
+  const {d,m,y}=stuDateParts[id];
+  const up={dateH:`${d}-${m}-${y}`};
+  if(d&&m&&y){const gr=hijriToGregorian(d,m,y);if(gr)up.dateG=`${gr.d}-${gr.m}-${gr.y}`;}
+  await updateDoc(doc(db,'students',id),up);
+};
+
+window.stuToggleInterview = async (id,cur) => updateDoc(doc(db,'students',id),{interview:cur==='done'?'pending':'done'});
+
+window.stuToggleAccept = async (id,cur,interview) => {
+  if(interview!=='done'){showToast('يجب إجراء المقابلة أولاً','err');return;}
+  const order=['na','accepted','rejected'];
+  await updateDoc(doc(db,'students',id),{accepted:order[(order.indexOf(cur)+1)%3]});
+};
+
+window.stuDelete = async id => {
+  if(!confirm('حذف الطالبة؟')) return;
+  await deleteDoc(doc(db,'students',id));
+  showToast('تم الحذف');
+};
+
+window.toggleSelectAll = checked => {
+  document.querySelectorAll('.row-check').forEach(cb=>{
+    cb.checked=checked;
+    cb.closest('tr').classList.toggle('selected-row',checked);
+  });
+  document.getElementById('selectedCount').textContent=(checked?document.querySelectorAll('.row-check').length:0)+' محددة';
+};
+
+window.onRowCheck = () => {
+  const checked=document.querySelectorAll('.row-check:checked');
+  document.getElementById('selectedCount').textContent=checked.length+' محددة';
+  document.querySelectorAll('.row-check').forEach(cb=>cb.closest('tr').classList.toggle('selected-row',cb.checked));
+};
+
+window.applyBulkDateTime = async () => {
+  const checked=document.querySelectorAll('.row-check:checked');
+  if(!checked.length){showToast('اختاري طالبات أولاً','err');return;}
+  const day=document.getElementById('bulkDay').value;
+  const dd=String(document.getElementById('bulkDD').value||'').padStart(2,'0');
+  const mm=document.getElementById('bulkMM').value;
+  const yy=document.getElementById('bulkYY').value;
+  const hour=document.getElementById('bulkHour').value;
+  const ampm=document.getElementById('bulkAmpm').value;
+  const up={};
+  if(day) up.day=day;
+  if(dd&&mm&&yy){up.dateH=`${dd}-${mm}-${yy}`;const gr=hijriToGregorian(dd,mm,yy);if(gr)up.dateG=`${gr.d}-${gr.m}-${gr.y}`;}
+  if(hour) up.hour=hour;
+  if(ampm) up.ampm=ampm;
+  if(!Object.keys(up).length){showToast('حددي بيانات للتطبيق','err');return;}
+  for(const cb of checked) await updateDoc(doc(db,'students',cb.dataset.id),up);
+  showToast(`✓ تم التطبيق على ${checked.length} طالبة`);
+  toggleSelectAll(false);
+};
+
+// patch showToast to accept error flag
+const _origToast = window.showToast ? null : null;
+
+function hideErr(){ document.getElementById('errMsg').classList.remove('show'); }
+function showToast(msg,err=false){ const t=document.getElementById('toast'); t.textContent=msg; t.className='toast'+(err?' error':''); t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),3000); }
+</script>
 </body>
 </html>
