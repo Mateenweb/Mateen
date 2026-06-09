@@ -18,8 +18,8 @@ onAuthStateChanged(auth, async user => {
   if (!user) { window.location.href = 'login.html'; return; }
   const snap = await getDoc(doc(db, 'users', user.uid));
   const role = snap.exists() ? snap.data().role : 'student';
-  if (role === 'student' || role === 'mateen' || role === 'supervisor') {
-    window.location.href = 'login.html'; return;
+  if (role === 'student' || role === 'mateen' || role === 'supervisor' || role === 'teacher') {
+    window.location.href = 'home.html'; return;
   }
   document.getElementById('navUserName').textContent  = user.displayName || user.email.split('@')[0];
   document.getElementById('authGate').style.display   = 'none';
