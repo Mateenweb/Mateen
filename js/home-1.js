@@ -62,8 +62,27 @@ onAuthStateChanged(auth, async user => {
       link.href = 'admin.html';
       link.className = 'admin-link';
       link.innerHTML = '<i class="ti ti-shield"></i> لوحة الإداريات';
+      link.style.display = 'flex';
+      link.style.alignItems = 'center';
+      link.style.gap = '12px';
+      link.style.padding = '10px 14px';
+      link.style.color = 'var(--text-mid)';
+      link.style.textDecoration = 'none';
+      link.style.borderRadius = '6px';
+      link.style.transition = 'all 0.2s';
+      link.style.cursor = 'pointer';
       nav.appendChild(divider);
       nav.appendChild(link);
+      
+      // Add hover effect
+      link.addEventListener('mouseover', () => {
+        link.style.background = 'rgba(138,94,60,0.07)';
+        link.style.color = 'var(--green-dark)';
+      });
+      link.addEventListener('mouseout', () => {
+        link.style.background = 'transparent';
+        link.style.color = 'var(--text-mid)';
+      });
     }
   }
 });
