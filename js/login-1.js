@@ -154,25 +154,8 @@ window.doLogin = async () => {
       return;
     }
 
-    /* التوجيه حسب الـ role */
-    let redirect = ROLE_CONFIG[role]?.redirect || 'home.html';
-
-    /* طالبة متين: استخدم الـ linkedStudentId المحفوظ */
-    if (role === 'mateen') {
-      const linkedId = data.linkedStudentId || null;
-      redirect = linkedId ? `student.html?id=${linkedId}` : 'student-general.html';
-    }
-
-    /* الطالبة العادية (student): توجيه لـ home.html */
-    if (role === 'student') {
-      redirect = 'home.html';
-    }
-
-    /* المعلمة: توجيه لصفحتها بناءً على subject المحفوظ */
-    if (role === 'teacher') {
-      const subjectId = data.subject || '';
-      redirect = subjectId ? `teacher-${subjectId}.html` : 'home.html';
-    }
+    /* كل الـ roles تروح home.html بعد تسجيل الدخول */
+    let redirect = 'home.html';
 
     showSuccess('أهلاً بكِ! 🎉', 'تم الدخول بنجاح، جارٍ التحويل...');
     setTimeout(() => window.location.href = redirect, 1500);
