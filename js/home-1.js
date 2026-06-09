@@ -52,7 +52,6 @@ onAuthStateChanged(auth, async user => {
   if (studentLinks) {
     if (role === 'mateen' || role === 'student') {
       studentLinks.style.display = '';
-      // اضبط رابط الملف الشخصي
       const profileLink = document.getElementById('profileLink');
       if (profileLink) {
         const linkedId = snap.data().linkedStudentId || null;
@@ -60,6 +59,19 @@ onAuthStateChanged(auth, async user => {
       }
     }
   }
+
+  // روابط المعلمة — تظهر بس للمعلمة
+  const teacherLinks = document.getElementById('teacherLinks');
+  if (teacherLinks && role === 'teacher') {
+    teacherLinks.style.display = '';
+    const subj = snap.data().subject || '';
+    const myPageLink = document.getElementById('myPageLink');
+    if (myPageLink && subj) myPageLink.href = 'teacher-' + subj + '.html';
+  }
+
+  // رابط الرسائل — لكل المستخدمين المسجلين
+  const msgsLink = document.getElementById('messagesLink');
+  if (msgsLink) msgsLink.style.display = '';
   // لو إدارية — أضيف رابط لوحة الإدارة
   if (role === 'admin') {
     const nav = userDiv.querySelector('.sidebar-nav');

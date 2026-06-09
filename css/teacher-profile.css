@@ -1,0 +1,157 @@
+/* ── Teacher Profile / Schedule / Library ── */
+
+.info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+.info-item {
+  background: var(--beige);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.info-label { font-size: 11px; color: var(--text-mid); }
+.info-val   { font-size: 14px; font-weight: 600; color: var(--text-dark); }
+
+/* badge */
+.tp-badge {
+  background: var(--green-dark);
+  color: var(--gold-light);
+  border-radius: 20px;
+  padding: 2px 10px;
+  font-size: 12px;
+  margin-right: 8px;
+}
+
+/* search */
+.tp-search-wrap { margin-bottom: 14px; }
+.tp-search {
+  width: 100%;
+  padding: 9px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 13px;
+  background: var(--beige);
+  outline: none;
+  box-sizing: border-box;
+}
+.tp-search:focus { border-color: var(--green-mid); }
+
+/* mateen student list */
+.mateen-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+  transition: background .15s;
+}
+.mateen-row:last-child { border-bottom: none; }
+.mateen-row:hover { background: var(--beige); }
+.mateen-avatar {
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  background: var(--beige2);
+  border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; flex-shrink: 0;
+}
+.mateen-name  { font-size: 14px; font-weight: 600; color: var(--text-dark); }
+.mateen-email { font-size: 12px; color: var(--text-mid); }
+.mateen-status {
+  margin-right: auto;
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  background: var(--beige2);
+  color: var(--text-mid);
+}
+.mateen-status.active { background: rgba(46,125,50,0.1); color: #2e7d32; }
+
+/* add button */
+.tp-add-btn {
+  background: rgba(201,162,39,0.15);
+  color: var(--gold);
+  border: 1px solid rgba(201,162,39,0.3);
+  border-radius: 8px;
+  padding: 5px 12px;
+  font-size: 12px;
+  cursor: pointer;
+  font-family: inherit;
+  display: flex; align-items: center; gap: 5px;
+  transition: background .2s;
+}
+.tp-add-btn:hover { background: rgba(201,162,39,0.25); }
+
+/* quick links */
+.tp-quick-links {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+}
+.tp-quick-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px 12px;
+  text-align: center;
+  text-decoration: none;
+  color: var(--text-dark);
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  font-size: 13px;
+  transition: all .2s;
+}
+.tp-quick-card i { font-size: 24px; color: var(--green-mid); }
+.tp-quick-card:hover { border-color: var(--green-mid); background: var(--beige); transform: translateY(-2px); }
+
+/* schedule */
+.sched-row {
+  display: flex; align-items: center; gap: 14px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+}
+.sched-row:last-child { border-bottom: none; }
+.sched-day-badge {
+  background: var(--green-dark); color: var(--gold-light);
+  border-radius: 8px; padding: 5px 14px; font-size: 13px;
+  min-width: 70px; text-align: center;
+}
+.sched-time-val { font-size: 15px; font-weight: 700; color: var(--text-dark); direction: ltr; }
+.sched-note-val { font-size: 12px; color: var(--text-mid); margin-top: 2px; }
+.sched-del-btn {
+  margin-right: auto; background: none; border: none;
+  color: #c0392b; cursor: pointer; font-size: 16px; opacity: .6;
+}
+.sched-del-btn:hover { opacity: 1; }
+
+/* resources */
+.res-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 14px; border-bottom: 1px solid var(--border);
+}
+.res-row:last-child { border-bottom: none; }
+.res-icon { font-size: 22px; flex-shrink: 0; }
+.res-title { font-size: 14px; font-weight: 600; color: var(--text-dark); }
+.res-type  { font-size: 11px; color: var(--text-mid); margin-top: 2px; }
+.res-link  { font-size: 12px; color: var(--green-mid); word-break: break-all; }
+.res-del-btn {
+  margin-right: auto; background: none; border: none;
+  color: #c0392b; cursor: pointer; font-size: 16px; opacity: .6;
+}
+.res-del-btn:hover { opacity: 1; }
+
+.empty-state {
+  text-align: center; padding: 32px; color: var(--text-mid);
+  font-size: 14px; display: flex; flex-direction: column;
+  align-items: center; gap: 8px;
+}
+
+@media (max-width: 700px) {
+  .info-grid { grid-template-columns: 1fr; }
+  .tp-quick-links { grid-template-columns: 1fr 1fr; }
+}

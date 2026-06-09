@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ملفي الشخصي — برنامج متين العلمي</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;500;600;700&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.42.0/dist/tabler-icons.min.css">
+  <link rel="stylesheet" href="../css/shared.css">
+  <link rel="stylesheet" href="../css/teacher.css">
+  <link rel="stylesheet" href="../css/teacher-profile.css">
+  <link rel="stylesheet" href="../css/islamic.css">
+  <link rel="stylesheet" href="../css/mobile.css">
+</head>
+<body>
+<div id="authGate" style="display:flex;align-items:center;justify-content:center;min-height:100vh;">
+  <div style="font-family:Amiri,serif;font-size:18px;color:var(--green-dark)">جارٍ التحقق...</div>
+</div>
+
+<div id="mainContent" style="display:none">
+<div class="basmala-bar"><span class="bsm-ornament">❦</span>بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ<span class="bsm-ornament">❦</span></div>
+
+<nav>
+  <a href="home.html" class="nav-logo">
+    <div class="logo-circle"><img src="../logo.png" alt="متين" style="width:100%;height:100%;border-radius:50%;object-fit:cover;"></div>
+    <div>
+      <div class="nav-brand">برنامج متين العلمي</div>
+      <div class="nav-tagline">نحو بناء علميٍّ متين</div>
+    </div>
+  </a>
+  <ul class="nav-links">
+    <li><a href="home.html">الرئيسية</a></li>
+    <li><a href="teachers.html">المعلمات</a></li>
+    <li><a href="teacher-schedule.html">جدولي</a></li>
+    <li><a href="teacher-library.html">مكتبتي</a></li>
+    <li><a href="messages.html">الرسائل</a></li>
+  </ul>
+  <div class="nav-btns">
+    <button onclick="doLogout()" class="btn-outline"><i class="ti ti-logout"></i> خروج</button>
+  </div>
+  <button class="nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')">
+    <i class="ti ti-menu-2"></i>
+  </button>
+</nav>
+
+<div class="teacher-hero">
+  <div class="teacher-avatar">👩‍🏫</div>
+  <div class="teacher-hero-info">
+    <div class="teacher-name" id="teacherName">...</div>
+    <div class="teacher-subj" id="teacherSubj">...</div>
+    <span class="teacher-badge">✦ برنامج متين العلمي</span>
+  </div>
+</div>
+
+<div class="breadcrumb">
+  <a href="home.html">الرئيسية</a>
+  <i class="ti ti-chevron-left" style="font-size:12px"></i>
+  <span>ملفي الشخصي</span>
+</div>
+
+<div class="teacher-wrap">
+
+  <!-- معلومات المعلمة -->
+  <div class="t-section">
+    <div class="t-section-head"><i class="ti ti-user"></i> معلوماتي</div>
+    <div class="t-section-body">
+      <div class="info-grid">
+        <div class="info-item"><span class="info-label">الاسم</span><span class="info-val" id="infoName">...</span></div>
+        <div class="info-item"><span class="info-label">البريد</span><span class="info-val" id="infoEmail">...</span></div>
+        <div class="info-item"><span class="info-label">الجوال</span><span class="info-val" id="infoPhone">...</span></div>
+        <div class="info-item"><span class="info-label">المادة</span><span class="info-val" id="infoSubject">...</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- طالبات متين -->
+  <div class="t-section">
+    <div class="t-section-head"><i class="ti ti-users"></i> طالبات متين المسجلات <span class="tp-badge" id="mateenCount">0</span></div>
+    <div class="t-section-body">
+      <div class="tp-search-wrap">
+        <input type="text" id="mateenSearch" placeholder="ابحثي باسم الطالبة..." oninput="filterMateenStudents()" class="tp-search"/>
+      </div>
+      <div id="mateenList"><div class="empty-state"><i class="ti ti-loader"></i> جارٍ التحميل...</div></div>
+    </div>
+  </div>
+
+  <!-- روابط سريعة -->
+  <div class="tp-quick-links">
+    <a href="teacher-schedule.html" class="tp-quick-card">
+      <i class="ti ti-calendar"></i>
+      <span>جدولي الدراسي</span>
+    </a>
+    <a href="teacher-library.html" class="tp-quick-card">
+      <i class="ti ti-library"></i>
+      <span>مكتبتي العلمية</span>
+    </a>
+    <a href="messages.html" class="tp-quick-card">
+      <i class="ti ti-message"></i>
+      <span>الرسائل</span>
+    </a>
+    <a id="myPageLink" href="home.html" class="tp-quick-card">
+      <i class="ti ti-layout"></i>
+      <span>صفحة مادتي</span>
+    </a>
+  </div>
+
+</div>
+
+<footer>
+  <div style="display:flex;align-items:center;gap:8px">
+    <img src="../logo.png" alt="متين" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:1px solid var(--gold);">
+    <span style="color:rgba(255,255,255,0.7);font-family:Amiri,serif">متين العلمي</span>
+  </div>
+  <div class="footer-social">
+    <a href="#"><i class="ti ti-brand-telegram"></i></a>
+    <a href="#"><i class="ti ti-brand-twitter"></i></a>
+    <a href="#"><i class="ti ti-brand-instagram"></i></a>
+  </div>
+</footer>
+</div>
+
+<script type="module" src="../js/teacher-profile.js"></script>
+</body>
+</html>

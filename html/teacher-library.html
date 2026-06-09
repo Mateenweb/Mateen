@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>مكتبتي العلمية — برنامج متين العلمي</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;500;600;700&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.42.0/dist/tabler-icons.min.css">
+  <link rel="stylesheet" href="../css/shared.css">
+  <link rel="stylesheet" href="../css/teacher.css">
+  <link rel="stylesheet" href="../css/teacher-profile.css">
+  <link rel="stylesheet" href="../css/library.css">
+  <link rel="stylesheet" href="../css/islamic.css">
+  <link rel="stylesheet" href="../css/mobile.css">
+</head>
+<body>
+<div id="authGate" style="display:flex;align-items:center;justify-content:center;min-height:100vh;">
+  <div style="font-family:Amiri,serif;font-size:18px;color:var(--green-dark)">جارٍ التحقق...</div>
+</div>
+
+<div id="mainContent" style="display:none">
+<div class="basmala-bar"><span class="bsm-ornament">❦</span>بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ<span class="bsm-ornament">❦</span></div>
+
+<nav>
+  <a href="home.html" class="nav-logo">
+    <div class="logo-circle"><img src="../logo.png" alt="متين" style="width:100%;height:100%;border-radius:50%;object-fit:cover;"></div>
+    <div>
+      <div class="nav-brand">برنامج متين العلمي</div>
+      <div class="nav-tagline">نحو بناء علميٍّ متين</div>
+    </div>
+  </a>
+  <ul class="nav-links">
+    <li><a href="home.html">الرئيسية</a></li>
+    <li><a href="teacher-profile.html">ملفي</a></li>
+    <li><a href="teacher-schedule.html">جدولي</a></li>
+    <li><a href="teacher-library.html" class="active">مكتبتي</a></li>
+    <li><a href="messages.html">الرسائل</a></li>
+  </ul>
+  <div class="nav-btns">
+    <button onclick="doLogout()" class="btn-outline"><i class="ti ti-logout"></i> خروج</button>
+  </div>
+  <button class="nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')">
+    <i class="ti ti-menu-2"></i>
+  </button>
+</nav>
+
+<div class="teacher-hero">
+  <div class="teacher-avatar">📚</div>
+  <div class="teacher-hero-info">
+    <div class="teacher-name" id="teacherName">...</div>
+    <div class="teacher-subj">مكتبتي العلمية</div>
+    <span class="teacher-badge">✦ برنامج متين العلمي</span>
+  </div>
+</div>
+
+<div class="breadcrumb">
+  <a href="home.html">الرئيسية</a>
+  <i class="ti ti-chevron-left" style="font-size:12px"></i>
+  <a href="teacher-profile.html">ملفي الشخصي</a>
+  <i class="ti ti-chevron-left" style="font-size:12px"></i>
+  <span>المكتبة</span>
+</div>
+
+<div class="teacher-wrap">
+
+  <div class="t-section">
+    <div class="t-section-head">
+      <i class="ti ti-library"></i> الملفات والمراجع
+      <button class="tp-add-btn" onclick="showAddResource()" style="margin-right:auto"><i class="ti ti-plus"></i> إضافة مرجع</button>
+    </div>
+    <div class="t-section-body">
+      <div class="lib-filters">
+        <button class="lib-btn active" onclick="filterRes(this,'all')">الكل</button>
+        <button class="lib-btn" onclick="filterRes(this,'pdf')">PDF</button>
+        <button class="lib-btn" onclick="filterRes(this,'link')">روابط</button>
+        <button class="lib-btn" onclick="filterRes(this,'note')">ملاحظات</button>
+      </div>
+      <div id="resourcesList"><div class="empty-state"><i class="ti ti-loader"></i> جارٍ التحميل...</div></div>
+    </div>
+  </div>
+
+  <!-- نموذج إضافة مرجع -->
+  <div class="t-section" id="addResourceForm" style="display:none">
+    <div class="t-section-head"><i class="ti ti-plus"></i> إضافة مرجع جديد</div>
+    <div class="t-section-body">
+      <div class="t-contact-form">
+        <div class="t-form-row">
+          <div class="t-field">
+            <label>العنوان</label>
+            <input type="text" id="resTitle" placeholder="عنوان المرجع"/>
+          </div>
+          <div class="t-field">
+            <label>النوع</label>
+            <select id="resType">
+              <option value="pdf">PDF</option>
+              <option value="link">رابط</option>
+              <option value="note">ملاحظة</option>
+            </select>
+          </div>
+        </div>
+        <div class="t-field">
+          <label>الرابط أو المحتوى</label>
+          <textarea id="resContent" placeholder="الرابط أو النص..."></textarea>
+        </div>
+        <div style="display:flex;gap:10px">
+          <button class="t-submit" onclick="saveResource()"><i class="ti ti-check"></i> حفظ</button>
+          <button class="t-submit" style="background:var(--beige2);color:var(--text-dark)" onclick="document.getElementById('addResourceForm').style.display='none'">إلغاء</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <div style="display:flex;align-items:center;gap:8px">
+    <img src="../logo.png" alt="متين" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:1px solid var(--gold);">
+    <span style="color:rgba(255,255,255,0.7);font-family:Amiri,serif">متين العلمي</span>
+  </div>
+  <div class="footer-social">
+    <a href="#"><i class="ti ti-brand-telegram"></i></a>
+    <a href="#"><i class="ti ti-brand-twitter"></i></a>
+    <a href="#"><i class="ti ti-brand-instagram"></i></a>
+  </div>
+</footer>
+</div>
+
+<script type="module" src="../js/teacher-library.js"></script>
+</body>
+</html>
