@@ -19,7 +19,7 @@ let regRole   = 'student';
 /* ── إعدادات كل Role ── */
 const ROLE_CONFIG = {
   student:    { redirect: 'student-general.html', status: 'active',  needsApproval: false },
-  mateen:     { redirect: 'student.html',         status: 'pending', needsApproval: true,  approvedBy: 'supervisor' },
+  mateen:     { redirect: 'home.html',            status: 'active',  needsApproval: false },
   teacher:    { redirect: 'teacher.html',         status: 'pending', needsApproval: true,  approvedBy: 'admin' },
   supervisor: { redirect: 'supervisor.html',      status: 'pending', needsApproval: true,  approvedBy: 'admin' },
   admin:      { redirect: 'admin.html',           status: 'active',  needsApproval: false },

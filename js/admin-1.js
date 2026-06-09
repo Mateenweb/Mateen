@@ -513,3 +513,73 @@ const _origToast = window.showToast ? null : null;
 
 function hideErr(){ document.getElementById('errMsg').classList.remove('show'); }
 function showToast(msg,err=false){ const t=document.getElementById('toast'); t.textContent=msg; t.className='toast'+(err?' error':''); t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),3000); }
+
+/* ══════════════════════════════════════
+   جميع الحسابات المسجلة
+══════════════════════════════════════ */
+const ROLE_LABELS = {
+  student:    'طالبة عادية',
+  mateen:     'طالبة متين',
+  teacher:    'معلمة',
+  supervisor: 'مشرفة',
+  admin:      'أدمن',
+};
+const STATUS_LABELS = {
+  active:   { text: 'مفعّل',   color: '#2e7d32' },
+  pending:  { text: 'معلق',    color: '#e65100' },
+  rejected: { text: 'مرفوض',  color: '#c62828' },
+  suspended:{ text: 'موقوف',  color: '#6a1a6a' },
+};
+
+async function loadAllAccounts() {
+  const container = document.getElementById('allAccountsContainer');
+  try {
+    const snap = await getDocs(collection(db, 'users'));
+    if (snap.empty) {
+      container.innerHTML = '<div class="empty-state"><i class="ti ti-inbox"></i> لا توجد حسابات مسجلة</div>';
+      return;
+    }
+
+    const users = [];
+    snap.forEach(d => users.push({ id: d.id, ...d.data() }));
+    users.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+
+    const rows = users.map(u => {
+      const roleLabel   = ROLE_LABELS[u.role]   || u.role   || '—';
+      const statusInfo  = STATUS_LABELS[u.status] || { text: u.status || '—', color: '#555' };
+      const date = u.createdAt?.seconds
+        ? new Date(u.createdAt.seconds * 1000).toLocaleDateString('ar-SA')
+        : '—';
+      return `
+        <tr>
+          <td>${u.name || '—'}</td>
+          <td>${u.email || '—'}</td>
+          <td>${roleLabel}</td>
+          <td><span style="color:${statusInfo.color};font-weight:600">${statusInfo.text}</span></td>
+          <td>${u.phone || '—'}</td>
+          <td>${date}</td>
+        </tr>`;
+    }).join('');
+
+    container.innerHTML = `
+      <div style="overflow-x:auto">
+        <table class="data-table" style="width:100%;border-collapse:collapse;font-size:14px">
+          <thead>
+            <tr style="background:var(--beige2)">
+              <th style="padding:10px 12px;text-align:right">الاسم</th>
+              <th style="padding:10px 12px;text-align:right">البريد</th>
+              <th style="padding:10px 12px;text-align:right">الصفة</th>
+              <th style="padding:10px 12px;text-align:right">الحالة</th>
+              <th style="padding:10px 12px;text-align:right">الجوال</th>
+              <th style="padding:10px 12px;text-align:right">تاريخ التسجيل</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>`;
+  } catch(e) {
+    container.innerHTML = '<div class="empty-state">حدث خطأ أثناء التحميل</div>';
+  }
+}
+
+loadAllAccounts();
