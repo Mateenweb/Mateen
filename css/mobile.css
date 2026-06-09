@@ -516,3 +516,81 @@
   .filter-bar input,
   .filter-bar select { width: 100% !important; min-width: 0 !important; }
 }
+
+/* ════════════════════════════════════════
+   19. LIBRARY PAGE — صفحة المكتبة
+   ════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .lib-filters {
+    gap: 6px !important;
+    margin-bottom: 16px !important;
+  }
+  .lib-btn {
+    padding: 6px 12px !important;
+    font-size: 12px !important;
+  }
+  .books-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 12px !important;
+  }
+  .book-card { border-radius: 10px !important; }
+  .book-cover { height: 100px !important; font-size: 32px !important; }
+  .book-info { padding: 10px !important; }
+  .book-title { font-size: 13px !important; margin-bottom: 3px !important; }
+  .book-author { font-size: 11px !important; margin-bottom: 6px !important; }
+  .book-cat { padding: 2px 8px !important; font-size: 10px !important; }
+}
+
+@media (max-width: 480px) {
+  .lib-filters { gap: 5px !important; margin-bottom: 12px !important; }
+  .lib-btn { padding: 5px 10px !important; font-size: 11px !important; }
+  .books-grid { grid-template-columns: 1fr !important; gap: 10px !important; }
+  .book-cover { height: 90px !important; font-size: 28px !important; }
+  .book-info { padding: 8px !important; }
+  .book-title { font-size: 12px !important; }
+  .book-author { font-size: 10px !important; }
+}
+
+/* ════════════════════════════════════════
+   20. GENERAL IMPROVEMENTS — تحسينات عام
+   ════════════════════════════════════════ */
+@media (max-width: 768px) {
+  /* Base font sizes */
+  body { font-size: 14px !important; }
+  h1 { font-size: 22px !important; }
+  h2 { font-size: 18px !important; }
+  h3 { font-size: 16px !important; }
+  h4 { font-size: 14px !important; }
+  p { font-size: 13px !important; line-height: 1.5 !important; }
+
+  /* Button sizes */
+  button, .btn, .btn-submit {
+    min-height: 44px !important;
+    font-size: 14px !important;
+    padding: 10px 16px !important;
+  }
+
+  /* Input sizes */
+  input, textarea, select {
+    min-height: 44px !important;
+    font-size: 16px !important;
+  }
+
+  /* Link sizes */
+  a { font-size: 13px !important; }
+
+  /* Remove hover effects on touch devices */
+  @media (hover: none) {
+    button:hover, .btn:hover { transform: none !important; }
+  }
+}
+
+@media (max-width: 480px) {
+  h1 { font-size: 18px !important; }
+  h2 { font-size: 16px !important; }
+  h3 { font-size: 14px !important; }
+  p { font-size: 12px !important; }
+  
+  button, .btn { font-size: 13px !important; }
+  input, textarea, select { font-size: 14px !important; }
+}
