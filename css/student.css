@@ -132,3 +132,17 @@
       font-size: 11px; margin-top: 5px;
     }
   
+/* ════════════════════════════════════════
+   MOBILE RESPONSIVE
+   ════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .section { padding: 16px 14px !important; }
+  .section-title { font-size: 17px !important; }
+  .cards-grid { grid-template-columns: 1fr !important; }
+  .card { border-radius: 10px !important; }
+}
+
+@media (max-width: 480px) {
+  .section { padding: 12px 12px !important; }
+  .section-title { font-size: 15px !important; }
+}
