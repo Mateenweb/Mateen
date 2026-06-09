@@ -71,7 +71,13 @@ onAuthStateChanged(auth, async user => {
 
   // رابط الرسائل — لكل المستخدمين المسجلين
   const msgsLink = document.getElementById('messagesLink');
-  if (msgsLink) msgsLink.style.display = '';
+  if (msgsLink && role !== 'supervisor') msgsLink.style.display = '';
+
+  // روابط المشرفة
+  const supervisorLinks = document.getElementById('supervisorLinks');
+  if (supervisorLinks && role === 'supervisor') {
+    supervisorLinks.style.display = '';
+  }
   // لو إدارية — أضيف رابط لوحة الإدارة
   if (role === 'admin') {
     const nav = userDiv.querySelector('.sidebar-nav');
