@@ -163,21 +163,9 @@ window.doLogin = async () => {
       redirect = linkedId ? `student.html?id=${linkedId}` : 'student-general.html';
     }
 
-    /* الطالبة العادية (student): ابحث عنها في students collection */
+    /* الطالبة العادية (student): توجيه لـ home.html */
     if (role === 'student') {
-      const fullName  = (data.name || '').trim();
-      const firstName = fullName.split(/\s+/)[0].toLowerCase();
-
-      if (firstName) {
-        const stuSnap = await getDocs(query(collection(db, 'students'), orderBy('order')));
-        let foundId = null;
-        stuSnap.forEach(d => {
-          if (foundId) return;
-          const stuFirstName = (d.data().name || '').trim().split(/\s+/)[0].toLowerCase();
-          if (stuFirstName === firstName) foundId = d.id;
-        });
-        if (foundId) redirect = `student.html?id=${foundId}`;
-      }
+      redirect = 'home.html';
     }
 
     /* المعلمة: توجيه لصفحتها بناءً على subject المحفوظ */
