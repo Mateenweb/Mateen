@@ -1,9 +1,9 @@
 
 
 import { initializeApp }   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
-import { getFirestore, collection, addDoc, doc, getDoc, query, where, getDocs, onSnapshot, orderBy, updateDoc } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, doc, getDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
-import { FIREBASE_CONFIG } from "./config.js";
+import { FIREBASE_CONFIG } from "./js/config.js";
 
 const app = initializeApp(FIREBASE_CONFIG);
 const db  = getFirestore(app);
@@ -36,22 +36,12 @@ onAuthStateChanged(auth, async user => {
   const role   = snap.exists() ? snap.data().role   : '';
   const status = snap.exists() ? snap.data().status : '';
   if (role !== 'teacher' && role !== 'admin' && role !== 'supervisor') {
-    window.location.href = 'home.html'; return;
+    window.location.href = 'login.html'; return;
   }
   if (status === 'pending' || status === 'suspended') {
-    window.location.href = 'home.html'; return;
-  }
-  // المعلمة تشوف بس صفحتها
-  const subject = snap.data().subject || '';
-  if (role === 'teacher' && subject !== 'fiqh') {
-    window.location.href = 'home.html'; return;
+    window.location.href = 'login.html'; return;
   }
   loadTeacherName();
-  // لو المعلمة نفسها — أظهر الـ inbox
-  if (role === 'teacher' && snap.data().subject === 'fiqh') {
-    document.getElementById('inboxSection').style.display = 'block';
-    loadInbox();
-  }
 });
 
 window.sendMessage = async () => {
@@ -96,62 +86,3 @@ window.sendMessage = async () => {
   }
 };
 
-
-
-/* ── Inbox ──────────────────────────────────── */
-function loadInbox() {
-  const q = query(
-    collection(db, 'teachers', 'fiqh', 'messages'),
-    orderBy('sentAt', 'desc')
-  );
-  onSnapshot(q, snap => {
-    const list = document.getElementById('inboxList');
-    const badge = document.getElementById('inboxBadge');
-    if (snap.empty) {
-      list.innerHTML = '<div class="empty-state" style="padding:24px"><i class="ti ti-inbox"></i><span>لا توجد رسائل بعد</span></div>';
-      badge.style.display = 'none';
-      return;
-    }
-    const msgs = [];
-    snap.forEach(d => msgs.push({ id: d.id, ...d.data() }));
-    const unread = msgs.filter(m => !m.read).length;
-    badge.textContent = unread;
-    badge.style.display = unread ? 'inline-block' : 'none';
-
-    list.innerHTML = msgs.map(m => {
-      const date = m.sentAt ? new Date(m.sentAt).toLocaleDateString('ar-SA') : '—';
-      return `
-        <div class="inbox-row ${m.read ? '' : 'unread'}" onclick="openMsg('${m.id}', '${m.name}', '${m.topic}', \`${m.body}\`, '${m.phone || ''}', '${date}')">
-          <div class="inbox-avatar">✉️</div>
-          <div style="flex:1">
-            <div class="inbox-name">${m.name || '—'}</div>
-            <div class="inbox-preview">${m.topic || ''} — ${(m.body || '').slice(0,60)}...</div>
-          </div>
-          <div class="inbox-date">${date}</div>
-          ${!m.read ? '<div class="inbox-dot"></div>' : ''}
-        </div>
-      `;
-    }).join('');
-  });
-}
-
-window.openMsg = async (id, name, topic, body, phone, date) => {
-  await updateDoc(doc(db, 'teachers', 'fiqh', 'messages', id), { read: true });
-  const old = document.getElementById('msgModal');
-  if (old) old.remove();
-  const modal = document.createElement('div');
-  modal.id = 'msgModal';
-  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px';
-  modal.innerHTML = `
-    <div style="background:#fff;border-radius:16px;padding:28px;max-width:500px;width:100%">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-        <h3 style="margin:0;font-family:Amiri,serif;font-size:18px">${name}</h3>
-        <button onclick="document.getElementById('msgModal').remove()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#888">✕</button>
-      </div>
-      <div style="font-size:12px;color:var(--text-mid);margin-bottom:12px">${date} ${phone ? '· ' + phone : ''}</div>
-      <div style="background:var(--beige);border-radius:8px;padding:12px;font-size:13.5px;margin-bottom:16px"><strong>${topic}</strong></div>
-      <div style="font-size:14px;line-height:2;color:var(--text-dark)">${body}</div>
-    </div>
-  `;
-  document.body.appendChild(modal);
-};

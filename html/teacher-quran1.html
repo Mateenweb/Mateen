@@ -1,155 +1,134 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+
+<html dir="rtl" lang="ar">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>معلمة القرآن الكريم — برنامج متين العلمي</title>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;500;600;700&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.42.0/dist/tabler-icons.min.css">
-  <link rel="stylesheet" href="../css/shared.css">
-  <link rel="stylesheet" href="../css/teacher.css">
-  <link rel="stylesheet" href="../css/islamic.css">
-  <link rel="stylesheet" href="../css/mobile.css">
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>معلمة القرآن الكريم — برنامج متين العلمي</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;500;600;700&amp;family=Amiri:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.42.0/dist/tabler-icons.min.css" rel="stylesheet"/>
+<link href="../css/shared.css" rel="stylesheet"/>
+<link href="../css/teacher.css" rel="stylesheet"/>
+<link href="../css/islamic.css" rel="stylesheet"/>
+<link href="../css/mobile.css" rel="stylesheet"/>
 </head>
 <body>
 <div class="basmala-bar"><span class="bsm-ornament">❦</span>بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ<span class="bsm-ornament">❦</span></div>
-
 <nav>
-  <a href="home.html" class="nav-logo">
-    <div class="logo-circle"><img src="../logo.png" alt="متين" style="width:100%;height:100%;border-radius:50%;object-fit:cover;"></div>
-    <div>
-      <div class="nav-brand">برنامج متين العلمي</div>
-      <div class="nav-tagline">نحو بناء علميٍّ متين</div>
-    </div>
-  </a>
-  <ul class="nav-links">
-    <li><a href="home.html">الرئيسية</a></li>
-    <li><a href="about.html">عن البرنامج</a></li>
-    <li><a href="courses.html">المسارات العلمية</a></li>
-    <li><a href="teachers.html" class="active">المعلمات</a></li>
-    <li><a href="#contact">تواصل معنا</a></li>
-  </ul>
-  <div class="nav-btns">
-    <a href="login.html" class="btn-outline"><i class="ti ti-user"></i> تسجيل الدخول</a>
-  </div>
-  <button class="nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')">
-    <i class="ti ti-menu-2"></i>
-  </button>
+<a class="nav-logo" href="home.html">
+<div class="logo-circle"><img alt="متين" src="../logo.png" style="width:100%;height:100%;border-radius:50%;object-fit:cover;"/></div>
+<div>
+<div class="nav-brand">برنامج متين العلمي</div>
+<div class="nav-tagline">نحو بناء علميٍّ متين</div>
+</div>
+</a>
+<ul class="nav-links">
+<li><a href="home.html">الرئيسية</a></li>
+<li><a href="about.html">عن البرنامج</a></li>
+<li><a href="courses.html">المسارات العلمية</a></li>
+<li><a class="active" href="teachers.html">المعلمات</a></li>
+<li><a href="#contact">تواصل معنا</a></li>
+</ul>
+<div class="nav-btns">
+<a class="btn-outline" href="login.html"><i class="ti ti-user"></i> تسجيل الدخول</a>
+</div>
+<button class="nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')">
+<i class="ti ti-menu-2"></i>
+</button>
 </nav>
-
 <div class="teacher-hero">
-  <div class="teacher-avatar">📗</div>
-  <div class="teacher-hero-info">
-    <div class="teacher-name" id="teacherName">معلمة القرآن الأولى</div>
-    <div class="teacher-subj">القرآن الكريم</div>
-    <span class="teacher-badge">✦ برنامج متين العلمي</span>
-  </div>
+<div class="teacher-avatar">📗</div>
+<div class="teacher-hero-info">
+<div class="teacher-name" id="teacherName">معلمة القرآن الأولى</div>
+<div class="teacher-subj">القرآن الكريم</div>
+<span class="teacher-badge">✦ برنامج متين العلمي</span>
 </div>
-
+</div>
 <div class="breadcrumb">
-  <a href="home.html">الرئيسية</a>
-  <i class="ti ti-chevron-left" style="font-size:12px"></i>
-  <a href="teachers.html">المعلمات</a>
-  <i class="ti ti-chevron-left" style="font-size:12px"></i>
-  <span id="breadcrumbName">معلمة القرآن الأولى</span>
+<a href="home.html">الرئيسية</a>
+<i class="ti ti-chevron-left" style="font-size:12px"></i>
+<a href="teachers.html">المعلمات</a>
+<i class="ti ti-chevron-left" style="font-size:12px"></i>
+<span id="breadcrumbName">معلمة القرآن الأولى</span>
 </div>
-
 <div class="teacher-wrap">
-
-  <div class="t-section">
-    <div class="t-section-head"><i class="ti ti-user"></i> نبذة عن المعلمة</div>
-    <div class="t-section-body">
-      <p class="about-text">معلمة متخصصة في مجال القرآن الكريم ضمن برنامج متين العلمي. تتميز بأسلوب تعليمي متميز يجمع بين الأصالة والوضوح.</p>
-    </div>
-  </div>
-
-  <div class="t-section">
-    <div class="t-section-head"><i class="ti ti-calendar"></i> الجدول الأسبوعي</div>
-    <div class="t-section-body">
-      <div class="schedule-grid">
-        <div class="sched-card">
-          <div class="sched-day">الأحد</div>
-          <div class="sched-time">-- : --</div>
-          <div class="sched-subj">القرآن الكريم</div>
-        </div>
-        <div class="sched-card">
-          <div class="sched-day">الثلاثاء</div>
-          <div class="sched-time">-- : --</div>
-          <div class="sched-subj">القرآن الكريم</div>
-        </div>
-        <div class="sched-card">
-          <div class="sched-day">الخميس</div>
-          <div class="sched-time">-- : --</div>
-          <div class="sched-subj">القرآن الكريم</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="t-section" id="contact">
-    <div class="t-section-head"><i class="ti ti-message"></i> <span id="contactTitle">تواصلي مع معلمة القرآن الأولى</span></div>
-    <div class="t-section-body">
-      <div class="err-inline" id="errMsg"><i class="ti ti-alert-circle"></i><span id="errText"></span></div>
-      <div class="success-msg" id="successMsg"><i class="ti ti-circle-check"></i> تم إرسال رسالتك بنجاح، ستردّ عليكِ المعلمة قريباً.</div>
-      <div class="t-contact-form">
-        <div class="t-form-row">
-          <div class="t-field">
-            <label>اسمك الكريم <span style="color:#c0392b">*</span></label>
-            <input type="text" id="msgName" placeholder="اسمك الكريم"/>
-          </div>
-          <div class="t-field">
-            <label>رقم الجوال</label>
-            <input type="text" id="msgPhone" placeholder="05XXXXXXXX" dir="ltr"/>
-          </div>
-        </div>
-        <div class="t-field">
-          <label>موضوع الرسالة <span style="color:#c0392b">*</span></label>
-          <select id="msgTopic">
-            <option value="">اختاري الموضوع</option>
-            <option>سؤال علمي</option>
-            <option>استفسار عن الجدول</option>
-            <option>غياب أو عذر</option>
-            <option>طلب مراجعة</option>
-            <option>أخرى</option>
-          </select>
-        </div>
-        <div class="t-field">
-          <label>الرسالة <span style="color:#c0392b">*</span></label>
-          <textarea id="msgBody" placeholder="اكتبي رسالتك هنا..."></textarea>
-        </div>
-        <button class="t-submit" id="sendBtn" onclick="sendMessage()">
-          <i class="ti ti-send"></i> إرسال الرسالة
-        </button>
-      </div>
-    </div>
-  </div>
-
-
-  <!-- inbox — تظهر بس للمعلمة بعد تسجيل الدخول -->
-  <div class="t-section" id="inboxSection" style="display:none">
-    <div class="t-section-head">
-      <i class="ti ti-inbox"></i> الرسائل الواردة
-      <span class="tp-badge" id="inboxBadge" style="display:none"></span>
-    </div>
-    <div class="t-section-body" style="padding:0">
-      <div id="inboxList"><div class="empty-state" style="padding:24px"><i class="ti ti-loader"></i> جارٍ التحميل...</div></div>
-    </div>
-  </div>
-
+<div class="t-section">
+<div class="t-section-head"><i class="ti ti-user"></i> نبذة عن المعلمة</div>
+<div class="t-section-body">
+<p class="about-text">معلمة متخصصة في مجال القرآن الكريم ضمن برنامج متين العلمي. تتميز بأسلوب تعليمي متميز يجمع بين الأصالة والوضوح.</p>
 </div>
-
+</div>
+<div class="t-section">
+<div class="t-section-head"><i class="ti ti-calendar"></i> الجدول الأسبوعي</div>
+<div class="t-section-body">
+<div class="schedule-grid">
+<div class="sched-card">
+<div class="sched-day">الأحد</div>
+<div class="sched-time">-- : --</div>
+<div class="sched-subj">القرآن الكريم</div>
+</div>
+<div class="sched-card">
+<div class="sched-day">الثلاثاء</div>
+<div class="sched-time">-- : --</div>
+<div class="sched-subj">القرآن الكريم</div>
+</div>
+<div class="sched-card">
+<div class="sched-day">الخميس</div>
+<div class="sched-time">-- : --</div>
+<div class="sched-subj">القرآن الكريم</div>
+</div>
+</div>
+</div>
+</div>
+<div class="t-section" id="contact">
+<div class="t-section-head"><i class="ti ti-message"></i> <span id="contactTitle">تواصلي مع معلمة القرآن الأولى</span></div>
+<div class="t-section-body">
+<div class="err-inline" id="errMsg"><i class="ti ti-alert-circle"></i><span id="errText"></span></div>
+<div class="success-msg" id="successMsg"><i class="ti ti-circle-check"></i> تم إرسال رسالتك بنجاح، ستردّ عليكِ المعلمة قريباً.</div>
+<div class="t-contact-form">
+<div class="t-form-row">
+<div class="t-field">
+<label>اسمك الكريم <span style="color:#c0392b">*</span></label>
+<input id="msgName" placeholder="اسمك الكريم" type="text"/>
+</div>
+<div class="t-field">
+<label>رقم الجوال</label>
+<input dir="ltr" id="msgPhone" placeholder="05XXXXXXXX" type="text"/>
+</div>
+</div>
+<div class="t-field">
+<label>موضوع الرسالة <span style="color:#c0392b">*</span></label>
+<select id="msgTopic">
+<option value="">اختاري الموضوع</option>
+<option>سؤال علمي</option>
+<option>استفسار عن الجدول</option>
+<option>غياب أو عذر</option>
+<option>طلب مراجعة</option>
+<option>أخرى</option>
+</select>
+</div>
+<div class="t-field">
+<label>الرسالة <span style="color:#c0392b">*</span></label>
+<textarea id="msgBody" placeholder="اكتبي رسالتك هنا..."></textarea>
+</div>
+<button class="t-submit" id="sendBtn" onclick="sendMessage()">
+<i class="ti ti-send"></i> إرسال الرسالة
+        </button>
+</div>
+</div>
+</div>
+</div>
 <footer>
-  <div style="display:flex;align-items:center;gap:8px">
-    <img src="../logo.png" alt="متين" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:1px solid var(--gold);">
-    <span style="color:rgba(255,255,255,0.7);font-family:Amiri,serif">متين العلمي</span>
-  </div>
-  <div class="footer-social">
-    <a href="#"><i class="ti ti-brand-telegram"></i></a>
-    <a href="#"><i class="ti ti-brand-twitter"></i></a>
-    <a href="#"><i class="ti ti-brand-instagram"></i></a>
-  </div>
+<div style="display:flex;align-items:center;gap:8px">
+<img alt="متين" src="../logo.png" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:1px solid var(--gold);"/>
+<span style="color:rgba(255,255,255,0.7);font-family:Amiri,serif">متين العلمي</span>
+</div>
+<div class="footer-social">
+<a href="#"><i class="ti ti-brand-telegram"></i></a>
+<a href="#"><i class="ti ti-brand-twitter"></i></a>
+<a href="#"><i class="ti ti-brand-instagram"></i></a>
+</div>
 </footer>
-
-<script type="module" src="../js/teacher-quran1-1.js"></script>
+<script src="../js/teacher-quran1-1.js" type="module"></script>
 </body>
 </html>

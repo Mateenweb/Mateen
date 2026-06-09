@@ -7,7 +7,7 @@ import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail,
 import { getFirestore, doc, getDoc, setDoc, addDoc, serverTimestamp,
          collection, getDocs, query, orderBy }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
-import { FIREBASE_CONFIG } from "./config.js";
+import { FIREBASE_CONFIG } from "./js/config.js";
 
 const app  = initializeApp(FIREBASE_CONFIG);
 const auth = getAuth(app);
@@ -18,8 +18,8 @@ let regRole   = 'student';
 
 /* ── إعدادات كل Role ── */
 const ROLE_CONFIG = {
-  student:    { redirect: 'home.html',           status: 'active',  needsApproval: false },
-  mateen:     { redirect: 'home.html',            status: 'pending', needsApproval: true,  approvedBy: 'supervisor' },
+  student:    { redirect: 'student-general.html', status: 'active',  needsApproval: false },
+  mateen:     { redirect: 'student.html',         status: 'pending', needsApproval: true,  approvedBy: 'supervisor' },
   teacher:    { redirect: 'teacher.html',         status: 'pending', needsApproval: true,  approvedBy: 'admin' },
   supervisor: { redirect: 'supervisor.html',      status: 'pending', needsApproval: true,  approvedBy: 'admin' },
   admin:      { redirect: 'admin.html',           status: 'active',  needsApproval: false },
@@ -154,8 +154,31 @@ window.doLogin = async () => {
       return;
     }
 
-    /* كل الـ roles تروح home.html بعد تسجيل الدخول */
-    let redirect = 'home.html';
+    /* التوجيه حسب الـ role */
+    let redirect = ROLE_CONFIG[role]?.redirect || 'home.html';
+
+    /* الطالبة العادية (student): ابحث عنها في students collection */
+    if (role === 'student') {
+      const fullName  = (data.name || '').trim();
+      const firstName = fullName.split(/\s+/)[0].toLowerCase();
+
+      if (firstName) {
+        const stuSnap = await getDocs(query(collection(db, 'students'), orderBy('order')));
+        let foundId = null;
+        stuSnap.forEach(d => {
+          if (foundId) return;
+          const stuFirstName = (d.data().name || '').trim().split(/\s+/)[0].toLowerCase();
+          if (stuFirstName === firstName) foundId = d.id;
+        });
+        if (foundId) redirect = `student.html?id=${foundId}`;
+      }
+    }
+
+    /* المعلمة: توجيه لصفحتها بناءً على subject المحفوظ */
+    if (role === 'teacher') {
+      const subjectId = data.subject || '';
+      redirect = subjectId ? `teacher-${subjectId}.html` : 'home.html';
+    }
 
     showSuccess('أهلاً بكِ! 🎉', 'تم الدخول بنجاح، جارٍ التحويل...');
     setTimeout(() => window.location.href = redirect, 1500);

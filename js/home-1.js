@@ -5,7 +5,7 @@ import { getAuth, onAuthStateChanged, signOut }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
 import { getFirestore, doc, getDoc }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
-import { FIREBASE_CONFIG } from "./config.js";
+import { FIREBASE_CONFIG } from "./js/config.js";
 
 const app  = initializeApp(FIREBASE_CONFIG);
 const auth = getAuth(app);
@@ -47,36 +47,10 @@ onAuthStateChanged(auth, async user => {
     if (teachersLink) teachersLink.closest('.contact-card').style.display = 'none';
   }
 
-  // روابط الطالبة — تظهر بس للطالبة وطالبة متين
-  const studentLinks = document.getElementById('studentLinks');
-  if (studentLinks) {
-    if (role === 'mateen' || role === 'student') {
-      studentLinks.style.display = '';
-      const profileLink = document.getElementById('profileLink');
-      if (profileLink) {
-        const linkedId = snap.data().linkedStudentId || null;
-        profileLink.href = linkedId ? 'student.html?id=' + linkedId : 'student-general.html';
-      }
-    }
-  }
-
-  // روابط المعلمة — تظهر بس للمعلمة
-  const teacherLinks = document.getElementById('teacherLinks');
-  if (teacherLinks && role === 'teacher') {
-    teacherLinks.style.display = '';
-    const subj = snap.data().subject || '';
-    const myPageLink = document.getElementById('myPageLink');
-    if (myPageLink && subj) myPageLink.href = 'teacher-' + subj + '.html';
-  }
-
-  // رابط الرسائل — لكل المستخدمين المسجلين
-  const msgsLink = document.getElementById('messagesLink');
-  if (msgsLink && role !== 'supervisor') msgsLink.style.display = '';
-
-  // روابط المشرفة
-  const supervisorLinks = document.getElementById('supervisorLinks');
-  if (supervisorLinks && role === 'supervisor') {
-    supervisorLinks.style.display = '';
+  // إخفاء "ملفي الشخصي" من غير طالبات متين
+  const profileLink = document.getElementById('profileLink');
+  if (profileLink && role !== 'mateen') {
+    profileLink.style.display = 'none';
   }
   // لو إدارية — أضيف رابط لوحة الإدارة
   if (role === 'admin') {

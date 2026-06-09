@@ -2,7 +2,7 @@
 import { initializeApp }   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
 import { getFirestore, doc, getDoc, collection, addDoc } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
-import { FIREBASE_CONFIG } from "./config.js";
+import { FIREBASE_CONFIG } from "./js/config.js";
 
 const app  = initializeApp(FIREBASE_CONFIG);
 const auth = getAuth(app);
@@ -37,8 +37,13 @@ const RECIPIENTS = {
   fiqh:    'معلمة الفقه',
   aqeedah: 'معلمة العقيدة',
   hadeeth: 'معلمة الحديث',
+  seera:   'معلمة السيرة النبوية',
+  nahw:    'معلمة النحو والصرف',
+  tajweed: 'معلمة التجويد',
+  mutoon:  'معلمة المتون',
   quran1:  'معلمة القرآن الأولى',
   quran2:  'معلمة القرآن الثانية',
+  tarbawi: 'معلمة البرامج التربوية',
 };
 
 window.submitContactNew = async () => {

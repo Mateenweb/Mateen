@@ -6,7 +6,7 @@ import { getAuth, onAuthStateChanged, signOut }
 import { getFirestore, collection, addDoc, deleteDoc, doc,
          onSnapshot, query, orderBy, getDoc, updateDoc, getDocs }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
-import { FIREBASE_CONFIG } from "./config.js";
+import { FIREBASE_CONFIG } from "./js/config.js";
 
 const app  = initializeApp(FIREBASE_CONFIG);
 const auth = getAuth(app);
@@ -18,15 +18,14 @@ onAuthStateChanged(auth, async user => {
   if (!user) { window.location.href = 'login.html'; return; }
   const snap = await getDoc(doc(db, 'users', user.uid));
   const role = snap.exists() ? snap.data().role : 'student';
-  if (role === 'student' || role === 'mateen' || role === 'teacher') {
-    window.location.href = 'home.html'; return;
+  if (role === 'student' || role === 'mateen' || role === 'supervisor') {
+    window.location.href = 'login.html'; return;
   }
   document.getElementById('navUserName').textContent  = user.displayName || user.email.split('@')[0];
   document.getElementById('authGate').style.display   = 'none';
   document.getElementById('mainContent').style.display = 'flex';
   if (role !== 'admin') {
     document.getElementById('studentsSection').style.display = 'none';
-    document.getElementById('allAccountsSection').style.display = 'none';
   } else {
     document.getElementById('pendingSection').style.display = 'block';
     loadPendingAccounts();
@@ -225,92 +224,8 @@ function renderPending(list) {
 }
 
 window.approveUser = async id => {
-  // Find the user data
-  const userSnap = await getDoc(doc(db, 'users', id));
-  if (!userSnap.exists()) return;
-  const userData = userSnap.data();
-
-  // If mateen student, show link modal first
-  if (userData.role === 'mateen') {
-    showLinkModal(id, userData);
-  } else {
-    await updateDoc(doc(db, 'users', id), { status: 'active' });
-    showToast('✓ تم قبول الحساب');
-  }
-};
-
-// ── Link Modal ────────────────────────────────────────
-function showLinkModal(userId, userData) {
-  // Remove existing modal if any
-  const old = document.getElementById('linkModal');
-  if (old) old.remove();
-
-  const options = allStudents.map(s =>
-    `<option value="${s.id}">${s.name || '—'}</option>`
-  ).join('');
-
-  const modal = document.createElement('div');
-  modal.id = 'linkModal';
-  modal.style.cssText = `
-    position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;
-    display:flex;align-items:center;justify-content:center;padding:16px;
-  `;
-  modal.innerHTML = `
-    <div style="background:#fff;border-radius:16px;padding:28px;max-width:460px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.2)">
-      <h3 style="margin:0 0 6px;font-family:Amiri,serif;font-size:20px">ربط الحساب بملف الطالبة</h3>
-      <p style="color:var(--text-mid);font-size:13px;margin:0 0 20px">
-        <strong>${userData.name || ''}</strong> — ${userData.email || ''}
-      </p>
-      <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px">اختاري الطالبة المقابلة من قاعدة البيانات:</label>
-      <select id="linkStudentSelect" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;margin-bottom:20px">
-        <option value="">— اختاري —</option>
-        ${options}
-      </select>
-      <p style="font-size:12px;color:var(--text-mid);margin:0 0 20px">
-        أو يمكنك القبول بدون ربط الآن وتربطها لاحقاً.
-      </p>
-      <div style="display:flex;gap:10px;justify-content:flex-end">
-        <button onclick="document.getElementById('linkModal').remove()" 
-          style="padding:8px 18px;border-radius:8px;border:1px solid var(--border);background:#fff;cursor:pointer;font-family:inherit">
-          إلغاء
-        </button>
-        <button onclick="approveMateenWithoutLink('${userId}')"
-          style="padding:8px 18px;border-radius:8px;border:1px solid var(--border);background:#fff;cursor:pointer;font-family:inherit;font-size:13px">
-          قبول بدون ربط
-        </button>
-        <button onclick="approveMateenWithLink('${userId}')"
-          style="padding:8px 18px;border-radius:8px;border:none;background:var(--green-mid);color:#fff;cursor:pointer;font-family:inherit;font-weight:600">
-          <i class="ti ti-link"></i> قبول وربط
-        </button>
-      </div>
-    </div>
-  `;
-  document.body.appendChild(modal);
-}
-
-window.approveMateenWithoutLink = async userId => {
-  await updateDoc(doc(db, 'users', userId), { status: 'active' });
-  document.getElementById('linkModal').remove();
-  showToast('✓ تم قبول الحساب بدون ربط');
-};
-
-window.approveMateenWithLink = async userId => {
-  const studentId = document.getElementById('linkStudentSelect').value;
-  if (!studentId) { showToast('⚠ اختاري طالبة أولاً'); return; }
-
-  // Approve user and save studentId in her profile
-  await updateDoc(doc(db, 'users', userId), {
-    status: 'active',
-    linkedStudentId: studentId,
-  });
-
-  // Save uid in the student record
-  await updateDoc(doc(db, 'students', studentId), {
-    uid: userId,
-  });
-
-  document.getElementById('linkModal').remove();
-  showToast('✓ تم القبول وربط الملف بنجاح');
+  await updateDoc(doc(db, 'users', id), { status: 'active' });
+  showToast('✓ تم قبول الحساب');
 };
 
 window.rejectUser = async id => {
@@ -514,73 +429,3 @@ const _origToast = window.showToast ? null : null;
 
 function hideErr(){ document.getElementById('errMsg').classList.remove('show'); }
 function showToast(msg,err=false){ const t=document.getElementById('toast'); t.textContent=msg; t.className='toast'+(err?' error':''); t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),3000); }
-
-/* ══════════════════════════════════════
-   جميع الحسابات المسجلة
-══════════════════════════════════════ */
-const ROLE_LABELS = {
-  student:    'طالبة عادية',
-  mateen:     'طالبة متين',
-  teacher:    'معلمة',
-  supervisor: 'مشرفة',
-  admin:      'أدمن',
-};
-const STATUS_LABELS = {
-  active:   { text: 'مفعّل',   color: '#2e7d32' },
-  pending:  { text: 'معلق',    color: '#e65100' },
-  rejected: { text: 'مرفوض',  color: '#c62828' },
-  suspended:{ text: 'موقوف',  color: '#6a1a6a' },
-};
-
-async function loadAllAccounts() {
-  const container = document.getElementById('allAccountsContainer');
-  try {
-    const snap = await getDocs(collection(db, 'users'));
-    if (snap.empty) {
-      container.innerHTML = '<div class="empty-state"><i class="ti ti-inbox"></i> لا توجد حسابات مسجلة</div>';
-      return;
-    }
-
-    const users = [];
-    snap.forEach(d => users.push({ id: d.id, ...d.data() }));
-    users.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
-
-    const rows = users.map(u => {
-      const roleLabel   = ROLE_LABELS[u.role]   || u.role   || '—';
-      const statusInfo  = STATUS_LABELS[u.status] || { text: u.status || '—', color: '#555' };
-      const date = u.createdAt?.seconds
-        ? new Date(u.createdAt.seconds * 1000).toLocaleDateString('ar-SA')
-        : '—';
-      return `
-        <tr>
-          <td>${u.name || '—'}</td>
-          <td>${u.email || '—'}</td>
-          <td>${roleLabel}</td>
-          <td><span style="color:${statusInfo.color};font-weight:600">${statusInfo.text}</span></td>
-          <td>${u.phone || '—'}</td>
-          <td>${date}</td>
-        </tr>`;
-    }).join('');
-
-    container.innerHTML = `
-      <div style="overflow-x:auto">
-        <table class="data-table" style="width:100%;border-collapse:collapse;font-size:14px">
-          <thead>
-            <tr style="background:var(--beige2)">
-              <th style="padding:10px 12px;text-align:right">الاسم</th>
-              <th style="padding:10px 12px;text-align:right">البريد</th>
-              <th style="padding:10px 12px;text-align:right">الصفة</th>
-              <th style="padding:10px 12px;text-align:right">الحالة</th>
-              <th style="padding:10px 12px;text-align:right">الجوال</th>
-              <th style="padding:10px 12px;text-align:right">تاريخ التسجيل</th>
-            </tr>
-          </thead>
-          <tbody>${rows}</tbody>
-        </table>
-      </div>`;
-  } catch(e) {
-    container.innerHTML = '<div class="empty-state">حدث خطأ أثناء التحميل</div>';
-  }
-}
-
-loadAllAccounts();

@@ -1,63 +1,56 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+
+<html dir="rtl" lang="ar">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>لوحة المشرفة — متين العلمي</title>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;500;600;700&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.42.0/dist/tabler-icons.min.css">
-  <link rel="stylesheet" href="../css/shared.css">
-  <link rel="stylesheet" href="../css/supervisor.css">
-  <link rel="stylesheet" href="../css/islamic.css">
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>لوحة المشرفة — متين العلمي</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;500;600;700&amp;family=Amiri:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.42.0/dist/tabler-icons.min.css" rel="stylesheet"/>
+<link href="../css/shared.css" rel="stylesheet"/>
+<link href="../css/supervisor.css" rel="stylesheet"/>
+<link href="../css/islamic.css" rel="stylesheet"/>
 </head>
 <body>
 <div class="basmala-bar"><span class="bsm-ornament">❦</span>بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ<span class="bsm-ornament">❦</span></div>
-
 <nav>
-  <a href="#" class="nav-logo">
-    <div class="logo-circle"><img src="../logo.png" alt="متين" style="width:100%;height:100%;border-radius:50%;object-fit:cover;"></div>
-    <div><div class="nav-brand">برنامج متين العلمي</div><div class="nav-tagline">نحو بناء علميٍّ متين</div></div>
-  </a>
-  <div class="nav-btns">
-    <div class="nav-user"><i class="ti ti-shield"></i><span class="nav-user-name" id="navUserName">مشرفة</span></div>
-    <button class="btn-logout" onclick="doLogout()"><i class="ti ti-logout"></i> خروج</button>
-  </div>
-</nav>
-
-<div id="authGate"><i class="ti ti-loader spin"></i><p>جارٍ التحقق من الصلاحيات...</p></div>
-
-<div id="mainContent" style="display:none; flex-direction:column; flex:1;">
-  <div class="hero">
-    <div class="hero-badge">🛡️ لوحة المشرفة</div>
-    <h1>إدارة طالبات متين</h1>
-    <p>مراجعة الحسابات الجديدة وإدارة الطالبات</p>
-  </div>
-
-  <div class="container">
-    <div class="stats-row">
-      <div class="stat-card"><div class="stat-num" id="sPending">0</div><div class="stat-label">بانتظار الموافقة</div></div>
-      <div class="stat-card"><div class="stat-num" id="sActive">0</div><div class="stat-label">طالبات نشطات</div></div>
-      <div class="stat-card"><div class="stat-num" id="sTotal">0</div><div class="stat-label">الإجمالي</div></div>
-    </div>
-
-    <div class="section">
-      <div class="section-head">
-        <div class="section-head-title"><i class="ti ti-user-check"></i> طالبات متين — بانتظار الموافقة</div>
-      </div>
-      <div id="pendingContainer"><div class="empty-state"><i class="ti ti-loader spin"></i></div></div>
-    </div>
-
-    <div class="section">
-      <div class="section-head">
-        <div class="section-head-title"><i class="ti ti-users"></i> جميع طالبات متين</div>
-      </div>
-      <div id="allContainer"><div class="empty-state"><i class="ti ti-loader spin"></i></div></div>
-    </div>
-  </div>
+<a class="nav-logo" href="#">
+<div class="logo-circle"><img alt="متين" src="../logo.png" style="width:100%;height:100%;border-radius:50%;object-fit:cover;"/></div>
+<div><div class="nav-brand">برنامج متين العلمي</div><div class="nav-tagline">نحو بناء علميٍّ متين</div></div>
+</a>
+<div class="nav-btns">
+<div class="nav-user"><i class="ti ti-shield"></i><span class="nav-user-name" id="navUserName">مشرفة</span></div>
+<button class="btn-logout" onclick="doLogout()"><i class="ti ti-logout"></i> خروج</button>
 </div>
-
+</nav>
+<div id="authGate"><i class="ti ti-loader spin"></i><p>جارٍ التحقق من الصلاحيات...</p></div>
+<div id="mainContent" style="display:none; flex-direction:column; flex:1;">
+<div class="hero">
+<div class="hero-badge">🛡️ لوحة المشرفة</div>
+<h1>إدارة طالبات متين</h1>
+<p>مراجعة الحسابات الجديدة وإدارة الطالبات</p>
+</div>
+<div class="container">
+<div class="stats-row">
+<div class="stat-card"><div class="stat-num" id="sPending">0</div><div class="stat-label">بانتظار الموافقة</div></div>
+<div class="stat-card"><div class="stat-num" id="sActive">0</div><div class="stat-label">طالبات نشطات</div></div>
+<div class="stat-card"><div class="stat-num" id="sTotal">0</div><div class="stat-label">الإجمالي</div></div>
+</div>
+<div class="section">
+<div class="section-head">
+<div class="section-head-title"><i class="ti ti-user-check"></i> طالبات متين — بانتظار الموافقة</div>
+</div>
+<div id="pendingContainer"><div class="empty-state"><i class="ti ti-loader spin"></i></div></div>
+</div>
+<div class="section">
+<div class="section-head">
+<div class="section-head-title"><i class="ti ti-users"></i> جميع طالبات متين</div>
+</div>
+<div id="allContainer"><div class="empty-state"><i class="ti ti-loader spin"></i></div></div>
+</div>
+</div>
+</div>
 <div class="toast" id="toast"></div>
-
-<script type="module" src="../js/supervisor-1.js"></script>
+<script src="../js/supervisor-1.js" type="module"></script>
 </body>
 </html>

@@ -6,7 +6,7 @@ import { getFirestore, doc, getDoc, collection, onSnapshot, query, orderBy, dele
 import { getAuth, onAuthStateChanged, signOut,
          EmailAuthProvider, reauthenticateWithCredential, deleteUser }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
-import { FIREBASE_CONFIG } from "./config.js";
+import { FIREBASE_CONFIG } from "./js/config.js";
 
 const app  = initializeApp(FIREBASE_CONFIG);
 const db   = getFirestore(app);
@@ -24,9 +24,6 @@ onAuthStateChanged(auth, async user => {
   const role     = userSnap.exists() ? userSnap.data().role : null;
 
   if (!role) { window.location.href = 'login.html'; return; }
-
-  // المعلمة لا تقدر تشوف ملفات الطالبات
-  if (role === 'teacher') { window.location.href = 'home.html'; return; }
 
   document.getElementById('authGate').style.display    = 'none';
   document.getElementById('mainContent').style.display = 'block';

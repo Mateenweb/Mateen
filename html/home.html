@@ -1,244 +1,212 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+
+<html dir="rtl" lang="ar">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>برنامج متين العلمي — الصفحة الرئيسية</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;500;600;700&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.42.0/dist/tabler-icons.min.css">
-  <link rel="stylesheet" href="../css/shared.css">
-  <link rel="stylesheet" href="../css/home.css">
-  <link rel="stylesheet" href="../css/islamic.css">
-  <link rel="stylesheet" href="../css/mobile.css">
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>برنامج متين العلمي — الصفحة الرئيسية</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;500;600;700&amp;family=Amiri:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.42.0/dist/tabler-icons.min.css" rel="stylesheet"/>
+<link href="../css/shared.css" rel="stylesheet"/>
+<link href="../css/home.css" rel="stylesheet"/>
+<link href="../css/islamic.css" rel="stylesheet"/>
+<link href="../css/mobile.css" rel="stylesheet"/>
 </head>
 <body>
 <!-- BASMALA -->
 <div class="basmala-bar"><span class="bsm-ornament">❦</span>بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ<span class="bsm-ornament">❦</span></div>
-
 <!-- NAVBAR -->
 <nav>
-  <div class="nav-logo">
-    <div class="logo-circle"><img src="../logo.png" alt="متين" style="width:100%;height:100%;border-radius:50%;object-fit:cover;"></div>
-    <div>
-      <div class="nav-brand">برنامج متين العلمي</div>
-      <div class="nav-tagline">نحو بناء علميٍّ متين</div>
-    </div>
-  </div>
-  <ul class="nav-links">
-    <li><a href="home.html" class="active">الرئيسية</a></li>
-    <li><a href="about.html">عن البرنامج</a></li>
-    <li><a href="courses.html">المسارات العلمية</a></li>
-    <li><a href="library.html">المكتبة</a></li>
-    <li><a href="news.html">الأخبار</a></li>
-    <li><a href="#contact">تواصل معنا</a></li>
-    <li class="mob-nav-divider"></li>
-    <li class="mob-nav-btns">
-      <a href="login.html" class="mob-login-btn"><i class="ti ti-login"></i> تسجيل الدخول</a>
-      <button class="mob-reg-btn" onclick="document.querySelector('.nav-links').classList.remove('open');document.getElementById('reg-modal').classList.add('open')">
-        <i class="ti ti-user-plus"></i> التسجيل في البرنامج
+<div class="nav-logo">
+<div class="logo-circle"><img alt="متين" src="../logo.png" style="width:100%;height:100%;border-radius:50%;object-fit:cover;"/></div>
+<div>
+<div class="nav-brand">برنامج متين العلمي</div>
+<div class="nav-tagline">نحو بناء علميٍّ متين</div>
+</div>
+</div>
+<ul class="nav-links">
+<li><a class="active" href="home.html">الرئيسية</a></li>
+<li><a href="about.html">عن البرنامج</a></li>
+<li><a href="courses.html">المسارات العلمية</a></li>
+<li><a href="library.html">المكتبة</a></li>
+<li><a href="news.html">الأخبار</a></li>
+<li><a href="#contact">تواصل معنا</a></li>
+<li class="mob-nav-divider"></li>
+<li class="mob-nav-btns">
+<a class="mob-login-btn" href="login.html"><i class="ti ti-login"></i> تسجيل الدخول</a>
+<button class="mob-reg-btn" onclick="document.querySelector('.nav-links').classList.remove('open');document.getElementById('reg-modal').classList.add('open')">
+<i class="ti ti-user-plus"></i> التسجيل في البرنامج
       </button>
-    </li>
-  </ul>
-  <div class="nav-btns">
-    <a href="admin.html" class="btn-admin"><i class="ti ti-dashboard"></i> لوحة الإدارة</a>
-    <a href="login.html" class="btn-outline"><i class="ti ti-user"></i> تسجيل الدخول</a>
-    <button class="btn-solid" onclick="document.getElementById('reg-modal').classList.add('open')">التسجيل في البرنامج</button>
-  </div>
-  <button class="nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')">
-    <i class="ti ti-menu-2"></i>
-  </button>
+</li>
+</ul>
+<div class="nav-btns">
+<a class="btn-admin" href="login.html"><i class="ti ti-dashboard"></i> لوحة الإدارة</a>
+<a class="btn-outline" href="login.html"><i class="ti ti-user"></i> تسجيل الدخول</a>
+<button class="btn-solid" onclick="document.getElementById('reg-modal').classList.add('open')">التسجيل في البرنامج</button>
+</div>
+<button class="nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')">
+<i class="ti ti-menu-2"></i>
+</button>
 </nav>
-
 <!-- MAIN LAYOUT -->
 <div class="main-wrap">
-
-  <!-- LEFT CONTENT -->
-  <div class="content-area">
-
-    <!-- HERO -->
-    <div class="hero">
-      <div class="hero-text">
-        <img src="../logo.png" alt="متين" class="hero-logo-mobile" style="width:90px;height:90px;border-radius:50%;object-fit:cover;border:3px solid var(--gold);box-shadow:0 4px 20px rgba(0,0,0,0.3);margin-bottom:12px;">
-        <div style="color:rgba(255,255,255,0.6);font-size:13px;margin-bottom:4px">برنامج</div>
-        <h1>متين العلمي</h1>
-        <h2>نحو بناء علميٍّ متين</h2>
-        <p>يجمع بين الحفظ والفهم والعمل</p>
-        <div class="hero-btns" id="heroBtns">
-          <a href="login.html" class="hero-btn-gold">تسجيل الدخول</a>
-          <button class="hero-btn-white" onclick="document.getElementById('reg-modal').classList.add('open')">إنشاء حساب ←</button>
-        </div>
-      </div>
-      <div class="hero-img">
-        <div class="hero-img-inner">
-          <img src="../logo.png" alt="متين العلمي" style="width:130px;height:130px;border-radius:50%;object-fit:cover;border:3px solid var(--gold);box-shadow:0 4px 24px rgba(0,0,0,0.25);">
-          <div style="color:rgba(201,162,39,0.85);font-size:11px;font-family:Amiri,serif;font-weight:700;text-align:center;margin-top:6px">برنامج متين العلمي</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- PATHS -->
-    <div class="section" style="background:var(--white)">
-      <div class="section-title">المسارات العلمية</div>
-      <div class="paths-grid">
-        <div class="path-card">
-          <div class="path-icon">📖</div>
-          <div class="path-name">القرآن الكريم</div>
-          <button class="path-btn">عرض التفاصيل</button>
-        </div>
-        <div class="path-card">
-          <div class="path-icon">📝</div>
-          <div class="path-name">المتون العلمية</div>
-          <button class="path-btn">عرض التفاصيل</button>
-        </div>
-        <div class="path-card">
-          <div class="path-icon">✍️</div>
-          <div class="path-name">اللغة العربية</div>
-          <button class="path-btn">عرض التفاصيل</button>
-        </div>
-        <div class="path-card">
-          <div class="path-icon">🎓</div>
-          <div class="path-name">الدورات التأهيلية</div>
-          <button class="path-btn">عرض التفاصيل</button>
-        </div>
-        <div class="path-card">
-          <div class="path-icon">🌱</div>
-          <div class="path-name">البرامج التربوية</div>
-          <button class="path-btn">عرض التفاصيل</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- STATS BAR -->
-    
+<!-- LEFT CONTENT -->
+<div class="content-area">
+<!-- HERO -->
+<div class="hero">
+<div class="hero-text">
+<img alt="متين" class="hero-logo-mobile" src="../logo.png" style="width:90px;height:90px;border-radius:50%;object-fit:cover;border:3px solid var(--gold);box-shadow:0 4px 20px rgba(0,0,0,0.3);margin-bottom:12px;"/>
+<div style="color:rgba(255,255,255,0.6);font-size:13px;margin-bottom:4px">برنامج</div>
+<h1>متين العلمي</h1>
+<h2>نحو بناء علميٍّ متين</h2>
+<p>يجمع بين الحفظ والفهم والعمل</p>
+<div class="hero-btns" id="heroBtns">
+<a class="hero-btn-gold" href="login.html">تسجيل الدخول</a>
+<button class="hero-btn-white" onclick="document.getElementById('reg-modal').classList.add('open')">إنشاء حساب ←</button>
+</div>
+</div>
+<div class="hero-img">
+<div class="hero-img-inner">
+<img alt="متين العلمي" src="../logo.png" style="width:130px;height:130px;border-radius:50%;object-fit:cover;border:3px solid var(--gold);box-shadow:0 4px 24px rgba(0,0,0,0.25);"/>
+<div style="color:rgba(201,162,39,0.85);font-size:11px;font-family:Amiri,serif;font-weight:700;text-align:center;margin-top:6px">برنامج متين العلمي</div>
+</div>
+</div>
+</div>
+<!-- PATHS -->
+<div class="section" style="background:var(--white)">
+<div class="section-title">المسارات العلمية</div>
+<div class="paths-grid">
+<div class="path-card">
+<div class="path-icon">📖</div>
+<div class="path-name">القرآن الكريم</div>
+<button class="path-btn">عرض التفاصيل</button>
+</div>
+<div class="path-card">
+<div class="path-icon">📝</div>
+<div class="path-name">المتون العلمية</div>
+<button class="path-btn">عرض التفاصيل</button>
+</div>
+<div class="path-card">
+<div class="path-icon">✍️</div>
+<div class="path-name">اللغة العربية</div>
+<button class="path-btn">عرض التفاصيل</button>
+</div>
+<div class="path-card">
+<div class="path-icon">🎓</div>
+<div class="path-name">الدورات التأهيلية</div>
+<button class="path-btn">عرض التفاصيل</button>
+</div>
+<div class="path-card">
+<div class="path-icon">🌱</div>
+<div class="path-name">البرامج التربوية</div>
+<button class="path-btn">عرض التفاصيل</button>
+</div>
+</div>
+</div>
+<!-- STATS BAR -->
 <div class="islamic-divider"><span>✦ ❧ ✦</span></div>
 <div class="stats-bar">
-      <div class="stat-item">
-        <div class="stat-icon">👩‍🎓</div>
-        <div class="stat-num">4,256</div>
-        <div class="stat-label">الطالبات</div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-icon">👩‍🏫</div>
-        <div class="stat-num">128</div>
-        <div class="stat-label">المعلمات</div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-icon">🎓</div>
-        <div class="stat-num">1,890</div>
-        <div class="stat-label">الخريجات</div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-icon">📚</div>
-        <div class="stat-num">78</div>
-        <div class="stat-label">الدورات المنجزة</div>
-      </div>
-    </div>
-
-    <!-- ANNOUNCEMENTS -->
-    
+<div class="stat-item">
+<div class="stat-icon">👩‍🎓</div>
+<div class="stat-num">4,256</div>
+<div class="stat-label">الطالبات</div>
+</div>
+<div class="stat-item">
+<div class="stat-icon">👩‍🏫</div>
+<div class="stat-num">128</div>
+<div class="stat-label">المعلمات</div>
+</div>
+<div class="stat-item">
+<div class="stat-icon">🎓</div>
+<div class="stat-num">1,890</div>
+<div class="stat-label">الخريجات</div>
+</div>
+<div class="stat-item">
+<div class="stat-icon">📚</div>
+<div class="stat-num">78</div>
+<div class="stat-label">الدورات المنجزة</div>
+</div>
+</div>
+<!-- ANNOUNCEMENTS -->
 <div class="islamic-divider"><span>✦ ❧ ✦</span></div>
 <div class="section ann-section">
-      <div class="section-title">آخر الإعلانات</div>
-      <div class="ann-grid">
-        <div class="ann-card">
-          <h4>فتح التسجيل</h4>
-          <p>تم فتح التسجيل في المستوى الأول للعام الدراسي القادم</p>
-          <div class="ann-date"><i class="ti ti-calendar"></i> 1445/11/15 هـ</div>
-        </div>
-        <div class="ann-card">
-          <h4>الاختبارات الشهرية</h4>
-          <p>تبدأ الاختبارات الشهرية الأسبوع القادم لجميع المستويات</p>
-          <div class="ann-date"><i class="ti ti-calendar"></i> 1445/11/18 هـ</div>
-        </div>
-        <div class="ann-card">
-          <h4>اللقاء العلمي الشهري</h4>
-          <p>لقاء علمي مفتوح مع مشايخ البرنامج - السبت القادم</p>
-          <div class="ann-date"><i class="ti ti-calendar"></i> 1445/11/20 هـ</div>
-        </div>
-        <div class="ann-img">
-          <span>📜</span>
-          <p>برنامج متين</p>
-        </div>
-      </div>
-      <button class="view-all-btn">عرض جميع الإعلانات</button>
-    </div>
-
-  </div><!-- end content -->
-
-  <!-- SIDEBAR -->
-  <div class="sidebar">
-
-    <!-- ══ حالتان: قبل الدخول / بعد الدخول ══ -->
-
-    <!-- [ حالة: غير مسجلة دخول ] -->
-    <div id="sidebar-guest">
-      <div class="sidebar-guest-logo">
-        <img src="../logo.png" alt="متين" style="width:52px;height:52px;border-radius:50%;object-fit:cover;border:2px solid var(--gold);">
-        <div style="font-family:Amiri,serif;color:var(--gold-light);font-size:15px;font-weight:700;margin-top:8px">برنامج متين العلمي</div>
-        <div style="color:rgba(255,255,255,0.55);font-size:11px;margin-top:2px">نحو بناء علميٍّ متين</div>
-      </div>
-      <div class="sidebar-divider"></div>
-      <div style="padding:0 14px 16px;display:flex;flex-direction:column;gap:8px">
-        <a href="login.html" class="sidebar-login-btn"><i class="ti ti-login"></i> تسجيل الدخول</a>
-        <button class="sidebar-reg-btn" onclick="document.getElementById('reg-modal').classList.add('open')"><i class="ti ti-user-plus"></i> التسجيل في البرنامج</button>
-      </div>
-      <div class="sidebar-divider"></div>
-      <div class="sidebar-nav">
-        <a href="home.html" class="active"><i class="ti ti-home"></i> الرئيسية</a>
-        <a href="about.html"><i class="ti ti-info-circle"></i> عن البرنامج</a>
-        <a href="courses.html"><i class="ti ti-books"></i> المسارات العلمية</a>
-        <a href="library.html"><i class="ti ti-library"></i> المكتبة</a>
-        <a href="news.html"><i class="ti ti-speakerphone"></i> الأخبار</a>
-        <a href="#contact"><i class="ti ti-headset"></i> تواصل معنا</a>
-      </div>
-    </div>
-
-    <!-- [ حالة: مسجلة دخول ] — مخفي افتراضياً، يظهر عبر JS -->
-    <div id="sidebar-user" style="display:none">
-
-      <!-- رأس الجانب: بيانات الطالبة -->
-      <div class="sidebar-header">
-        <div class="sidebar-avatar" id="sidebarAvatar">👩</div>
-        <div class="user-info">
-          <div class="user-name" id="sidebarName">...</div>
-          <div class="user-role" id="sidebarRole">الطالبة</div>
-        </div>
-      </div>
-
-      <div class="sidebar-divider"></div>
-
-      <!-- روابط الطالبة -->
-      <div class="sidebar-nav">
-        <a href="home.html" class="active"><i class="ti ti-home"></i> الرئيسية</a>
-        <div id="studentLinks" style="display:none">
-          <a href="student.html" id="profileLink"><i class="ti ti-user"></i> ملفي الشخصي</a>
-          <a href="#"><i class="ti ti-certificate"></i> شهاداتي</a>
-          <a href="#"><i class="ti ti-award"></i> إجازاتي</a>
-          <a href="#"><i class="ti ti-chart-bar"></i> درجاتي</a>
-          <a href="#"><i class="ti ti-calendar"></i> جدولي الدراسي</a>
-          <a href="#"><i class="ti ti-checks"></i> حضوري وغيابي</a>
-          <a href="#"><i class="ti ti-library"></i> المكتبة العلمية</a>
-          <a href="#"><i class="ti ti-speakerphone"></i> الإعلانات</a>
-        </div>
-        <div id="teacherLinks" style="display:none">
-          <a href="teacher-profile.html"><i class="ti ti-user"></i> ملفي الشخصي</a>
-          <a href="teacher-schedule.html"><i class="ti ti-calendar"></i> جدولي الدراسي</a>
-          <a href="teacher-library.html"><i class="ti ti-library"></i> مكتبتي العلمية</a>
-          <a href="#" id="myPageLink"><i class="ti ti-layout"></i> صفحة مادتي</a>
-        </div>
-        <div id="supervisorLinks" style="display:none">
-          <a href="supervisor.html"><i class="ti ti-layout-dashboard"></i> لوحة المشرفة</a>
-          <a href="admin.html"><i class="ti ti-shield"></i> لوحة الإدارة</a>
-          <a href="messages.html"><i class="ti ti-message"></i> الرسائل</a>
-        </div>
-        <a href="messages.html" id="messagesLink" style="display:none"><i class="ti ti-message"></i> الرسائل</a>
-      </div>
-
-      <div class="sidebar-divider"></div>
-
-      <!--
+<div class="section-title">آخر الإعلانات</div>
+<div class="ann-grid">
+<div class="ann-card">
+<h4>فتح التسجيل</h4>
+<p>تم فتح التسجيل في المستوى الأول للعام الدراسي القادم</p>
+<div class="ann-date"><i class="ti ti-calendar"></i> 1445/11/15 هـ</div>
+</div>
+<div class="ann-card">
+<h4>الاختبارات الشهرية</h4>
+<p>تبدأ الاختبارات الشهرية الأسبوع القادم لجميع المستويات</p>
+<div class="ann-date"><i class="ti ti-calendar"></i> 1445/11/18 هـ</div>
+</div>
+<div class="ann-card">
+<h4>اللقاء العلمي الشهري</h4>
+<p>لقاء علمي مفتوح مع مشايخ البرنامج - السبت القادم</p>
+<div class="ann-date"><i class="ti ti-calendar"></i> 1445/11/20 هـ</div>
+</div>
+<div class="ann-img">
+<span>📜</span>
+<p>برنامج متين</p>
+</div>
+</div>
+<button class="view-all-btn">عرض جميع الإعلانات</button>
+</div>
+</div><!-- end content -->
+<!-- SIDEBAR -->
+<div class="sidebar">
+<!-- ══ حالتان: قبل الدخول / بعد الدخول ══ -->
+<!-- [ حالة: غير مسجلة دخول ] -->
+<div id="sidebar-guest">
+<div class="sidebar-guest-logo">
+<img alt="متين" src="../logo.png" style="width:52px;height:52px;border-radius:50%;object-fit:cover;border:2px solid var(--gold);"/>
+<div style="font-family:Amiri,serif;color:var(--gold-light);font-size:15px;font-weight:700;margin-top:8px">برنامج متين العلمي</div>
+<div style="color:rgba(255,255,255,0.55);font-size:11px;margin-top:2px">نحو بناء علميٍّ متين</div>
+</div>
+<div class="sidebar-divider"></div>
+<div style="padding:0 14px 16px;display:flex;flex-direction:column;gap:8px">
+<a class="sidebar-login-btn" href="login.html"><i class="ti ti-login"></i> تسجيل الدخول</a>
+<button class="sidebar-reg-btn" onclick="document.getElementById('reg-modal').classList.add('open')"><i class="ti ti-user-plus"></i> التسجيل في البرنامج</button>
+</div>
+<div class="sidebar-divider"></div>
+<div class="sidebar-nav">
+<a class="active" href="home.html"><i class="ti ti-home"></i> الرئيسية</a>
+<a href="about.html"><i class="ti ti-info-circle"></i> عن البرنامج</a>
+<a href="courses.html"><i class="ti ti-books"></i> المسارات العلمية</a>
+<a href="library.html"><i class="ti ti-library"></i> المكتبة</a>
+<a href="news.html"><i class="ti ti-speakerphone"></i> الأخبار</a>
+<a href="#contact"><i class="ti ti-headset"></i> تواصل معنا</a>
+</div>
+</div>
+<!-- [ حالة: مسجلة دخول ] — مخفي افتراضياً، يظهر عبر JS -->
+<div id="sidebar-user" style="display:none">
+<!-- رأس الجانب: بيانات الطالبة -->
+<div class="sidebar-header">
+<div class="sidebar-avatar" id="sidebarAvatar">👩</div>
+<div class="user-info">
+<div class="user-name" id="sidebarName">...</div>
+<div class="user-role" id="sidebarRole">الطالبة</div>
+</div>
+</div>
+<div class="sidebar-divider"></div>
+<!-- روابط الطالبة -->
+<div class="sidebar-nav">
+<a class="active" href="home.html"><i class="ti ti-home"></i> الرئيسية</a>
+<a href="student.html" id="profileLink"><i class="ti ti-user"></i> ملفي الشخصي</a>
+<a href="#"><i class="ti ti-certificate"></i> شهاداتي</a>
+<a href="#"><i class="ti ti-award"></i> إجازاتي</a>
+<a href="#"><i class="ti ti-chart-bar"></i> درجاتي</a>
+<a href="#"><i class="ti ti-calendar"></i> جدولي الدراسي</a>
+<a href="#"><i class="ti ti-checks"></i> حضوري وغيابي</a>
+<a href="#"><i class="ti ti-library"></i> المكتبة العلمية</a>
+<a href="#"><i class="ti ti-speakerphone"></i> الإعلانات</a>
+</div>
+<div class="sidebar-divider"></div>
+<!--
       ══════════════════════════════════════
       [ قسم مخفي مؤقتاً — نظرة عامة ]
       ══════════════════════════════════════
@@ -341,213 +309,205 @@
       <div class="sidebar-divider"></div>
       ══════════════════════════════════════
       -->
-
-      <!-- زر الخروج -->
-      <div style="padding:8px 14px 16px">
-        <button class="sidebar-logout-btn" onclick="doLogout()">
-          <i class="ti ti-logout"></i> تسجيل الخروج
+<!-- زر الخروج -->
+<div style="padding:8px 14px 16px">
+<button class="sidebar-logout-btn" onclick="doLogout()">
+<i class="ti ti-logout"></i> تسجيل الخروج
         </button>
-      </div>
-
-    </div><!-- end sidebar-user -->
-
-    <div class="sidebar-logo">
-      <img src="../logo.png" alt="متين" style="width:42px;height:42px;border-radius:50%;object-fit:cover;border:1.5px solid var(--gold);background:#fff;">
-      <div class="sidebar-logo-text">متين العلمي</div>
-    </div>
-  </div><!-- end sidebar -->
-
+</div>
+</div><!-- end sidebar-user -->
+<div class="sidebar-logo">
+<img alt="متين" src="../logo.png" style="width:42px;height:42px;border-radius:50%;object-fit:cover;border:1.5px solid var(--gold);background:#fff;"/>
+<div class="sidebar-logo-text">متين العلمي</div>
+</div>
+</div><!-- end sidebar -->
 </div><!-- end main -->
-
 <!-- CONTACT SECTION -->
-<section id="contact" class="contact-section">
-  <div class="contact-wrap">
-    <div class="contact-header">
-      <div class="hero-badge">📬 تواصلي معنا</div>
-      <h2>نسعد بتواصلك</h2>
-      <p>هل لديكِ سؤال أو استفسار؟ تواصلي معنا وسنرد عليكِ في أقرب وقت</p>
-    </div>
-
-    <div class="contact-grid">
-      <!-- Contact Info -->
-      <div class="contact-info">
-        <div class="contact-card">
-          <div class="contact-icon"><i class="ti ti-brand-telegram"></i></div>
-          <div>
-            <div class="contact-label">قناة تيليغرام</div>
-            <a href="#" class="contact-val">@mateen_program</a>
-          </div>
-        </div>
-        <div class="contact-card">
-          <div class="contact-icon"><i class="ti ti-brand-whatsapp"></i></div>
-          <div>
-            <div class="contact-label">واتساب</div>
-            <a href="#" class="contact-val">+966 5X XXX XXXX</a>
-          </div>
-        </div>
-        <div class="contact-card">
-          <div class="contact-icon"><i class="ti ti-clock"></i></div>
-          <div>
-            <div class="contact-label">أوقات الرد</div>
-            <div class="contact-val">الأحد — الخميس، ٩ص — ٩م</div>
-          </div>
-        </div>
-        <div class="contact-card" style="border:1px solid rgba(201,162,39,0.3);background:rgba(201,162,39,0.05)">
-          <div class="contact-icon" style="background:rgba(201,162,39,0.15)"><i class="ti ti-users" style="color:var(--gold)"></i></div>
-          <div>
-            <div class="contact-label">تواصل مع المعلمات</div>
-            <a href="teachers.html" class="contact-val" style="color:var(--gold)">عرض صفحات المعلمات ←</a>
-          </div>
-        </div>
-      </div>
-
-      <!-- Contact Form -->
-      <div class="contact-form-wrap">
-        <div class="contact-form-title">أرسلي رسالتك</div>
-        <div class="contact-form">
-          <div class="form-row">
-            <div class="form-group">
-              <label>اسمك الكريم</label>
-              <input type="text" id="ctName" placeholder="اسمك الكريم" class="form-input">
-            </div>
-            <div class="form-group">
-              <label>رقم الجوال</label>
-              <input type="text" id="ctPhone" placeholder="05XXXXXXXX" class="form-input" dir="ltr">
-            </div>
-          </div>
-          <div class="form-group">
-            <label>إلى من تودّين إرسال الرسالة؟</label>
-            <select id="ctRecipient" class="form-input">
-              <option value="">اختاري الجهة</option>
-              <optgroup label="── الإدارة ──">
-                <option value="admin">الإدارة العامة</option>
-              </optgroup>
-              <optgroup label="── المعلمات ──">
-                <option value="tafseer">معلمة التفسير</option>
-                <option value="fiqh">معلمة الفقه</option>
-                <option value="aqeedah">معلمة العقيدة</option>
-                <option value="hadeeth">معلمة الحديث</option>
-                <option value="quran1">معلمة القرآن الأولى</option>
-                <option value="quran2">معلمة القرآن الثانية</option>
-              </optgroup>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>موضوع الرسالة</label>
-            <select id="ctTopic" class="form-input">
-              <option value="">اختاري الموضوع</option>
-              <option>سؤال علمي</option>
-              <option>استفسار عن التسجيل</option>
-              <option>استفسار عن الجدول</option>
-              <option>غياب أو عذر</option>
-              <option>مشكلة تقنية</option>
-              <option>اقتراح</option>
-              <option>أخرى</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>الرسالة</label>
-            <textarea id="ctBody" placeholder="اكتبي رسالتك هنا..." class="form-input form-textarea"></textarea>
-          </div>
-          <div id="ctSuccess" style="display:none;background:rgba(45,110,69,0.08);border:1px solid rgba(45,110,69,0.25);border-radius:8px;padding:10px 14px;font-size:13px;color:var(--green-dark);margin-bottom:4px">
+<section class="contact-section" id="contact">
+<div class="contact-wrap">
+<div class="contact-header">
+<div class="hero-badge">📬 تواصلي معنا</div>
+<h2>نسعد بتواصلك</h2>
+<p>هل لديكِ سؤال أو استفسار؟ تواصلي معنا وسنرد عليكِ في أقرب وقت</p>
+</div>
+<div class="contact-grid">
+<!-- Contact Info -->
+<div class="contact-info">
+<div class="contact-card">
+<div class="contact-icon"><i class="ti ti-brand-telegram"></i></div>
+<div>
+<div class="contact-label">قناة تيليغرام</div>
+<a class="contact-val" href="#">@mateen_program</a>
+</div>
+</div>
+<div class="contact-card">
+<div class="contact-icon"><i class="ti ti-brand-whatsapp"></i></div>
+<div>
+<div class="contact-label">واتساب</div>
+<a class="contact-val" href="#">+966 5X XXX XXXX</a>
+</div>
+</div>
+<div class="contact-card">
+<div class="contact-icon"><i class="ti ti-clock"></i></div>
+<div>
+<div class="contact-label">أوقات الرد</div>
+<div class="contact-val">الأحد — الخميس، ٩ص — ٩م</div>
+</div>
+</div>
+<div class="contact-card" style="border:1px solid rgba(201,162,39,0.3);background:rgba(201,162,39,0.05)">
+<div class="contact-icon" style="background:rgba(201,162,39,0.15)"><i class="ti ti-users" style="color:var(--gold)"></i></div>
+<div>
+<div class="contact-label">تواصل مع المعلمات</div>
+<a class="contact-val" href="teachers.html" style="color:var(--gold)">عرض صفحات المعلمات ←</a>
+</div>
+</div>
+</div>
+<!-- Contact Form -->
+<div class="contact-form-wrap">
+<div class="contact-form-title">أرسلي رسالتك</div>
+<div class="contact-form">
+<div class="form-row">
+<div class="form-group">
+<label>اسمك الكريم</label>
+<input class="form-input" id="ctName" placeholder="اسمك الكريم" type="text"/>
+</div>
+<div class="form-group">
+<label>رقم الجوال</label>
+<input class="form-input" dir="ltr" id="ctPhone" placeholder="05XXXXXXXX" type="text"/>
+</div>
+</div>
+<div class="form-group">
+<label>إلى من تودّين إرسال الرسالة؟</label>
+<select class="form-input" id="ctRecipient">
+<option value="">اختاري الجهة</option>
+<optgroup label="── الإدارة ──">
+<option value="admin">الإدارة العامة</option>
+</optgroup>
+<optgroup label="── المعلمات ──">
+<option value="tafseer">معلمة التفسير</option>
+<option value="fiqh">معلمة الفقه</option>
+<option value="aqeedah">معلمة العقيدة</option>
+<option value="hadeeth">معلمة الحديث</option>
+<option value="seera">معلمة السيرة النبوية</option>
+<option value="nahw">معلمة النحو والصرف</option>
+<option value="tajweed">معلمة التجويد والتلاوة</option>
+<option value="mutoon">معلمة المتون العلمية</option>
+<option value="quran1">معلمة القرآن الأولى</option>
+<option value="quran2">معلمة القرآن الثانية</option>
+<option value="tarbawi">معلمة البرامج التربوية</option>
+</optgroup>
+</select>
+</div>
+<div class="form-group">
+<label>موضوع الرسالة</label>
+<select class="form-input" id="ctTopic">
+<option value="">اختاري الموضوع</option>
+<option>سؤال علمي</option>
+<option>استفسار عن التسجيل</option>
+<option>استفسار عن الجدول</option>
+<option>غياب أو عذر</option>
+<option>مشكلة تقنية</option>
+<option>اقتراح</option>
+<option>أخرى</option>
+</select>
+</div>
+<div class="form-group">
+<label>الرسالة</label>
+<textarea class="form-input form-textarea" id="ctBody" placeholder="اكتبي رسالتك هنا..."></textarea>
+</div>
+<div id="ctSuccess" style="display:none;background:rgba(45,110,69,0.08);border:1px solid rgba(45,110,69,0.25);border-radius:8px;padding:10px 14px;font-size:13px;color:var(--green-dark);margin-bottom:4px">
             ✅ تم إرسال رسالتك بنجاح!
           </div>
-          <button class="contact-submit" id="ctBtn" onclick="submitContactNew()">
-            <i class="ti ti-send"></i> إرسال الرسالة
+<button class="contact-submit" id="ctBtn" onclick="submitContactNew()">
+<i class="ti ti-send"></i> إرسال الرسالة
           </button>
-        </div>
-      </div>
-    </div>
-  </div>
+</div>
+</div>
+</div>
+</div>
 </section>
-
 <!-- FOOTER -->
 <!-- AYA BANNER -->
 <div class="aya-banner">
-  <span class="aya-text">﴿ وَتَعَاوَنُوا عَلَى الْبِرِّ وَالتَّقْوَىٰ ﴾</span>
-  <span class="aya-ref">سورة المائدة: ٢</span>
+<span class="aya-text">﴿ وَتَعَاوَنُوا عَلَى الْبِرِّ وَالتَّقْوَىٰ ﴾</span>
+<span class="aya-ref">سورة المائدة: ٢</span>
 </div>
-
 <footer>
-  <div class="footer-logo">
-    <img src="../logo.png" alt="متين" style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:1.5px solid var(--gold);background:#fff;">
-    <span style="color:rgba(255,255,255,0.8);font-family:Amiri,serif;font-size:15px">متين العلمي</span>
-  </div>
-  <div class="footer-dua">اللهم علمنا ما ينفعنا وانفعنا بما علمتنا وزدنا علماً</div>
-  <div class="footer-social">
-    <a href="#"><i class="ti ti-brand-telegram"></i></a>
-    <a href="#"><i class="ti ti-brand-twitter"></i></a>
-    <a href="#"><i class="ti ti-brand-instagram"></i></a>
-    <a href="#"><i class="ti ti-brand-youtube"></i></a>
-  </div>
+<div class="footer-logo">
+<img alt="متين" src="../logo.png" style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:1.5px solid var(--gold);background:#fff;"/>
+<span style="color:rgba(255,255,255,0.8);font-family:Amiri,serif;font-size:15px">متين العلمي</span>
+</div>
+<div class="footer-dua">اللهم علمنا ما ينفعنا وانفعنا بما علمتنا وزدنا علماً</div>
+<div class="footer-social">
+<a href="#"><i class="ti ti-brand-telegram"></i></a>
+<a href="#"><i class="ti ti-brand-twitter"></i></a>
+<a href="#"><i class="ti ti-brand-instagram"></i></a>
+<a href="#"><i class="ti ti-brand-youtube"></i></a>
+</div>
 </footer>
-
-<script type="module" src="../js/home-1.js"></script>
-
-<script type="module" src="../js/home-2.js"></script>
-
+<script src="../js/home-1.js" type="module"></script>
+<script src="../js/home-2.js" type="module"></script>
 <script src="../js/home-3.js"></script>
-
 <!-- REGISTRATION MODAL -->
-<div id="reg-modal" class="reg-modal-overlay" onclick="if(event.target===this)this.classList.remove('open')">
-  <div class="reg-modal-box">
-    <div class="reg-modal-header">
-      <div>
-        <div class="hero-badge" style="display:inline-block;margin-bottom:6px">📝 طلب تسجيل</div>
-        <h2>التسجيل في برنامج متين العلمي</h2>
-        <p>أدخلي بياناتك وسنتواصل معكِ في أقرب وقت</p>
-      </div>
-      <button class="reg-close" onclick="document.getElementById('reg-modal').classList.remove('open')"><i class="ti ti-x"></i></button>
-    </div>
-    <div class="contact-form" style="padding:0">
-      <div class="form-row">
-        <div class="form-group">
-          <label>الاسم الكامل *</label>
-          <input type="text" placeholder="اسمك الكريم" class="form-input">
-        </div>
-        <div class="form-group">
-          <label>رقم الجوال *</label>
-          <input type="text" placeholder="05XXXXXXXX" class="form-input" dir="ltr">
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>البريد الإلكتروني *</label>
-          <input type="email" placeholder="email@example.com" class="form-input" dir="ltr">
-        </div>
-        <div class="form-group">
-          <label>العمر</label>
-          <input type="number" placeholder="مثال: 22" class="form-input" dir="ltr">
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>المستوى المطلوب *</label>
-          <select class="form-input">
-            <option value="">اختاري المستوى</option>
-            <option>المستوى الأول (مبتدئ)</option>
-            <option>المستوى الثاني</option>
-            <option>المستوى الثالث</option>
-            <option>المستوى الرابع</option>
-            <option>المستوى المتقدم</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>كيف عرفتِ البرنامج؟</label>
-          <select class="form-input">
-            <option value="">اختاري</option>
-            <option>من صديقة أو معارف</option>
-            <option>منصات التواصل الاجتماعي</option>
-            <option>إعلان</option>
-            <option>أخرى</option>
-          </select>
-        </div>
-      </div>
-      <button class="contact-submit" style="width:100%;justify-content:center;margin-top:4px" onclick="submitReg(this)">
-        <i class="ti ti-send"></i> إرسال طلب التسجيل
+<div class="reg-modal-overlay" id="reg-modal" onclick="if(event.target===this)this.classList.remove('open')">
+<div class="reg-modal-box">
+<div class="reg-modal-header">
+<div>
+<div class="hero-badge" style="display:inline-block;margin-bottom:6px">📝 طلب تسجيل</div>
+<h2>التسجيل في برنامج متين العلمي</h2>
+<p>أدخلي بياناتك وسنتواصل معكِ في أقرب وقت</p>
+</div>
+<button class="reg-close" onclick="document.getElementById('reg-modal').classList.remove('open')"><i class="ti ti-x"></i></button>
+</div>
+<div class="contact-form" style="padding:0">
+<div class="form-row">
+<div class="form-group">
+<label>الاسم الكامل *</label>
+<input class="form-input" placeholder="اسمك الكريم" type="text"/>
+</div>
+<div class="form-group">
+<label>رقم الجوال *</label>
+<input class="form-input" dir="ltr" placeholder="05XXXXXXXX" type="text"/>
+</div>
+</div>
+<div class="form-row">
+<div class="form-group">
+<label>البريد الإلكتروني *</label>
+<input class="form-input" dir="ltr" placeholder="email@example.com" type="email"/>
+</div>
+<div class="form-group">
+<label>العمر</label>
+<input class="form-input" dir="ltr" placeholder="مثال: 22" type="number"/>
+</div>
+</div>
+<div class="form-row">
+<div class="form-group">
+<label>المستوى المطلوب *</label>
+<select class="form-input">
+<option value="">اختاري المستوى</option>
+<option>المستوى الأول (مبتدئ)</option>
+<option>المستوى الثاني</option>
+<option>المستوى الثالث</option>
+<option>المستوى الرابع</option>
+<option>المستوى المتقدم</option>
+</select>
+</div>
+<div class="form-group">
+<label>كيف عرفتِ البرنامج؟</label>
+<select class="form-input">
+<option value="">اختاري</option>
+<option>من صديقة أو معارف</option>
+<option>منصات التواصل الاجتماعي</option>
+<option>إعلان</option>
+<option>أخرى</option>
+</select>
+</div>
+</div>
+<button class="contact-submit" onclick="submitReg(this)" style="width:100%;justify-content:center;margin-top:4px">
+<i class="ti ti-send"></i> إرسال طلب التسجيل
       </button>
-    </div>
-  </div>
+</div>
+</div>
 </div>
 <script src="../js/home-4.js"></script>
 </body>
