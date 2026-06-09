@@ -26,6 +26,7 @@ onAuthStateChanged(auth, async user => {
   document.getElementById('mainContent').style.display = 'flex';
   if (role !== 'admin') {
     document.getElementById('studentsSection').style.display = 'none';
+    document.getElementById('allAccountsSection').style.display = 'none';
   } else {
     document.getElementById('pendingSection').style.display = 'block';
     loadPendingAccounts();
