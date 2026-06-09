@@ -37,3 +37,18 @@
     .toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(80px); background:var(--green-dark); color:var(--gold-light); padding:10px 20px; border-radius:8px; font-size:13px; box-shadow:0 4px 16px rgba(0,0,0,0.25); transition:transform .3s; z-index:999; }
     .toast.show { transform:translateX(-50%) translateY(0); }
   
+/* ════════════════════════════════════════
+   MOBILE RESPONSIVE
+   ════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .section { padding: 16px 14px !important; }
+  .stats-bar { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
+  .stat-item { padding: 12px 8px !important; }
+  .cards-grid { grid-template-columns: 1fr !important; }
+  .main-grid { grid-template-columns: 1fr !important; }
+}
+
+@media (max-width: 480px) {
+  .stats-bar { grid-template-columns: 1fr !important; }
+  .section { padding: 12px 12px !important; }
+}
