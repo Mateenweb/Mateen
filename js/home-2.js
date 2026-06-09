@@ -37,13 +37,8 @@ const RECIPIENTS = {
   fiqh:    'معلمة الفقه',
   aqeedah: 'معلمة العقيدة',
   hadeeth: 'معلمة الحديث',
-  seera:   'معلمة السيرة النبوية',
-  nahw:    'معلمة النحو والصرف',
-  tajweed: 'معلمة التجويد',
-  mutoon:  'معلمة المتون',
   quran1:  'معلمة القرآن الأولى',
   quran2:  'معلمة القرآن الثانية',
-  tarbawi: 'معلمة البرامج التربوية',
 };
 
 window.submitContactNew = async () => {
