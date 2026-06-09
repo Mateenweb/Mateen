@@ -467,3 +467,25 @@ footer {
 .aya-banner::after  { color: rgba(92,61,46,0.3) !important; }
 
 /* nav links dropdown موبايل يبقى غامق — ok */
+
+/* ════════════════════════════════════════
+   MOBILE RESPONSIVE — تحسينات إضافية
+   ════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .stat-box { padding: 14px 12px !important; }
+  .stat-number { font-size: 20px !important; }
+  .stat-label { font-size: 12px !important; }
+  
+  .alert, .notification { padding: 12px 14px !important; font-size: 13px !important; }
+  
+  .divider { margin: 12px 0 !important; }
+  
+  .badge { padding: 3px 10px !important; font-size: 11px !important; }
+}
+
+@media (max-width: 480px) {
+  .stat-number { font-size: 18px !important; }
+  .stat-label { font-size: 11px !important; }
+  
+  .alert, .notification { padding: 10px 12px !important; font-size: 12px !important; }
+}
