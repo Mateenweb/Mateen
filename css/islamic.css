@@ -346,3 +346,21 @@ footer::before {
   .aya-banner::after { display: none; }
   footer::before     { font-size: 9px; letter-spacing: 2px; }
 }
+
+/* ════════════════════════════════════════
+   MOBILE RESPONSIVE
+   ════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .islamic-divider { margin: 12px 0 !important; }
+  .islamic-divider span { font-size: 16px !important; letter-spacing: 3px !important; }
+  
+  .aya-banner { padding: 14px 12px !important; margin: 12px 0 !important; }
+  .aya-text { font-size: 15px !important; line-height: 1.6 !important; }
+  .aya-source { font-size: 11px !important; }
+}
+
+@media (max-width: 480px) {
+  .islamic-divider span { font-size: 14px !important; letter-spacing: 2px !important; }
+  .aya-text { font-size: 13px !important; }
+  .aya-source { font-size: 10px !important; }
+}
