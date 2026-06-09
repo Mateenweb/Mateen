@@ -47,20 +47,17 @@ onAuthStateChanged(auth, async user => {
     if (teachersLink) teachersLink.closest('.contact-card').style.display = 'none';
   }
 
-  // زرار "ملفي الشخصي"
-  const profileLink = document.getElementById('profileLink');
-  if (profileLink) {
+  // روابط الطالبة — تظهر بس للطالبة وطالبة متين
+  const studentLinks = document.getElementById('studentLinks');
+  if (studentLinks) {
     if (role === 'mateen' || role === 'student') {
-      const userData = snap.data();
-      const linkedId = userData.linkedStudentId || null;
-      if (linkedId) {
-        profileLink.href = 'student.html?id=' + linkedId;
-      } else {
-        profileLink.href = 'student-general.html';
+      studentLinks.style.display = '';
+      // اضبط رابط الملف الشخصي
+      const profileLink = document.getElementById('profileLink');
+      if (profileLink) {
+        const linkedId = snap.data().linkedStudentId || null;
+        profileLink.href = linkedId ? 'student.html?id=' + linkedId : 'student-general.html';
       }
-      profileLink.style.display = '';
-    } else {
-      profileLink.style.display = 'none';
     }
   }
   // لو إدارية — أضيف رابط لوحة الإدارة
