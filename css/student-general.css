@@ -16,3 +16,18 @@
     @keyframes spin { to { transform:rotate(360deg); } }
     .spin { animation:spin .8s linear infinite; }
   
+/* ════════════════════════════════════════
+   MOBILE RESPONSIVE
+   ════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .section { padding: 16px 14px !important; }
+  .stats-bar { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
+  .stat-item { padding: 12px 8px !important; }
+  .cards-grid { grid-template-columns: 1fr !important; }
+  .main-wrap { gap: 0 !important; }
+}
+
+@media (max-width: 480px) {
+  .stats-bar { grid-template-columns: 1fr !important; }
+  .section { padding: 12px 12px !important; }
+}
