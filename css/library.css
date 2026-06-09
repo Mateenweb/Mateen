@@ -10,4 +10,22 @@
 .book-author{font-size:12px;color:var(--text-mid);margin-bottom:8px;}
 .book-cat{display:inline-block;background:var(--beige);border:1px solid var(--border);padding:2px 10px;border-radius:10px;font-size:11px;color:var(--text-mid);}
 .book-card.hidden{display:none;}
-@media(max-width:600px){.books-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:768px){
+  .lib-filters{gap:6px;margin-bottom:16px;}
+  .lib-btn{padding:6px 14px;font-size:12px;}
+  .books-grid{grid-template-columns:repeat(2,1fr);gap:14px;}
+  .book-cover{height:100px;font-size:32px;}
+  .book-info{padding:10px;}
+  .book-title{font-size:13px;margin-bottom:3px;}
+  .book-author{font-size:11px;margin-bottom:6px;}
+  .book-cat{padding:1px 8px;font-size:10px;}
+}
+@media(max-width:480px){
+  .lib-filters{gap:5px;margin-bottom:12px;}
+  .lib-btn{padding:5px 10px;font-size:11px;}
+  .books-grid{grid-template-columns:1fr;gap:12px;}
+  .book-cover{height:90px;font-size:28px;}
+  .book-info{padding:8px;}
+  .book-title{font-size:12px;}
+  .book-author{font-size:10px;}
+}
