@@ -36,10 +36,15 @@ onAuthStateChanged(auth, async user => {
   const role   = snap.exists() ? snap.data().role   : '';
   const status = snap.exists() ? snap.data().status : '';
   if (role !== 'teacher' && role !== 'admin' && role !== 'supervisor') {
-    window.location.href = 'login.html'; return;
+    window.location.href = 'home.html'; return;
   }
   if (status === 'pending' || status === 'suspended') {
-    window.location.href = 'login.html'; return;
+    window.location.href = 'home.html'; return;
+  }
+  // المعلمة تشوف بس صفحتها
+  const subject = snap.data().subject || '';
+  if (role === 'teacher' && subject !== 'tafseer') {
+    window.location.href = 'home.html'; return;
   }
   loadTeacherName();
 });

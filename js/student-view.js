@@ -15,8 +15,12 @@ const db   = getFirestore(app);
 const auth = getAuth(app);
 
 // ── Auth Guard ───────────────────────────────
-onAuthStateChanged(auth, user => {
+onAuthStateChanged(auth, async user => {
   if (!user) { window.location.href = 'login.html'; return; }
+  const snap = await getDoc(doc(db, 'users', user.uid));
+  const role = snap.exists() ? snap.data().role : '';
+  // المعلمة لا تقدر تشوف ملفات الطالبات
+  if (role === 'teacher') { window.location.href = 'home.html'; return; }
   document.getElementById('authGate').style.display    = 'none';
   document.getElementById('mainContent').style.display = 'block';
   initStudentView();

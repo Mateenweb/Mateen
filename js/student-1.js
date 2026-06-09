@@ -25,6 +25,9 @@ onAuthStateChanged(auth, async user => {
 
   if (!role) { window.location.href = 'login.html'; return; }
 
+  // المعلمة لا تقدر تشوف ملفات الطالبات
+  if (role === 'teacher') { window.location.href = 'home.html'; return; }
+
   document.getElementById('authGate').style.display    = 'none';
   document.getElementById('mainContent').style.display = 'block';
 

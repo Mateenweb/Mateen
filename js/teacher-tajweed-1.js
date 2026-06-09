@@ -1,10 +1,29 @@
 
 import { initializeApp }   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
 import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
 import { FIREBASE_CONFIG } from "./config.js";
 
 const app = initializeApp(FIREBASE_CONFIG);
 const db  = getFirestore(app);
+const auth = getAuth(app);
+onAuthStateChanged(auth, async user => {
+  if (!user) { window.location.href = 'login.html'; return; }
+  const snap = await getDoc(doc(db, 'users', user.uid));
+  const role   = snap.exists() ? snap.data().role   : '';
+  const status = snap.exists() ? snap.data().status : '';
+  if (role !== 'teacher' && role !== 'admin' && role !== 'supervisor') {
+    window.location.href = 'home.html'; return;
+  }
+  if (status === 'pending' || status === 'suspended') {
+    window.location.href = 'home.html'; return;
+  }
+  // المعلمة تشوف بس صفحتها
+  if (role === 'teacher' && (snap.data().subject || '') !== 'tajweed') {
+    window.location.href = 'home.html'; return;
+  }
+});
+
 const TEACHER_ID = "tajweed";
 
 window.sendMessage = async () => {
