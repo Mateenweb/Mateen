@@ -88,4 +88,4 @@ onAuthStateChanged(auth, async user => {
 });
 
 window.doLogout = () =>
-  signOut(auth).then(() => window.location.href = 'login.html');
+  signOut(auth).then(() => window.location.href = '../html/login.html');
