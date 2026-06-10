@@ -18,7 +18,7 @@ const auth = getAuth(app);
 
 // ── Auth Guard ───────────────────────────────
 onAuthStateChanged(auth, async user => {
-  if (!user) { window.location.href = '../login.html'; return; }
+  if (!user) { window.location.href = '../html/login.html'; return; }
   const snap = await getDoc(doc(db, 'users', user.uid));
   const role = snap.exists() ? snap.data().role : null;
 
@@ -29,7 +29,7 @@ onAuthStateChanged(auth, async user => {
     const userData  = snap.data();
     // لو مفيش id أو الـ id مش مطابق لبياناتها — ارجعيها لـ login
     if (!urlId) {
-      window.location.href = 'login.html'; return;
+      window.location.href = '../html/login.html'; return;
     }
     initPage();
     return;
@@ -42,7 +42,7 @@ onAuthStateChanged(auth, async user => {
   }
 
   // غير ذلك — ارجع لـ login
-  window.location.href = 'login.html';
+  window.location.href = '../html/login.html';
 });
 
 // ── جدول المواد لكل يوم ──────────────────────
