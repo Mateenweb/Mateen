@@ -332,6 +332,16 @@ function renderStudents(list) {
         <option value="م"${s.ampm==='م'?' selected':''}>مساءً</option>
       </select>
     </div>`;
+    const placementCell = s.status === 'new'
+      ? `<div class="placement-wrap">
+           <input type="number" class="placement-input" min="0" max="100"
+             value="${s.placementScore ?? ''}"
+             placeholder="الدرجة"
+             onchange="stuField('${s.id}','placementScore',this.value===''?null:Number(this.value))"
+           >
+           <span class="placement-unit">/ 100</span>
+         </div>`
+      : `<span style="color:var(--text-mid);font-size:12px">—</span>`;
     return `<tr>
       <td><input type="checkbox" class="row-check" data-id="${s.id}" onchange="onRowCheck()"></td>
       <td style="color:var(--text-mid);font-size:12px">${i+1}</td>
@@ -344,6 +354,7 @@ function renderStudents(list) {
       <td>${timeSel}</td>
       <td><button class="btn-interview ${intClass}" onclick="stuToggleInterview('${s.id}','${s.interview}')">${intLabel}</button></td>
       <td><button class="btn-accept ${accClass}" onclick="stuToggleAccept('${s.id}','${s.accepted}','${s.interview}')">${accLabel}</button></td>
+      <td>${placementCell}</td>
       <td><button class="btn-del-stu" onclick="stuDelete('${s.id}')" title="حذف"><i class="ti ti-trash"></i></button></td>
     </tr>`;
   }).join('');
