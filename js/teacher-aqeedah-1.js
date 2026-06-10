@@ -1,11 +1,11 @@
 
 
-import { initializeApp }   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
+import { initializeApp, getApps, getApp }   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
 import { getFirestore, collection, addDoc, doc, getDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
 import { FIREBASE_CONFIG } from "./config.js";
 
-const app = initializeApp(FIREBASE_CONFIG);
+const app = getApps().length ? getApp() : initializeApp(FIREBASE_CONFIG);
 const db  = getFirestore(app);
 const auth = getAuth(app);
 
@@ -31,15 +31,15 @@ async function loadTeacherName() {
 }
 
 onAuthStateChanged(auth, async user => {
-  if (!user) { window.location.href = 'login.html'; return; }
+  if (!user) { window.location.href = '../html/login.html'; return; }
   const snap = await getDoc(doc(db, 'users', user.uid));
   const role   = snap.exists() ? snap.data().role   : '';
   const status = snap.exists() ? snap.data().status : '';
   if (role !== 'teacher' && role !== 'admin' && role !== 'supervisor') {
-    window.location.href = 'login.html'; return;
+    window.location.href = '../html/login.html'; return;
   }
   if (status === 'pending' || status === 'suspended') {
-    window.location.href = 'login.html'; return;
+    window.location.href = '../html/login.html'; return;
   }
   loadTeacherName();
 });
