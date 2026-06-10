@@ -28,7 +28,7 @@ onAuthStateChanged(auth, async user => {
     }
   }
 });
-window.doLogout = () => signOut(auth).then(() => window.location.href='login.html');
+window.doLogout = () => signOut(auth).then(() => window.location.href='../html/login.html');
 
 // ── Contact form with Firebase ────────────────
 const RECIPIENTS = {
