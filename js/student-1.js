@@ -1,5 +1,5 @@
 
-import { initializeApp }
+import { initializeApp, getApps, getApp }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
 import { getFirestore, doc, getDoc, collection, onSnapshot, query, orderBy, deleteDoc }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
@@ -8,22 +8,22 @@ import { getAuth, onAuthStateChanged, signOut,
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
 import { FIREBASE_CONFIG } from "./config.js";
 
-const app  = initializeApp(FIREBASE_CONFIG);
+const app  = getApps().length ? getApp() : initializeApp(FIREBASE_CONFIG);
 const db   = getFirestore(app);
 const auth = getAuth(app);
 
 // ── Auth Guard ────────────────────────────────
 onAuthStateChanged(auth, async user => {
-  if (!user) { window.location.href = 'login.html'; return; }
+  if (!user) { window.location.href = '../html/login.html'; return; }
 
   const params   = new URLSearchParams(location.search);
   const studentId = params.get('id');
-  if (!studentId) { window.location.href = 'login.html'; return; }
+  if (!studentId) { window.location.href = '../html/login.html'; return; }
 
   const userSnap = await getDoc(doc(db, 'users', user.uid));
   const role     = userSnap.exists() ? userSnap.data().role : null;
 
-  if (!role) { window.location.href = 'login.html'; return; }
+  if (!role) { window.location.href = '../html/login.html'; return; }
 
   document.getElementById('authGate').style.display    = 'none';
   document.getElementById('mainContent').style.display = 'block';
@@ -33,7 +33,7 @@ onAuthStateChanged(auth, async user => {
 
 // ── Logout ────────────────────────────────────
 document.getElementById('logoutBtn').addEventListener('click', () => {
-  signOut(auth).then(() => window.location.href = 'login.html');
+  signOut(auth).then(() => window.location.href = '../html/login.html');
 });
 
 // ── حذف الحساب ───────────────────────────────
