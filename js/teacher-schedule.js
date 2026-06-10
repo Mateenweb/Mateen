@@ -13,20 +13,20 @@ let currentUser = null;
 let teacherSubject = '';
 
 onAuthStateChanged(auth, async user => {
-  if (!user) { window.location.href = 'login.html'; return; }
+  if (!user) { window.location.href = '../html/login.html'; return; }
 
   const snap = await getDoc(doc(db, 'users', user.uid));
-  if (!snap.exists()) { window.location.href = 'login.html'; return; }
+  if (!snap.exists()) { window.location.href = '../html/login.html'; return; }
 
   const data   = snap.data();
   const role   = data.role   || '';
   const status = data.status || '';
 
   if (role !== 'teacher' && role !== 'admin' && role !== 'supervisor') {
-    window.location.href = 'home.html'; return;
+    window.location.href = '../html/home.html'; return;
   }
   if (status === 'pending' || status === 'suspended') {
-    window.location.href = 'home.html'; return;
+    window.location.href = '../html/home.html'; return;
   }
 
   currentUser    = user;
@@ -39,7 +39,7 @@ onAuthStateChanged(auth, async user => {
   loadSchedule();
 });
 
-window.doLogout = () => signOut(auth).then(() => window.location.href = 'login.html');
+window.doLogout = () => signOut(auth).then(() => window.location.href = '../html/login.html');
 
 // ── Load schedule ──────────────────────
 async function loadSchedule() {
