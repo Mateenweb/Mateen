@@ -25,6 +25,12 @@ onAuthStateChanged(auth, async user => {
   const heroBtns = document.getElementById('heroBtns');
   if (heroBtns) heroBtns.style.display = 'none';
 
+  // إخفاء زراير الـ navbar
+  const navBtns = document.getElementById('navBtns');
+  if (navBtns) navBtns.style.display = 'none';
+  const mobNavBtns = document.getElementById('mobNavBtns');
+  if (mobNavBtns) mobNavBtns.style.display = 'none';
+
   // مسجلة دخول — اجلب بيانات المستخدمة
   guest.style.display   = 'none';
   userDiv.style.display = 'block';
