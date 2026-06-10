@@ -21,6 +21,10 @@ onAuthStateChanged(auth, async user => {
     return;
   }
 
+  // إخفاء زراير الـ hero لما تسجل دخول
+  const heroBtns = document.getElementById('heroBtns');
+  if (heroBtns) heroBtns.style.display = 'none';
+
   // مسجلة دخول — اجلب بيانات المستخدمة
   guest.style.display   = 'none';
   userDiv.style.display = 'block';
