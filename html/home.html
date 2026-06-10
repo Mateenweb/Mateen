@@ -157,7 +157,14 @@
 </div>
 </div><!-- end content -->
 <!-- SIDEBAR -->
-<div class="sidebar">
+<!-- Overlay للموبايل -->
+<div class="mob-sidebar-overlay" id="mobSidebarOverlay" onclick="closeMobSidebar()"></div>
+
+<!-- زرار فتح الـ sidebar على الموبايل -->
+<button class="mob-sidebar-fab" id="mobSidebarFab" onclick="toggleMobSidebar()" style="display:none" aria-label="القائمة">☰</button>
+
+<div class="sidebar" id="mainSidebar">
+<div class="mob-sheet-handle" style="display:none"></div>
 <!-- ══ حالتان: قبل الدخول / بعد الدخول ══ -->
 <!-- [ حالة: غير مسجلة دخول ] -->
 <div id="sidebar-guest">
@@ -509,5 +516,47 @@
 </div>
 </div>
 <script src="../js/home-4.js"></script>
+<script>
+// ── Mobile Sidebar (Bottom Sheet) ──────────────────────
+(function () {
+  const isMob = () => window.innerWidth <= 768;
+
+  const fab     = document.getElementById('mobSidebarFab');
+  const overlay = document.getElementById('mobSidebarOverlay');
+  const sidebar = document.getElementById('mainSidebar');
+  const handle  = sidebar ? sidebar.querySelector('.mob-sheet-handle') : null;
+
+  function showFab() {
+    if (!fab) return;
+    fab.style.display   = isMob() ? 'flex' : 'none';
+    if (handle) handle.style.display = isMob() ? 'block' : 'none';
+  }
+
+  window.toggleMobSidebar = function () {
+    if (!isMob()) return;
+    const open = sidebar.classList.toggle('mob-open');
+    overlay.classList.toggle('mob-open', open);
+    document.body.style.overflow = open ? 'hidden' : '';
+  };
+
+  window.closeMobSidebar = function () {
+    sidebar.classList.remove('mob-open');
+    overlay.classList.remove('mob-open');
+    document.body.style.overflow = '';
+  };
+
+  // أغلق عند الضغط على أي رابط داخل الـ sidebar
+  if (sidebar) {
+    sidebar.querySelectorAll('a, .sidebar-logout-btn').forEach(el => {
+      el.addEventListener('click', function () {
+        if (isMob()) closeMobSidebar();
+      });
+    });
+  }
+
+  showFab();
+  window.addEventListener('resize', showFab);
+})();
+</script>
 </body>
 </html>

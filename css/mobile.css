@@ -140,7 +140,70 @@ padding: 0 !important;
 gap: 0 !important;
 max-width: 100% !important;
   }
-  .sidebar        { display: none !important; }
+  /* ── Sidebar: مخفية بالكامل، تُفتح كـ bottom-sheet ── */
+  .sidebar {
+    display: flex !important;
+    position: fixed !important;
+    bottom: 0 !important;
+    right: 0 !important;
+    left: 0 !important;
+    top: auto !important;
+    width: 100% !important;
+    max-height: 80vh !important;
+    border-radius: 20px 20px 0 0 !important;
+    box-shadow: 0 -4px 30px rgba(0,0,0,0.18) !important;
+    z-index: 1200 !important;
+    overflow-y: auto !important;
+    transform: translateY(100%) !important;
+    transition: transform 0.35s cubic-bezier(0.32,0.72,0,1) !important;
+    border-right: none !important;
+  }
+  .sidebar.mob-open {
+    transform: translateY(0) !important;
+  }
+
+  /* زرار فتح الـ sidebar */
+  .mob-sidebar-fab {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    bottom: 22px;
+    left: 18px;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: var(--green-dark);
+    border: 2.5px solid var(--gold);
+    box-shadow: 0 4px 18px rgba(0,0,0,0.22);
+    z-index: 1300;
+    cursor: pointer;
+    font-size: 22px;
+    color: var(--gold);
+  }
+
+  /* overlay خلف الـ sheet */
+  .mob-sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.35);
+    z-index: 1100;
+  }
+  .mob-sidebar-overlay.mob-open {
+    display: block;
+  }
+
+  /* مقبض السحب فوق الـ sheet */
+  .mob-sheet-handle {
+    display: block !important;
+    width: 38px;
+    height: 4px;
+    background: var(--border);
+    border-radius: 4px;
+    margin: 10px auto 6px;
+    flex-shrink: 0;
+  }
   .content-area   { min-width: 0 !important; overflow: hidden !important; }
 
   .section        { padding: 14px var(--mob-pad) !important; }
