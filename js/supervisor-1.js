@@ -1,25 +1,25 @@
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
+import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
 import { getFirestore, collection, doc, getDoc, onSnapshot, query, where, orderBy, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 import { FIREBASE_CONFIG } from "./config.js";
 
-const app  = initializeApp(FIREBASE_CONFIG);
+const app  = getApps().length ? getApp() : initializeApp(FIREBASE_CONFIG);
 const auth = getAuth(app);
 const db   = getFirestore(app);
 
 onAuthStateChanged(auth, async user => {
-  if (!user) { window.location.href = 'login.html'; return; }
+  if (!user) { window.location.href = '../html/login.html'; return; }
   const snap = await getDoc(doc(db, 'users', user.uid));
   const role = snap.exists() ? snap.data().role : '';
-  if (role !== 'supervisor' && role !== 'admin') { window.location.href = 'login.html'; return; }
+  if (role !== 'supervisor' && role !== 'admin') { window.location.href = '../html/login.html'; return; }
   document.getElementById('navUserName').textContent   = snap.data().name || user.email.split('@')[0];
   document.getElementById('authGate').style.display    = 'none';
   document.getElementById('mainContent').style.display = 'flex';
   loadData();
 });
 
-window.doLogout = () => signOut(auth).then(() => window.location.href = 'login.html');
+window.doLogout = () => signOut(auth).then(() => window.location.href = '../html/login.html');
 
 function loadData() {
   const mateenQuery = query(collection(db,'users'), where('role','==','mateen'), orderBy('createdAt','desc'));
