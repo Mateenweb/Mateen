@@ -1,21 +1,20 @@
 import { initializeApp, getApps, getApp }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
-import { getFirestore, collection, query, orderBy, onSnapshot }
+import { getAuth, onAuthStateChanged }
+  from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
+import { getFirestore, collection, query, orderBy, onSnapshot, addDoc, getDoc, doc }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 import { FIREBASE_CONFIG } from "./config.js";
 
-const app = getApps().length ? getApp() : initializeApp(FIREBASE_CONFIG);
-const db  = getFirestore(app);
+const app  = getApps().length ? getApp() : initializeApp(FIREBASE_CONFIG);
+const auth = getAuth(app);
+const db   = getFirestore(app);
 
 let allMats = [];
 
 const TYPE_ICONS = {
   محاضرة: '🎙️', ملخص: '📄', واجب: '📝', اختبار: '✅',
   مرجع: '📚', فيديو: '🎬', أخرى: '📎'
-};
-
-const LINK_ICONS = {
-  youtube: '▶️', drive: '📁', dropbox: '☁️', default: '🔗'
 };
 
 function detectLinkType(url) {
@@ -25,6 +24,8 @@ function detectLinkType(url) {
   if (url.includes('dropbox')) return 'dropbox';
   return 'default';
 }
+
+const LINK_LABELS = { youtube: '▶️ يوتيوب', drive: '📁 درايف', dropbox: '☁️ دروبوكس', default: '🔗 فتح الرابط' };
 
 function renderMats(mats) {
   const container = document.getElementById('matsContainer');
@@ -50,11 +51,7 @@ function renderMats(mats) {
           </div>
         </div>
         ${m.notes ? `<div style="font-size:12px;color:var(--text-mid);background:var(--beige);padding:8px 10px;border-radius:8px;margin-bottom:10px">${m.notes}</div>` : ''}
-        <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--gold-dark)">
-          <span>${LINK_ICONS[detectLinkType(m.url)]}</span>
-          <span>فتح الرابط</span>
-          <i class="ti ti-external-link"></i>
-        </div>
+        <div style="font-size:12px;color:var(--gold-dark)">${LINK_LABELS[detectLinkType(m.url)]}</div>
       </div>
     </a>
   `).join('');
@@ -62,8 +59,58 @@ function renderMats(mats) {
 
 window.filterMats = () => {
   const val = document.getElementById('filterCourse').value;
-  const filtered = val ? allMats.filter(m => m.course === val) : allMats;
-  renderMats(filtered);
+  renderMats(val ? allMats.filter(m => m.course === val) : allMats);
+};
+
+// Show admin button if user is admin
+onAuthStateChanged(auth, async user => {
+  if (!user) return;
+  const snap = await getDoc(doc(db, 'users', user.uid));
+  const role = snap.exists() ? snap.data().role : '';
+  if (role === 'admin') {
+    const btn = document.getElementById('adminAddBtn');
+    if (btn) btn.style.display = 'flex';
+  }
+});
+
+// Submit new course
+window.submitNewCourse = async () => {
+  const title = document.getElementById('newCourseTitle').value.trim();
+  const course = document.getElementById('newCourseCat').value;
+  const type  = document.getElementById('newCourseType').value;
+  const url   = document.getElementById('newCourseUrl').value.trim();
+  const notes = document.getElementById('newCourseNotes').value.trim();
+  const err   = document.getElementById('addCourseErr');
+
+  if (!title || !course || !url) {
+    err.style.display = 'block';
+    err.textContent = 'يرجى تعبئة الحقول المطلوبة (الاسم، المادة، الرابط)';
+    return;
+  }
+  err.style.display = 'none';
+
+  const btn = document.getElementById('addCourseSubmit');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="ti ti-loader"></i> جاري الإضافة...';
+
+  try {
+    await addDoc(collection(db, 'materials'), {
+      title, course, type, url, notes,
+      addedAt: Date.now(),
+      addedBy: auth.currentUser.email,
+    });
+    // Reset form
+    ['newCourseTitle','newCourseCat','newCourseUrl','newCourseNotes'].forEach(id => {
+      document.getElementById(id).value = '';
+    });
+    document.getElementById('addCourseModal').style.display = 'none';
+  } catch(e) {
+    err.style.display = 'block';
+    err.textContent = 'حدث خطأ، حاولي مرة أخرى';
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = '<i class="ti ti-circle-plus"></i> إضافة المادة';
 };
 
 // Load materials from Firestore
