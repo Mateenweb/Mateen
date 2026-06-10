@@ -310,8 +310,27 @@
   </div>
 </div>
 
-<!-- FOOTER -->
-<!-- AYA BANNER -->
+
+<!-- DYNAMIC MATERIALS FROM FIREBASE -->
+<div class="section" id="dynamicMatsSection" style="display:none">
+  <div class="section-head">
+    <div class="section-head-title"><i class="ti ti-files"></i> المواد المضافة</div>
+    <select id="filterCourse" onchange="filterMats()" style="padding:6px 12px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:13px;background:var(--white);color:var(--text-dark);">
+      <option value="">كل المواد</option>
+      <option>التفسير</option><option>الفقه</option><option>العقيدة</option>
+      <option>الحديث</option><option>القرآن الكريم</option><option>السيرة النبوية</option>
+      <option>التجويد والتلاوة</option><option>النحو</option><option>أخرى</option>
+    </select>
+  </div>
+  <div id="matsContainer" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;padding:16px 0;">
+    <div style="text-align:center;color:var(--text-mid);padding:40px;grid-column:1/-1;">
+      <i class="ti ti-loader" style="font-size:24px;"></i>
+      <div style="margin-top:8px">جاري التحميل...</div>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->\n<!-- AYA BANNER -->
 <div class="aya-banner">
   <span class="aya-text">﴿ وَتَعَاوَنُوا عَلَى الْبِرِّ وَالتَّقْوَىٰ ﴾</span>
   <span class="aya-ref">سورة المائدة: ٢</span>
@@ -325,5 +344,6 @@
   <div class="footer-dua">اللهم علمنا ما ينفعنا وانفعنا بما علمتنا</div>
 </footer>
   <script src="../js/courses.js"></script>
+  <script src="../js/courses-firebase.js" type="module"></script>
 </body>
 </html>
