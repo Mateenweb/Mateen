@@ -54,17 +54,17 @@ nav::after {
   left: 0; right: 0;
   height: 2px;
   background: linear-gradient(to right,
-    transparent 0%,
-    var(--accent-green) 20%,
-    var(--gold) 50%,
-    var(--accent-green) 80%,
-    transparent 100%);
+transparent 0%,
+var(--accent-green) 20%,
+var(--gold) 50%,
+var(--accent-green) 80%,
+transparent 100%);
   opacity: 0.6;
 }
 
 /* ════════════════════════════════════════════════
    3. hero / page-hero / teacher-hero
-      نمط هندسي واضح + إطار ذهبي
+  نمط هندسي واضح + إطار ذهبي
    ════════════════════════════════════════════════ */
 .hero,
 .page-hero,
@@ -151,7 +151,7 @@ nav::after {
   flex: 1;
   height: 2px;
   background: linear-gradient(to var(--dir, left),
-    transparent 0%, var(--gold) 40%, var(--accent-green) 100%);
+transparent 0%, var(--gold) 40%, var(--accent-green) 100%);
 }
 .islamic-divider::before { --dir: right; }
 .islamic-divider span {
@@ -308,7 +308,7 @@ footer::before {
 .logo-circle {
   border: 2px solid var(--gold) !important;
   box-shadow: 0 0 0 3px var(--accent-green-soft),
-              0 0 12px rgba(201,162,39,0.2) !important;
+          0 0 12px rgba(201,162,39,0.2) !important;
 }
 
 /* ════════════════════════════════════════════════
@@ -353,7 +353,7 @@ footer::before {
 @media (max-width: 768px) {
   .islamic-divider { margin: 12px 0 !important; }
   .islamic-divider span { font-size: 16px !important; letter-spacing: 3px !important; }
-  
+
   .aya-banner { padding: 14px 12px !important; margin: 12px 0 !important; }
   .aya-text { font-size: 15px !important; line-height: 1.6 !important; }
   .aya-source { font-size: 11px !important; }

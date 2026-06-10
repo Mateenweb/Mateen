@@ -716,17 +716,17 @@ footer {
   .nav-tagline { display: none; }
   .nav-links  { display: none; }
   .nav-links.open {
-    display: flex;
-    flex-direction: column;
-    position: absolute !important;
-    top: 52px;
-    right: 0;
-    left: 0;
-    background: var(--green-dark);
-    padding: 10px 16px 16px;
-    gap: 10px;
-    z-index: 200;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.35);
+display: flex;
+flex-direction: column;
+position: absolute !important;
+top: 52px;
+right: 0;
+left: 0;
+background: var(--green-dark);
+padding: 10px 16px 16px;
+gap: 10px;
+z-index: 200;
+box-shadow: 0 4px 16px rgba(0,0,0,0.35);
   }
   .nav-links a { font-size: 13px; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.06); }
   .nav-toggle { display: block; font-size: 20px; }
@@ -734,19 +734,19 @@ footer {
 
   /* ── Hero ── */
   .hero {
-    padding: 20px 16px;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    min-height: unset;
-    gap: 12px;
+padding: 20px 16px;
+flex-direction: column;
+align-items: center;
+text-align: center;
+min-height: unset;
+gap: 12px;
   }
   .hero-img { display: none; }
   .hero-logo-mobile {
-    display: block !important;
-    width: 72px !important;
-    height: 72px !important;
-    margin-bottom: 8px !important;
+display: block !important;
+width: 72px !important;
+height: 72px !important;
+margin-bottom: 8px !important;
   }
   .hero-text h1 { font-size: 32px; }
   .hero-text h2 { font-size: 16px; }
@@ -1001,83 +1001,83 @@ footer {
 
   /* إظهار أزرار الموبايل */
   .mob-nav-divider {
-    display: block !important;
-    height: 1px;
-    background: rgba(201,162,39,0.3);
-    margin: 6px 0;
+display: block !important;
+height: 1px;
+background: rgba(201,162,39,0.3);
+margin: 6px 0;
   }
   .mob-nav-btns {
-    display: flex !important;
-    flex-direction: column;
-    gap: 8px;
-    padding: 8px 0 4px;
-    list-style: none;
+display: flex !important;
+flex-direction: column;
+gap: 8px;
+padding: 8px 0 4px;
+list-style: none;
   }
   .mob-login-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    background: rgba(201,162,39,0.15);
-    color: var(--gold-light) !important;
-    border: 1px solid rgba(201,162,39,0.4);
-    border-radius: 9px;
-    padding: 11px 16px;
-    font-size: 13px;
-    font-weight: 600;
-    text-decoration: none;
-    transition: background .2s;
+display: flex;
+align-items: center;
+justify-content: center;
+gap: 8px;
+background: rgba(201,162,39,0.15);
+color: var(--gold-light) !important;
+border: 1px solid rgba(201,162,39,0.4);
+border-radius: 9px;
+padding: 11px 16px;
+font-size: 13px;
+font-weight: 600;
+text-decoration: none;
+transition: background .2s;
   }
   .mob-login-btn:hover { background: rgba(201,162,39,0.25) !important; }
 
   .mob-reg-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    background: var(--gold);
-    color: var(--green-dark) !important;
-    border: none;
-    border-radius: 9px;
-    padding: 11px 16px;
-    font-size: 13px;
-    font-weight: 700;
-    font-family: inherit;
-    cursor: pointer;
-    transition: opacity .2s;
-    width: 100%;
+display: flex;
+align-items: center;
+justify-content: center;
+gap: 8px;
+background: var(--gold);
+color: var(--green-dark) !important;
+border: none;
+border-radius: 9px;
+padding: 11px 16px;
+font-size: 13px;
+font-weight: 700;
+font-family: inherit;
+cursor: pointer;
+transition: opacity .2s;
+width: 100%;
   }
   .mob-reg-btn:hover { opacity: 0.88; }
 
   /* nav-links.open تحسين */
   .nav-links.open {
-    display: flex !important;
-    flex-direction: column !important;
-    position: absolute !important;
-    top: 56px !important;
-    right: 0 !important; left: 0 !important;
-    background: var(--green-dark) !important;
-    padding: 10px 16px 16px !important;
-    gap: 0 !important;
-    z-index: 9999 !important;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.35) !important;
-    border-top: 2px solid var(--gold) !important;
+display: flex !important;
+flex-direction: column !important;
+position: absolute !important;
+top: 56px !important;
+right: 0 !important; left: 0 !important;
+background: var(--green-dark) !important;
+padding: 10px 16px 16px !important;
+gap: 0 !important;
+z-index: 9999 !important;
+box-shadow: 0 8px 24px rgba(0,0,0,0.35) !important;
+border-top: 2px solid var(--gold) !important;
   }
   .nav-links.open > li { list-style: none; }
   .nav-links.open > li > a {
-    display: flex !important;
-    align-items: center !important;
-    padding: 11px 6px !important;
-    font-size: 14px !important;
-    color: rgba(255,255,255,0.88) !important;
-    border-bottom: 1px solid rgba(255,255,255,0.07) !important;
-    text-decoration: none !important;
+display: flex !important;
+align-items: center !important;
+padding: 11px 6px !important;
+font-size: 14px !important;
+color: rgba(255,255,255,0.88) !important;
+border-bottom: 1px solid rgba(255,255,255,0.07) !important;
+text-decoration: none !important;
   }
   .nav-links.open > li:last-child > a { border-bottom: none !important; }
   .nav-links.open > li > a:hover,
   .nav-links.open > li > a.active {
-    color: var(--gold-light) !important;
-    background: rgba(201,162,39,0.1) !important;
+color: var(--gold-light) !important;
+background: rgba(201,162,39,0.1) !important;
   }
 
   /* nav overflow fix */

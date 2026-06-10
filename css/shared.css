@@ -256,17 +256,17 @@ footer {
 @media (max-width: 768px) {
   .nav-links { display: none; }
   .nav-links.open {
-    display: flex;
-    flex-direction: column;
-    position: absolute;
-    top: 56px;
-    right: 0;
-    left: 0;
-    background: var(--green-dark);
-    padding: 12px 20px;
-    gap: 12px;
-    z-index: 200;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+display: flex;
+flex-direction: column;
+position: absolute;
+top: 56px;
+right: 0;
+left: 0;
+background: var(--green-dark);
+padding: 12px 20px;
+gap: 12px;
+z-index: 200;
+box-shadow: 0 4px 12px rgba(0,0,0,0.3);
   }
   .nav-toggle { display: block; }
   .nav-btns   { display: none; }
@@ -475,17 +475,17 @@ footer {
   .stat-box { padding: 14px 12px !important; }
   .stat-number { font-size: 20px !important; }
   .stat-label { font-size: 12px !important; }
-  
+
   .alert, .notification { padding: 12px 14px !important; font-size: 13px !important; }
-  
+
   .divider { margin: 12px 0 !important; }
-  
+
   .badge { padding: 3px 10px !important; font-size: 11px !important; }
 }
 
 @media (max-width: 480px) {
   .stat-number { font-size: 18px !important; }
   .stat-label { font-size: 11px !important; }
-  
+
   .alert, .notification { padding: 10px 12px !important; font-size: 12px !important; }
 }
