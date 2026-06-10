@@ -1,41 +1,54 @@
 /* ================================================
-   برنامج متين العلمي — موبايل أول
-   mobile.css
+   برنامج متين العلمي — mobile.css
+   Automatic Responsive for ALL pages
    ================================================ */
 
-/* ════════════════════════════════════════
-   متغيرات الموبايل
-   ════════════════════════════════════════ */
 :root {
   --mob-pad: 14px;
   --mob-radius: 10px;
-  --mob-font-base: 13.5px;
 }
 
 /* ════════════════════════════════════════
-   1. NAV — موبايل
+   1. BASE — أساسيات
+   ════════════════════════════════════════ */
+html { overflow-x: hidden; }
+
+@media (max-width: 768px) {
+  body {
+    font-size: 14px !important;
+    overflow-x: hidden !important;
+  }
+  * { -webkit-tap-highlight-color: transparent; }
+  button { touch-action: manipulation; }
+
+  /* منع أي عنصر يتجاوز عرض الشاشة */
+  img, video, iframe, table { max-width: 100%; }
+}
+
+/* ════════════════════════════════════════
+   2. NAV — شريط التنقل
    ════════════════════════════════════════ */
 @media (max-width: 768px) {
-
   nav {
-    padding: 0 14px;
-    height: 52px;
+    padding: 0 var(--mob-pad) !important;
+    height: 52px !important;
+    overflow: visible !important;
   }
+  .logo-circle  { width: 32px !important; height: 32px !important; }
+  .nav-brand    { font-size: 13px !important; }
+  .nav-tagline  { display: none !important; }
 
-  /* ── إخفاء الروابط وإظهار زر الهامبرغر ── */
   .nav-links {
     display: none !important;
   }
   .nav-links.open {
     display: flex !important;
     flex-direction: column !important;
-    /* position:absolute بدل fixed عشان overflow:hidden على body */
     position: absolute !important;
     top: 52px !important;
-    right: 0 !important;
-    left: 0 !important;
+    right: 0 !important; left: 0 !important;
     background: var(--green-dark) !important;
-    padding: 8px 0 14px !important;
+    padding: 8px 0 16px !important;
     gap: 0 !important;
     z-index: 9999 !important;
     box-shadow: 0 8px 24px rgba(0,0,0,0.35) !important;
@@ -54,30 +67,37 @@
     align-items: center !important;
     color: rgba(255,255,255,0.88) !important;
     text-decoration: none !important;
-    transition: background 0.15s !important;
   }
   .nav-links.open a:hover,
   .nav-links.open a.active {
     background: rgba(201,162,39,0.15) !important;
     color: var(--gold-light) !important;
   }
-  .nav-toggle { display: flex !important; align-items: center; justify-content: center; }
-  .nav-btns   { display: none !important; }
+  .nav-links.open .mob-nav-btns {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+    padding: 10px 16px !important;
+  }
+  .nav-toggle {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 22px !important;
+  }
+  .nav-btns     { display: none !important; }
+  .nav-user     { max-width: 110px; overflow: hidden; }
+  .nav-user-name { font-size: 12px !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-  .nav-brand   { font-size: 13px; }
-  .nav-tagline { display: none; }
-  .logo-circle { width: 32px; height: 32px; }
-
-  /* ── البسملة ── */
-  .basmala-bar { font-size: 13px; padding: 7px 12px; letter-spacing: 1px; }
-  .bsm-ornament { display: none; }
+  .basmala-bar  { font-size: 13px !important; padding: 7px var(--mob-pad) !important; }
+  .bsm-ornament { display: none !important; }
 }
 
 /* ════════════════════════════════════════
-   2. HERO — موبايل
+   3. HERO — الهيرو
    ════════════════════════════════════════ */
 @media (max-width: 768px) {
-
+  /* الرئيسية */
   .hero {
     padding: 20px var(--mob-pad) !important;
     flex-direction: column !important;
@@ -86,519 +106,451 @@
     min-height: unset !important;
     gap: 10px !important;
   }
-  .hero::before { inset: 5px; }
-  .hero-img     { display: none !important; }
+  .hero-img         { display: none !important; }
   .hero-logo-mobile {
     display: block !important;
-    width: 72px !important;
-    height: 72px !important;
-    margin-bottom: 6px !important;
+    width: 68px !important; height: 68px !important;
+    margin-bottom: 8px !important;
   }
-  .hero-text h1 { font-size: 30px !important; }
-  .hero-text h2 { font-size: 15px !important; }
-  .hero-text p  { font-size: 12px !important; margin-bottom: 12px !important; }
-  .hero-btns    { flex-direction: column; gap: 8px; align-items: center; }
+  .hero-text h1     { font-size: 30px !important; }
+  .hero-text h2     { font-size: 15px !important; }
+  .hero-text p      { font-size: 12px !important; margin-bottom: 12px !important; }
+  .hero-btns        { flex-direction: column !important; gap: 8px !important; align-items: stretch !important; }
   .hero-btn-gold,
-  .hero-btn-white { width: 100%; text-align: center; padding: 10px; font-size: 13px; }
+  .hero-btn-white   { width: 100% !important; text-align: center !important; padding: 11px !important; font-size: 13px !important; }
 
-  .page-hero    { padding: 24px var(--mob-pad) !important; }
-  .page-hero h1 { font-size: 22px !important; }
+  /* page-hero (صفحات داخلية) */
+  .page-hero        { padding: 20px var(--mob-pad) !important; }
+  .page-hero h1     { font-size: 20px !important; }
+  .page-hero p      { font-size: 12px !important; }
 
-  .teacher-hero { flex-direction: column; text-align: center; padding: 24px var(--mob-pad) !important; gap: 14px; }
-  .teacher-avatar { width: 72px; height: 72px; font-size: 32px; }
-  .teacher-name { font-size: 20px; }
+  /* teacher-hero */
+  .teacher-hero     { flex-direction: column !important; text-align: center !important; padding: 20px var(--mob-pad) !important; gap: 12px !important; }
+  .teacher-avatar   { width: 68px !important; height: 68px !important; font-size: 30px !important; }
+  .teacher-name     { font-size: 18px !important; }
 }
 
 /* ════════════════════════════════════════
-   3. LAYOUT — الشبكة الرئيسية
+   4. LAYOUT — الشبكة الرئيسية
    ════════════════════════════════════════ */
 @media (max-width: 768px) {
-
-  /* home main-wrap: إزالة الـ sidebar */
   .main-wrap {
     grid-template-columns: 1fr !important;
     padding: 0 !important;
     gap: 0 !important;
+    max-width: 100% !important;
   }
-  .sidebar { display: none !important; }
-  .content-area { min-width: 0; }
+  .sidebar        { display: none !important; }
+  .content-area   { min-width: 0 !important; overflow: hidden !important; }
 
-  /* padding عام للأقسام */
-  .section       { padding: 16px var(--mob-pad) !important; }
-  .teacher-wrap  { padding: 14px var(--mob-pad) !important; }
-  .section-wrap  { padding: 0 var(--mob-pad) 20px !important; }
-  .main-wrap.standalone { padding: 14px var(--mob-pad) !important; }
+  .section        { padding: 14px var(--mob-pad) !important; }
+  .section-body   { padding: 14px var(--mob-pad) !important; }
+  .teacher-wrap   { padding: 14px var(--mob-pad) !important; }
+  .section-wrap   { padding: 0 var(--mob-pad) 16px !important; }
+  .container      { padding: 12px var(--mob-pad) !important; gap: 14px !important; }
+  .card           { padding: 14px !important; }
 }
 
 /* ════════════════════════════════════════
-   4. GRIDS — شبكات البطاقات
+   5. GRIDS — شبكات البطاقات
    ════════════════════════════════════════ */
 @media (max-width: 768px) {
-
-  /* مسارات الرئيسية */
-  .paths-grid     { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
-
-  /* المعلمات */
-  .teachers-grid  { grid-template-columns: 1fr 1fr !important; gap: 12px !important; }
-
-  /* الإعلانات */
-  .ann-grid       { grid-template-columns: 1fr !important; }
-  .ann-img        { display: none !important; }
-
-  /* إحصائيات */
-  .stats-bar      { grid-template-columns: 1fr 1fr !important; gap: 10px !important; padding: 14px var(--mob-pad) !important; }
-  .stat-item      { border-left: none !important; padding: 12px 8px !important; }
-
-  /* جدول المعلمة */
-  .schedule-grid  { grid-template-columns: 1fr 1fr !important; gap: 8px !important; }
-
-  /* نموذج */
-  .t-form-row     { grid-template-columns: 1fr !important; }
-  .contact-grid   { grid-template-columns: 1fr !important; }
-  .form-row       { grid-template-columns: 1fr !important; }
-
-  /* إحصاء stats page */
-  .charts-grid    { grid-template-columns: 1fr !important; }
-  .summary-bar    { grid-template-columns: 1fr 1fr !important; }
-
-  /* صفحة الطالبة */
-  .cards-grid     { grid-template-columns: 1fr !important; }
-  .main-grid      { grid-template-columns: 1fr !important; }
-  .msg-meta-grid  { grid-template-columns: 1fr 1fr !important; }
+  .paths-grid         { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
+  .teachers-grid      { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
+  .ann-grid           { grid-template-columns: 1fr !important; }
+  .ann-img            { display: none !important; }
+  .stats-bar          { grid-template-columns: 1fr 1fr !important; padding: 12px var(--mob-pad) !important; gap: 10px !important; }
+  .stat-item          { border-left: none !important; padding: 10px 6px !important; }
+  .stat-item:not(:last-child) { border-bottom: 1px solid rgba(255,255,255,0.1) !important; }
+  .schedule-grid      { grid-template-columns: 1fr 1fr !important; gap: 8px !important; }
+  .t-form-row         { grid-template-columns: 1fr !important; }
+  .form-row           { grid-template-columns: 1fr !important; }
+  .contact-grid       { grid-template-columns: 1fr !important; }
+  .charts-grid        { grid-template-columns: 1fr !important; gap: 12px !important; }
+  .summary-bar        { grid-template-columns: 1fr 1fr !important; gap: 8px !important; }
+  .cards-grid         { grid-template-columns: 1fr !important; }
+  .main-grid          { grid-template-columns: 1fr !important; }
+  .msg-meta-grid      { grid-template-columns: 1fr 1fr !important; }
+  .stats-row          { grid-template-columns: 1fr 1fr !important; gap: 8px !important; }
+  .stu-stats-row      { grid-template-columns: repeat(3, 1fr) !important; gap: 6px !important; }
+  .form-row-2         { grid-template-columns: 1fr !important; }
+  .role-grid          { grid-template-columns: repeat(3, 1fr) !important; gap: 6px !important; }
+  .reg-role-grid      { grid-template-columns: 1fr 1fr !important; }
+  .courses-grid       { grid-template-columns: 1fr !important; gap: 12px !important; }
+  .books-grid         { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
 }
 
 @media (max-width: 420px) {
-  .paths-grid    { grid-template-columns: 1fr !important; }
-  .teachers-grid { grid-template-columns: 1fr !important; }
-  .schedule-grid { grid-template-columns: 1fr !important; }
-  .stats-bar     { grid-template-columns: 1fr 1fr !important; }
+  .paths-grid       { grid-template-columns: 1fr !important; }
+  .teachers-grid    { grid-template-columns: 1fr !important; }
+  .schedule-grid    { grid-template-columns: 1fr !important; }
+  .stu-stats-row    { grid-template-columns: 1fr 1fr !important; }
+  .books-grid       { grid-template-columns: 1fr !important; }
+  .role-grid        { grid-template-columns: repeat(2, 1fr) !important; }
 }
 
 /* ════════════════════════════════════════
-   5. TABLE — الجدول الرئيسي (admin/database)
+   6. TABLES — الجداول
    ════════════════════════════════════════ */
 @media (max-width: 768px) {
-
-  .table-wrapper {
+  /* أي جدول يُلف في wrapper يصبح scrollable */
+  .stu-table-wrap,
+  .table-wrapper,
+  .table-wrap,
+  .mat-table-wrap,
+  .table-scroll,
+  #studentsTableWrap {
     overflow-x: auto !important;
-    -webkit-overflow-scrolling: touch;
-    border-radius: var(--mob-radius);
-    border: 1px solid var(--border);
+    -webkit-overflow-scrolling: touch !important;
+    border-radius: var(--mob-radius) !important;
   }
 
-  /* تلميح السحب للمستخدم */
-  .table-wrapper::before {
-    content: '← اسحبي للمشاهدة →';
-    display: block;
-    text-align: center;
-    font-size: 11px;
-    color: var(--text-mid);
-    padding: 5px;
-    background: var(--beige2);
-    border-bottom: 1px solid var(--border);
-  }
+  .stu-table,
+  .mat-table,
+  .pending-table { min-width: 700px !important; }
 
-  table     { min-width: 700px !important; }
-  th, td    { padding: 8px 8px !important; font-size: 12px !important; white-space: nowrap; }
+  #studentsTableWrap table { min-width: 580px !important; }
+
+  th, td {
+    padding: 8px !important;
+    font-size: 12px !important;
+    white-space: nowrap !important;
+  }
 
   /* inputs داخل الجدول */
-  .name-cell input { font-size: 12px !important; padding: 5px 7px !important; }
-  .status-select,
-  .day-select      { font-size: 11px !important; padding: 4px !important; }
-  .date-day-sel    { width: 32px !important; font-size: 11px !important; }
-  .date-month-sel  { width: 60px !important; font-size: 11px !important; }
-  .date-year-sel   { width: 48px !important; font-size: 11px !important; }
-  .time-hour,
-  .time-minute     { width: 36px !important; font-size: 11px !important; }
-  .time-ampm       { width: 44px !important; font-size: 11px !important; }
-
-  /* أزرار الصفوف */
-  .row-btns { gap: 4px !important; flex-wrap: nowrap; }
-  .row-btns button { padding: 4px 7px !important; font-size: 11px !important; }
+  .stu-name-cell input { font-size: 12px !important; min-width: 80px !important; }
+  .status-sel, .day-sel { font-size: 11px !important; }
+  .bulk-sel             { font-size: 11px !important; }
+  .placement-input      { width: 52px !important; font-size: 12px !important; }
 }
 
 /* ════════════════════════════════════════
-   6. TOPBAR / FILTERS — شريط الأدوات
+   7. FILTER & TOPBAR — أشرطة البحث
    ════════════════════════════════════════ */
 @media (max-width: 768px) {
-
   .topbar,
   .filter-bar,
-  .search-bar {
+  .search-bar,
+  .stu-filter-bar,
+  .msg-filters,
+  .lib-filters {
     flex-wrap: wrap !important;
     gap: 8px !important;
     padding: 10px var(--mob-pad) !important;
   }
 
-  .search-modern,
-  .topbar input[type="text"],
+  .filter-bar input,
+  .stu-filter-bar input,
   .search-bar input {
     width: 100% !important;
     min-width: 0 !important;
     font-size: 13px !important;
   }
 
-  .modern-select,
-  select.filter {
+  .filter-bar select,
+  .stu-filter-bar select,
+  .modern-select {
     flex: 1 !important;
     min-width: 0 !important;
     font-size: 12px !important;
   }
 
-  /* أزرار الأدوات تمتلئ عرضياً */
-  .topbar-actions { width: 100%; display: flex; gap: 8px; flex-wrap: wrap; }
-  .topbar-actions button,
-  .topbar-actions a { flex: 1; justify-content: center; font-size: 12px !important; }
+  /* stu-bulk-bar */
+  .stu-bulk-bar   { flex-direction: column !important; gap: 10px !important; padding: 12px var(--mob-pad) !important; }
+  .stu-bulk-fields { flex-wrap: wrap !important; gap: 6px !important; }
+  .stu-bulk-info  { flex-wrap: wrap; }
+  .bulk-num       { width: 48px !important; }
+  .bulk-apply-btn { width: 100% !important; }
 }
 
 /* ════════════════════════════════════════
-   7. CARDS — بطاقات عامة
+   8. CARDS — بطاقات عامة
    ════════════════════════════════════════ */
 @media (max-width: 768px) {
+  .path-card, .teacher-card, .ann-card,
+  .t-section, .section-card { border-radius: var(--mob-radius) !important; }
 
-  .card,
-  .t-section,
-  .section-card,
-  .ann-card,
-  .path-card,
-  .teacher-card {
-    border-radius: var(--mob-radius) !important;
-  }
-
-  .path-card   { padding: 16px 12px !important; }
-  .path-icon   { font-size: 28px !important; margin-bottom: 8px !important; }
+  .path-card   { padding: 14px 10px !important; }
+  .path-icon   { font-size: 26px !important; margin-bottom: 6px !important; }
   .path-name   { font-size: 13px !important; }
 
-  .teacher-card { padding: 18px 12px !important; }
-  .tc-icon      { font-size: 30px !important; margin-bottom: 8px !important; }
-  .tc-name      { font-size: 15px !important; }
-  .tc-btn       { padding: 6px 14px !important; font-size: 11px !important; }
+  .teacher-card { padding: 16px 10px !important; }
+  .tc-icon      { font-size: 28px !important; }
+  .tc-name      { font-size: 14px !important; }
+  .tc-btn       { padding: 6px 12px !important; font-size: 11px !important; }
 
-  .ann-card { padding: 14px !important; }
-  .ann-card h4 { font-size: 14px !important; }
-  .ann-card p  { font-size: 12px !important; }
+  .ann-card     { padding: 12px !important; }
+  .ann-card h4  { font-size: 13px !important; }
+  .ann-card p   { font-size: 12px !important; }
+
+  .book-cover   { height: 90px !important; font-size: 30px !important; }
+  .book-info    { padding: 8px !important; }
+  .book-title   { font-size: 12px !important; }
+  .book-author  { font-size: 11px !important; }
 }
 
 /* ════════════════════════════════════════
-   8. SECTION-TITLE & BREADCRUMB
+   9. SECTION HEADERS
    ════════════════════════════════════════ */
 @media (max-width: 768px) {
-
-  .section-title {
-    font-size: 17px !important;
+  .section-head {
+    padding: 10px var(--mob-pad) !important;
+    flex-wrap: wrap !important;
     gap: 6px !important;
-    padding: 0 var(--mob-pad) !important;
   }
-
-  .breadcrumb {
-    padding: 8px var(--mob-pad) !important;
-    font-size: 11px !important;
-    flex-wrap: wrap;
-    gap: 4px;
-  }
-}
-
-/* ════════════════════════════════════════
-   9. MODALS — نوافذ منبثقة
-   ════════════════════════════════════════ */
-@media (max-width: 768px) {
-
-  /* export modal, message modal, reg modal */
-  .export-modal-box,
-  .msg-modal-box,
-  .reg-modal-content {
-    width: calc(100vw - 24px) !important;
-    max-width: unset !important;
-    max-height: 92vh !important;
-    overflow-y: auto;
-    margin: 12px !important;
-  }
-
-  .msg-modal-body,
-  .modal-body { padding: 14px var(--mob-pad) !important; }
-
-  .msg-meta-grid { grid-template-columns: 1fr 1fr !important; gap: 8px !important; }
-
-  /* stepper تسجيل */
-  .stepper { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 4px; }
-  .step-label { font-size: 10px !important; }
+  .section-head-title { font-size: 14px !important; }
+  .section-title      { font-size: 16px !important; padding: 0 var(--mob-pad) !important; }
+  .breadcrumb         { padding: 7px var(--mob-pad) !important; font-size: 11px !important; flex-wrap: wrap; gap: 4px; }
+  .card-head          { padding: 10px var(--mob-pad) !important; }
 }
 
 /* ════════════════════════════════════════
    10. FORMS — نماذج
    ════════════════════════════════════════ */
 @media (max-width: 768px) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="number"]),
+  textarea,
+  select {
+    font-size: 16px !important; /* منع zoom على iOS */
+  }
 
-  .t-field input,
-  .t-field textarea,
-  .t-field select,
-  .login-input,
-  .form-input { font-size: 14px !important; padding: 10px 12px !important; }
+  .t-field input, .t-field textarea, .t-field select,
+  .login-input, .form-input, .field input, .field select, .field textarea {
+    font-size: 16px !important;
+    padding: 10px 12px !important;
+  }
 
-  .t-submit,
-  .login-btn,
-  .btn-submit {
+  .t-submit, .login-btn, .btn-submit, .contact-submit,
+  .btn-add, .btn-bulk-add {
     width: 100% !important;
     justify-content: center !important;
     padding: 12px !important;
     font-size: 14px !important;
   }
 
-  .role-grid { gap: 6px !important; }
-  .role-btn  { padding: 8px 4px !important; }
-  .role-icon { font-size: 20px !important; }
-  .role-label{ font-size: 10px !important; }
+  .howto   { padding: 10px 12px !important; }
+  .howto-title { font-size: 12px !important; }
+  .howto-step  { font-size: 11.5px !important; }
+
+  .role-btn   { padding: 8px 4px !important; }
+  .role-icon  { font-size: 20px !important; }
+  .role-label { font-size: 10px !important; }
 }
 
 /* ════════════════════════════════════════
-   11. STUDENT PAGE — صفحة الطالبة
+   11. MODALS — نوافذ منبثقة
    ════════════════════════════════════════ */
 @media (max-width: 768px) {
-
-  .sv-header {
-    flex-direction: column !important;
-    gap: 10px !important;
-    align-items: flex-start !important;
-    padding: 14px var(--mob-pad) !important;
+  .export-modal-box,
+  .msg-modal-box,
+  .reg-modal-box,
+  .del-modal,
+  .modal-box {
+    width: calc(100vw - 24px) !important;
+    max-width: unset !important;
+    max-height: 92vh !important;
+    overflow-y: auto !important;
+    margin: 12px !important;
+    border-radius: 14px !important;
   }
 
-  .tabs { gap: 6px !important; flex-wrap: wrap !important; }
-  .tab  { padding: 7px 12px !important; font-size: 12px !important; flex: 1; text-align: center; }
+  .reg-modal-box    { padding: 0 !important; }
+  .reg-modal-header { padding: 16px var(--mob-pad) !important; }
+  .msg-modal-body,
+  .modal-body       { padding: 14px var(--mob-pad) !important; }
 
-  .grade-row,
-  .att-row { font-size: 12px !important; padding: 8px 12px !important; }
-
-  .att-badge { font-size: 11px !important; padding: 2px 8px !important; }
+  .stepper          { flex-wrap: nowrap !important; overflow-x: auto !important; padding-bottom: 4px !important; }
+  .step-label       { font-size: 10px !important; }
 }
 
 /* ════════════════════════════════════════
-   12. TEACHER PAGE TABS
+   12. TABS — التبويبات
    ════════════════════════════════════════ */
 @media (max-width: 768px) {
-
   .page-tabs {
-    padding: 0 var(--mob-pad) !important;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    gap: 0;
+    padding: 0 !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    gap: 0 !important;
+    border-radius: 0 !important;
   }
-
   .page-tab {
     padding: 11px 14px !important;
     font-size: 12px !important;
-    white-space: nowrap;
-    flex-shrink: 0;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
   }
+  .tabs   { gap: 6px !important; flex-wrap: wrap !important; }
+  .tab    { padding: 7px 12px !important; font-size: 12px !important; flex: 1 !important; text-align: center !important; }
+}
+
+/* ════════════════════════════════════════
+   13. STUDENT PAGES — صفحات الطالبة
+   ════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .student-header-bar {
+    padding: 10px var(--mob-pad) !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+  .welcome-card     { padding: 14px var(--mob-pad) !important; gap: 10px !important; }
+  .stats-bar.student-stats { grid-template-columns: repeat(2, 1fr) !important; }
+
+  .sv-header        { flex-direction: column !important; gap: 10px !important; padding: 14px var(--mob-pad) !important; }
+  .sv-info          { text-align: center !important; }
+  .sv-avatar        { margin: 0 auto !important; }
+
+  .grade-row, .att-row { font-size: 12px !important; padding: 8px 12px !important; }
+  .att-badge        { font-size: 11px !important; padding: 2px 8px !important; }
+
+  .session-card     { border-radius: 8px !important; }
+  .session-header   { padding: 10px 12px !important; font-size: 13px !important; }
+}
+
+/* ════════════════════════════════════════
+   14. TEACHER PAGES — صفحات المعلمة
+   ════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .t-wrap           { padding: 14px var(--mob-pad) !important; gap: 14px !important; }
+  .t-section        { border-radius: var(--mob-radius) !important; }
+  .t-section-head   { padding: 10px var(--mob-pad) !important; font-size: 14px !important; }
+  .t-section-body   { padding: 14px var(--mob-pad) !important; }
+
+  .schedule-card    { padding: 12px !important; }
+  .schedule-day     { font-size: 13px !important; }
+  .schedule-time    { font-size: 12px !important; }
 
   /* جدول الطالبات في صفحة المعلمة */
-  #studentsTableWrap table { min-width: 550px !important; }
   #studentsTableWrap th,
-  #studentsTableWrap td   { font-size: 12px !important; padding: 8px 8px !important; }
+  #studentsTableWrap td { font-size: 12px !important; padding: 8px !important; }
 
-  /* قائمة الرسائل */
-  .msg-item    { padding: 12px var(--mob-pad) !important; }
-  .msg-sender  { font-size: 12px !important; }
-  .msg-preview { font-size: 11px !important; }
-  .msg-filters { padding: 10px var(--mob-pad) !important; flex-wrap: wrap; }
+  /* رسائل */
+  .msg-item         { padding: 12px var(--mob-pad) !important; }
+  .msg-sender       { font-size: 13px !important; }
+  .msg-preview      { font-size: 12px !important; }
 
-  /* stats في صفحة المعلمة */
-  .stats-bar.teacher-stats { grid-template-columns: 1fr 1fr !important; }
+  /* profile */
+  .profile-grid     { grid-template-columns: 1fr !important; gap: 12px !important; }
+  .profile-avatar   { width: 64px !important; height: 64px !important; }
 }
 
 /* ════════════════════════════════════════
-   13. AYA BANNER
+   15. STATS PAGE — صفحة الإحصاءات
    ════════════════════════════════════════ */
 @media (max-width: 768px) {
-  .aya-banner      { padding: 14px var(--mob-pad) !important; }
-  .aya-text        { font-size: 16px !important; }
-  .aya-banner::after { display: none !important; }
+  .stat-box         { padding: 14px 10px !important; }
+  .stat-number      { font-size: 22px !important; }
+  .stat-label       { font-size: 12px !important; }
+  .chart-wrap       { padding: 10px !important; }
+  canvas            { max-height: 220px !important; }
 }
 
 /* ════════════════════════════════════════
-   14. FOOTER
+   16. ADMIN PAGE — لوحة الإدارة
    ════════════════════════════════════════ */
 @media (max-width: 768px) {
-  footer {
-    flex-direction: column !important;
-    text-align: center !important;
-    padding: 16px var(--mob-pad) !important;
-    gap: 10px !important;
-  }
-  footer::before { font-size: 9px !important; letter-spacing: 2px !important; white-space: normal; text-align: center; }
-  .footer-social { justify-content: center; }
+  .add-form { gap: 10px !important; }
+
+  /* pending section */
+  .pending-badge    { font-size: 11px !important; }
+
+  /* btn-add-student */
+  .btn-add-student  { font-size: 12px !important; padding: 7px 12px !important; }
+
+  /* export/import buttons */
+  .export-btn, #openExportBtn { width: 100% !important; justify-content: center !important; }
 }
 
 /* ════════════════════════════════════════
-   15. ISLAMIC DIVIDER
-   ════════════════════════════════════════ */
-@media (max-width: 768px) {
-  .islamic-divider { margin: 6px var(--mob-pad) !important; }
-  .islamic-divider span { font-size: 16px !important; letter-spacing: 4px !important; }
-}
-
-/* ════════════════════════════════════════
-   16. ADMIN PAGE
-   ════════════════════════════════════════ */
-@media (max-width: 768px) {
-
-  /* الـ bulk apply panel */
-  .bulk-panel,
-  .bulk-bar {
-    flex-direction: column !important;
-    gap: 10px !important;
-    padding: 12px var(--mob-pad) !important;
-  }
-  .bulk-panel > * { width: 100%; }
-
-  /* export button */
-  .export-btn,
-  #openExportBtn {
-    width: 100% !important;
-    justify-content: center !important;
-  }
-
-  /* selected count */
-  #selectedCount { font-size: 12px; }
-}
-
-/* ════════════════════════════════════════
-   17. LOGIN PAGE
+   17. LOGIN PAGE — صفحة الدخول
    ════════════════════════════════════════ */
 @media (max-width: 480px) {
-  .login-card { padding: 24px 16px !important; border-radius: 14px !important; }
+  .login-page   { padding: 16px 12px !important; padding-top: 24px !important; }
+  .login-card   { border-radius: 14px !important; max-width: 100% !important; }
+  .login-logo   { padding: 18px 16px 14px !important; }
+  .login-body   { padding: 16px 16px 20px !important; }
   .login-logo h1 { font-size: 18px !important; }
 }
 
 /* ════════════════════════════════════════
-   18. SCROLL IMPROVEMENTS
+   18. MESSAGES — الرسائل
+   ════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .messages-wrap    { flex-direction: column !important; }
+  .msg-sidebar      { width: 100% !important; max-height: 240px !important; }
+  .msg-detail       { border-right: none !important; border-top: 1px solid var(--border) !important; }
+}
+
+/* ════════════════════════════════════════
+   19. LIBRARY — المكتبة
+   ════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .lib-btn    { padding: 6px 12px !important; font-size: 12px !important; }
+}
+
+/* ════════════════════════════════════════
+   20. MISC — عناصر متفرقة
+   ════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .islamic-divider  { margin: 6px var(--mob-pad) !important; }
+  .islamic-divider span { font-size: 15px !important; letter-spacing: 3px !important; }
+
+  .aya-banner       { padding: 14px var(--mob-pad) !important; }
+  .aya-text         { font-size: 16px !important; }
+  .aya-banner::after { display: none !important; }
+
+  footer {
+    flex-direction: column !important;
+    text-align: center !important;
+    padding: 14px var(--mob-pad) !important;
+    gap: 10px !important;
+  }
+  .footer-social    { justify-content: center !important; }
+
+  .hero-badge       { font-size: 11px !important; padding: 3px 12px !important; }
+
+  /* welcome card في الرئيسية بعد الدخول */
+  .welcome-card .delete-acc-btn,
+  .welcome-card .logout-btn-s { font-size: 12px !important; padding: 6px 10px !important; }
+
+  /* contact form */
+  .contact-section  { padding: 32px 0 !important; }
+  .contact-header h2 { font-size: 22px !important; }
+  .contact-wrap     { padding: 0 var(--mob-pad) !important; }
+
+  /* supervisor */
+  .sup-wrap         { padding: 14px var(--mob-pad) !important; }
+  .sup-stats        { grid-template-columns: 1fr 1fr !important; }
+}
+
+/* ════════════════════════════════════════
+   21. EXTRA SMALL (< 380px)
+   ════════════════════════════════════════ */
+@media (max-width: 380px) {
+  :root { --mob-pad: 10px; }
+  .hero-text h1     { font-size: 26px !important; }
+  .stats-bar        { grid-template-columns: 1fr 1fr !important; }
+  .paths-grid       { grid-template-columns: 1fr !important; }
+  .stu-stats-row    { grid-template-columns: 1fr 1fr !important; }
+}
+
+/* ════════════════════════════════════════
+   22. SCROLL & TOUCH IMPROVEMENTS
    ════════════════════════════════════════ */
 @media (max-width: 768px) {
   html { scroll-behavior: smooth; }
 
-  /* منع overflow أفقي */
-  body { overflow-x: hidden !important; }
-
-  /* تحسين اللمس */
-  button, a, input, select, textarea {
-    -webkit-tap-highlight-color: transparent;
-  }
-  button { touch-action: manipulation; }
-}
-
-/* ════════════════════════════════════════
-   إضافة: جدول admin (mat-table)
-   ════════════════════════════════════════ */
-@media (max-width: 768px) {
-  .mat-table-wrap,
-  .table-wrap {
-    overflow-x: auto !important;
+  /* أي overflow-x: scroll يكون ناعم */
+  [style*="overflow-x: auto"],
+  [style*="overflow-x:auto"] {
     -webkit-overflow-scrolling: touch;
-    border-radius: 8px;
-  }
-  .mat-table {
-    min-width: 580px !important;
-  }
-  .mat-table th,
-  .mat-table td {
-    padding: 8px 8px !important;
-    font-size: 11.5px !important;
-    white-space: nowrap;
-  }
-  /* أزرار صغيرة */
-  .action-btn,
-  .view-btn,
-  .edit-btn,
-  .delete-btn {
-    padding: 4px 8px !important;
-    font-size: 11px !important;
-  }
-  /* الـ hero في admin */
-  .hero h1   { font-size: 19px !important; }
-  .hero      { padding: 18px 14px !important; }
-  /* filter bar */
-  .filter-bar {
-    flex-direction: column !important;
-    gap: 8px !important;
-    padding: 12px !important;
-  }
-  .filter-bar input,
-  .filter-bar select { width: 100% !important; min-width: 0 !important; }
-}
-
-/* ════════════════════════════════════════
-   19. LIBRARY PAGE — صفحة المكتبة
-   ════════════════════════════════════════ */
-@media (max-width: 768px) {
-  .lib-filters {
-    gap: 6px !important;
-    margin-bottom: 16px !important;
-  }
-  .lib-btn {
-    padding: 6px 12px !important;
-    font-size: 12px !important;
-  }
-  .books-grid {
-    grid-template-columns: repeat(2, 1fr) !important;
-    gap: 12px !important;
-  }
-  .book-card { border-radius: 10px !important; }
-  .book-cover { height: 100px !important; font-size: 32px !important; }
-  .book-info { padding: 10px !important; }
-  .book-title { font-size: 13px !important; margin-bottom: 3px !important; }
-  .book-author { font-size: 11px !important; margin-bottom: 6px !important; }
-  .book-cat { padding: 2px 8px !important; font-size: 10px !important; }
-}
-
-@media (max-width: 480px) {
-  .lib-filters { gap: 5px !important; margin-bottom: 12px !important; }
-  .lib-btn { padding: 5px 10px !important; font-size: 11px !important; }
-  .books-grid { grid-template-columns: 1fr !important; gap: 10px !important; }
-  .book-cover { height: 90px !important; font-size: 28px !important; }
-  .book-info { padding: 8px !important; }
-  .book-title { font-size: 12px !important; }
-  .book-author { font-size: 10px !important; }
-}
-
-/* ════════════════════════════════════════
-   20. GENERAL IMPROVEMENTS — تحسينات عام
-   ════════════════════════════════════════ */
-@media (max-width: 768px) {
-  /* Base font sizes */
-  body { font-size: 14px !important; }
-  h1 { font-size: 22px !important; }
-  h2 { font-size: 18px !important; }
-  h3 { font-size: 16px !important; }
-  h4 { font-size: 14px !important; }
-  p { font-size: 13px !important; line-height: 1.5 !important; }
-
-  /* Button sizes */
-  button, .btn, .btn-submit {
-    min-height: 44px !important;
-    font-size: 14px !important;
-    padding: 10px 16px !important;
   }
 
-  /* Input sizes */
-  input, textarea, select {
-    min-height: 44px !important;
-    font-size: 16px !important;
-  }
-
-  /* Link sizes */
-  a { font-size: 13px !important; }
-
-  /* Remove hover effects on touch devices */
+  /* إزالة hover effects على الشاشات اللمسية */
   @media (hover: none) {
-    button:hover, .btn:hover { transform: none !important; }
+    button:hover, .btn:hover, a:hover {
+      transform: none !important;
+      opacity: 1 !important;
+    }
   }
-}
-
-@media (max-width: 480px) {
-  h1 { font-size: 18px !important; }
-  h2 { font-size: 16px !important; }
-  h3 { font-size: 14px !important; }
-  p { font-size: 12px !important; }
-  
-  button, .btn { font-size: 13px !important; }
-  input, textarea, select { font-size: 14px !important; }
 }
