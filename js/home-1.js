@@ -21,14 +21,6 @@ onAuthStateChanged(auth, async user => {
     return;
   }
 
-  // تحديث زراير الـ hero لما المستخدمة تسجّل دخول
-  const heroBtns = document.getElementById('heroBtns');
-  if (heroBtns) {
-    heroBtns.innerHTML = `
-      <button class="hero-btn-gold" onclick="document.getElementById('reg-modal').classList.add('open')">التسجيل في البرنامج</button>
-      <button class="hero-btn-white">المزيد عن البرنامج ←</button>`;
-  }
-
   // مسجلة دخول — اجلب بيانات المستخدمة
   guest.style.display   = 'none';
   userDiv.style.display = 'block';
@@ -39,7 +31,19 @@ onAuthStateChanged(auth, async user => {
 
   document.getElementById('sidebarName').textContent = 'مرحباً، ' + name;
   document.getElementById('sidebarRole').textContent =
-    role === 'admin' ? 'مشرفة / معلمة' : 'الطالبة';
+    role === 'admin' ? 'إدارية' : 'الطالبة';
+
+  // لو إدارية — امسح كل الروابط وأضيف بس لوحة الإدارة
+  if (role === 'admin') {
+    const nav = userDiv.querySelector('.sidebar-nav');
+    if (nav) {
+      nav.innerHTML = `
+        <a href="../html/admin.html" class="admin-link" style="display:flex;align-items:center;gap:12px;padding:10px 14px;color:var(--text-mid);text-decoration:none;border-radius:6px;transition:all 0.2s;">
+          <i class="ti ti-shield"></i> لوحة الإداريات
+        </a>`;
+    }
+    return;
+  }
 
   // إخفاء زرار "عرض صفحات المعلمات" من الطالبات
   if (role === 'student' || role === 'mateen') {
@@ -51,39 +55,6 @@ onAuthStateChanged(auth, async user => {
   const profileLink = document.getElementById('profileLink');
   if (profileLink && role !== 'mateen') {
     profileLink.style.display = 'none';
-  }
-  // لو إدارية — أضيف رابط لوحة الإدارة
-  if (role === 'admin') {
-    const nav = userDiv.querySelector('.sidebar-nav');
-    if (nav && !nav.querySelector('.admin-link')) {
-      const divider = document.createElement('div');
-      divider.className = 'sidebar-divider';
-      const link = document.createElement('a');
-      link.href = 'admin.html';
-      link.className = 'admin-link';
-      link.innerHTML = '<i class="ti ti-shield"></i> لوحة الإداريات';
-      link.style.display = 'flex';
-      link.style.alignItems = 'center';
-      link.style.gap = '12px';
-      link.style.padding = '10px 14px';
-      link.style.color = 'var(--text-mid)';
-      link.style.textDecoration = 'none';
-      link.style.borderRadius = '6px';
-      link.style.transition = 'all 0.2s';
-      link.style.cursor = 'pointer';
-      nav.appendChild(divider);
-      nav.appendChild(link);
-      
-      // Add hover effect
-      link.addEventListener('mouseover', () => {
-        link.style.background = 'rgba(138,94,60,0.07)';
-        link.style.color = 'var(--green-dark)';
-      });
-      link.addEventListener('mouseout', () => {
-        link.style.background = 'transparent';
-        link.style.color = 'var(--text-mid)';
-      });
-    }
   }
 });
 
