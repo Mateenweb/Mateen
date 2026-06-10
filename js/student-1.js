@@ -80,7 +80,7 @@ document.getElementById('delConfirmBtn').addEventListener('click', async () => {
     await deleteUser(user);
 
     // توجيه لصفحة الرئيسية
-    window.location.href = 'home.html';
+    window.location.href = '../html/home.html';
 
   } catch(e) {
     const msgs = {
