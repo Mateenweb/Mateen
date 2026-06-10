@@ -707,7 +707,7 @@ footer {
 
 @media (max-width: 768px) {
   .main-wrap { grid-template-columns: 1fr; }
-  .sidebar   { display: none; }
+  .sidebar   { display: flex; } /* overridden by mobile.css */
 
   /* ── Nav ── */
   nav { padding: 0 14px; height: 52px; }
