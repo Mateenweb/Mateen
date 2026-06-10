@@ -706,8 +706,8 @@ footer {
 }
 
 @media (max-width: 768px) {
-  .main-wrap { grid-template-columns: 1fr; }
-  .sidebar   { display: flex; } /* overridden by mobile.css */
+  .main-wrap { display: flex !important; flex-direction: column !important; }
+  .sidebar   { display: flex !important; width: 100% !important; border-right: none !important; border-bottom: 2px solid var(--border) !important; order: -1 !important; }
 
   /* ── Nav ── */
   nav { padding: 0 14px; height: 52px; }
