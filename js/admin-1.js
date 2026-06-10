@@ -1,5 +1,5 @@
 
-import { initializeApp }
+import { initializeApp, getApps, getApp }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
@@ -8,18 +8,18 @@ import { getFirestore, collection, addDoc, deleteDoc, doc,
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 import { FIREBASE_CONFIG } from "./config.js";
 
-const app  = initializeApp(FIREBASE_CONFIG);
+const app  = getApps().length ? getApp() : initializeApp(FIREBASE_CONFIG);
 const auth = getAuth(app);
 const db   = getFirestore(app);
 let allMats = [];
 
 // ── AUTH GUARD ────────────────────────────────────────
 onAuthStateChanged(auth, async user => {
-  if (!user) { window.location.href = 'login.html'; return; }
+  if (!user) { window.location.href = '../html/login.html'; return; }
   const snap = await getDoc(doc(db, 'users', user.uid));
   const role = snap.exists() ? snap.data().role : 'student';
   if (role === 'student' || role === 'mateen' || role === 'supervisor') {
-    window.location.href = 'login.html'; return;
+    window.location.href = '../html/login.html'; return;
   }
   document.getElementById('navUserName').textContent  = user.displayName || user.email.split('@')[0];
   document.getElementById('authGate').style.display   = 'none';
@@ -33,7 +33,7 @@ onAuthStateChanged(auth, async user => {
   loadMats();
 });
 
-window.doLogout = () => signOut(auth).then(() => window.location.href = 'login.html');
+window.doLogout = () => signOut(auth).then(() => window.location.href = '../html/login.html');
 
 // ── ADD ───────────────────────────────────────────────
 window.doAdd = async () => {
