@@ -21,10 +21,10 @@ const auth = getAuth(app);
 
 // ── Auth Guard ───────────────────────────────
 onAuthStateChanged(auth, async user => {
-  if (!user) { window.location.href = 'login.html'; return; }
+  if (!user) { window.location.href = '../html/login.html'; return; }
   const snap = await getDoc(doc(db, 'users', user.uid));
   const role = snap.exists() ? snap.data().role : 'student';
-  if (role === 'student') { window.location.href = 'login.html'; return; }
+  if (role === 'student') { window.location.href = '../html/login.html'; return; }
   // Show page content
   const gate = document.getElementById('authGate');
   const main = document.getElementById('mainContent');
