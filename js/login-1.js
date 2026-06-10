@@ -2,7 +2,7 @@
 import { initializeApp }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail,
-         createUserWithEmailAndPassword }
+         createUserWithEmailAndPassword, setPersistence, browserLocalPersistence }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
 import { getFirestore, doc, getDoc, setDoc, addDoc, serverTimestamp,
          collection, getDocs, query, orderBy }
@@ -12,6 +12,9 @@ import { FIREBASE_CONFIG } from "./config.js";
 const app  = initializeApp(FIREBASE_CONFIG);
 const auth = getAuth(app);
 const db   = getFirestore(app);
+
+// ضمان حفظ الجلسة في localStorage
+setPersistence(auth, browserLocalPersistence);
 
 let loginRole = 'student';
 let regRole   = 'student';
