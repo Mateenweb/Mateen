@@ -189,7 +189,7 @@ nav {
   position: absolute;
   inset: 0;
   background: linear-gradient(
-    to left,
+    to right,
     rgba(247,239,227,0.0) 0%,
     rgba(247,239,227,0.55) 35%,
     rgba(247,239,227,0.92) 60%,
