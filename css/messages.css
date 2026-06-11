@@ -182,8 +182,67 @@
 }
 
 @media (max-width: 700px) {
-  .msg-layout { flex-direction: column; height: auto; }
-  .msg-sidebar { width: 100%; border-left: none; border-bottom: 1px solid var(--border); max-height: 260px; }
-  .msg-main { height: 60vh; }
-  .msg-bubble { max-width: 85%; }
+  /* Layout: full screen switching between list and chat */
+  .msg-layout {
+    flex-direction: column;
+    height: calc(100vh - 110px);
+    margin: 10px 8px;
+    border-radius: 12px;
+  }
+
+  /* قائمة المحادثات — تاخد الشاشة كاملة */
+  .msg-sidebar {
+    width: 100%;
+    border-left: none;
+    border-bottom: none;
+    max-height: 100%;
+    flex: 1;
+    display: flex;
+  }
+  .msg-sidebar.mob-hidden { display: none !important; }
+
+  /* المحادثة — مخفية لحد ما تفتح محادثة */
+  .msg-main { height: 100%; flex: 1; display: none; }
+  .msg-main.mob-visible { display: flex !important; }
+
+  /* زر الرجوع للقائمة */
+  .mob-back-btn {
+    display: flex !important;
+    align-items: center;
+    gap: 6px;
+    background: none;
+    border: none;
+    color: var(--green-dark);
+    font-size: 15px;
+    font-family: inherit;
+    cursor: pointer;
+    padding: 0;
+    font-weight: 600;
+  }
+
+  /* header المحادثة أكبر */
+  .msg-conv-head { padding: 12px 14px; gap: 10px; }
+  .msg-conv-name { font-size: 16px; }
+  .msg-conv-role { font-size: 13px; }
+
+  /* الفقاعات أكبر */
+  .msg-bubble { max-width: 88%; font-size: 15px; padding: 11px 14px; }
+  .msg-bubbles { padding: 14px 12px; gap: 10px; }
+
+  /* input أكبر */
+  .msg-input { font-size: 15px; padding: 11px 14px; }
+  .msg-send-btn { width: 46px; height: 46px; font-size: 18px; }
+  .msg-input-wrap { padding: 10px 12px; gap: 8px; }
+
+  /* قائمة المحادثات */
+  .msg-sidebar-head { padding: 14px 16px; font-size: 17px; }
+  .conv-item { padding: 14px 16px; gap: 12px; }
+  .conv-avatar { width: 48px; height: 48px; font-size: 24px; }
+  .conv-name { font-size: 15px; }
+  .conv-preview { font-size: 13px; max-width: 200px; }
+  .conv-time { font-size: 12px; }
+
+  /* البحث */
+  .tp-search { font-size: 15px; padding: 11px 14px; }
+  #convList { overflow-y: auto; }
 }

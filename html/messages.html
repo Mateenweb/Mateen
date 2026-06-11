@@ -60,6 +60,7 @@
 
     <div id="msgConv" style="display:none;height:100%;display:none;flex-direction:column">
       <div class="msg-conv-head">
+        <button class="mob-back-btn" onclick="mobBackToList()" style="display:none"><i class="ti ti-arrow-right"></i> الرسائل</button>
         <div class="msg-conv-avatar" id="convAvatar">👤</div>
         <div>
           <div class="msg-conv-name" id="convName">...</div>
@@ -89,5 +90,43 @@
 </div>
 
 <script type="module" src="../js/messages.js"></script>
+
+<script>
+// ── Mobile messages switching ──────────────
+function isMobMsg() { return window.innerWidth <= 700; }
+
+function mobOpenChat() {
+  if (!isMobMsg()) return;
+  document.querySelector('.msg-sidebar').classList.add('mob-hidden');
+  document.querySelector('.msg-main').classList.add('mob-visible');
+  document.querySelector('.mob-back-btn').style.display = 'flex';
+}
+
+window.mobBackToList = function() {
+  document.querySelector('.msg-sidebar').classList.remove('mob-hidden');
+  document.querySelector('.msg-main').classList.remove('mob-visible');
+  document.querySelector('.mob-back-btn').style.display = 'none';
+};
+
+// Hook into conv selection — patch after page loads
+window.addEventListener('load', () => {
+  const convList = document.getElementById('convList');
+  if (convList) {
+    convList.addEventListener('click', e => {
+      const item = e.target.closest('.conv-item');
+      if (item) setTimeout(mobOpenChat, 50);
+    });
+  }
+});
+
+window.addEventListener('resize', () => {
+  if (!isMobMsg()) {
+    document.querySelector('.msg-sidebar').classList.remove('mob-hidden');
+    document.querySelector('.msg-main').classList.remove('mob-visible');
+    const backBtn = document.querySelector('.mob-back-btn');
+    if (backBtn) backBtn.style.display = 'none';
+  }
+});
+</script>
 </body>
 </html>
