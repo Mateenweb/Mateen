@@ -609,6 +609,7 @@ html { overflow-x: hidden; }
    ════════════════════════════════════════ */
 @media (max-width: 768px) {
   #mainSidebar.sidebar {
+    display: none !important;
     position: fixed !important;
     top: 0 !important;
     right: -85% !important;
@@ -625,6 +626,7 @@ html { overflow-x: hidden; }
     border-right: none !important;
   }
   #mainSidebar.sidebar.open {
+    display: flex !important;
     right: 0 !important;
   }
   #mainSidebar #sidebar-user, #mainSidebar #sidebar-guest {
