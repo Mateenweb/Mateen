@@ -43,28 +43,22 @@ onAuthStateChanged(auth, async user => {
   document.getElementById('sidebarRole').textContent =
     role === 'admin' ? 'إدارية' : 'الطالبة';
 
-  // لو إدارية — امسح كل الروابط وأضيف بس لوحة الإدارة
+  // لو إدارية — أضيفي رابط لوحة الإدارة بدون مسح باقي الروابط
   if (role === 'admin') {
     const nav = userDiv.querySelector('.sidebar-nav');
-    if (nav) {
-      nav.innerHTML = `
-        <a href="../html/admin.html" class="admin-link" style="display:flex;align-items:center;gap:12px;padding:10px 14px;color:var(--text-mid);text-decoration:none;border-radius:6px;transition:all 0.2s;">
-          <i class="ti ti-shield"></i> لوحة الإداريات
-        </a>`;
+    if (nav && !nav.querySelector('.admin-link')) {
+      const a = document.createElement('a');
+      a.href = '../html/admin.html';
+      a.className = 'admin-link';
+      a.innerHTML = '<i class="ti ti-shield"></i> لوحة الإداريات';
+      nav.appendChild(a);
     }
-    return;
   }
 
   // إخفاء زرار "عرض صفحات المعلمات" من الطالبات
   if (role === 'student' || role === 'mateen') {
     const teachersLink = document.querySelector('a[href="teachers.html"]');
     if (teachersLink) teachersLink.closest('.contact-card').style.display = 'none';
-  }
-
-  // إخفاء "ملفي الشخصي" من غير طالبات متين
-  const profileLink = document.getElementById('profileLink');
-  if (profileLink && role !== 'mateen') {
-    profileLink.style.display = 'none';
   }
 });
 
