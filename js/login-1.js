@@ -131,7 +131,7 @@ window.doLogin = async () => {
     /* التحقق إن الصفة المختارة تطابق الـ role الفعلي */
     if (loginRole !== role) {
       await auth.signOut();
-      const roleNames = { student:'طالبة عادية', mateen:'طالبة متين', teacher:'معلمة', supervisor:'مشرفة', admin:'أدمن' };
+      const roleNames = { student:'أصدقاء متين', mateen:'بنات متين', teacher:'معلمة', supervisor:'مشرفة', admin:'إدارة' };
       showError(`هذا الحساب مسجّل كـ "${roleNames[role] || role}"، يرجى اختيار الصفة الصحيحة`);
       setLoading('loginBtn', false, '<i class="ti ti-login"></i> دخول');
       return;

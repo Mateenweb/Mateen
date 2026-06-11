@@ -148,11 +148,11 @@ function esc(s){ return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replac
 // ══════════════════════════════════════
 
 const ROLE_LABELS = {
-  student:    '🎓 طالبة عادية',
-  mateen:     '📖 طالبة متين',
+  student:    '🤝 أصدقاء متين',
+  mateen:     '📖 بنات متين',
   teacher:    '👩‍🏫 معلمة',
   supervisor: '🛡️ مشرفة',
-  admin:      '👑 أدمن',
+  admin:      '👑 إدارة',
 };
 
 function loadPendingAccounts() {
