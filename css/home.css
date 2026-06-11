@@ -169,8 +169,11 @@ nav {
    MAIN LAYOUT
    ════════════════════════════════════════ */
 .main-wrap {
-  display: grid;
-  grid-template-columns: 1fr 270px;
+  display: grid !important;
+  grid-template-columns: 270px 1fr !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
   min-height: calc(100vh - 96px);
 }
 .content-area { overflow: hidden; }
