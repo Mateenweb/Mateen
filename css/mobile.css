@@ -604,7 +604,7 @@ html { overflow-x: hidden; }
    X. SIDEBAR كقائمة منزلقة في الموبايل
    ════════════════════════════════════════ */
 @media (max-width: 768px) {
-  .sidebar {
+  #mainSidebar.sidebar {
     position: fixed !important;
     top: 0 !important;
     right: -85% !important;
@@ -618,24 +618,25 @@ html { overflow-x: hidden; }
     overflow-y: auto !important;
     box-sizing: border-box !important;
     border-bottom: none !important;
+    border-right: none !important;
   }
-  .sidebar.open {
+  #mainSidebar.sidebar.open {
     right: 0 !important;
   }
-  #sidebar-user, #sidebar-guest {
+  #mainSidebar #sidebar-user, #mainSidebar #sidebar-guest {
     width: 100% !important;
     box-sizing: border-box !important;
   }
-  #sidebar-user {
+  #mainSidebar #sidebar-user {
     display: flex !important;
     flex-direction: column !important;
     min-height: 100% !important;
   }
-  .sidebar-nav {
+  #mainSidebar .sidebar-nav {
     flex: 1 1 auto !important;
     overflow-y: auto !important;
   }
-  .sidebar-actions {
+  #mainSidebar .sidebar-actions {
     margin-top: auto !important;
     flex-shrink: 0 !important;
   }
