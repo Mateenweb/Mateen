@@ -437,20 +437,7 @@ box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 }
 
 /* hero الرئيسية */
-.hero {
-  background: linear-gradient(135deg, var(--beige2) 0%, var(--beige) 60%, #fff5e8 100%) !important;
-  border-bottom: 3px solid var(--gold) !important;
-}
-.hero-text h1 { color: var(--green-dark) !important; }
-.hero-text h2 { color: var(--text-mid) !important; }
-.hero-text p  { color: var(--text-mid) !important; }
-.hero-btn-gold  { background: var(--gold) !important; color: var(--green-dark) !important; }
-.hero-btn-white {
-  background: transparent !important;
-  color: var(--green-dark) !important;
-  border: 1.5px solid var(--green-dark) !important;
-}
-.hero-btn-white:hover { background: var(--green-dark) !important; color: var(--gold-light) !important; }
+/* hero styles handled in home.css */
 
 /* basmala تبقى غامقة — nav + basmala هم فقط الغامقين */
 .basmala-bar { background: linear-gradient(135deg, var(--green-dark), var(--green-mid)) !important; }

@@ -174,7 +174,7 @@ nav {
 
 /* ===== HERO ===== */
 .hero {
-  background: url('../hero-bg.png') center/cover no-repeat;
+  background: url('../hero-bg.png') center/cover no-repeat !important;
   padding: 70px 60px 70px 48px;
   display: flex;
   align-items: center;
@@ -241,8 +241,8 @@ nav {
 }
 
 .hero-btn-gold {
-  background: var(--green-dark);
-  color: white;
+  background: var(--green-dark) !important;
+  color: white !important;
   border: none;
   padding: 9px 20px;
   border-radius: 8px;
@@ -255,9 +255,9 @@ nav {
 .hero-btn-gold:hover { opacity: 0.88; }
 
 .hero-btn-white {
-  background: rgba(255,255,255,0.7);
-  border: 1.5px solid var(--border);
-  color: var(--green-dark);
+  background: rgba(255,255,255,0.7) !important;
+  border: 1.5px solid var(--border) !important;
+  color: var(--green-dark) !important;
   padding: 9px 20px;
   border-radius: 8px;
   cursor: pointer;
