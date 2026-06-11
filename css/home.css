@@ -443,6 +443,7 @@ body {
   width: 72px; height: 72px;
   border-radius: 50%; object-fit: cover;
   border: 2px solid var(--gold);
+  background: #1a4a2e;
   margin-bottom: 14px;
   display: block;
 }
