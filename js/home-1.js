@@ -61,9 +61,9 @@ onAuthStateChanged(auth, async user => {
     if (teachersLink) teachersLink.closest('.contact-card').style.display = 'none';
   }
 
-  // إخفاء "ملفي الشخصي" من غير طالبات متين
+  // إخفاء "ملفي الشخصي" من غير طالبات (عادية أو متين)
   const profileLink = document.getElementById('profileLink');
-  if (profileLink && role !== 'mateen') {
+  if (profileLink && role !== 'mateen' && role !== 'student') {
     profileLink.style.display = 'none';
   }
 });
