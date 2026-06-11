@@ -23,13 +23,13 @@ onAuthStateChanged(auth, async user => {
 
   // إخفاء زراير الـ hero لما تسجل دخول
   const heroBtns = document.getElementById('heroBtns');
-  if (heroBtns) heroBtns.style.display = 'none';
+  if (heroBtns) { heroBtns.classList.remove('d-flex','d-lg-flex'); heroBtns.classList.add('d-none'); }
 
   // إخفاء زراير الـ navbar
   const navBtns = document.getElementById('navBtns');
-  if (navBtns) navBtns.style.display = 'none';
+  if (navBtns) { navBtns.classList.remove('d-flex','d-lg-flex'); navBtns.classList.add('d-none'); }
   const mobNavBtns = document.getElementById('mobNavBtns');
-  if (mobNavBtns) mobNavBtns.style.display = 'none';
+  if (mobNavBtns) { mobNavBtns.classList.remove('d-flex','d-lg-flex'); mobNavBtns.classList.add('d-none'); }
 
   // مسجلة دخول — اجلب بيانات المستخدمة
   guest.style.display   = 'none';

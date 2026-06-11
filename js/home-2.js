@@ -18,7 +18,7 @@ onAuthStateChanged(auth, async user => {
   // إخفاء زراير تسجيل الدخول/التسجيل لما تكون مسجلة دخول
   ['heroBtns','navBtns','mobNavBtns'].forEach(id => {
     const el = document.getElementById(id);
-    if (el) el.style.display = 'none';
+    if (el) { el.classList.remove('d-flex','d-lg-flex'); el.classList.add('d-none'); }
   });
   const snap = await getDoc(doc(db, 'users', user.uid));
   const role = snap.exists() ? snap.data().role : 'student';
