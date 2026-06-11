@@ -303,3 +303,8 @@ document.addEventListener('keydown', e => {
   if (rf && rf.style.display !== 'none') window.doRegister();
   if (ff && ff.style.display !== 'none') window.doReset();
 });
+
+/* ── فتح تبويب التسجيل تلقائياً لو الرابط فيه #register ── */
+if (window.location.hash === '#register') {
+  window.switchTab('register');
+}
