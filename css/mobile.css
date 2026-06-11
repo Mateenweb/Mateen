@@ -626,6 +626,19 @@ html { overflow-x: hidden; }
     width: 100% !important;
     box-sizing: border-box !important;
   }
+  #sidebar-user {
+    display: flex !important;
+    flex-direction: column !important;
+    min-height: 100% !important;
+  }
+  .sidebar-nav {
+    flex: 1 1 auto !important;
+    overflow-y: auto !important;
+  }
+  .sidebar-actions {
+    margin-top: auto !important;
+    flex-shrink: 0 !important;
+  }
 
   .sidebar-overlay {
     display: none;
