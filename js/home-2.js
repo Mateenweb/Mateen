@@ -33,16 +33,16 @@ window.doLogout = () => signOut(auth).then(() => window.location.href='../html/l
 // ── Contact form with Firebase ────────────────
 const RECIPIENTS = {
   admin:   'الإدارة العامة',
-  tafseer: 'معلمة التفسير',
-  fiqh:    'معلمة الفقه',
-  aqeedah: 'معلمة العقيدة',
-  hadeeth: 'معلمة الحديث',
+  tafseer: 'دكتورة عبير عقلان',
+  fiqh:    'دكتورة أماني عقلان',
+  aqeedah: 'أستاذة رشا حمدي',
+  hadeeth: 'دكتورة حصة بنت عبدالعزيز',
   seera:   'معلمة السيرة النبوية',
   nahw:    'معلمة النحو والصرف',
   tajweed: 'معلمة التجويد',
   mutoon:  'معلمة المتون',
-  quran1:  'معلمة القرآن الأولى',
-  quran2:  'معلمة القرآن الثانية',
+  quran1:  'أستاذة رميساء محمد',
+  quran2:  'أستاذة أسماء محمد',
   tarbawi: 'معلمة البرامج التربوية',
 };
 

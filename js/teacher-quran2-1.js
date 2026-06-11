@@ -22,7 +22,7 @@ async function loadTeacherName() {
     );
     const snap = await getDocs(q);
     if (!snap.empty) {
-      const name = snap.docs[0].data().name || 'معلمة القرآن الثانية';
+      const name = snap.docs[0].data().name || 'أستاذة أسماء محمد';
       document.getElementById('teacherName').textContent = name;
       document.getElementById('breadcrumbName').textContent = name;
       document.getElementById('contactTitle').textContent = 'تواصلي مع ' + name;
