@@ -79,7 +79,7 @@ body {
   border: 2px solid var(--gold);
   overflow: hidden;
   flex-shrink: 0;
-  background: #000;
+  background: var(--green-dark);
   box-shadow: 0 0 0 1px rgba(201,162,39,0.25);
 }
 .logo-circle img {
@@ -269,7 +269,7 @@ body {
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid var(--gold);
-  background: #000;
+  background: var(--green-dark);
   box-shadow: 0 0 0 1px rgba(201,162,39,0.25);
 }
 
@@ -396,7 +396,7 @@ body {
   width: 32px; height: 32px;
   border-radius: 50%; object-fit: cover;
   border: 1.5px solid var(--gold);
-  background: #000;
+  background: var(--green-dark);
 }
 
 .sidebar-footer span {
