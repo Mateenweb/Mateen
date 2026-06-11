@@ -79,14 +79,11 @@ body {
   border: 1.5px solid var(--gold);
   overflow: hidden;
   flex-shrink: 0;
-  background: transparent;
-  mix-blend-mode: normal;
 }
 .logo-circle img {
   width: 100%;
   height: 100%;
   object-fit: contain;
-  mix-blend-mode: screen;
 }
 
 .nav-brand {
@@ -127,7 +124,6 @@ body {
 .btn-outline {
   border: 1px solid var(--gold);
   color: var(--gold);
-  background: transparent;
   padding: 6px 14px;
   border-radius: 7px;
   cursor: pointer;
@@ -271,9 +267,8 @@ body {
   border-radius: 50%;
   object-fit: contain;
   border: 2px solid var(--gold);
-  background: transparent;
-  mix-blend-mode: screen;
 }
+
 .sidebar-brand {
   font-family: Amiri, serif;
   color: var(--gold);
@@ -397,9 +392,8 @@ body {
   width: 30px; height: 30px;
   border-radius: 50%; object-fit: contain;
   border: 1px solid var(--gold);
-  background: transparent;
-  mix-blend-mode: screen;
 }
+
 .sidebar-footer span {
   color: var(--green-dark);
   font-family: Amiri, serif;
@@ -568,7 +562,6 @@ body {
   flex: 1;
 }
 .path-btn {
-  background: transparent;
   border: 1px solid var(--green-mid);
   color: var(--green-mid);
   padding: 5px 12px;
@@ -657,7 +650,6 @@ body {
   gap: 5px;
 }
 .view-all-btn {
-  background: transparent;
   border: 1px solid var(--green-mid);
   color: var(--green-mid);
   padding: 9px 20px;
