@@ -46,6 +46,11 @@
       <button class="btn-solid" onclick="document.getElementById('reg-modal').classList.add('open')">التسجيل في البرنامج</button>
     </div>
 
+    <button class="sidebar-fab d-lg-none" id="sidebarFab" aria-label="ملفي وحسابي" onclick="document.getElementById('mainSidebar').classList.add('open');document.getElementById('sidebarOverlay').classList.add('show')">
+      <i class="ti ti-user-circle"></i>
+      <span>حسابي</span>
+    </button>
+
     <button class="nav-toggle d-lg-none" id="mobileMenuToggle" aria-label="القائمة">
       <i class="ti ti-menu-2"></i>
     </button>
@@ -137,11 +142,6 @@
 
   <!-- Mobile sidebar overlay -->
   <div class="sidebar-overlay d-lg-none" id="sidebarOverlay" onclick="document.getElementById('mainSidebar').classList.remove('open');this.classList.remove('show')"></div>
-
-  <!-- Mobile floating button to open profile sidebar -->
-  <button class="sidebar-fab d-lg-none" id="sidebarFab" aria-label="القائمة الجانبية" onclick="document.getElementById('mainSidebar').classList.add('open');document.getElementById('sidebarOverlay').classList.add('show')">
-    <i class="ti ti-user-circle"></i>
-  </button>
 
   <!-- MAIN CONTENT -->
   <main class="content-area">
