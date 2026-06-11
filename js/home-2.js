@@ -14,6 +14,12 @@ onAuthStateChanged(auth, async user => {
   const userDiv = document.getElementById('sidebar-user');
   if (!user) { guest.style.display='block'; userDiv.style.display='none'; return; }
   guest.style.display='none'; userDiv.style.display='block';
+
+  // إخفاء زراير تسجيل الدخول/التسجيل لما تكون مسجلة دخول
+  ['heroBtns','navBtns','mobNavBtns'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
   const snap = await getDoc(doc(db, 'users', user.uid));
   const role = snap.exists() ? snap.data().role : 'student';
   const name = user.displayName || user.email.split('@')[0];
