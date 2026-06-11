@@ -8,6 +8,7 @@ const db   = getFirestore(app);
 const auth = getAuth(app);
 
 const DAYS_ORDER = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+const DAY_ICONS  = { 'الأحد':'🌅','الاثنين':'📖','الثلاثاء':'✏️','الأربعاء':'📚','الخميس':'🌿','الجمعة':'🕌','السبت':'⭐' };
 
 let currentUser = null;
 let teacherSubject = '';
@@ -55,25 +56,47 @@ async function loadSchedule() {
 
     const slots = [];
     snap.forEach(d => slots.push({ id: d.id, ...d.data() }));
-    slots.sort((a, b) => DAYS_ORDER.indexOf(a.day) - DAYS_ORDER.indexOf(b.day));
 
-    container.innerHTML = slots.map(s => `
-      <div class="sched-row">
-        <div class="sched-day-badge">${s.day}</div>
-        <div>
-          <div class="sched-time-val">${s.time || '--:--'}</div>
-          ${s.note ? `<div class="sched-note-val">${s.note}</div>` : ''}
-        </div>
-        <button class="sched-del-btn" onclick="deleteSlot('${s.id}')"><i class="ti ti-trash"></i></button>
-      </div>
-    `).join('');
+    // رتّب حسب الأيام ثم الوقت
+    const byDay = {};
+    DAYS_ORDER.forEach(d => byDay[d] = []);
+    slots.forEach(s => { if (byDay[s.day]) byDay[s.day].push(s); });
+    const activeDays = DAYS_ORDER.filter(d => byDay[d].length > 0);
+
+    let html = '<div class="schedule-week">';
+    activeDays.forEach(day => {
+      const daySlots = byDay[day].sort((a,b) => (a.time||'').localeCompare(b.time||''));
+      html += '<div class="sched-day-group">';
+      html += '<div class="sched-day-header">';
+      html += '<span class="sched-day-icon">' + (DAY_ICONS[day]||'📅') + '</span>';
+      html += '<span class="sched-day-name">' + day + '</span>';
+      html += '<span class="sched-day-count">' + daySlots.length + ' موعد</span>';
+      html += '</div>';
+      html += '<div class="sched-slots">';
+      daySlots.forEach(s => {
+        html += '<div class="sched-slot">';
+        html += '<span class="sched-time-pill"><i class="ti ti-clock"></i> ' + (s.time||'--:--') + '</span>';
+        if (s.note) {
+          html += '<span class="sched-note-text">' + s.note + '</span>';
+        } else {
+          html += '<span class="sched-note-text" style="color:var(--text-light)">—</span>';
+        }
+        html += '<button class="sched-del-btn" onclick="deleteSlot(\'' + s.id + '\')"><i class="ti ti-trash"></i></button>';
+        html += '</div>';
+      });
+      html += '</div></div>';
+    });
+    html += '</div>';
+    container.innerHTML = html;
+
   } catch(e) {
-    container.innerHTML = '<div class="empty-state">حدث خطأ أثناء التحميل</div>';
+    container.innerHTML = '<div class="empty-state"><i class="ti ti-alert-circle"></i><span>حدث خطأ أثناء التحميل</span></div>';
   }
 }
 
 window.showAddSlot = () => {
   document.getElementById('addSlotForm').style.display = 'block';
+  document.getElementById('addSlotForm').scrollIntoView({ behavior: 'smooth', block: 'start' });
 };
 
 window.saveSlot = async () => {
