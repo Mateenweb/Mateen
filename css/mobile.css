@@ -612,11 +612,11 @@ html { overflow-x: hidden; }
     display: none !important;
     position: fixed !important;
     top: 0 !important;
+    bottom: 0 !important;
     right: -85% !important;
     left: auto !important;
     width: 85% !important;
     max-width: 320px !important;
-    height: 100vh !important;
     z-index: 1050 !important;
     transition: right 0.3s ease !important;
     box-shadow: -4px 0 20px rgba(0,0,0,0.15) !important;
