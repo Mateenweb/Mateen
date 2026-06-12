@@ -1,4 +1,3 @@
-
 import { initializeApp, getApps, getApp }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
 import { getFirestore, doc, getDoc, collection, onSnapshot, query, orderBy, deleteDoc }
@@ -60,7 +59,7 @@ onAuthStateChanged(auth, async user => {
     }
     document.getElementById('authGate').style.display    = 'none';
     document.getElementById('mainContent').style.display = 'block';
-    initPage(studentId);
+    initPage(studentId, teacherSubject);
     return;
   }
 
