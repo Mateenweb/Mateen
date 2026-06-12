@@ -11,6 +11,7 @@
 <link href="../libs/tabler-icons/tabler-icons.min.css" rel="stylesheet"/>
 <link href="../libs/bootstrap/bootstrap.rtl.min.css" rel="stylesheet"/>
 <link href="../css/home.css" rel="stylesheet"/>
+<link href="../css/mobile.css" rel="stylesheet"/>
 </head>
 <body>
 
@@ -41,10 +42,15 @@
       <li><a href="#contact">تواصل معنا</a></li>
     </ul>
 
-    <div class="nav-btns d-none d-lg-flex">
+    <div class="nav-btns d-none d-lg-flex" id="navBtns">
       <a class="btn-outline" href="login.html"><i class="ti ti-user"></i> تسجيل الدخول</a>
       <button class="btn-solid" onclick="document.getElementById('reg-modal').classList.add('open')">التسجيل في البرنامج</button>
     </div>
+
+    <button class="sidebar-fab d-lg-none" id="sidebarFab" aria-label="ملفي وحسابي" data-bs-toggle="offcanvas" data-bs-target="#mainSidebar" aria-controls="mainSidebar">
+      <i class="ti ti-user-circle"></i>
+      <span>حسابي</span>
+    </button>
 
     <button class="nav-toggle d-lg-none" id="mobileMenuToggle" aria-label="القائمة">
       <i class="ti ti-menu-2"></i>
@@ -61,7 +67,7 @@
       <li><a href="news.html"><i class="ti ti-speakerphone"></i> الأخبار</a></li>
       <li><a href="#contact"><i class="ti ti-headset"></i> تواصل معنا</a></li>
     </ul>
-    <div class="mobile-menu-btns">
+    <div class="mobile-menu-btns" id="mobNavBtns">
       <a class="mob-login-btn" href="login.html"><i class="ti ti-login"></i> تسجيل الدخول</a>
       <button class="mob-reg-btn" onclick="document.getElementById('mobileMenu').classList.remove('open');document.getElementById('reg-modal').classList.add('open')">
         <i class="ti ti-user-plus"></i> التسجيل في البرنامج
@@ -151,11 +157,11 @@
         <div class="hero-ornament">❧ ✦ ❧</div>
         <h1>علمٌ يُبنى عليه<br>إيمانٌ يُثمر حياة</h1>
         <p>منصة متين تقدم لك تعلماً أصيلاً من القرآن والسنة<br>على يد نخبة من العلماء والباحثين</p>
-        <div class="hero-btns">
-          <a class="hero-btn-primary" href="courses.html"><i class="ti ti-compass"></i> استكشفي الدورات</a>
-          <button class="hero-btn-secondary" onclick="document.getElementById('reg-modal').classList.add('open')">
-            <i class="ti ti-info-circle"></i> تعرفي على متين
-          </button>
+        <div class="hero-btns" id="heroBtns">
+          <a class="hero-btn-primary" href="login.html"><i class="ti ti-login"></i> تسجيل الدخول</a>
+          <a class="hero-btn-secondary" href="login.html#register">
+            <i class="ti ti-user-plus"></i> انضمي إلى متين
+          </a>
         </div>
       </div>
     </section>
@@ -333,12 +339,12 @@
                   <option value="admin">الإدارة العامة</option>
                 </optgroup>
                 <optgroup label="── المعلمات ──">
-                  <option value="tafseer">معلمة التفسير</option>
-                  <option value="fiqh">معلمة الفقه</option>
-                  <option value="aqeedah">معلمة العقيدة</option>
-                  <option value="hadeeth">معلمة الحديث</option>
-                  <option value="quran1">معلمة القرآن الأولى</option>
-                  <option value="quran2">معلمة القرآن الثانية</option>
+                  <option value="tafseer">دكتورة عبير عقلان - التفسير</option>
+                  <option value="fiqh">دكتورة أماني عقلان - الفقه</option>
+                  <option value="aqeedah">أستاذة رشا حمدي - العقيدة</option>
+                  <option value="hadeeth">دكتورة حصة بنت عبدالعزيز - الحديث</option>
+                  <option value="quran1">أستاذة رُميساء محمد السيد الزهري - القرآن</option>
+                  <option value="quran2">أستاذة أسماء محمد السيد الزهري - القرآن</option>
                 </optgroup>
               </select>
             </div>

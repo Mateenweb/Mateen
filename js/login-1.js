@@ -2,7 +2,8 @@
 import { initializeApp }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail,
-         createUserWithEmailAndPassword, setPersistence, browserLocalPersistence }
+         createUserWithEmailAndPassword, setPersistence, browserLocalPersistence,
+         onAuthStateChanged }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
 import { getFirestore, doc, getDoc, setDoc, addDoc, serverTimestamp,
          collection, getDocs, query, orderBy }
@@ -15,6 +16,31 @@ const db   = getFirestore(app);
 
 // ضمان حفظ الجلسة في localStorage
 setPersistence(auth, browserLocalPersistence);
+
+// لو المستخدمة مسجلة دخول بالفعل — حوّليها بعيداً عن صفحة الدخول
+onAuthStateChanged(auth, async user => {
+  if (!user) return;
+  if (window.location.hash === '#noredirect') return;
+  try {
+    const snap = await getDoc(doc(db, 'users', user.uid));
+    const data = snap.exists() ? snap.data() : {};
+    const role = data.role || 'student';
+    let redirect = 'home.html';
+
+    if (role === 'student' || role === 'mateen') {
+      redirect = 'home.html';
+    } else if (role === 'teacher') {
+      const subjectId = data.subject || '';
+      redirect = subjectId ? `teacher-${subjectId}.html` : 'home.html';
+    } else if (role === 'admin' || role === 'supervisor') {
+      redirect = 'home.html';
+    }
+
+    window.location.replace(redirect);
+  } catch(e) {
+    window.location.replace('home.html');
+  }
+});
 
 let loginRole = 'student';
 let regRole   = 'student';
@@ -131,7 +157,7 @@ window.doLogin = async () => {
     /* التحقق إن الصفة المختارة تطابق الـ role الفعلي */
     if (loginRole !== role) {
       await auth.signOut();
-      const roleNames = { student:'طالبة عادية', mateen:'طالبة متين', teacher:'معلمة', supervisor:'مشرفة', admin:'أدمن' };
+      const roleNames = { student:'أصدقاء متين', mateen:'بنات متين', teacher:'معلمة', supervisor:'مشرفة', admin:'إدارة' };
       showError(`هذا الحساب مسجّل كـ "${roleNames[role] || role}"، يرجى اختيار الصفة الصحيحة`);
       setLoading('loginBtn', false, '<i class="ti ti-login"></i> دخول');
       return;
@@ -303,3 +329,8 @@ document.addEventListener('keydown', e => {
   if (rf && rf.style.display !== 'none') window.doRegister();
   if (ff && ff.style.display !== 'none') window.doReset();
 });
+
+/* ── فتح تبويب التسجيل تلقائياً لو الرابط فيه #register ── */
+if (window.location.hash === '#register') {
+  window.switchTab('register');
+}

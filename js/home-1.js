@@ -23,17 +23,17 @@ onAuthStateChanged(auth, async user => {
 
   // إخفاء زراير الـ hero لما تسجل دخول
   const heroBtns = document.getElementById('heroBtns');
-  if (heroBtns) heroBtns.style.display = 'none';
+  if (heroBtns) { heroBtns.classList.remove('d-flex','d-lg-flex'); heroBtns.classList.add('d-none'); }
 
   // إخفاء زراير الـ navbar
   const navBtns = document.getElementById('navBtns');
-  if (navBtns) navBtns.style.display = 'none';
+  if (navBtns) { navBtns.classList.remove('d-flex','d-lg-flex'); navBtns.classList.add('d-none'); }
   const mobNavBtns = document.getElementById('mobNavBtns');
-  if (mobNavBtns) mobNavBtns.style.display = 'none';
+  if (mobNavBtns) { mobNavBtns.classList.remove('d-flex','d-lg-flex'); mobNavBtns.classList.add('d-none'); }
 
   // مسجلة دخول — اجلب بيانات المستخدمة
   guest.style.display   = 'none';
-  userDiv.style.display = 'block';
+  userDiv.style.display = 'block'; userDiv.classList.add('show-user');
 
   const snap = await getDoc(doc(db, 'users', user.uid));
   const role = snap.exists() ? snap.data().role : 'student';
@@ -61,9 +61,9 @@ onAuthStateChanged(auth, async user => {
     if (teachersLink) teachersLink.closest('.contact-card').style.display = 'none';
   }
 
-  // إخفاء "ملفي الشخصي" من غير طالبات متين
+  // إخفاء "ملفي الشخصي" من غير طالبات (عادية أو متين)
   const profileLink = document.getElementById('profileLink');
-  if (profileLink && role !== 'mateen') {
+  if (profileLink && role !== 'mateen' && role !== 'student') {
     profileLink.style.display = 'none';
   }
 });

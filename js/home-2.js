@@ -13,7 +13,13 @@ onAuthStateChanged(auth, async user => {
   const guest   = document.getElementById('sidebar-guest');
   const userDiv = document.getElementById('sidebar-user');
   if (!user) { guest.style.display='block'; userDiv.style.display='none'; return; }
-  guest.style.display='none'; userDiv.style.display='block';
+  guest.style.display='none'; userDiv.style.display='block'; userDiv.classList.add('show-user');
+
+  // إخفاء زراير تسجيل الدخول/التسجيل لما تكون مسجلة دخول
+  ['heroBtns','navBtns','mobNavBtns'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.classList.remove('d-flex','d-lg-flex'); el.classList.add('d-none'); }
+  });
   const snap = await getDoc(doc(db, 'users', user.uid));
   const role = snap.exists() ? snap.data().role : 'student';
   const name = user.displayName || user.email.split('@')[0];
@@ -33,16 +39,16 @@ window.doLogout = () => signOut(auth).then(() => window.location.href='../html/l
 // ── Contact form with Firebase ────────────────
 const RECIPIENTS = {
   admin:   'الإدارة العامة',
-  tafseer: 'معلمة التفسير',
-  fiqh:    'معلمة الفقه',
-  aqeedah: 'معلمة العقيدة',
-  hadeeth: 'معلمة الحديث',
+  tafseer: 'دكتورة عبير عقلان',
+  fiqh:    'دكتورة أماني عقلان',
+  aqeedah: 'أستاذة رشا حمدي',
+  hadeeth: 'دكتورة حصة بنت عبدالعزيز',
   seera:   'معلمة السيرة النبوية',
   nahw:    'معلمة النحو والصرف',
   tajweed: 'معلمة التجويد',
   mutoon:  'معلمة المتون',
-  quran1:  'معلمة القرآن الأولى',
-  quran2:  'معلمة القرآن الثانية',
+  quran1:  'أستاذة رُميساء محمد السيد الزهري',
+  quran2:  'أستاذة أسماء محمد السيد الزهري',
   tarbawi: 'معلمة البرامج التربوية',
 };
 

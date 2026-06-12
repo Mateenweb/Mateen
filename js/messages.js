@@ -7,7 +7,7 @@ const app  = initializeApp(FIREBASE_CONFIG);
 const db   = getFirestore(app);
 const auth = getAuth(app);
 
-const ROLE_LABELS  = { student: 'طالبة', mateen: 'طالبة متين', teacher: 'معلمة', supervisor: 'مشرفة', admin: 'أدمن' };
+const ROLE_LABELS  = { student: 'أصدقاء متين', mateen: 'بنات متين', teacher: 'معلمة', supervisor: 'مشرفة', admin: 'إدارة' };
 const ROLE_AVATARS = { student: '👧', mateen: '🌸', teacher: '👩‍🏫', supervisor: '👩‍💼', admin: '🛡️' };
 
 let currentUser     = null;

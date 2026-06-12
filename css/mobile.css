@@ -88,25 +88,30 @@ html { overflow-x: hidden; }
    ════════════════════════════════════════ */
 @media (max-width: 768px) {
   .hero {
-    padding: 24px var(--mob-pad) !important;
+    padding: 32px var(--mob-pad) !important;
     flex-direction: column !important;
     align-items: center !important;
     text-align: center !important;
     min-height: unset !important;
-    gap: 12px !important;
+    gap: 0 !important;
   }
   .hero-img         { display: none !important; }
   .hero-logo-mobile {
     display: block !important;
     width: 80px !important; height: 80px !important;
-    margin-bottom: 10px !important;
+    background: #1a4a2e !important;
+    margin: 0 auto 16px !important;
   }
-  .hero-text h1     { font-size: 34px !important; }
+  .hero-text { max-width: 100% !important; }
+  .hero-ornament    { font-size: 14px !important; margin-bottom: 10px !important; }
+  .hero-text h1     { font-size: 32px !important; line-height: 1.35 !important; margin-bottom: 14px !important; }
   .hero-text h2     { font-size: 17px !important; }
-  .hero-text p      { font-size: 15px !important; margin-bottom: 14px !important; }
-  .hero-btns        { flex-direction: column !important; gap: 10px !important; align-items: stretch !important; }
+  .hero-text p      { font-size: 15px !important; line-height: 1.8 !important; margin-bottom: 22px !important; }
+  .hero-btns        { flex-direction: column !important; gap: 10px !important; align-items: stretch !important; width: 100% !important; }
+  .hero-btn-primary,
+  .hero-btn-secondary,
   .hero-btn-gold,
-  .hero-btn-white   { width: 100% !important; text-align: center !important; padding: 14px !important; font-size: 16px !important; }
+  .hero-btn-white   { width: 100% !important; justify-content: center !important; text-align: center !important; padding: 14px !important; font-size: 16px !important; }
 
   .page-hero        { padding: 24px var(--mob-pad) !important; }
   .page-hero h1     { font-size: 22px !important; }
@@ -596,5 +601,52 @@ html { overflow-x: hidden; }
       transform: none !important;
       opacity: 1 !important;
     }
+  }
+}
+
+/* ════════════════════════════════════════
+   X. SIDEBAR كـ Offcanvas (Bootstrap) في الموبايل
+   ════════════════════════════════════════ */
+@media (max-width: 991px) {
+  #mainSidebar.offcanvas {
+    width: 85% !important;
+    max-width: 320px !important;
+  }
+  #mainSidebar #sidebar-user.show-user {
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  #mainSidebar #sidebar-user .sidebar-nav {
+    position: static !important;
+    flex: 0 0 auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  #mainSidebar #sidebar-user .sidebar-actions {
+    position: static !important;
+    order: 99 !important;
+    margin-top: 8px !important;
+  }
+
+  .sidebar-fab {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--green-dark, #1a4a2e);
+    color: var(--gold, #c9a227);
+    border: 1.5px solid var(--gold, #c9a227);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 13px;
+    font-weight: 600;
+    margin-inline-start: 8px;
+    cursor: pointer;
+  }
+  .sidebar-fab i { font-size: 18px; }
+}
+
+@media (min-width: 992px) {
+  .sidebar-fab {
+    display: none !important;
   }
 }
