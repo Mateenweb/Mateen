@@ -80,6 +80,12 @@ onAuthStateChanged(auth, async user => {
 
   loadConversations();
   loadAllUsers();
+
+  // فتح مودال "رسالة جديدة" لو جاية من الهوم بـ ?compose=1
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('compose') === '1') {
+    setTimeout(() => window.showNewConv && window.showNewConv(), 600);
+  }
 });
 
 window.doLogout = () => signOut(auth).then(() => window.location.href = '../html/login.html');
@@ -371,3 +377,4 @@ function escapeHtml(str) {
 function escapeAttr(str) {
   return String(str).replace(/'/g,"\\'").replace(/"/g,'\\"');
 }
+
