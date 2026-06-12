@@ -47,6 +47,7 @@ let currentUser     = null;
 let currentUserData = null;
 let activeConvId    = null;
 let msgUnsub        = null;
+let convUnsub       = null;   // unsubscribe للـ conversations listener
 let allUsers        = [];
 let allConvs        = [];
 
@@ -77,6 +78,11 @@ onAuthStateChanged(auth, async user => {
   }
   const myNameEl = document.getElementById('myName');
   if (myNameEl) myNameEl.textContent = data.name || currentUser.email;
+
+  // إلغاء أي listeners قديمة قبل إعادة التشغيل (مهم عند الريفريش)
+  if (convUnsub) { convUnsub(); convUnsub = null; }
+  if (msgUnsub)  { msgUnsub();  msgUnsub  = null; }
+  activeConvId = null;
 
   loadConversations();
   loadAllUsers();
@@ -148,7 +154,7 @@ function loadConversations() {
     orderBy('lastAt', 'desc')
   );
 
-  onSnapshot(q, async snap => {
+  convUnsub = onSnapshot(q, async snap => {
     allConvs = [];
     const promises = snap.docs.map(async d => {
       const data    = d.data();
@@ -383,4 +389,5 @@ function escapeHtml(str) {
 function escapeAttr(str) {
   return String(str).replace(/'/g,"\\'").replace(/"/g,'\\"');
 }
+
 
