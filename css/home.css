@@ -879,52 +879,103 @@ footer {
 }
 .reg-close:hover { background: #fde8e8; color: #c0392b; }
 
-/* ===== RESPONSIVE BREAKPOINTS ===== */
+/* ===================================================
+   RESPONSIVE BREAKPOINTS — Bootstrap 5 standard sizes
+   xs  < 576px
+   sm  576px–767px
+   md  768px–991px
+   lg  992px–1199px
+   xl  1200px+
+   =================================================== */
 
-/* Tablet */
-@media (max-width: 1199px) {
-  .hero { padding: 60px 40px; }
-  .hero-text h1 { font-size: 44px; }
-  .page-section { padding: 24px 24px; }
-  .col-xl-2dot4 { width: 33.333%; }
+/* --------------------------------------------------
+   LG (992px–1199px) — Tablet landscape / small laptop
+   Bootstrap: @media (max-width: 1199.98px)
+   -------------------------------------------------- */
+@media (max-width: 1199.98px) {
+  /* CONFLICT: hero has hardcoded padding: 80px 60px — scale down */
+  .hero { padding: 56px 36px; }
+  .hero-text h1 { font-size: 42px; }
+
+  /* CONFLICT: page-section padding: 28px 32px — reduce */
+  .page-section { padding: 22px 20px; }
+
+  /* 5-col grid → 3 col */
+  .col-xl-2dot4 { width: 33.333% !important; }
 }
 
-/* Small tablet */
-@media (max-width: 991px) {
+/* --------------------------------------------------
+   MD (768px–991px) — Tablet portrait
+   Bootstrap: @media (max-width: 991.98px)
+   -------------------------------------------------- */
+@media (max-width: 991.98px) {
+  /* CONFLICT: page-layout is flex row — force column on tablet */
   .page-layout { flex-direction: column; }
-  .hero { padding: 44px 28px; min-height: 340px; }
-  .hero-text h1 { font-size: 38px; }
-  .col-xl-2dot4 { width: 33.333%; }
+
+  /* CONFLICT: hero padding too large for tablet */
+  .hero { padding: 40px 24px; min-height: 300px; }
+  .hero-text h1 { font-size: 36px; }
+
+  /* 3-col grid stays on tablet */
+  .col-xl-2dot4 { width: 33.333% !important; }
+
+  /* CONFLICT: footer padding too wide */
   footer { padding: 14px 20px; }
+
+  /* CONFLICT: contact section over-padded */
+  .contact-section { padding: 48px 0; }
 }
 
-/* Mobile */
-@media (max-width: 767px) {
+/* --------------------------------------------------
+   SM (576px–767px) — Large phone / small tablet
+   Bootstrap: @media (max-width: 767.98px)
+   -------------------------------------------------- */
+@media (max-width: 767.98px) {
+  /* CONFLICT: hero text-align not centered on mobile */
   .hero {
-    padding: 32px 20px;
+    padding: 28px 16px;
     text-align: center;
     min-height: unset;
     justify-content: center;
   }
-  .hero::before {
-    background: rgba(247,239,227,0.88);
-  }
+  /* CONFLICT: hero overlay too transparent — boost on mobile */
+  .hero::before { background: rgba(247,239,227,0.9); }
+
   .hero-text { max-width: 100%; }
-  .hero-text h1 { font-size: 32px; }
+  .hero-text h1 { font-size: 30px; line-height: 1.25; }
   .hero-text p { font-size: 13px; }
   .hero-btns { justify-content: center; }
-  .hero-btn-primary, .hero-btn-secondary { padding: 9px 18px; font-size: 13px; }
+  .hero-btn-primary,
+  .hero-btn-secondary { padding: 9px 16px; font-size: 13px; }
 
-  .col-xl-2dot4 { width: 50%; }
+  /* CONFLICT: col-xl-2dot4 stays 33% → force 50% on mobile */
+  .col-xl-2dot4 { width: 50% !important; }
 
-  .page-section { padding: 20px 16px; }
-  .stats-bar { padding: 16px 12px; }
+  /* CONFLICT: page-section padding: 28px 32px — too wide for phone */
+  .page-section { padding: 18px 14px; }
 
-  .contact-section { padding: 40px 0; }
-  .contact-form-wrap { padding: 20px; }
-  .reg-modal-box { padding: 22px; }
+  /* CONFLICT: stats bar padding too much */
+  .stats-bar { padding: 14px 10px; }
+
+  /* CONFLICT: stat-item borders wrong on 2-col grid */
+  .stat-item {
+    border-left: none !important;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    padding-bottom: 12px;
+  }
+  .stat-item:nth-child(odd) { border-right: 1px solid rgba(255,255,255,0.1); }
+  .stat-item:nth-child(3),
+  .stat-item:last-child { border-bottom: none; }
+
+  /* CONFLICT: contact section padding */
+  .contact-section { padding: 36px 0; }
+  .contact-form-wrap { padding: 18px 14px; }
+
+  /* CONFLICT: reg-modal padding too large */
+  .reg-modal-box { padding: 20px 16px; }
   .reg-modal-header { flex-wrap: wrap; gap: 10px; }
 
+  /* CONFLICT: footer flex-row breaks on mobile */
   footer {
     padding: 14px 16px;
     flex-direction: column;
@@ -933,51 +984,82 @@ footer {
   }
   .footer-dua { flex: none; }
   .footer-social { justify-content: center; }
+
+  /* CONFLICT: navbar inner padding too much */
+  .nav-inner { padding: 0 14px; }
+
+  /* CONFLICT: section-title font too large */
+  .section-title { font-size: 18px; }
 }
 
-/* Very small mobile */
-@media (max-width: 420px) {
+/* --------------------------------------------------
+   XS (< 576px) — Small phones
+   Bootstrap: @media (max-width: 575.98px)
+   -------------------------------------------------- */
+@media (max-width: 575.98px) {
+  /* CONFLICT: hero h1 still too big on tiny screens */
   .hero-text h1 { font-size: 26px; }
-  .col-xl-2dot4 { width: 50%; }
+
+  /* CONFLICT: nav-brand overflow on very small screens */
   .nav-brand { font-size: 13px; }
+  .nav-tagline { display: none; }
+
+  /* CONFLICT: basmala text overflows on 320px screens */
+  .basmala-bar { font-size: 13px; letter-spacing: 0.5px; }
+
+  /* CONFLICT: path cards padding too much */
+  .path-card { padding: 12px 8px; }
+  .path-icon { width: 44px; height: 44px; font-size: 18px; }
+
+  /* CONFLICT: ann-card padding */
+  .ann-card { padding: 14px 12px; }
+
+  /* CONFLICT: contact cards gap */
+  .contact-card { padding: 12px 14px; gap: 10px; }
+  .contact-icon { width: 38px; height: 38px; font-size: 17px; }
+
+  /* CONFLICT: hero buttons stack vertically */
+  .hero-btns { flex-direction: column; gap: 8px; align-items: center; }
+  .hero-btn-primary, .hero-btn-secondary { width: 100%; justify-content: center; }
 }
 
-/* ===========================
-   MOBILE SIDEBAR DRAWER FIX
-   =========================== */
-
-/* Mobile sidebar: hidden off-canvas by default */
-@media (max-width: 991px) {
+/* --------------------------------------------------
+   MOBILE SIDEBAR DRAWER
+   — off-canvas from right, Bootstrap breakpoint md
+   -------------------------------------------------- */
+@media (max-width: 991.98px) {
+  /* CONFLICT: sidebar has d-none d-lg-flex in HTML
+     — override to use off-canvas drawer instead */
   .sidebar {
     display: flex !important;
     position: fixed;
     top: 0; bottom: 0;
-    left: -280px;
+    left: -280px;   /* hidden off right edge in RTL */
     right: auto;
     width: 260px;
     min-width: 260px;
     height: 100vh;
     z-index: 800;
-    box-shadow: 4px 0 24px rgba(0,0,0,0.18);
-    transition: left 0.3s ease;
+    box-shadow: 4px 0 24px rgba(0,0,0,0.22);
+    transition: left 0.28s cubic-bezier(0.4,0,0.2,1);
     overflow-y: auto;
+    overflow-x: hidden;  /* CONFLICT: prevent inner content from causing h-scroll */
   }
 
-  .sidebar.mobile-open {
-    left: 0;
-  }
+  .sidebar.mobile-open { left: 0; }
 
-  /* Overlay behind sidebar */
+  /* Overlay */
   .sidebar-overlay {
     display: none;
     position: fixed;
     inset: 0;
     background: rgba(0,0,0,0.45);
     z-index: 799;
+    backdrop-filter: blur(1px);
   }
   .sidebar-overlay.active { display: block; }
 
-  /* Fix sidebar-user display on mobile */
+  /* CONFLICT: sidebar-user JS sets display:block — override to flex */
   #sidebar-user {
     display: flex !important;
     flex-direction: column;
@@ -992,42 +1074,58 @@ footer {
     box-sizing: border-box;
   }
 
-  /* Fix sidebar-actions padding */
-  .sidebar-actions {
-    padding: 0 12px 12px;
-  }
+  /* Bigger touch targets on mobile nav links */
+  .sidebar-nav a { padding: 12px 16px; font-size: 14px; }
 
-  /* Fix sidebar nav links */
-  .sidebar-nav a {
-    padding: 11px 14px;
-    font-size: 14px;
-  }
-
-  /* Fix sidebar header */
-  .sidebar-header {
-    padding: 16px 14px;
-  }
-
-  /* Close button inside sidebar on mobile */
+  /* Close button shown only on mobile */
   .sidebar-close-btn {
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    padding: 10px 14px 0;
+    padding: 10px 12px 0;
+    background: var(--green-dark);
   }
   .sidebar-close-btn button {
-    background: rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.12);
     border: none;
     color: white;
-    font-size: 22px;
+    font-size: 20px;
     cursor: pointer;
     border-radius: 50%;
-    width: 34px; height: 34px;
+    width: 32px; height: 32px;
     display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s;
   }
+  .sidebar-close-btn button:hover { background: rgba(255,255,255,0.22); }
+
+  /* CONFLICT: prevent body scroll when sidebar open */
+  body.sidebar-open { overflow: hidden; }
 }
 
 @media (min-width: 992px) {
+  /* Hide mobile-only elements on desktop */
   .sidebar-overlay { display: none !important; }
   .sidebar-close-btn { display: none !important; }
+}
+
+/* --------------------------------------------------
+   GLOBAL OVERFLOW FIX
+   — prevents horizontal scroll on all screen sizes
+   -------------------------------------------------- */
+html, body {
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
+/* CONFLICT: any element wider than viewport — force clamp */
+.page-layout,
+.content-area,
+.main-nav,
+.hero,
+.page-section,
+.stats-bar,
+.contact-section,
+footer {
+  max-width: 100%;
+  box-sizing: border-box;
 }
