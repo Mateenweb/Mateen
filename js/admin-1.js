@@ -619,7 +619,7 @@ window.renderAllUsers = () => {
       ? new Date(u.createdAt.seconds * 1000).toLocaleDateString('ar-EG', { year:'numeric', month:'short', day:'numeric' })
       : '—';
 
-    const actionBtns = u.status === 'active'
+    const toggleBtn = u.status === 'active'
       ? `<button class="btn-reject" style="font-size:11px;padding:4px 10px"
            onclick="suspendUser('${u.id}')">
            <i class="ti ti-ban"></i> إيقاف
@@ -630,6 +630,15 @@ window.renderAllUsers = () => {
            <i class="ti ti-player-play"></i> إعادة تفعيل
          </button>`
       : `<span style="color:var(--text-mid);font-size:12px">—</span>`;
+
+    const actionBtns = `<div style="display:flex;gap:5px;align-items:center">
+      ${toggleBtn}
+      <button class="btn-del-stu" title="حذف الحساب نهائياً"
+        onclick="deleteUserAccount('${u.id}','${u.name ? u.name.replace(/'/g,"\\'"): ""}')"
+        style="padding:4px 8px;font-size:12px">
+        <i class="ti ti-trash"></i>
+      </button>
+    </div>`;
 
     return `<tr>
       <td style="color:var(--text-mid);font-size:12px">${i + 1}</td>
@@ -654,4 +663,13 @@ window.reactivateUser = async id => {
   await updateDoc(doc(db, 'users', id), { status: 'active' });
   showToast('✓ تم إعادة تفعيل الحساب');
 };
+
+window.deleteUserAccount = async (id, name) => {
+  const label = name || 'هذا المستخدم';
+  if (!confirm(`هل أنتِ متأكدة من حذف حساب "${label}" نهائياً؟\nلا يمكن التراجع عن هذا الإجراء.`)) return;
+  if (!confirm(`تأكيد أخير: سيُحذف حساب "${label}" بشكل دائم.`)) return;
+  await deleteDoc(doc(db, 'users', id));
+  showToast('تم حذف الحساب نهائياً');
+};
+
 
