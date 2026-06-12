@@ -10,7 +10,7 @@ const app  = getApps().length ? getApp() : initializeApp(FIREBASE_CONFIG);
 const auth = getAuth(app);
 const db   = getFirestore(app);
 
-const ROLE_COLORS = {
+const ROLE_BG = {
   student:    '#d8f3dc',
   mateen:     '#b7e4c7',
   teacher:    '#e9f5db',
@@ -35,23 +35,19 @@ function timeAgo(ts) {
 function initials(name) {
   if (!name) return '؟';
   const parts = name.trim().split(' ');
-  return parts.length >= 2
-    ? parts[0][0] + parts[1][0]
-    : name[0];
+  return parts.length >= 2 ? parts[0][0] + parts[1][0] : name[0];
 }
 
 onAuthStateChanged(auth, async user => {
-  if (!user) return; // not logged in → section stays hidden
+  if (!user) return;
 
   const section = document.getElementById('homeMessagesSection');
   const listEl  = document.getElementById('homeConvList');
   if (!section || !listEl) return;
 
-  // Show section
   section.style.display = 'block';
 
   try {
-    // Fetch conversations where user is participant, latest first
     const q = query(
       collection(db, 'conversations'),
       where('participants', 'array-contains', user.uid),
@@ -64,22 +60,21 @@ onAuthStateChanged(auth, async user => {
     if (convSnap.empty) {
       listEl.innerHTML = `
         <div class="home-conv-empty">
-          <i class="ti ti-message-off" style="font-size:28px;display:block;margin-bottom:8px;color:#ccc"></i>
-          لا توجد محادثات بعد.<br>
-          <a href="messages.html" style="color:var(--green-dark);font-size:13px">ابدئي محادثة جديدة</a>
+          <i class="ti ti-message-off" style="font-size:26px;display:block;margin-bottom:6px;color:#ccc"></i>
+          لا توجد محادثات بعد —
+          <a href="messages.html?compose=1" style="color:var(--green-dark);font-weight:600">ابدئي محادثة جديدة</a>
         </div>`;
       return;
     }
 
-    // Collect other-user IDs
+    // collect other user IDs
     const otherIds = [];
     convSnap.forEach(d => {
-      const parts = d.data().participants || [];
-      const other = parts.find(p => p !== user.uid);
+      const other = (d.data().participants || []).find(p => p !== user.uid);
       if (other && !otherIds.includes(other)) otherIds.push(other);
     });
 
-    // Fetch user profiles
+    // fetch profiles
     const userCache = {};
     await Promise.all(otherIds.map(async uid => {
       try {
@@ -88,30 +83,26 @@ onAuthStateChanged(auth, async user => {
       } catch (_) {}
     }));
 
-    // Build HTML
     let html = '';
     convSnap.forEach(d => {
       const data    = d.data();
-      const parts   = data.participants || [];
-      const otherId = parts.find(p => p !== user.uid);
+      const otherId = (data.participants || []).find(p => p !== user.uid);
       const other   = userCache[otherId] || {};
       const name    = other.name || 'مستخدم';
       const role    = other.role || 'student';
       const lastMsg = data.lastMsg || '...';
-      const lastAt  = data.lastAt  || null;
-      const unread  = (data.unread && data.unread[user.uid]) ? data.unread[user.uid] : 0;
-      const avatarBg = ROLE_COLORS[role] || '#e8f4ea';
-      const convId  = d.id;
+      const unread  = data.unread && data.unread[user.uid] ? data.unread[user.uid] : 0;
+      const bg      = ROLE_BG[role] || '#e8f4ea';
 
       html += `
-        <a class="home-conv-item" href="messages.html?conv=${convId}">
-          <div class="home-conv-avatar" style="background:${avatarBg}">${initials(name)}</div>
+        <a class="home-conv-item" href="messages.html?conv=${d.id}">
+          <div class="home-conv-avatar" style="background:${bg}">${initials(name)}</div>
           <div class="home-conv-body">
             <div class="home-conv-name">${name}</div>
             <div class="home-conv-preview">${lastMsg}</div>
           </div>
           <div class="home-conv-meta">
-            <span class="home-conv-time">${timeAgo(lastAt)}</span>
+            <span class="home-conv-time">${timeAgo(data.lastAt)}</span>
             ${unread > 0 ? `<span class="home-conv-unread">${unread}</span>` : ''}
           </div>
         </a>`;
@@ -120,7 +111,7 @@ onAuthStateChanged(auth, async user => {
     listEl.innerHTML = html;
 
   } catch (err) {
-    console.error('home-msg error:', err);
+    console.error('home-msg:', err);
     listEl.innerHTML = `<div class="home-conv-empty">تعذّر تحميل الرسائل</div>`;
   }
 });
