@@ -936,3 +936,93 @@ footer {
   .col-xl-2dot4 { width: 50%; }
   .nav-brand { font-size: 13px; }
 }
+
+/* ===========================
+   MOBILE SIDEBAR DRAWER FIX
+   =========================== */
+
+/* Mobile sidebar: hidden off-canvas by default */
+@media (max-width: 991px) {
+  .sidebar {
+    display: flex !important;
+    position: fixed;
+    top: 0; bottom: 0;
+    right: -280px;
+    left: auto;
+    width: 260px;
+    min-width: 260px;
+    height: 100vh;
+    z-index: 800;
+    box-shadow: -4px 0 24px rgba(0,0,0,0.18);
+    transition: right 0.3s ease;
+    overflow-y: auto;
+  }
+
+  .sidebar.mobile-open {
+    right: 0;
+  }
+
+  /* Overlay behind sidebar */
+  .sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    z-index: 799;
+  }
+  .sidebar-overlay.active { display: block; }
+
+  /* Fix sidebar-user display on mobile */
+  #sidebar-user {
+    display: flex !important;
+    flex-direction: column;
+    flex: 1;
+  }
+
+  /* Fix logout button sizing */
+  .sidebar-logout-btn {
+    font-size: 13px;
+    padding: 10px 12px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* Fix sidebar-actions padding */
+  .sidebar-actions {
+    padding: 0 12px 12px;
+  }
+
+  /* Fix sidebar nav links */
+  .sidebar-nav a {
+    padding: 11px 14px;
+    font-size: 14px;
+  }
+
+  /* Fix sidebar header */
+  .sidebar-header {
+    padding: 16px 14px;
+  }
+
+  /* Close button inside sidebar on mobile */
+  .sidebar-close-btn {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 10px 14px 0;
+  }
+  .sidebar-close-btn button {
+    background: rgba(255,255,255,0.1);
+    border: none;
+    color: white;
+    font-size: 22px;
+    cursor: pointer;
+    border-radius: 50%;
+    width: 34px; height: 34px;
+    display: flex; align-items: center; justify-content: center;
+  }
+}
+
+@media (min-width: 992px) {
+  .sidebar-overlay { display: none !important; }
+  .sidebar-close-btn { display: none !important; }
+}
