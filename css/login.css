@@ -139,7 +139,7 @@ body:has(.login-page) {
 
 /* Responsive */
 @media (max-width:768px) {
-  .login-page  { padding:16px 12px; align-items:flex-start; padding-top:24px; }
+  .login-page  { padding:16px 12px; }
   .login-card  { border-radius:16px; max-width:100%; }
   .login-logo  { padding:20px 20px 16px; }
   .login-body  { padding:18px 18px 24px; }
