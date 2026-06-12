@@ -223,9 +223,109 @@ function renderPending(list) {
   cont.innerHTML = html;
 }
 
+// ── مودال الربط ───────────────────────────────────────────
+let _pendingApproveId   = null;   // uid المستخدمة المنتظرة للموافقة
+window._selectedLinkId  = null;   // id الطالبة المختارة في الجدول
+
 window.approveUser = async id => {
-  await updateDoc(doc(db, 'users', id), { status: 'active' });
-  showToast('✓ تم قبول الحساب');
+  // اجلب بيانات المستخدمة لعرضها في المودال
+  const snap = await getDoc(doc(db, 'users', id));
+  const name = snap.exists() ? (snap.data().name || snap.data().email || id) : id;
+
+  _pendingApproveId      = id;
+  window._selectedLinkId = null;
+
+  // عنوان فرعي
+  document.getElementById('linkModalSubtitle').textContent =
+    'اختاري طالبة لربطها بحساب: ' + name;
+
+  // مسح البحث
+  document.getElementById('linkSearch').value = '';
+
+  // ابنِ قائمة الطالبات (من allStudents المحملة مسبقاً)
+  renderLinkList(allStudents);
+
+  // أظهر المودال
+  const modal = document.getElementById('linkModal');
+  modal.style.display = 'flex';
+};
+
+window.closeLinkModal = () => {
+  document.getElementById('linkModal').style.display = 'none';
+  _pendingApproveId = null;
+  window._selectedLinkId = null;
+};
+
+window.filterLinkList = () => {
+  const q = document.getElementById('linkSearch').value.trim().toLowerCase();
+  renderLinkList(q ? allStudents.filter(s => (s.name||'').toLowerCase().includes(q)) : allStudents);
+};
+
+function renderLinkList(list) {
+  const el = document.getElementById('linkStudentList');
+  if (!list.length) {
+    el.innerHTML = '<div style="text-align:center;color:#aaa;padding:28px;font-family:Noto Naskh Arabic,serif">لا توجد نتائج</div>';
+    return;
+  }
+  el.innerHTML = list.map(s => {
+    const linked    = s.uid ? `<span style="font-size:11px;background:#d8f3dc;color:#1a4a2e;padding:2px 8px;border-radius:10px;margin-right:6px">مرتبطة ✓</span>` : '';
+    const dayTime   = [s.day, s.hour ? s.hour + ' ' + (s.ampm||'') : ''].filter(Boolean).join(' — ');
+    return `<div id="linkItem_${s.id}"
+      onclick="selectLinkStudent('${s.id}')"
+      style="display:flex;align-items:center;gap:12px;padding:11px 18px;cursor:pointer;border-bottom:1px solid #f5f0e8;transition:background .15s">
+      <div style="width:38px;height:38px;border-radius:50%;background:#e9f5db;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:#1a4a2e;font-family:'Noto Naskh Arabic',serif;flex-shrink:0">
+        ${(s.name||'؟')[0]}
+      </div>
+      <div style="flex:1;min-width:0">
+        <div style="font-family:'Noto Naskh Arabic',serif;font-weight:600;font-size:14px;color:#1a4a2e">${s.name||'—'}${linked}</div>
+        <div style="font-size:12px;color:#999;font-family:'Noto Naskh Arabic',serif">${dayTime||'لم يحدد موعد'}</div>
+      </div>
+      <div id="linkCheck_${s.id}" style="width:22px;height:22px;border-radius:50%;border:2px solid #d4c9a8;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s"></div>
+    </div>`;
+  }).join('');
+}
+
+window.selectLinkStudent = id => {
+  // أزل تحديد القديم
+  if (window._selectedLinkId) {
+    const prev = document.getElementById('linkItem_' + window._selectedLinkId);
+    const prevCheck = document.getElementById('linkCheck_' + window._selectedLinkId);
+    if (prev)      prev.style.background = '';
+    if (prevCheck) { prevCheck.style.background = ''; prevCheck.style.borderColor = '#d4c9a8'; prevCheck.innerHTML = ''; }
+  }
+  window._selectedLinkId = id;
+  const item  = document.getElementById('linkItem_' + id);
+  const check = document.getElementById('linkCheck_' + id);
+  if (item)  item.style.background  = '#f0faf3';
+  if (check) { check.style.background = '#1a4a2e'; check.style.borderColor = '#1a4a2e'; check.innerHTML = '<i class="ti ti-check" style="font-size:12px;color:#fff"></i>'; }
+
+  const btn = document.getElementById('linkConfirmBtn');
+  btn.disabled = false;
+  btn.style.opacity = '1';
+};
+
+window.confirmLinkModal = async (studentId) => {
+  if (!_pendingApproveId) return;
+  const uid = _pendingApproveId;
+
+  // أغلق المودال أولاً
+  document.getElementById('linkModal').style.display = 'none';
+  _pendingApproveId = null;
+  window._selectedLinkId = null;
+
+  // فعّل الحساب
+  await updateDoc(doc(db, 'users', uid), {
+    status: 'active',
+    ...(studentId ? { linkedStudentId: studentId } : {})
+  });
+
+  // لو في ربط، حفظ uid في سجل الطالبة في الجدول
+  if (studentId) {
+    await updateDoc(doc(db, 'students', studentId), { uid });
+    showToast('✓ تم قبول الحساب وربطه بالطالبة');
+  } else {
+    showToast('✓ تم قبول الحساب بدون ربط');
+  }
 };
 
 window.rejectUser = async id => {
