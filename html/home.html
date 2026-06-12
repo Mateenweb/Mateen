@@ -1,468 +1,785 @@
 <!DOCTYPE html>
-<html dir="rtl" lang="ar">
+<html lang="ar" dir="rtl">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<link rel="icon" type="image/x-icon" href="../favicon.ico"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>برنامج متين العلمي — الصفحة الرئيسية</title>
-<link href="https://fonts.googleapis.com" rel="preconnect"/>
-<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;500;600;700&family=Amiri:wght@400;700&display=swap" rel="stylesheet"/>
-<link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.42.0/dist/tabler-icons.min.css" rel="stylesheet"/>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css" rel="stylesheet"/>
-<link href="../css/home.css" rel="stylesheet"/>
-<link href="../css/mobile.css" rel="stylesheet"/>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Cairo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --gold: #b8962e;
+    --gold-light: #d4af5a;
+    --gold-pale: #f5edd8;
+    --gold-deep: #8a6f1f;
+    --ink: #1c1a14;
+    --ink-soft: #3d3826;
+    --parchment: #faf6ee;
+    --parchment-dark: #f0e9d8;
+    --white: #ffffff;
+    --border: #e0d4b0;
+    --shadow: rgba(28,26,20,0.08);
+    --radius: 12px;
+    --radius-sm: 8px;
+    --nav-h: 72px;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Cairo', sans-serif;
+    background: var(--parchment);
+    color: var(--ink);
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* ── NAV ── */
+  .nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    height: var(--nav-h);
+    display: flex;
+    align-items: center;
+    padding: 0 clamp(1rem, 4vw, 3rem);
+    gap: 1.5rem;
+  }
+
+  .nav-logo {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    text-decoration: none;
+    flex-shrink: 0;
+  }
+  .nav-logo img { width: 40px; height: 40px; object-fit: contain; }
+  .nav-logo span {
+    font-family: 'Amiri', serif;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--gold-deep);
+    white-space: nowrap;
+  }
+
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    list-style: none;
+    flex: 1;
+    justify-content: center;
+  }
+  .nav-links a {
+    text-decoration: none;
+    color: var(--ink-soft);
+    font-size: 0.9rem;
+    font-weight: 500;
+    padding: 0.4rem 0.75rem;
+    border-radius: var(--radius-sm);
+    transition: background 0.2s, color 0.2s;
+  }
+  .nav-links a:hover, .nav-links a.active {
+    background: var(--gold-pale);
+    color: var(--gold-deep);
+  }
+
+  .nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-shrink: 0;
+  }
+  .btn-ghost {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--ink-soft);
+    padding: 0.4rem 1rem;
+    border-radius: var(--radius-sm);
+    font-family: 'Cairo', sans-serif;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .btn-ghost:hover { border-color: var(--gold); color: var(--gold-deep); }
+
+  .btn-primary {
+    background: var(--gold);
+    border: none;
+    color: var(--white);
+    padding: 0.45rem 1.1rem;
+    border-radius: var(--radius-sm);
+    font-family: 'Cairo', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .btn-primary:hover { background: var(--gold-deep); }
+
+  /* Hamburger */
+  .hamburger {
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 4px;
+    margin-right: auto;
+  }
+  .hamburger span {
+    display: block;
+    width: 22px;
+    height: 2px;
+    background: var(--ink-soft);
+    border-radius: 2px;
+    transition: all 0.3s;
+  }
+
+  /* Mobile nav drawer */
+  .mobile-drawer {
+    display: none;
+    position: fixed;
+    top: var(--nav-h);
+    right: 0;
+    left: 0;
+    bottom: 0;
+    background: var(--white);
+    z-index: 99;
+    padding: 1.5rem;
+    flex-direction: column;
+    gap: 0.5rem;
+    overflow-y: auto;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+  }
+  .mobile-drawer.open { transform: translateX(0); }
+  .mobile-drawer a {
+    text-decoration: none;
+    color: var(--ink);
+    font-size: 1rem;
+    font-weight: 500;
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius-sm);
+    border-bottom: 1px solid var(--border);
+  }
+  .mobile-drawer a:hover { background: var(--gold-pale); color: var(--gold-deep); }
+  .mobile-drawer .mobile-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 1rem;
+  }
+  .mobile-drawer .btn-ghost,
+  .mobile-drawer .btn-primary { text-align: center; padding: 0.75rem; font-size: 0.95rem; }
+
+  /* ── HERO ── */
+  .hero {
+    text-align: center;
+    padding: clamp(3rem, 8vw, 6rem) clamp(1rem, 5vw, 3rem) clamp(2.5rem, 6vw, 5rem);
+    background: linear-gradient(170deg, var(--white) 0%, var(--gold-pale) 60%, var(--parchment) 100%);
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      radial-gradient(circle at 20% 80%, rgba(184,150,46,0.06) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba(184,150,46,0.06) 0%, transparent 50%);
+  }
+
+  .hero-ornament {
+    font-family: 'Amiri', serif;
+    color: var(--gold-light);
+    font-size: clamp(1.1rem, 3vw, 1.5rem);
+    letter-spacing: 0.2em;
+    margin-bottom: 1.5rem;
+  }
+
+  .hero-logo {
+    width: clamp(70px, 14vw, 100px);
+    height: clamp(70px, 14vw, 100px);
+    margin: 0 auto 1.5rem;
+    display: block;
+    filter: drop-shadow(0 4px 12px rgba(184,150,46,0.2));
+  }
+
+  .hero h1 {
+    font-family: 'Amiri', serif;
+    font-size: clamp(1.9rem, 5.5vw, 3.2rem);
+    color: var(--ink);
+    line-height: 1.4;
+    margin-bottom: 1rem;
+  }
+  .hero h1 span { color: var(--gold-deep); }
+
+  .hero-sub {
+    font-size: clamp(0.95rem, 2.5vw, 1.1rem);
+    color: var(--ink-soft);
+    max-width: 520px;
+    margin: 0 auto 2rem;
+    line-height: 1.8;
+  }
+
+  .hero-cta {
+    display: flex;
+    justify-content: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+  .hero-cta .btn-primary { padding: 0.7rem 1.6rem; font-size: 0.95rem; }
+  .hero-cta .btn-ghost { padding: 0.7rem 1.6rem; font-size: 0.95rem; }
+
+  /* ── SECTION BASE ── */
+  .section {
+    padding: clamp(2.5rem, 6vw, 4.5rem) clamp(1rem, 5vw, 3rem);
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+  .section-title {
+    font-family: 'Amiri', serif;
+    font-size: clamp(1.4rem, 3.5vw, 2rem);
+    color: var(--ink);
+    text-align: center;
+    margin-bottom: 0.4rem;
+  }
+  .section-sub {
+    text-align: center;
+    color: var(--ink-soft);
+    font-size: 0.9rem;
+    margin-bottom: 2.5rem;
+  }
+  .divider {
+    text-align: center;
+    color: var(--gold-light);
+    font-size: 1.2rem;
+    letter-spacing: 0.4em;
+    margin: 0.5rem 0;
+  }
+
+  /* ── COURSES ── */
+  .courses-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 1rem;
+  }
+  .course-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem 1rem;
+    text-align: center;
+    cursor: pointer;
+    transition: box-shadow 0.2s, transform 0.2s, border-color 0.2s;
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.6rem;
+  }
+  .course-card:hover {
+    box-shadow: 0 6px 20px var(--shadow);
+    transform: translateY(-3px);
+    border-color: var(--gold-light);
+  }
+  .course-icon { font-size: 2rem; }
+  .course-name {
+    font-family: 'Amiri', serif;
+    font-size: 1.1rem;
+    color: var(--ink);
+    font-weight: 700;
+  }
+  .course-link {
+    font-size: 0.78rem;
+    color: var(--gold-deep);
+    border: 1px solid var(--gold-light);
+    padding: 0.2rem 0.7rem;
+    border-radius: 100px;
+    margin-top: 0.25rem;
+    transition: background 0.2s;
+  }
+  .course-card:hover .course-link { background: var(--gold-pale); }
+
+  /* ── STATS ── */
+  .stats-wrap {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: clamp(1.5rem, 4vw, 2.5rem) clamp(1rem, 3vw, 2rem);
+  }
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1rem;
+  }
+  .stat-item { text-align: center; padding: 1rem; }
+  .stat-icon { font-size: 1.8rem; margin-bottom: 0.5rem; }
+  .stat-num {
+    font-family: 'Amiri', serif;
+    font-size: clamp(1.8rem, 4vw, 2.4rem);
+    font-weight: 700;
+    color: var(--gold-deep);
+    line-height: 1.1;
+  }
+  .stat-label {
+    font-size: 0.85rem;
+    color: var(--ink-soft);
+    margin-top: 0.2rem;
+  }
+
+  /* ── NEWS ── */
+  .news-section { background: var(--parchment-dark); }
+  .news-section .section { max-width: 1100px; }
+  .news-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  .news-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem 1.25rem 1rem;
+  }
+  .news-badge {
+    display: inline-block;
+    background: var(--gold-pale);
+    color: var(--gold-deep);
+    font-size: 0.75rem;
+    padding: 0.2rem 0.7rem;
+    border-radius: 100px;
+    margin-bottom: 0.6rem;
+    font-weight: 600;
+  }
+  .news-title {
+    font-family: 'Amiri', serif;
+    font-size: 1.05rem;
+    color: var(--ink);
+    font-weight: 700;
+    line-height: 1.5;
+    margin-bottom: 0.4rem;
+  }
+  .news-body { font-size: 0.87rem; color: var(--ink-soft); line-height: 1.6; }
+  .news-date { font-size: 0.75rem; color: var(--gold); margin-top: 0.75rem; }
+  .news-more {
+    text-align: center;
+  }
+
+  /* ── CONTACT ── */
+  .contact-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    align-items: start;
+  }
+  @media (max-width: 680px) { .contact-grid { grid-template-columns: 1fr; } }
+
+  .contact-info { display: flex; flex-direction: column; gap: 1rem; }
+  .contact-box {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.1rem 1.25rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+  .contact-icon { font-size: 1.4rem; flex-shrink: 0; }
+  .contact-label { font-size: 0.78rem; color: var(--ink-soft); margin-bottom: 0.15rem; }
+  .contact-val { font-weight: 600; color: var(--ink); font-size: 0.95rem; }
+  .contact-note { font-size: 0.8rem; color: var(--ink-soft); margin-top: 0.15rem; }
+
+  .contact-form {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+  .form-group { display: flex; flex-direction: column; gap: 0.3rem; }
+  .form-group label { font-size: 0.85rem; font-weight: 600; color: var(--ink-soft); }
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    font-family: 'Cairo', sans-serif;
+    font-size: 0.9rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 0.55rem 0.8rem;
+    background: var(--parchment);
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
+    direction: rtl;
+  }
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus { border-color: var(--gold); }
+  .form-group textarea { resize: vertical; min-height: 90px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+  @media (max-width: 480px) { .form-row { grid-template-columns: 1fr; } }
+
+  .form-success {
+    display: none;
+    text-align: center;
+    padding: 1rem;
+    background: #f0faf4;
+    border: 1px solid #a8d8b9;
+    border-radius: var(--radius-sm);
+    color: #1a6b3a;
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--ink);
+    color: rgba(255,255,255,0.7);
+    text-align: center;
+    padding: 2rem 1rem;
+  }
+  footer img { width: 44px; margin-bottom: 0.5rem; filter: brightness(10); opacity: 0.8; }
+  footer .footer-name { color: var(--white); font-family: 'Amiri', serif; font-size: 1.1rem; margin-bottom: 0.25rem; }
+  footer .footer-dua { font-family: 'Amiri', serif; font-size: 0.9rem; margin-bottom: 1rem; }
+  footer .footer-links { display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; }
+  footer .footer-links a { color: rgba(255,255,255,0.5); text-decoration: none; font-size: 0.82rem; transition: color 0.2s; }
+  footer .footer-links a:hover { color: var(--gold-light); }
+
+  /* ── BASMALA BANNER ── */
+  .basmala {
+    background: var(--gold-deep);
+    color: var(--gold-pale);
+    text-align: center;
+    font-family: 'Amiri', serif;
+    font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+    padding: 0.6rem 1rem;
+    letter-spacing: 0.05em;
+  }
+
+  /* ── QURAN FOOTER BANNER ── */
+  .quran-banner {
+    background: var(--gold-pale);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    text-align: center;
+    padding: 1.25rem;
+    font-family: 'Amiri', serif;
+    font-size: clamp(1rem, 2.8vw, 1.25rem);
+    color: var(--gold-deep);
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    .nav-links { display: none; }
+    .nav-actions { display: none; }
+    .hamburger { display: flex; }
+    .mobile-drawer { display: flex; }
+  }
+</style>
 </head>
 <body>
 
-<!-- BASMALA -->
-<div class="basmala-bar">
-  <span class="bsm-ornament">❦</span>بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ<span class="bsm-ornament">❦</span>
-</div>
+<!-- Basmala top strip -->
+<div class="basmala">❦ بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ ❦</div>
 
-<!-- NAVBAR -->
-<nav class="main-nav">
-  <div class="nav-inner">
-    <div class="nav-logo">
-      <div class="logo-circle">
-        <img alt="متين" src="../logo.png"/>
-      </div>
-      <div>
-        <div class="nav-brand">برنامج متين العلمي</div>
-        <div class="nav-tagline d-none d-md-block">نحو بناء علميٍّ متين</div>
-      </div>
-    </div>
+<!-- ══ NAVBAR ══ -->
+<nav class="nav">
+  <a class="nav-logo" href="home.html">
+    <img src="https://mateenweb.github.io/Mateen/logo.png" alt="متين">
+    <span>متين العلمي</span>
+  </a>
 
-    <ul class="nav-links d-none d-lg-flex">
-      <li><a class="active" href="home.html">الرئيسية</a></li>
-      <li><a href="about.html">عن البرنامج</a></li>
-      <li><a href="courses.html">المواد العلمية</a></li>
-      <li><a href="library.html">المكتبة</a></li>
-      <li><a href="news.html">الأخبار</a></li>
-      <li><a href="#contact">تواصل معنا</a></li>
-    </ul>
+  <ul class="nav-links">
+    <li><a href="home.html" class="active">الرئيسية</a></li>
+    <li><a href="about.html">عن البرنامج</a></li>
+    <li><a href="courses.html">المواد العلمية</a></li>
+    <li><a href="library.html">المكتبة</a></li>
+    <li><a href="news.html">الأخبار</a></li>
+    <li><a href="#contact">تواصل معنا</a></li>
+  </ul>
 
-    <div class="nav-btns d-none d-lg-flex" id="navBtns">
-      <a class="btn-outline" href="login.html"><i class="ti ti-user"></i> تسجيل الدخول</a>
-      <button class="btn-solid" onclick="document.getElementById('reg-modal').classList.add('open')">التسجيل في البرنامج</button>
-    </div>
-
-    <button class="sidebar-fab d-lg-none" id="sidebarFab" aria-label="ملفي وحسابي" data-bs-toggle="offcanvas" data-bs-target="#mainSidebar" aria-controls="mainSidebar">
-      <i class="ti ti-user-circle"></i>
-      <span>حسابي</span>
-    </button>
-
-    <button class="nav-toggle d-lg-none" id="mobileMenuToggle" aria-label="القائمة">
-      <i class="ti ti-menu-2"></i>
-    </button>
+  <div class="nav-actions">
+    <a href="login.html" class="btn-ghost">تسجيل الدخول</a>
+    <a href="login.html#register" class="btn-primary">التسجيل في البرنامج</a>
   </div>
 
-  <!-- Mobile Menu -->
-  <div class="mobile-menu d-lg-none" id="mobileMenu">
-    <ul>
-      <li><a href="home.html"><i class="ti ti-home"></i> الرئيسية</a></li>
-      <li><a href="about.html"><i class="ti ti-info-circle"></i> عن البرنامج</a></li>
-      <li><a href="courses.html"><i class="ti ti-books"></i> المواد العلمية</a></li>
-      <li><a href="library.html"><i class="ti ti-library"></i> المكتبة</a></li>
-      <li><a href="news.html"><i class="ti ti-speakerphone"></i> الأخبار</a></li>
-      <li><a href="#contact"><i class="ti ti-headset"></i> تواصل معنا</a></li>
-    </ul>
-    <div class="mobile-menu-btns" id="mobNavBtns">
-      <a class="mob-login-btn" href="login.html"><i class="ti ti-login"></i> تسجيل الدخول</a>
-      <button class="mob-reg-btn" onclick="document.getElementById('mobileMenu').classList.remove('open');document.getElementById('reg-modal').classList.add('open')">
-        <i class="ti ti-user-plus"></i> التسجيل في البرنامج
-      </button>
-    </div>
-  </div>
+  <!-- Hamburger -->
+  <button class="hamburger" id="menuBtn" aria-label="القائمة">
+    <span></span><span></span><span></span>
+  </button>
 </nav>
 
-<!-- PAGE LAYOUT -->
-<div class="page-layout">
-
-  <!-- SIDEBAR -->
-  <aside class="sidebar offcanvas offcanvas-end offcanvas-lg" tabindex="-1" id="mainSidebar" aria-labelledby="mainSidebarLabel">
-    <button type="button" class="btn-close btn-close-white d-lg-none" data-bs-dismiss="offcanvas" aria-label="إغلاق"></button>
-    <!-- Guest State -->
-    <div id="sidebar-guest">
-      <div class="sidebar-guest-logo">
-        <img alt="متين" src="../logo.png" class="sidebar-logo-img"/>
-        <div class="sidebar-brand">برنامج متين العلمي</div>
-        <div class="sidebar-sub">نحو بناء علميٍّ متين</div>
-      </div>
-      <div class="sidebar-divider"></div>
-      <div class="sidebar-actions">
-        <a class="sidebar-login-btn" href="login.html"><i class="ti ti-login"></i> تسجيل الدخول</a>
-        <button class="sidebar-reg-btn" onclick="document.getElementById('reg-modal').classList.add('open')">
-          <i class="ti ti-user-plus"></i> التسجيل في البرنامج
-        </button>
-      </div>
-      <div class="sidebar-divider"></div>
-      <nav class="sidebar-nav">
-        <a class="active" href="home.html"><i class="ti ti-home"></i> الرئيسية</a>
-        <a href="about.html"><i class="ti ti-info-circle"></i> عن البرنامج</a>
-        <a href="courses.html"><i class="ti ti-books"></i> المواد العلمية</a>
-        <a href="library.html"><i class="ti ti-library"></i> المكتبة</a>
-        <a href="news.html"><i class="ti ti-speakerphone"></i> الأخبار</a>
-        <a href="#contact"><i class="ti ti-headset"></i> تواصل معنا</a>
-      </nav>
-    </div>
-
-    <!-- Logged-in State -->
-    <div id="sidebar-user" style="display:none; flex-direction:column; flex:1;">
-      <div class="sidebar-header">
-        <div class="sidebar-avatar" id="sidebarAvatar">👩</div>
-        <div class="user-info">
-          <div class="user-name" id="sidebarName">...</div>
-          <div class="user-role" id="sidebarRole">الطالبة</div>
-        </div>
-      </div>
-      <div class="sidebar-divider"></div>
-      <nav class="sidebar-nav">
-        <a class="active" href="home.html"><i class="ti ti-home"></i> الرئيسية</a>
-        <a href="student.html" id="profileLink"><i class="ti ti-user"></i> ملفي الشخصي</a>
-        <a href="#"><i class="ti ti-certificate"></i> شهاداتي</a>
-        <a href="#"><i class="ti ti-award"></i> إجازاتي</a>
-        <a href="#"><i class="ti ti-chart-bar"></i> درجاتي</a>
-        <a href="#"><i class="ti ti-calendar"></i> جدولي الدراسي</a>
-        <a href="#"><i class="ti ti-checks"></i> حضوري وغيابي</a>
-        <a href="#"><i class="ti ti-library"></i> المكتبة العلمية</a>
-        <a href="#"><i class="ti ti-speakerphone"></i> الإعلانات</a>
-      </nav>
-      <div class="sidebar-divider"></div>
-      <div class="sidebar-actions">
-        <button class="sidebar-logout-btn" onclick="doLogout()">
-          <i class="ti ti-logout"></i> تسجيل الخروج
-        </button>
-      </div>
-    </div>
-
-    <div class="sidebar-footer">
-      <img alt="متين" src="../logo.png" class="sidebar-foot-img"/>
-      <span>متين العلمي</span>
-    </div>
-  </aside>
-
-  <!-- MAIN CONTENT -->
-  <main class="content-area">
-
-    <!-- HERO -->
-    <section class="hero">
-      <div class="hero-text">
-        <img alt="متين" class="hero-logo-mobile d-lg-none" src="../logo.png"/>
-        <div class="hero-ornament">❧ ✦ ❧</div>
-        <h1>علمٌ يُبنى عليه<br>إيمانٌ يُثمر حياة</h1>
-        <p>منصة متين تقدم لك تعلماً أصيلاً من القرآن والسنة<br>على يد نخبة من العلماء والباحثين</p>
-        <div class="hero-btns" id="heroBtns">
-          <a class="hero-btn-primary" href="login.html"><i class="ti ti-login"></i> تسجيل الدخول</a>
-          <a class="hero-btn-secondary" href="login.html#register">
-            <i class="ti ti-user-plus"></i> انضمي إلى متين
-          </a>
-        </div>
-      </div>
-    </section>
-
-    <!-- SUBJECTS -->
-    <section class="page-section bg-white">
-      <div class="section-title">المواد العلمية</div>
-      <div class="row g-3">
-        <div class="col-6 col-sm-4 col-md-3 col-xl-2dot4">
-          <div class="path-card" onclick="window.location.href='courses.html'">
-            <div class="path-icon">📖</div>
-            <div class="path-name">التفسير</div>
-            <button class="path-btn">عرض التفاصيل</button>
-          </div>
-        </div>
-        <div class="col-6 col-sm-4 col-md-3 col-xl-2dot4">
-          <div class="path-card" onclick="window.location.href='courses.html'">
-            <div class="path-icon">⚖️</div>
-            <div class="path-name">الفقه</div>
-            <button class="path-btn">عرض التفاصيل</button>
-          </div>
-        </div>
-        <div class="col-6 col-sm-4 col-md-3 col-xl-2dot4">
-          <div class="path-card" onclick="window.location.href='courses.html'">
-            <div class="path-icon">🕌</div>
-            <div class="path-name">العقيدة</div>
-            <button class="path-btn">عرض التفاصيل</button>
-          </div>
-        </div>
-        <div class="col-6 col-sm-4 col-md-3 col-xl-2dot4">
-          <div class="path-card" onclick="window.location.href='courses.html'">
-            <div class="path-icon">📜</div>
-            <div class="path-name">الحديث</div>
-            <button class="path-btn">عرض التفاصيل</button>
-          </div>
-        </div>
-        <div class="col-6 col-sm-4 col-md-3 col-xl-2dot4">
-          <div class="path-card" onclick="window.location.href='courses.html'">
-            <div class="path-icon">🌿</div>
-            <div class="path-name">القرآن الكريم</div>
-            <button class="path-btn">عرض التفاصيل</button>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- STATS -->
-    <div class="islamic-divider"><span>✦ ❧ ✦</span></div>
-    <section class="stats-bar">
-      <div class="row g-0 w-100">
-        <div class="col-6 col-md-3">
-          <div class="stat-item">
-            <div class="stat-icon">👩‍🎓</div>
-            <div class="stat-num">4,256</div>
-            <div class="stat-label">الطالبات</div>
-          </div>
-        </div>
-        <div class="col-6 col-md-3">
-          <div class="stat-item">
-            <div class="stat-icon">👩‍🏫</div>
-            <div class="stat-num">128</div>
-            <div class="stat-label">المعلمات</div>
-          </div>
-        </div>
-        <div class="col-6 col-md-3">
-          <div class="stat-item">
-            <div class="stat-icon">🎓</div>
-            <div class="stat-num">1,890</div>
-            <div class="stat-label">الخريجات</div>
-          </div>
-        </div>
-        <div class="col-6 col-md-3">
-          <div class="stat-item">
-            <div class="stat-icon">📚</div>
-            <div class="stat-num">78</div>
-            <div class="stat-label">الدورات المنجزة</div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ANNOUNCEMENTS -->
-    <div class="islamic-divider"><span>✦ ❧ ✦</span></div>
-    <section class="page-section ann-section">
-      <div class="section-title">آخر الإعلانات</div>
-      <div class="row g-3">
-        <div class="col-12 col-md-4">
-          <div class="ann-card h-100">
-            <h4>فتح التسجيل</h4>
-            <p>تم فتح التسجيل في المستوى الأول للعام الدراسي القادم</p>
-            <div class="ann-date"><i class="ti ti-calendar"></i> 1445/11/15 هـ</div>
-          </div>
-        </div>
-        <div class="col-12 col-md-4">
-          <div class="ann-card h-100">
-            <h4>الاختبارات الشهرية</h4>
-            <p>تبدأ الاختبارات الشهرية الأسبوع القادم لجميع المستويات</p>
-            <div class="ann-date"><i class="ti ti-calendar"></i> 1445/11/18 هـ</div>
-          </div>
-        </div>
-        <div class="col-12 col-md-4">
-          <div class="ann-card h-100">
-            <h4>اللقاء العلمي الشهري</h4>
-            <p>لقاء علمي مفتوح مع مشايخ البرنامج - السبت القادم</p>
-            <div class="ann-date"><i class="ti ti-calendar"></i> 1445/11/20 هـ</div>
-          </div>
-        </div>
-      </div>
-      <button class="view-all-btn mt-3">عرض جميع الإعلانات</button>
-    </section>
-
-  </main>
+<!-- Mobile drawer -->
+<div class="mobile-drawer" id="drawer">
+  <a href="home.html">الرئيسية</a>
+  <a href="about.html">عن البرنامج</a>
+  <a href="courses.html">المواد العلمية</a>
+  <a href="library.html">المكتبة</a>
+  <a href="news.html">الأخبار</a>
+  <a href="#contact" onclick="closeDrawer()">تواصل معنا</a>
+  <div class="mobile-actions">
+    <a href="login.html" class="btn-ghost">تسجيل الدخول</a>
+    <a href="login.html#register" class="btn-primary">التسجيل في البرنامج</a>
+  </div>
 </div>
 
-<!-- CONTACT SECTION -->
-<section class="contact-section" id="contact">
-  <div class="container-xl px-4">
-    <div class="contact-header text-center mb-5">
-      <div class="hero-badge">📬 تواصلي معنا</div>
-      <h2>نسعد بتواصلك</h2>
-      <p>هل لديكِ سؤال أو استفسار؟ تواصلي معنا وسنرد عليكِ في أقرب وقت</p>
-    </div>
+<!-- ══ HERO ══ -->
+<section class="hero">
+  <div class="hero-ornament">❧ ✦ ❧</div>
+  <img src="https://mateenweb.github.io/Mateen/logo.png" alt="شعار متين" class="hero-logo">
+  <h1>علمٌ يُبنى عليه<br><span>إيمانٌ يُثمر حياة</span></h1>
+  <p class="hero-sub">منصة متين تقدم لكِ تعلماً أصيلاً من القرآن والسنة<br>على يد نخبة من العلماء والباحثين</p>
+  <div class="hero-cta">
+    <a href="login.html" class="btn-ghost">تسجيل الدخول</a>
+    <a href="login.html#register" class="btn-primary">انضمي إلى متين</a>
+  </div>
+</section>
 
-    <div class="row g-4">
-      <div class="col-12 col-lg-4">
-        <div class="contact-info d-flex flex-column gap-3">
-          <div class="contact-card">
-            <div class="contact-icon"><i class="ti ti-brand-telegram"></i></div>
-            <div>
-              <div class="contact-label">قناة تيليغرام</div>
-              <a class="contact-val" href="#">@mateen_program</a>
-            </div>
-          </div>
-          <div class="contact-card">
-            <div class="contact-icon"><i class="ti ti-brand-whatsapp"></i></div>
-            <div>
-              <div class="contact-label">واتساب</div>
-              <a class="contact-val" href="#">+966 5X XXX XXXX</a>
-            </div>
-          </div>
-          <div class="contact-card">
-            <div class="contact-icon"><i class="ti ti-clock"></i></div>
-            <div>
-              <div class="contact-label">أوقات الرد</div>
-              <div class="contact-val">الأحد — الخميس، ٩ص — ٩م</div>
-            </div>
-          </div>
-          <div class="contact-card contact-card-gold">
-            <div class="contact-icon contact-icon-gold"><i class="ti ti-users"></i></div>
-            <div>
-              <div class="contact-label">تواصل مع المعلمات</div>
-              <a class="contact-val-gold" href="teachers.html">عرض صفحات المعلمات ←</a>
-            </div>
-          </div>
+<!-- ══ COURSES ══ -->
+<div class="section">
+  <p class="section-title">المواد العلمية</p>
+  <div class="divider">✦ ❧ ✦</div>
+  <p class="section-sub">اختاري مادتك وابدئي رحلتك العلمية</p>
+  <div class="courses-grid">
+    <a href="courses.html" class="course-card">
+      <span class="course-icon">📖</span>
+      <span class="course-name">التفسير</span>
+      <span class="course-link">عرض التفاصيل</span>
+    </a>
+    <a href="courses.html" class="course-card">
+      <span class="course-icon">⚖️</span>
+      <span class="course-name">الفقه</span>
+      <span class="course-link">عرض التفاصيل</span>
+    </a>
+    <a href="courses.html" class="course-card">
+      <span class="course-icon">🕌</span>
+      <span class="course-name">العقيدة</span>
+      <span class="course-link">عرض التفاصيل</span>
+    </a>
+    <a href="courses.html" class="course-card">
+      <span class="course-icon">📜</span>
+      <span class="course-name">الحديث</span>
+      <span class="course-link">عرض التفاصيل</span>
+    </a>
+    <a href="courses.html" class="course-card">
+      <span class="course-icon">🌿</span>
+      <span class="course-name">القرآن الكريم</span>
+      <span class="course-link">عرض التفاصيل</span>
+    </a>
+  </div>
+</div>
+
+<!-- ══ STATS ══ -->
+<div style="background: var(--parchment-dark); padding: clamp(2rem,5vw,4rem) clamp(1rem,5vw,3rem);">
+  <div style="max-width:1100px; margin:0 auto;">
+    <div class="divider" style="margin-bottom:1.5rem;">✦ ❧ ✦</div>
+    <div class="stats-wrap">
+      <div class="stats-grid">
+        <div class="stat-item">
+          <div class="stat-icon">👩‍🎓</div>
+          <div class="stat-num">4,256</div>
+          <div class="stat-label">الطالبات</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-icon">👩‍🏫</div>
+          <div class="stat-num">128</div>
+          <div class="stat-label">المعلمات</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-icon">🎓</div>
+          <div class="stat-num">1,890</div>
+          <div class="stat-label">الخريجات</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-icon">📚</div>
+          <div class="stat-num">78</div>
+          <div class="stat-label">الدورات المنجزة</div>
         </div>
       </div>
+    </div>
+    <div class="divider" style="margin-top:1.5rem;">✦ ❧ ✦</div>
+  </div>
+</div>
 
-      <div class="col-12 col-lg-8">
-        <div class="contact-form-wrap">
-          <div class="contact-form-title">أرسلي رسالتك</div>
-          <div class="row g-3">
-            <div class="col-12 col-sm-6">
-              <label class="form-label-custom">اسمك الكريم</label>
-              <input class="form-input" id="ctName" placeholder="اسمك الكريم" type="text"/>
-            </div>
-            <div class="col-12 col-sm-6">
-              <label class="form-label-custom">رقم الجوال</label>
-              <input class="form-input" dir="ltr" id="ctPhone" placeholder="05XXXXXXXX" type="text"/>
-            </div>
-            <div class="col-12 col-sm-6">
-              <label class="form-label-custom">إلى من تودّين الإرسال؟</label>
-              <select class="form-input" id="ctRecipient">
-                <option value="">اختاري الجهة</option>
-                <optgroup label="── الإدارة ──">
-                  <option value="admin">الإدارة العامة</option>
-                </optgroup>
-                <optgroup label="── المعلمات ──">
-                  <option value="tafseer">دكتورة عبير عقلان - التفسير</option>
-                  <option value="fiqh">دكتورة أماني عقلان - الفقه</option>
-                  <option value="aqeedah">أستاذة رشا حمدي - العقيدة</option>
-                  <option value="hadeeth">دكتورة حصة بنت عبدالعزيز - الحديث</option>
-                  <option value="quran1">أستاذة رُميساء محمد السيد الزهري - القرآن</option>
-                  <option value="quran2">أستاذة أسماء محمد السيد الزهري - القرآن</option>
-                </optgroup>
-              </select>
-            </div>
-            <div class="col-12 col-sm-6">
-              <label class="form-label-custom">موضوع الرسالة</label>
-              <select class="form-input" id="ctTopic">
-                <option value="">اختاري الموضوع</option>
-                <option>سؤال علمي</option>
-                <option>استفسار عن التسجيل</option>
-                <option>استفسار عن الجدول</option>
-                <option>غياب أو عذر</option>
-                <option>مشكلة تقنية</option>
-                <option>اقتراح</option>
-                <option>أخرى</option>
-              </select>
-            </div>
-            <div class="col-12">
-              <label class="form-label-custom">الرسالة</label>
-              <textarea class="form-input form-textarea" id="ctBody" placeholder="اكتبي رسالتك هنا..."></textarea>
-            </div>
+<!-- ══ NEWS ══ -->
+<div class="news-section">
+  <div class="section">
+    <p class="section-title">آخر الإعلانات</p>
+    <div class="divider"></div>
+    <p class="section-sub" style="margin-bottom:1.5rem;">تابعي أحدث أخبار البرنامج</p>
+    <div class="news-grid">
+      <div class="news-card">
+        <span class="news-badge">تسجيل</span>
+        <div class="news-title">فتح التسجيل</div>
+        <div class="news-body">تم فتح التسجيل في المستوى الأول للعام الدراسي القادم</div>
+        <div class="news-date">1445/11/15 هـ</div>
+      </div>
+      <div class="news-card">
+        <span class="news-badge">اختبارات</span>
+        <div class="news-title">الاختبارات الشهرية</div>
+        <div class="news-body">تبدأ الاختبارات الشهرية الأسبوع القادم لجميع المستويات</div>
+        <div class="news-date">1445/11/18 هـ</div>
+      </div>
+      <div class="news-card">
+        <span class="news-badge">لقاء علمي</span>
+        <div class="news-title">اللقاء العلمي الشهري</div>
+        <div class="news-body">لقاء علمي مفتوح مع مشايخ البرنامج — السبت القادم</div>
+        <div class="news-date">1445/11/20 هـ</div>
+      </div>
+    </div>
+    <div class="news-more">
+      <a href="news.html" class="btn-ghost">عرض جميع الإعلانات</a>
+    </div>
+  </div>
+</div>
+
+<!-- ══ CONTACT ══ -->
+<section id="contact">
+  <div class="section">
+    <p class="section-title">📬 تواصلي معنا</p>
+    <div class="divider"></div>
+    <p class="section-sub">هل لديكِ سؤال أو استفسار؟ نسعد بتواصلك</p>
+
+    <div class="contact-grid">
+      <!-- Info -->
+      <div class="contact-info">
+        <div class="contact-box">
+          <span class="contact-icon">📱</span>
+          <div>
+            <div class="contact-label">قناة تيليغرام</div>
+            <div class="contact-val">@mateen_program</div>
           </div>
-          <div id="ctSuccess" style="display:none" class="success-msg mt-3">
-            ✅ تم إرسال رسالتك بنجاح!
-          </div>
-          <button class="contact-submit mt-3" id="ctBtn" onclick="submitContactNew()">
-            <i class="ti ti-send"></i> إرسال الرسالة
-          </button>
         </div>
+        <div class="contact-box">
+          <span class="contact-icon">💬</span>
+          <div>
+            <div class="contact-label">واتساب</div>
+            <div class="contact-val">+966 5X XXX XXXX</div>
+          </div>
+        </div>
+        <div class="contact-box">
+          <span class="contact-icon">🕐</span>
+          <div>
+            <div class="contact-label">أوقات الرد</div>
+            <div class="contact-val">الأحد — الخميس</div>
+            <div class="contact-note">٩ صباحاً — ٩ مساءً</div>
+          </div>
+        </div>
+        <a href="teachers.html" class="btn-primary" style="text-align:center; padding:0.75rem;">عرض صفحات المعلمات ←</a>
+      </div>
+
+      <!-- Form -->
+      <div class="contact-form" id="contactForm">
+        <div class="form-row">
+          <div class="form-group">
+            <label>اسمك الكريم</label>
+            <input type="text" placeholder="الاسم الكامل">
+          </div>
+          <div class="form-group">
+            <label>رقم الجوال</label>
+            <input type="tel" placeholder="+966...">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>إلى من تودّين الإرسال؟</label>
+          <select>
+            <option value="">اختاري الجهة</option>
+            <optgroup label="── الإدارة ──">
+              <option>الإدارة العامة</option>
+            </optgroup>
+            <optgroup label="── المعلمات ──">
+              <option>دكتورة عبير عقلان - التفسير</option>
+              <option>دكتورة أماني عقلان - الفقه</option>
+              <option>أستاذة رشا حمدي - العقيدة</option>
+              <option>دكتورة حصة بنت عبدالعزيز - الحديث</option>
+              <option>أستاذة رُميساء محمد السيد الزهري - القرآن</option>
+              <option>أستاذة أسماء محمد السيد الزهري - القرآن</option>
+            </optgroup>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>موضوع الرسالة</label>
+          <select>
+            <option value="">اختاري الموضوع</option>
+            <option>سؤال علمي</option>
+            <option>استفسار عن التسجيل</option>
+            <option>استفسار عن الجدول</option>
+            <option>غياب أو عذر</option>
+            <option>مشكلة تقنية</option>
+            <option>اقتراح</option>
+            <option>أخرى</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>الرسالة</label>
+          <textarea placeholder="اكتبي رسالتك هنا..."></textarea>
+        </div>
+        <div class="form-success" id="formSuccess">✅ تم إرسال رسالتك بنجاح!</div>
+        <button class="btn-primary" style="padding:0.75rem; font-size:0.95rem;" onclick="submitForm()">إرسال الرسالة</button>
       </div>
     </div>
   </div>
 </section>
 
-<!-- AYA BANNER -->
-<div class="aya-banner">
-  <span class="aya-text">﴿ وَتَعَاوَنُوا عَلَى الْبِرِّ وَالتَّقْوَىٰ ﴾</span>
-  <span class="aya-ref">سورة المائدة: ٢</span>
+<!-- ══ QURAN BANNER ══ -->
+<div class="quran-banner">
+  ﴿ وَتَعَاوَنُوا عَلَى الْبِرِّ وَالتَّقْوَىٰ ﴾ <span style="font-size:0.85em; color:var(--gold);">سورة المائدة: ٢</span>
 </div>
 
-<!-- FOOTER -->
+<!-- ══ FOOTER ══ -->
 <footer>
-  <div class="footer-logo">
-    <img alt="متين" src="../logo.png" style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:1.5px solid var(--gold);background:#1a4a2e;"/>
-    <span>متين العلمي</span>
-  </div>
+  <img src="https://mateenweb.github.io/Mateen/logo.png" alt="متين">
+  <div class="footer-name">متين العلمي</div>
   <div class="footer-dua">اللهم علمنا ما ينفعنا وانفعنا بما علمتنا وزدنا علماً</div>
-  <div class="footer-social">
-    <a href="#"><i class="ti ti-brand-telegram"></i></a>
-    <a href="#"><i class="ti ti-brand-twitter"></i></a>
-    <a href="#"><i class="ti ti-brand-instagram"></i></a>
-    <a href="#"><i class="ti ti-brand-youtube"></i></a>
+  <div class="footer-links">
+    <a href="home.html">الرئيسية</a>
+    <a href="about.html">عن البرنامج</a>
+    <a href="courses.html">المواد العلمية</a>
+    <a href="library.html">المكتبة</a>
+    <a href="news.html">الأخبار</a>
+    <a href="#contact">تواصل معنا</a>
   </div>
 </footer>
 
-<!-- REGISTRATION MODAL -->
-<div class="reg-modal-overlay" id="reg-modal" onclick="if(event.target===this)this.classList.remove('open')">
-  <div class="reg-modal-box">
-    <div class="reg-modal-header">
-      <div>
-        <div class="hero-badge" style="display:inline-block;margin-bottom:6px">📝 طلب تسجيل</div>
-        <h2>التسجيل في برنامج متين العلمي</h2>
-        <p>أدخلي بياناتك وسنتواصل معكِ في أقرب وقت</p>
-      </div>
-      <button class="reg-close" onclick="document.getElementById('reg-modal').classList.remove('open')">
-        <i class="ti ti-x"></i>
-      </button>
-    </div>
-    <div class="row g-3 mt-1">
-      <div class="col-12 col-sm-6">
-        <label class="form-label-custom">الاسم الكامل *</label>
-        <input class="form-input" placeholder="اسمك الكريم" type="text"/>
-      </div>
-      <div class="col-12 col-sm-6">
-        <label class="form-label-custom">رقم الجوال *</label>
-        <input class="form-input" dir="ltr" placeholder="05XXXXXXXX" type="text"/>
-      </div>
-      <div class="col-12 col-sm-6">
-        <label class="form-label-custom">البريد الإلكتروني *</label>
-        <input class="form-input" dir="ltr" placeholder="email@example.com" type="email"/>
-      </div>
-      <div class="col-12 col-sm-6">
-        <label class="form-label-custom">العمر</label>
-        <input class="form-input" dir="ltr" placeholder="مثال: 22" type="number"/>
-      </div>
-      <div class="col-12 col-sm-6">
-        <label class="form-label-custom">المستوى المطلوب *</label>
-        <select class="form-input">
-          <option value="">اختاري المستوى</option>
-          <option>المستوى الأول (مبتدئ)</option>
-          <option>المستوى الثاني</option>
-          <option>المستوى الثالث</option>
-          <option>المستوى الرابع</option>
-          <option>المستوى المتقدم</option>
-        </select>
-      </div>
-      <div class="col-12 col-sm-6">
-        <label class="form-label-custom">كيف عرفتِ البرنامج؟</label>
-        <select class="form-input">
-          <option value="">اختاري</option>
-          <option>من صديقة أو معارف</option>
-          <option>منصات التواصل الاجتماعي</option>
-          <option>إعلان</option>
-          <option>أخرى</option>
-        </select>
-      </div>
-      <div class="col-12">
-        <button class="contact-submit w-100 justify-content-center" onclick="submitReg(this)">
-          <i class="ti ti-send"></i> إرسال طلب التسجيل
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="../js/home-1.js" type="module"></script>
-<script src="../js/home-2.js" type="module"></script>
-<script src="../js/home-3.js"></script>
-<script src="../js/home-4.js"></script>
 <script>
-document.getElementById('mobileMenuToggle').addEventListener('click', function() {
-  document.getElementById('mobileMenu').classList.toggle('open');
-});
+  const menuBtn = document.getElementById('menuBtn');
+  const drawer = document.getElementById('drawer');
+
+  menuBtn.addEventListener('click', () => {
+    drawer.classList.toggle('open');
+  });
+
+  function closeDrawer() {
+    drawer.classList.remove('open');
+  }
+
+  document.querySelectorAll('.mobile-drawer a').forEach(a => {
+    a.addEventListener('click', closeDrawer);
+  });
+
+  function submitForm() {
+    document.getElementById('formSuccess').style.display = 'block';
+    setTimeout(() => {
+      document.getElementById('formSuccess').style.display = 'none';
+    }, 4000);
+  }
 </script>
 </body>
 </html>
