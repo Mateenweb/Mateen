@@ -285,11 +285,17 @@ window.sendMsg = async () => {
     sentAt:     serverTimestamp(),
   });
 
+  // اجلب unread الحالي من Firestore مباشرة عشان نضمن الدقة
+  const convSnap = await getDoc(doc(db, 'conversations', activeConvId));
+  const currentUnread = convSnap.exists()
+    ? (convSnap.data().unread?.[otherId] || 0)
+    : 0;
+
   await setDoc(doc(db, 'conversations', activeConvId), {
     participants: [currentUser.uid, otherId].filter(Boolean),
     lastMsg:  text,
     lastAt:   serverTimestamp(),
-    [`unread.${otherId}`]: (allConvs.find(c => c.id === activeConvId)?.unread?.[otherId] || 0) + 1,
+    [`unread.${otherId}`]: currentUnread + 1,
     [`unread.${currentUser.uid}`]: 0,
   }, { merge: true });
 };
