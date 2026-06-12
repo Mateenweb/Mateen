@@ -246,17 +246,22 @@ body {
 
 /* ===== SIDEBAR ===== */
 .sidebar {
-  width: var(--sidebar-w);
-  min-width: var(--sidebar-w);
   background: var(--white);
   border-left: 1px solid var(--border);
-  display: flex;
   flex-direction: column;
-  flex-shrink: 0;
-  position: sticky;
-  top: 58px;
-  height: calc(100vh - 58px);
-  overflow-y: auto;
+}
+
+@media (min-width: 992px) {
+  .sidebar {
+    width: var(--sidebar-w);
+    min-width: var(--sidebar-w);
+    display: flex;
+    flex-shrink: 0;
+    position: sticky;
+    top: 58px;
+    height: calc(100vh - 58px);
+    overflow-y: auto;
+  }
 }
 
 .sidebar-guest-logo {
