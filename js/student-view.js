@@ -17,28 +17,51 @@ const auth = getAuth(app);
 // ── Auth Guard ───────────────────────────────
 onAuthStateChanged(auth, async user => {
   if (!user) { window.location.href = '../html/login.html'; return; }
+
   const snap = await getDoc(doc(db, 'users', user.uid));
-  const role = snap.exists() ? snap.data().role : '';
-  // المعلمة لا تقدر تشوف ملفات الطالبات
-  if (role === 'teacher') { window.location.href = '../html/home.html'; return; }
-  document.getElementById('authGate').style.display    = 'none';
-  document.getElementById('mainContent').style.display = 'block';
-  initStudentView();
+  if (!snap.exists()) { window.location.href = '../html/login.html'; return; }
+
+  const userData = snap.data();
+  const role     = userData.role   || '';
+  const status   = userData.status || '';
+
+  if (status === 'pending' || status === 'suspended') {
+    window.location.href = '../html/home.html'; return;
+  }
+
+  // الإدارة والمشرفة: تشوف الكل
+  if (role === 'admin' || role === 'supervisor') {
+    document.getElementById('authGate').style.display    = 'none';
+    document.getElementById('mainContent').style.display = 'block';
+    initStudentView(userData);
+    return;
+  }
+
+  // المعلمة: بس طالباتها — التحقق يتم جوه initStudentView بعد ما يتحمّل الـ student
+  if (role === 'teacher') {
+    document.getElementById('authGate').style.display    = 'none';
+    document.getElementById('mainContent').style.display = 'block';
+    initStudentView(userData);
+    return;
+  }
+
+  // الطالبات وأي حد تاني — ممنوع
+  window.location.href = '../html/home.html';
 });
 
-function initStudentView() {
+function initStudentView(userData = {}) {
 
 // ── Get number from URL ───────────────────────
 const hashParams = new URLSearchParams(location.hash.replace(/^#/, ''));
 const params     = new URLSearchParams(location.search);
 const studentNum = parseInt(hashParams.get('n') || params.get('n'));
 
-function showError() {
+function showError(msg = 'الرابط غير صحيح') {
   document.body.innerHTML = `
     <div style="display:flex;align-items:center;justify-content:center;min-height:100vh;">
       <div style="background:white;border-radius:16px;padding:40px;text-align:center;font-family:Cairo,sans-serif;">
         <div style="font-size:40px;margin-bottom:16px">⚠️</div>
-        <div style="font-size:18px;color:#1a3a5c;font-weight:700">الرابط غير صحيح</div>
+        <div style="font-size:18px;color:#1a3a5c;font-weight:700">${msg}</div>
       </div>
     </div>`;
 }
@@ -47,12 +70,10 @@ if (!studentNum || isNaN(studentNum)) { showError(); throw new Error('No student
 
 // ── Load Student ─────────────────────────────
 async function loadAll() {
-  // جيبي كل الطلاب مرتبين وخدي الرقم المطلوب
   const allSnap = await getDocs(query(collection(db, 'students'), orderBy('order')));
   if (allSnap.empty || studentNum > allSnap.docs.length) { showError(); return; }
   const studentId = allSnap.docs[studentNum - 1].id;
 
-  // إخفاء الرقم من الـ URL بعد ما اتحمّل
   history.replaceState(null, '', location.pathname);
 
   const studentRef = doc(db, 'students', studentId);
@@ -61,6 +82,15 @@ async function loadAll() {
     getDocs(query(collection(db, 'students', studentId, 'sessions'), orderBy('date', 'desc'))),
     getDocs(query(collection(db, 'students', studentId, 'grades'),   orderBy('createdAt', 'desc')))
   ]);
+
+  // المعلمة: تشوف بس طالباتها فقط
+  if (userData.role === 'teacher') {
+    const teacherSubject = userData.subject || '';
+    if (!snap.exists() || snap.data().teacherId !== teacherSubject) {
+      showError('ليس لديكِ صلاحية لعرض هذه الصفحة');
+      return;
+    }
+  }
 
   if (!snap.exists()) {
     document.getElementById('studentName').textContent = 'طالبة غير موجودة';

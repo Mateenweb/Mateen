@@ -16,19 +16,56 @@ const auth = getAuth(app);
 onAuthStateChanged(auth, async user => {
   if (!user) { window.location.href = '../html/login.html'; return; }
 
-  const params   = new URLSearchParams(location.search);
+  const params    = new URLSearchParams(location.search);
   const studentId = params.get('id');
   if (!studentId) { window.location.href = '../html/login.html'; return; }
 
   const userSnap = await getDoc(doc(db, 'users', user.uid));
-  const role     = userSnap.exists() ? userSnap.data().role : null;
+  if (!userSnap.exists()) { window.location.href = '../html/login.html'; return; }
 
-  if (!role) { window.location.href = '../html/login.html'; return; }
+  const userData = userSnap.data();
+  const role     = userData.role   || '';
+  const status   = userData.status || '';
 
-  document.getElementById('authGate').style.display    = 'none';
-  document.getElementById('mainContent').style.display = 'block';
+  // ممنوع: حسابات معلّقة أو pending
+  if (status === 'pending' || status === 'suspended') {
+    window.location.href = '../html/home.html'; return;
+  }
 
-  initPage(studentId);
+  // الطالبة: تشوف بس صفحتها هي
+  if (role === 'student' || role === 'mateen') {
+    if (user.uid !== studentId) {
+      window.location.href = '../html/home.html'; return;
+    }
+    document.getElementById('authGate').style.display    = 'none';
+    document.getElementById('mainContent').style.display = 'block';
+    initPage(studentId);
+    return;
+  }
+
+  // الإدارة والمشرفة: تشوف الكل
+  if (role === 'admin' || role === 'supervisor') {
+    document.getElementById('authGate').style.display    = 'none';
+    document.getElementById('mainContent').style.display = 'block';
+    initPage(studentId);
+    return;
+  }
+
+  // المعلمة: تشوف بس طالباتها (teacherId في doc الطالبة = subject المعلمة)
+  if (role === 'teacher') {
+    const teacherSubject = userData.subject || '';
+    const studentSnap    = await getDoc(doc(db, 'students', studentId));
+    if (!studentSnap.exists() || studentSnap.data().teacherId !== teacherSubject) {
+      window.location.href = '../html/home.html'; return;
+    }
+    document.getElementById('authGate').style.display    = 'none';
+    document.getElementById('mainContent').style.display = 'block';
+    initPage(studentId);
+    return;
+  }
+
+  // أي role تاني — ممنوع
+  window.location.href = '../html/login.html';
 });
 
 // ── Logout ────────────────────────────────────
