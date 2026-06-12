@@ -13,99 +13,84 @@
 <link href="../css/home.css" rel="stylesheet"/>
 <link href="../css/mobile.css" rel="stylesheet"/>
 <style>
-/* ── Home Messages Widget ────────────────────────────────── */
-.msg-widget-section { padding-top: 28px; padding-bottom: 20px; }
-.msg-widget-section .section-title {
-  display: flex; align-items: center; gap: 0;
-  position: relative;
+/* ── Home Messages Widget ─────────────────────────── */
+.msg-widget-section { display:none; padding-top:24px; padding-bottom:8px; }
+.msg-widget-header {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 14px;
 }
-.msg-widget-viewall {
-  margin-right: auto;
+.msg-widget-header .section-title { flex:1; margin-bottom:0; }
+.msg-widget-actions { display:flex; align-items:center; gap:8px; }
+.msg-compose-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--green-dark, #1a4a2e);
+  color: #fff;
+  font-family: 'Noto Naskh Arabic', serif;
+  font-size: 13px;
+  border: none; border-radius: 20px;
+  padding: 6px 16px; cursor: pointer;
+  transition: background .2s, box-shadow .2s;
+  text-decoration: none;
+}
+.msg-compose-btn:hover { background: #245c38; box-shadow: 0 3px 10px rgba(26,74,46,.25); color:#fff; }
+.msg-viewall-btn {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-family: 'Noto Naskh Arabic', serif;
   font-size: 13px;
   color: var(--green-dark, #1a4a2e);
   text-decoration: none;
-  font-family: 'Noto Naskh Arabic', serif;
   border: 1px solid var(--green-dark, #1a4a2e);
-  padding: 4px 12px;
   border-radius: 20px;
+  padding: 5px 14px;
   transition: all .2s;
 }
-.msg-widget-viewall:hover { background: var(--green-dark,#1a4a2e); color:#fff; }
-.home-conv-list { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
-.home-conv-loading {
-  text-align: center;
-  color: #888;
-  padding: 24px;
-  font-family: 'Noto Naskh Arabic', serif;
-}
-.home-conv-empty {
-  text-align: center;
-  color: #aaa;
-  padding: 24px;
-  font-family: 'Noto Naskh Arabic', serif;
-  font-size: 14px;
+.msg-viewall-btn:hover { background: var(--green-dark,#1a4a2e); color:#fff; }
+.home-conv-list { display:flex; flex-direction:column; gap:9px; }
+.home-conv-loading, .home-conv-empty {
+  text-align:center; color:#999; padding:20px;
+  font-family:'Noto Naskh Arabic',serif; font-size:13.5px;
 }
 .home-conv-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
-  background: #fff;
-  border-radius: 10px;
-  border: 1px solid #e8e0d0;
-  cursor: pointer;
-  text-decoration: none;
+  display:flex; align-items:center; gap:12px;
+  padding:11px 16px;
+  background:#fff;
+  border-radius:10px;
+  border:1px solid #e8e0d0;
+  cursor:pointer; text-decoration:none;
   transition: box-shadow .18s, border-color .18s;
 }
 .home-conv-item:hover {
   box-shadow: 0 3px 12px rgba(26,74,46,.10);
   border-color: var(--gold, #c9a227);
-  text-decoration: none;
+  text-decoration:none;
 }
 .home-conv-avatar {
-  width: 44px; height: 44px; border-radius: 50%;
-  background: #d8f3dc;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 18px; font-weight: 700;
-  color: var(--green-dark, #1a4a2e);
-  flex-shrink: 0;
-  font-family: 'Noto Naskh Arabic', serif;
+  width:42px; height:42px; border-radius:50%;
+  background:#d8f3dc;
+  display:flex; align-items:center; justify-content:center;
+  font-size:16px; font-weight:700;
+  color:var(--green-dark,#1a4a2e);
+  flex-shrink:0;
+  font-family:'Noto Naskh Arabic',serif;
 }
-.home-conv-body { flex: 1; min-width: 0; }
+.home-conv-body { flex:1; min-width:0; }
 .home-conv-name {
-  font-family: 'Noto Naskh Arabic', serif;
-  font-weight: 600;
-  font-size: 14.5px;
-  color: var(--green-dark, #1a4a2e);
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  font-family:'Noto Naskh Arabic',serif; font-weight:600;
+  font-size:14px; color:var(--green-dark,#1a4a2e);
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
 }
 .home-conv-preview {
-  font-family: 'Noto Naskh Arabic', serif;
-  font-size: 13px;
-  color: #777;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  margin-top: 2px;
+  font-family:'Noto Naskh Arabic',serif; font-size:12.5px;
+  color:#888; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  margin-top:2px;
 }
-.home-conv-meta {
-  display: flex; flex-direction: column; align-items: flex-start; gap: 4px;
-  flex-shrink: 0;
-}
-.home-conv-time {
-  font-size: 11.5px;
-  color: #aaa;
-  font-family: 'Noto Naskh Arabic', serif;
-  white-space: nowrap;
-}
+.home-conv-meta { display:flex; flex-direction:column; align-items:flex-start; gap:4px; flex-shrink:0; }
+.home-conv-time { font-size:11px; color:#bbb; font-family:'Noto Naskh Arabic',serif; white-space:nowrap; }
 .home-conv-unread {
-  background: var(--green-dark, #1a4a2e);
-  color: #fff;
-  font-size: 11px;
-  font-weight: 700;
-  padding: 1px 7px;
-  border-radius: 10px;
-  min-width: 20px;
-  text-align: center;
-  font-family: sans-serif;
+  background:var(--green-dark,#1a4a2e); color:#fff;
+  font-size:11px; font-weight:700;
+  padding:1px 7px; border-radius:10px;
+  min-width:20px; text-align:center; font-family:sans-serif;
 }
 </style>
 </head>
@@ -216,7 +201,6 @@
       <nav class="sidebar-nav">
         <a class="active" href="home.html"><i class="ti ti-home"></i> الرئيسية</a>
         <a href="student.html" id="profileLink"><i class="ti ti-user"></i> ملفي الشخصي</a>
-        <a href="messages.html"><i class="ti ti-message-2"></i> رسائلي</a>
         <a href="#"><i class="ti ti-certificate"></i> شهاداتي</a>
         <a href="#"><i class="ti ti-award"></i> إجازاتي</a>
         <a href="#"><i class="ti ti-chart-bar"></i> درجاتي</a>
@@ -259,16 +243,20 @@
     </section>
 
     <!-- MESSAGES WIDGET (logged-in only) -->
-    <section class="page-section msg-widget-section" id="homeMessagesSection" style="display:none">
-      <div class="section-title">
-        <i class="ti ti-message-2" style="color:var(--gold);margin-left:8px"></i>
-        رسائلي الأخيرة
-        <a href="messages.html" class="msg-widget-viewall">عرض الكل <i class="ti ti-arrow-left"></i></a>
+    <section class="page-section msg-widget-section" id="homeMessagesSection">
+      <div class="msg-widget-header">
+        <div class="section-title"><i class="ti ti-message-2" style="color:var(--gold);margin-left:6px"></i>رسائلي الأخيرة</div>
+        <div class="msg-widget-actions">
+          <a href="messages.html?compose=1" class="msg-compose-btn">
+            <i class="ti ti-edit"></i> رسالة جديدة
+          </a>
+          <a href="messages.html" class="msg-viewall-btn">
+            عرض الكل <i class="ti ti-arrow-left"></i>
+          </a>
+        </div>
       </div>
       <div id="homeConvList" class="home-conv-list">
-        <div class="home-conv-loading">
-          <i class="ti ti-loader-2"></i> جارٍ التحميل...
-        </div>
+        <div class="home-conv-loading"><i class="ti ti-loader-2"></i> جارٍ التحميل...</div>
       </div>
     </section>
 
@@ -388,10 +376,10 @@
     <div class="contact-header text-center mb-5">
       <div class="hero-badge">📬 تواصلي معنا</div>
       <h2>نسعد بتواصلك</h2>
-      <p>هل لديكِ سؤال أو استفسار؟ تواصلي مع المعلمات والإدارة مباشرةً عبر نظام الرسائل</p>
+      <p>هل لديكِ سؤال أو استفسار؟ تواصلي معنا وسنرد عليكِ في أقرب وقت</p>
     </div>
 
-    <div class="row g-4 justify-content-center">
+    <div class="row g-4">
       <div class="col-12 col-lg-4">
         <div class="contact-info d-flex flex-column gap-3">
           <div class="contact-card">
@@ -415,24 +403,69 @@
               <div class="contact-val">الأحد — الخميس، ٩ص — ٩م</div>
             </div>
           </div>
+          <div class="contact-card contact-card-gold">
+            <div class="contact-icon contact-icon-gold"><i class="ti ti-users"></i></div>
+            <div>
+              <div class="contact-label">تواصل مع المعلمات</div>
+              <a class="contact-val-gold" href="teachers.html">عرض صفحات المعلمات ←</a>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div class="col-12 col-lg-5">
-        <div class="contact-form-wrap" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;text-align:center;padding:40px 32px">
-          <div style="width:64px;height:64px;border-radius:50%;background:var(--green-dark);display:flex;align-items:center;justify-content:center">
-            <i class="ti ti-message-2" style="font-size:28px;color:var(--gold-light)"></i>
+      <div class="col-12 col-lg-8">
+        <div class="contact-form-wrap">
+          <div class="contact-form-title">أرسلي رسالتك</div>
+          <div class="row g-3">
+            <div class="col-12 col-sm-6">
+              <label class="form-label-custom">اسمك الكريم</label>
+              <input class="form-input" id="ctName" placeholder="اسمك الكريم" type="text"/>
+            </div>
+            <div class="col-12 col-sm-6">
+              <label class="form-label-custom">رقم الجوال</label>
+              <input class="form-input" dir="ltr" id="ctPhone" placeholder="05XXXXXXXX" type="text"/>
+            </div>
+            <div class="col-12 col-sm-6">
+              <label class="form-label-custom">إلى من تودّين الإرسال؟</label>
+              <select class="form-input" id="ctRecipient">
+                <option value="">اختاري الجهة</option>
+                <optgroup label="── الإدارة ──">
+                  <option value="admin">الإدارة العامة</option>
+                </optgroup>
+                <optgroup label="── المعلمات ──">
+                  <option value="tafseer">دكتورة عبير عقلان - التفسير</option>
+                  <option value="fiqh">دكتورة أماني عقلان - الفقه</option>
+                  <option value="aqeedah">أستاذة رشا حمدي - العقيدة</option>
+                  <option value="hadeeth">دكتورة حصة بنت عبدالعزيز - الحديث</option>
+                  <option value="quran1">أستاذة رُميساء محمد السيد الزهري - القرآن</option>
+                  <option value="quran2">أستاذة أسماء محمد السيد الزهري - القرآن</option>
+                </optgroup>
+              </select>
+            </div>
+            <div class="col-12 col-sm-6">
+              <label class="form-label-custom">موضوع الرسالة</label>
+              <select class="form-input" id="ctTopic">
+                <option value="">اختاري الموضوع</option>
+                <option>سؤال علمي</option>
+                <option>استفسار عن التسجيل</option>
+                <option>استفسار عن الجدول</option>
+                <option>غياب أو عذر</option>
+                <option>مشكلة تقنية</option>
+                <option>اقتراح</option>
+                <option>أخرى</option>
+              </select>
+            </div>
+            <div class="col-12">
+              <label class="form-label-custom">الرسالة</label>
+              <textarea class="form-input form-textarea" id="ctBody" placeholder="اكتبي رسالتك هنا..."></textarea>
+            </div>
           </div>
-          <div>
-            <div class="contact-form-title" style="margin-bottom:8px">نظام الرسائل الخاص</div>
-            <p style="color:var(--text-mid);font-size:13.5px;line-height:1.7;margin:0">
-              تواصلي مع معلماتك ومشرفاتك عبر نظام رسائل خاص وآمن.<br>
-              كل محادثة سرية ولا يراها إلا طرفاها.
-            </p>
+          <div id="ctSuccess" style="display:none" class="success-msg mt-3">
+            ✅ تم إرسال رسالتك بنجاح!
           </div>
-          <a href="messages.html" class="contact-submit" style="display:inline-flex;align-items:center;gap:8px;text-decoration:none;padding:12px 28px">
-            <i class="ti ti-send"></i> الذهاب إلى الرسائل
-          </a>
+          <button class="contact-submit mt-3" id="ctBtn" onclick="submitContactNew()">
+            <i class="ti ti-send"></i> إرسال الرسالة
+          </button>
         </div>
       </div>
     </div>
@@ -533,4 +566,3 @@ document.getElementById('mobileMenuToggle').addEventListener('click', function()
 <script src="../js/home-msg.js" type="module"></script>
 </body>
 </html>
-
