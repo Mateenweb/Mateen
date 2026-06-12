@@ -605,51 +605,12 @@ html { overflow-x: hidden; }
 }
 
 /* ════════════════════════════════════════
-   X. SIDEBAR كقائمة منزلقة في الموبايل
+   X. SIDEBAR كـ Offcanvas (Bootstrap) في الموبايل
    ════════════════════════════════════════ */
-@media (max-width: 768px) {
-  #mainSidebar.sidebar {
-    display: none !important;
-    position: fixed !important;
-    top: 0 !important;
-    bottom: 0 !important;
-    right: -85% !important;
-    left: auto !important;
+@media (max-width: 991px) {
+  #mainSidebar.offcanvas {
     width: 85% !important;
     max-width: 320px !important;
-    z-index: 1050 !important;
-    transition: right 0.3s ease !important;
-    box-shadow: -4px 0 20px rgba(0,0,0,0.15) !important;
-    overflow-y: auto !important;
-    box-sizing: border-box !important;
-    border-bottom: none !important;
-    border-right: none !important;
-  }
-  #mainSidebar.sidebar.open {
-    display: flex !important;
-    right: 0 !important;
-  }
-  #mainSidebar #sidebar-user, #mainSidebar #sidebar-guest {
-    width: 100% !important;
-    box-sizing: border-box !important;
-  }
-  #mainSidebar #sidebar-user {
-    display: flex !important;
-    flex-direction: column !important;
-  }
-  #mainSidebar .sidebar-actions {
-    margin-top: 0 !important;
-  }
-
-  .sidebar-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.4);
-    z-index: 1040;
-  }
-  .sidebar-overlay.show {
-    display: block;
   }
 
   .sidebar-fab {
@@ -669,8 +630,7 @@ html { overflow-x: hidden; }
   .sidebar-fab i { font-size: 18px; }
 }
 
-@media (min-width: 769px) {
-  .sidebar-overlay,
+@media (min-width: 992px) {
   .sidebar-fab {
     display: none !important;
   }

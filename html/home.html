@@ -47,7 +47,7 @@
       <button class="btn-solid" onclick="document.getElementById('reg-modal').classList.add('open')">التسجيل في البرنامج</button>
     </div>
 
-    <button class="sidebar-fab d-lg-none" id="sidebarFab" aria-label="ملفي وحسابي" onclick="document.getElementById('mainSidebar').classList.add('open');document.getElementById('sidebarOverlay').classList.add('show')">
+    <button class="sidebar-fab d-lg-none" id="sidebarFab" aria-label="ملفي وحسابي" data-bs-toggle="offcanvas" data-bs-target="#mainSidebar" aria-controls="mainSidebar">
       <i class="ti ti-user-circle"></i>
       <span>حسابي</span>
     </button>
@@ -80,7 +80,8 @@
 <div class="page-layout">
 
   <!-- SIDEBAR -->
-  <aside class="sidebar" id="mainSidebar">
+  <aside class="sidebar offcanvas offcanvas-end offcanvas-lg" tabindex="-1" id="mainSidebar">
+    <button type="button" class="btn-close d-lg-none" data-bs-dismiss="offcanvas" aria-label="إغلاق" style="position:absolute; left:14px; top:14px; z-index:10;"></button>
     <!-- Guest State -->
     <div id="sidebar-guest">
       <div class="sidebar-guest-logo">
@@ -140,9 +141,6 @@
       <span>متين العلمي</span>
     </div>
   </aside>
-
-  <!-- Mobile sidebar overlay -->
-  <div class="sidebar-overlay d-lg-none" id="sidebarOverlay" onclick="document.getElementById('mainSidebar').classList.remove('open');this.classList.remove('show')"></div>
 
   <!-- MAIN CONTENT -->
   <main class="content-area">

@@ -887,7 +887,6 @@ footer {
 /* Small tablet */
 @media (max-width: 991px) {
   .page-layout { flex-direction: column; }
-  .sidebar { display: none !important; }
   .hero { padding: 44px 28px; min-height: 340px; }
   .hero-text h1 { font-size: 38px; }
   .col-xl-2dot4 { width: 33.333%; }
