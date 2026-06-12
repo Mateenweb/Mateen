@@ -12,121 +12,186 @@
   <link rel="stylesheet" href="../css/mobile.css">
 </head>
 <body>
+
+<!-- Auth gate -->
 <div id="authGate" style="display:flex;align-items:center;justify-content:center;min-height:100vh;">
   <div style="font-family:Amiri,serif;font-size:18px;color:var(--green-dark)">جارٍ التحقق...</div>
 </div>
 
 <div id="mainContent" style="display:none">
-<div class="basmala-bar"><span class="bsm-ornament">❦</span>بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ<span class="bsm-ornament">❦</span></div>
 
-<nav>
-  <a href="home.html" class="nav-logo">
-    <div class="logo-circle"><img src="../logo.png" alt="متين" style="width:100%;height:100%;border-radius:50%;object-fit:cover;"></div>
-    <div>
-      <div class="nav-brand">برنامج متين العلمي</div>
-      <div class="nav-tagline">نحو بناء علميٍّ متين</div>
-    </div>
-  </a>
-  <ul class="nav-links">
-    <li><a href="home.html">الرئيسية</a></li>
-    <li><a href="messages.html" class="active">الرسائل</a></li>
-  </ul>
-  <div class="nav-btns">
-    <button onclick="doLogout()" class="btn-outline"><i class="ti ti-logout"></i> خروج</button>
-  </div>
-  <button class="nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')">
-    <i class="ti ti-menu-2"></i>
-  </button>
-</nav>
-
-<div class="msg-layout">
-
-  <!-- قائمة المحادثات -->
-  <div class="msg-sidebar">
-    <div class="msg-sidebar-head">
-      <span><i class="ti ti-message"></i> الرسائل</span>
-      <button class="tp-add-btn" onclick="showNewConv()"><i class="ti ti-edit"></i> جديدة</button>
-    </div>
-    <input type="text" id="convSearch" class="tp-search" placeholder="ابحثي..." oninput="filterConvs()" style="margin:10px;width:calc(100% - 20px)"/>
-    <div id="convList"><div class="empty-state" style="padding:20px"><i class="ti ti-loader"></i></div></div>
+  <!-- Basmala -->
+  <div class="basmala-bar">
+    <span class="bsm-ornament">❦</span>بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ<span class="bsm-ornament">❦</span>
   </div>
 
-  <!-- نافذة المحادثة -->
-  <div class="msg-main">
-    <div id="msgEmpty" class="msg-empty-state">
-      <i class="ti ti-message-dots" style="font-size:48px;color:var(--border)"></i>
-      <p>اختاري محادثة لعرضها</p>
+  <!-- Navbar -->
+  <nav>
+    <a href="home.html" class="nav-logo">
+      <div class="logo-circle">
+        <img src="../logo.png" alt="متين" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">
+      </div>
+      <div>
+        <div class="nav-brand">برنامج متين العلمي</div>
+        <div class="nav-tagline">نحو بناء علميٍّ متين</div>
+      </div>
+    </a>
+    <ul class="nav-links">
+      <li><a href="home.html">الرئيسية</a></li>
+      <li><a href="messages.html" class="active">الرسائل</a></li>
+    </ul>
+    <div class="nav-btns">
+      <button onclick="doLogout()" class="btn-outline"><i class="ti ti-logout"></i> خروج</button>
     </div>
+    <button class="nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')">
+      <i class="ti ti-menu-2"></i>
+    </button>
+  </nav>
 
-    <div id="msgConv" style="display:none;height:100%;display:none;flex-direction:column">
-      <div class="msg-conv-head">
-        <button class="mob-back-btn" onclick="mobBackToList()" style="display:none"><i class="ti ti-arrow-right"></i> الرسائل</button>
-        <div class="msg-conv-avatar" id="convAvatar">👤</div>
-        <div>
-          <div class="msg-conv-name" id="convName">...</div>
-          <div class="msg-conv-role" id="convRole">...</div>
+  <!-- Main layout -->
+  <div class="msg-layout">
+
+    <!-- ── Sidebar (conversation list) ── -->
+    <aside class="msg-sidebar" id="msgSidebar">
+      <div class="msg-sidebar-head">
+        <div class="msg-sidebar-top">
+          <div class="msg-sidebar-title">
+            <i class="ti ti-message-2"></i> الرسائل
+          </div>
+          <button class="compose-btn" onclick="showNewConv()">
+            <i class="ti ti-edit"></i> جديدة
+          </button>
+        </div>
+
+        <!-- Current user info -->
+        <div class="msg-user-info">
+          <div id="myAvatarSmall"></div>
+          <div>
+            <div class="msg-user-name" id="myName">...</div>
+          </div>
+          <span class="msg-role-badge" id="myRoleBadge">...</span>
+        </div>
+
+        <!-- Search -->
+        <div class="msg-search-wrap">
+          <i class="ti ti-search"></i>
+          <input type="text" id="convSearch" class="tp-search"
+                 placeholder="ابحثي في المحادثات..."
+                 oninput="filterConvs()"/>
         </div>
       </div>
-      <div class="msg-bubbles" id="msgBubbles"></div>
-      <div class="msg-input-wrap">
-        <textarea id="msgInput" class="msg-input" placeholder="اكتبي رسالتك..." rows="1" onkeydown="handleMsgKey(event)"></textarea>
-        <button class="msg-send-btn" onclick="sendMsg()"><i class="ti ti-send"></i></button>
+
+      <div id="convList">
+        <div class="empty-state">
+          <i class="ti ti-loader-2"></i>
+          <p>جارٍ التحميل...</p>
+        </div>
       </div>
+    </aside>
+
+    <!-- ── Main conversation area ── -->
+    <main class="msg-main">
+
+      <!-- Empty state (no conv selected) -->
+      <div id="msgEmpty" class="msg-empty-state">
+        <i class="ti ti-message-dots"></i>
+        <h3>مرحباً بكِ في الرسائل</h3>
+        <p>اختاري محادثة من القائمة أو ابدئي محادثة جديدة</p>
+      </div>
+
+      <!-- Active conversation -->
+      <div id="msgConv" style="display:none;flex-direction:column;height:100%">
+
+        <!-- Header -->
+        <div class="msg-conv-head">
+          <button class="mob-back-btn" onclick="mobBackToList()">
+            <i class="ti ti-arrow-right"></i>
+          </button>
+          <div id="convHeaderAvatar"></div>
+          <div class="msg-conv-info">
+            <div class="msg-conv-name" id="convName">...</div>
+            <div class="msg-conv-role" id="convRole">...</div>
+          </div>
+        </div>
+
+        <!-- Messages -->
+        <div class="msg-bubbles" id="msgBubbles"></div>
+
+        <!-- Input -->
+        <div class="msg-input-wrap">
+          <textarea id="msgInput" class="msg-input"
+                    placeholder="اكتبي رسالتك هنا..."
+                    rows="1"
+                    onkeydown="handleMsgKey(event)"
+                    oninput="autoGrow(this)"></textarea>
+          <button class="msg-send-btn" onclick="sendMsg()" title="إرسال">
+            <i class="ti ti-send"></i>
+          </button>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- ── New Conversation Modal ── -->
+  <div id="newConvModal" class="new-conv-modal" onclick="if(event.target===this)closeNewConv()">
+    <div class="new-conv-box">
+      <div class="new-conv-head">
+        <div class="new-conv-title">
+          <i class="ti ti-user-plus"></i> محادثة جديدة
+        </div>
+        <button class="new-conv-close" onclick="closeNewConv()">
+          <i class="ti ti-x"></i>
+        </button>
+      </div>
+
+      <div class="new-conv-search-wrap">
+        <i class="ti ti-search"></i>
+        <input type="text" id="userSearch" class="tp-search"
+               placeholder="ابحثي باسم المستخدم..."
+               oninput="searchUsers()"
+               style="padding-right:36px"/>
+      </div>
+
+      <div id="userResults"></div>
     </div>
   </div>
 
-</div>
-
-<!-- modal محادثة جديدة -->
-<div id="newConvModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:999;align-items:center;justify-content:center">
-  <div style="background:#fff;border-radius:16px;padding:28px;max-width:440px;width:90%">
-    <h3 style="margin:0 0 16px;font-family:Amiri,serif">محادثة جديدة</h3>
-    <input type="text" id="userSearch" class="tp-search" placeholder="ابحثي عن مستخدم..." oninput="searchUsers()" style="width:100%;margin-bottom:12px"/>
-    <div id="userResults" style="max-height:240px;overflow-y:auto"></div>
-    <button onclick="document.getElementById('newConvModal').style.display='none'" style="margin-top:12px;padding:8px 18px;border-radius:8px;border:1px solid var(--border);background:#fff;cursor:pointer;font-family:inherit;width:100%">إلغاء</button>
-  </div>
-</div>
-
-</div>
+</div><!-- /mainContent -->
 
 <script type="module" src="../js/messages.js"></script>
 
 <script>
-// ── Mobile messages switching ──────────────
-function isMobMsg() { return window.innerWidth <= 700; }
+// ── Mobile switching ──────────────────────────────────
+function isMob() { return window.innerWidth <= 700; }
 
 function mobOpenChat() {
-  if (!isMobMsg()) return;
-  document.querySelector('.msg-sidebar').classList.add('mob-hidden');
-  document.querySelector('.msg-main').classList.add('mob-visible');
-  document.querySelector('.mob-back-btn').style.display = 'flex';
+  if (!isMob()) return;
+  document.getElementById('msgSidebar').classList.add('mob-hidden');
+  document.getElementById('msgConv').parentElement.classList.add('mob-visible');
 }
 
 window.mobBackToList = function() {
-  document.querySelector('.msg-sidebar').classList.remove('mob-hidden');
-  document.querySelector('.msg-main').classList.remove('mob-visible');
-  document.querySelector('.mob-back-btn').style.display = 'none';
+  document.getElementById('msgSidebar').classList.remove('mob-hidden');
+  document.getElementById('msgConv').parentElement.classList.remove('mob-visible');
 };
 
-// Hook into conv selection — patch after page loads
 window.addEventListener('load', () => {
-  const convList = document.getElementById('convList');
-  if (convList) {
-    convList.addEventListener('click', e => {
-      const item = e.target.closest('.conv-item');
-      if (item) setTimeout(mobOpenChat, 50);
-    });
-  }
+  document.getElementById('convList').addEventListener('click', e => {
+    if (e.target.closest('.conv-item')) setTimeout(mobOpenChat, 60);
+  });
 });
 
 window.addEventListener('resize', () => {
-  if (!isMobMsg()) {
-    document.querySelector('.msg-sidebar').classList.remove('mob-hidden');
-    document.querySelector('.msg-main').classList.remove('mob-visible');
-    const backBtn = document.querySelector('.mob-back-btn');
-    if (backBtn) backBtn.style.display = 'none';
+  if (!isMob()) {
+    document.getElementById('msgSidebar').classList.remove('mob-hidden');
+    const main = document.querySelector('.msg-main');
+    if (main) main.classList.remove('mob-visible');
+    const back = document.querySelector('.mob-back-btn');
+    if (back) back.style.display = 'none';
   }
 });
 </script>
+
 </body>
 </html>

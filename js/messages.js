@@ -7,8 +7,41 @@ const app  = initializeApp(FIREBASE_CONFIG);
 const db   = getFirestore(app);
 const auth = getAuth(app);
 
-const ROLE_LABELS  = { student: 'أصدقاء متين', mateen: 'بنات متين', teacher: 'معلمة', supervisor: 'مشرفة', admin: 'إدارة' };
-const ROLE_AVATARS = { student: '👧', mateen: '🌸', teacher: '👩‍🏫', supervisor: '👩‍💼', admin: '🛡️' };
+const ROLE_LABELS = {
+  student:    'طالبة',
+  mateen:     'طالبة متين',
+  teacher:    'معلمة',
+  supervisor: 'مشرفة',
+  admin:      'إدارة'
+};
+
+const ROLE_COLORS = {
+  student:    '#2d6a4f',
+  mateen:     '#40916c',
+  teacher:    '#1b4332',
+  supervisor: '#c9a227',
+  admin:      '#6b2737'
+};
+
+const ROLE_INITIALS_BG = {
+  student:    '#d8f3dc',
+  mateen:     '#b7e4c7',
+  teacher:    '#e9f5db',
+  supervisor: '#fff3cd',
+  admin:      '#f8d7da'
+};
+
+// ── Messaging permissions ──────────────────────────────────────────────────
+// student/mateen → can message: teacher, supervisor, admin
+// teacher/supervisor/admin → can message: anyone
+function canMessageRole(myRole, theirRole) {
+  const elevated = ['teacher', 'supervisor', 'admin'];
+  if (elevated.includes(myRole)) return true;           // staff → anyone
+  if (['student','mateen'].includes(myRole)) {
+    return elevated.includes(theirRole);                // students → staff only
+  }
+  return false;
+}
 
 let currentUser     = null;
 let currentUserData = null;
@@ -17,14 +50,14 @@ let msgUnsub        = null;
 let allUsers        = [];
 let allConvs        = [];
 
-// ── Auth ──────────────────────────────────────
+// ── Auth ───────────────────────────────────────────────────────────────────
 onAuthStateChanged(auth, async user => {
   if (!user) { window.location.href = '../html/login.html'; return; }
 
   const snap = await getDoc(doc(db, 'users', user.uid));
   if (!snap.exists()) { window.location.href = '../html/login.html'; return; }
 
-  const data   = snap.data();
+  const data = snap.data();
   if (data.status === 'pending' || data.status === 'suspended') {
     window.location.href = '../html/home.html'; return;
   }
@@ -35,18 +68,62 @@ onAuthStateChanged(auth, async user => {
   document.getElementById('authGate').style.display   = 'none';
   document.getElementById('mainContent').style.display = 'block';
 
+  // Show role badge in header
+  const roleBadge = document.getElementById('myRoleBadge');
+  if (roleBadge) {
+    roleBadge.textContent = ROLE_LABELS[data.role] || data.role;
+    roleBadge.style.background = ROLE_INITIALS_BG[data.role] || '#f0f0f0';
+    roleBadge.style.color = ROLE_COLORS[data.role] || '#333';
+  }
+  const myNameEl = document.getElementById('myName');
+  if (myNameEl) myNameEl.textContent = data.name || currentUser.email;
+
   loadConversations();
   loadAllUsers();
 });
 
 window.doLogout = () => signOut(auth).then(() => window.location.href = '../html/login.html');
 
-// ── Conv ID helper ────────────────────────────
-function convId(uid1, uid2) {
-  return [uid1, uid2].sort().join('__');
+// ── Conv ID helper ─────────────────────────────────────────────────────────
+function convId(uid1, uid2) { return [uid1, uid2].sort().join('__'); }
+
+// ── Initials avatar ────────────────────────────────────────────────────────
+function makeInitials(name, role) {
+  if (!name) return '؟';
+  const parts = name.trim().split(/\s+/);
+  return parts.length >= 2
+    ? parts[0][0] + parts[1][0]
+    : parts[0].slice(0, 2);
 }
 
-// ── Load all users (for new conv) ─────────────
+function avatarHtml(name, role, size = 42) {
+  const initials = makeInitials(name, role);
+  const bg  = ROLE_INITIALS_BG[role] || '#e8e8e8';
+  const col = ROLE_COLORS[role]      || '#555';
+  return `<div class="conv-avatar" style="width:${size}px;height:${size}px;background:${bg};color:${col};font-size:${Math.round(size*0.35)}px">${initials}</div>`;
+}
+
+// ── Format timestamp ───────────────────────────────────────────────────────
+function fmtTime(seconds) {
+  if (!seconds) return '';
+  const d = new Date(seconds * 1000);
+  const now = new Date();
+  const diffDays = Math.floor((now - d) / 86400000);
+  if (diffDays === 0) return d.toLocaleTimeString('ar', { hour: '2-digit', minute: '2-digit' });
+  if (diffDays === 1) return 'أمس';
+  if (diffDays < 7)  return d.toLocaleDateString('ar', { weekday: 'short' });
+  return d.toLocaleDateString('ar', { day: 'numeric', month: 'short' });
+}
+
+function fmtFullTime(seconds) {
+  if (!seconds) return '';
+  return new Date(seconds * 1000).toLocaleString('ar', {
+    hour: '2-digit', minute: '2-digit',
+    day: 'numeric', month: 'short'
+  });
+}
+
+// ── Load all users ─────────────────────────────────────────────────────────
 async function loadAllUsers() {
   const snap = await getDocs(collection(db, 'users'));
   allUsers = [];
@@ -57,7 +134,7 @@ async function loadAllUsers() {
   });
 }
 
-// ── Load conversations ────────────────────────
+// ── Load conversations ─────────────────────────────────────────────────────
 function loadConversations() {
   const q = query(
     collection(db, 'conversations'),
@@ -68,13 +145,14 @@ function loadConversations() {
   onSnapshot(q, async snap => {
     allConvs = [];
     const promises = snap.docs.map(async d => {
-      const data  = d.data();
+      const data    = d.data();
       const otherId = data.participants.find(p => p !== currentUser.uid);
       const otherSnap = await getDoc(doc(db, 'users', otherId));
       const other = otherSnap.exists() ? otherSnap.data() : {};
       allConvs.push({ id: d.id, ...data, otherId, otherName: other.name || otherId, otherRole: other.role || '' });
     });
     await Promise.all(promises);
+    allConvs.sort((a, b) => (b.lastAt?.seconds || 0) - (a.lastAt?.seconds || 0));
     renderConvList(allConvs);
   });
 }
@@ -82,27 +160,40 @@ function loadConversations() {
 function renderConvList(list) {
   const el = document.getElementById('convList');
   if (!list.length) {
-    el.innerHTML = '<div class="empty-state">لا توجد محادثات بعد</div>';
+    el.innerHTML = `
+      <div class="empty-state">
+        <i class="ti ti-message-off"></i>
+        <p>لا توجد محادثات بعد</p>
+      </div>`;
     return;
   }
   el.innerHTML = list.map(c => {
-    const avatar = ROLE_AVATARS[c.otherRole] || '👤';
-    const role   = ROLE_LABELS[c.otherRole]  || '';
-    const time   = c.lastAt?.seconds ? new Date(c.lastAt.seconds * 1000).toLocaleTimeString('ar', { hour: '2-digit', minute: '2-digit' }) : '';
-    const unread = c.unread?.[currentUser.uid] > 0;
+    const time   = fmtTime(c.lastAt?.seconds);
+    const unread = c.unread?.[currentUser.uid] > 0 ? c.unread[currentUser.uid] : 0;
+    const roleLabel = ROLE_LABELS[c.otherRole] || '';
+    const isActive = activeConvId === c.id;
+
+    // Truncate last message
+    const preview = (c.lastMsg || '').length > 45
+      ? c.lastMsg.slice(0, 45) + '…'
+      : (c.lastMsg || 'ابدئي المحادثة');
+
     return `
-      <div class="conv-item ${activeConvId === c.id ? 'active' : ''}" onclick="openConv('${c.id}','${c.otherId}','${c.otherName}','${c.otherRole}')">
-        <div class="conv-avatar">${avatar}</div>
-        <div style="flex:1;min-width:0">
-          <div class="conv-name">${c.otherName}</div>
-          <div class="conv-preview">${c.lastMsg || '...'}</div>
+      <div class="conv-item ${isActive ? 'active' : ''} ${unread ? 'unread' : ''}"
+           onclick="openConv('${c.id}','${c.otherId}','${c.otherName}','${c.otherRole}')">
+        ${avatarHtml(c.otherName, c.otherRole, 44)}
+        <div class="conv-meta">
+          <div class="conv-top-row">
+            <span class="conv-name">${c.otherName}</span>
+            <span class="conv-time">${time}</span>
+          </div>
+          <div class="conv-bottom-row">
+            <span class="conv-preview">${preview}</span>
+            ${unread ? `<span class="conv-unread">${unread > 9 ? '9+' : unread}</span>` : ''}
+          </div>
+          <span class="conv-role-pill" style="background:${ROLE_INITIALS_BG[c.otherRole]||'#eee'};color:${ROLE_COLORS[c.otherRole]||'#555'}">${roleLabel}</span>
         </div>
-        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
-          <div class="conv-time">${time}</div>
-          ${unread ? `<div class="conv-unread">${c.unread[currentUser.uid]}</div>` : ''}
-        </div>
-      </div>
-    `;
+      </div>`;
   }).join('');
 }
 
@@ -111,16 +202,20 @@ window.filterConvs = () => {
   renderConvList(q ? allConvs.filter(c => c.otherName.toLowerCase().includes(q)) : allConvs);
 };
 
-// ── Open conversation ─────────────────────────
+// ── Open conversation ──────────────────────────────────────────────────────
 window.openConv = async (cid, otherId, otherName, otherRole) => {
   activeConvId = cid;
   if (msgUnsub) msgUnsub();
 
-  document.getElementById('msgEmpty').style.display  = 'none';
-  document.getElementById('msgConv').style.display   = 'flex';
-  document.getElementById('convAvatar').textContent  = ROLE_AVATARS[otherRole] || '👤';
-  document.getElementById('convName').textContent    = otherName;
-  document.getElementById('convRole').textContent    = ROLE_LABELS[otherRole] || '';
+  document.getElementById('msgEmpty').style.display = 'none';
+  const convEl = document.getElementById('msgConv');
+  convEl.style.display = 'flex';
+
+  // Header
+  document.getElementById('convHeaderAvatar').innerHTML = avatarHtml(otherName, otherRole, 38);
+  document.getElementById('convName').textContent  = otherName;
+  document.getElementById('convRole').textContent  = ROLE_LABELS[otherRole] || otherRole;
+  document.getElementById('convRole').style.color  = ROLE_COLORS[otherRole] || 'var(--text-mid)';
 
   // Mark as read
   await updateDoc(doc(db, 'conversations', cid), { [`unread.${currentUser.uid}`]: 0 });
@@ -129,44 +224,65 @@ window.openConv = async (cid, otherId, otherName, otherRole) => {
   const q = query(collection(db, 'conversations', cid, 'messages'), orderBy('sentAt'));
   msgUnsub = onSnapshot(q, snap => {
     const bubbles = document.getElementById('msgBubbles');
+
+    // Group by day
+    let lastDay = '';
     bubbles.innerHTML = snap.docs.map(d => {
       const m    = d.data();
       const mine = m.senderId === currentUser.uid;
-      const time = m.sentAt?.seconds ? new Date(m.sentAt.seconds * 1000).toLocaleTimeString('ar', { hour: '2-digit', minute: '2-digit' }) : '';
-      return `
-        <div class="msg-bubble ${mine ? 'mine' : 'theirs'}">
-          ${m.text}
-          <div class="msg-bubble-time">${time}</div>
-        </div>
-      `;
+      const sec  = m.sentAt?.seconds;
+      const time = sec ? new Date(sec * 1000).toLocaleTimeString('ar', { hour: '2-digit', minute: '2-digit' }) : '';
+      const fullTime = fmtFullTime(sec);
+
+      const dayStr = sec ? new Date(sec * 1000).toLocaleDateString('ar', { weekday:'long', day:'numeric', month:'long' }) : '';
+      let dayDivider = '';
+      if (dayStr && dayStr !== lastDay) {
+        lastDay = dayStr;
+        dayDivider = `<div class="msg-day-divider"><span>${dayStr}</span></div>`;
+      }
+
+      return `${dayDivider}
+        <div class="msg-row ${mine ? 'mine' : 'theirs'}">
+          ${!mine ? avatarHtml(otherName, otherRole, 28) : ''}
+          <div class="msg-bubble-wrap">
+            ${!mine ? `<div class="msg-sender-name">${otherName}</div>` : ''}
+            <div class="msg-bubble ${mine ? 'mine' : 'theirs'}" title="${fullTime}">
+              <span class="msg-text">${escapeHtml(m.text)}</span>
+              <span class="msg-time">${time}${mine ? ' <i class="ti ti-check"></i>' : ''}</span>
+            </div>
+          </div>
+        </div>`;
     }).join('');
+
     bubbles.scrollTop = bubbles.scrollHeight;
   });
 
   renderConvList(allConvs);
 };
 
-// ── Send message ──────────────────────────────
+// ── Send message ───────────────────────────────────────────────────────────
 window.sendMsg = async () => {
   const input = document.getElementById('msgInput');
   const text  = input.value.trim();
   if (!text || !activeConvId) return;
 
   input.value = '';
+  input.style.height = 'auto';
 
   const otherId = allConvs.find(c => c.id === activeConvId)?.otherId;
 
   await addDoc(collection(db, 'conversations', activeConvId, 'messages'), {
     text,
-    senderId: currentUser.uid,
+    senderId:   currentUser.uid,
     senderName: currentUserData.name || currentUser.email,
-    sentAt: serverTimestamp(),
+    senderRole: currentUserData.role || '',
+    sentAt:     serverTimestamp(),
   });
 
   await setDoc(doc(db, 'conversations', activeConvId), {
     participants: [currentUser.uid, otherId].filter(Boolean),
-    lastMsg: text,
-    lastAt: serverTimestamp(),
+    lastMsg:  text,
+    lastAt:   serverTimestamp(),
     [`unread.${otherId}`]: (allConvs.find(c => c.id === activeConvId)?.unread?.[otherId] || 0) + 1,
     [`unread.${currentUser.uid}`]: 0,
   }, { merge: true });
@@ -176,41 +292,82 @@ window.handleMsgKey = e => {
   if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMsg(); }
 };
 
-// ── New conversation ──────────────────────────
+// Auto-grow textarea
+window.autoGrow = el => {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+};
+
+// ── New conversation ───────────────────────────────────────────────────────
 window.showNewConv = () => {
   document.getElementById('newConvModal').style.display = 'flex';
   document.getElementById('userSearch').value = '';
-  document.getElementById('userResults').innerHTML = '';
+  searchUsers();
+};
+
+window.closeNewConv = () => {
+  document.getElementById('newConvModal').style.display = 'none';
 };
 
 window.searchUsers = () => {
   const q   = document.getElementById('userSearch').value.trim().toLowerCase();
   const el  = document.getElementById('userResults');
-  const res = q ? allUsers.filter(u => (u.name || '').toLowerCase().includes(q) || (u.email || '').includes(q)) : allUsers;
 
-  el.innerHTML = res.slice(0, 10).map(u => `
-    <div class="user-result-item" onclick="startConv('${u.id}','${u.name || u.email}','${u.role}')">
-      <div class="user-result-avatar">${ROLE_AVATARS[u.role] || '👤'}</div>
-      <div>
-        <div class="user-result-name">${u.name || u.email}</div>
-        <div class="user-result-role">${ROLE_LABELS[u.role] || ''}</div>
-      </div>
-    </div>
-  `).join('');
+  // Filter by permission AND search term
+  const myRole = currentUserData?.role || '';
+  const res = allUsers
+    .filter(u => canMessageRole(myRole, u.role))
+    .filter(u => !q || (u.name || '').toLowerCase().includes(q) || (u.email || '').includes(q));
+
+  if (!res.length) {
+    el.innerHTML = `<div class="empty-state" style="padding:20px"><i class="ti ti-user-off"></i><p>${q ? 'لا نتائج' : 'لا يوجد مستخدمون متاحون'}</p></div>`;
+    return;
+  }
+
+  // Group by role
+  const groups = {};
+  res.forEach(u => {
+    const r = u.role || 'other';
+    if (!groups[r]) groups[r] = [];
+    groups[r].push(u);
+  });
+
+  const roleOrder = ['admin', 'supervisor', 'teacher', 'mateen', 'student'];
+  el.innerHTML = roleOrder
+    .filter(r => groups[r])
+    .map(r => `
+      <div class="user-group-label">${ROLE_LABELS[r] || r}</div>
+      ${groups[r].map(u => `
+        <div class="user-result-item" onclick="startConv('${u.id}','${escapeAttr(u.name || u.email)}','${u.role}')">
+          ${avatarHtml(u.name || u.email, u.role, 38)}
+          <div>
+            <div class="user-result-name">${u.name || u.email}</div>
+            <div class="user-result-role" style="color:${ROLE_COLORS[u.role]||'#888'}">${ROLE_LABELS[u.role] || ''}</div>
+          </div>
+        </div>`).join('')}
+    `).join('');
 };
 
 window.startConv = async (otherId, otherName, otherRole) => {
-  document.getElementById('newConvModal').style.display = 'none';
+  closeNewConv();
   const cid = convId(currentUser.uid, otherId);
-
-  // Create conv doc if not exists
   await setDoc(doc(db, 'conversations', cid), {
     participants: [currentUser.uid, otherId],
     lastMsg: '',
-    lastAt: serverTimestamp(),
+    lastAt:  serverTimestamp(),
     [`unread.${currentUser.uid}`]: 0,
     [`unread.${otherId}`]: 0,
   }, { merge: true });
-
   openConv(cid, otherId, otherName, otherRole);
 };
+
+// ── Helpers ────────────────────────────────────────────────────────────────
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;')
+    .replace(/\n/g,'<br>');
+}
+function escapeAttr(str) {
+  return String(str).replace(/'/g,"\\'").replace(/"/g,'\\"');
+}

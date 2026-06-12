@@ -1,7 +1,7 @@
 
 import { initializeApp, getApps, getApp }   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, collection, addDoc } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 import { FIREBASE_CONFIG } from "./config.js";
 
 const app  = getApps().length ? getApp() : initializeApp(FIREBASE_CONFIG);
@@ -36,51 +36,4 @@ onAuthStateChanged(auth, async user => {
 });
 window.doLogout = () => signOut(auth).then(() => window.location.href='../html/login.html');
 
-// ── Contact form with Firebase ────────────────
-const RECIPIENTS = {
-  admin:   'الإدارة العامة',
-  tafseer: 'دكتورة عبير عقلان',
-  fiqh:    'دكتورة أماني عقلان',
-  aqeedah: 'أستاذة رشا حمدي',
-  hadeeth: 'دكتورة حصة بنت عبدالعزيز',
-  seera:   'معلمة السيرة النبوية',
-  nahw:    'معلمة النحو والصرف',
-  tajweed: 'معلمة التجويد',
-  mutoon:  'معلمة المتون',
-  quran1:  'أستاذة رُميساء محمد السيد الزهري',
-  quran2:  'أستاذة أسماء محمد السيد الزهري',
-  tarbawi: 'معلمة البرامج التربوية',
-};
-
-window.submitContactNew = async () => {
-  const name      = document.getElementById('ctName').value.trim();
-  const phone     = document.getElementById('ctPhone').value.trim();
-  const recipient = document.getElementById('ctRecipient').value;
-  const topic     = document.getElementById('ctTopic').value;
-  const body      = document.getElementById('ctBody').value.trim();
-  if (!name || !recipient || !body) {
-    alert('يرجى تعبئة الاسم والجهة المستقبِلة والرسالة');
-    return;
-  }
-  const btn = document.getElementById('ctBtn');
-  btn.disabled = true;
-  btn.innerHTML = '<i class="ti ti-loader" style="animation:spin .8s linear infinite;display:inline-block"></i> جارٍ الإرسال...';
-  try {
-    const colPath = recipient === 'admin'
-      ? collection(db, 'messages', 'admin', 'inbox')
-      : collection(db, 'teachers', recipient, 'messages');
-    await addDoc(colPath, {
-      name, phone, topic, body,
-      recipientId:   recipient,
-      recipientName: RECIPIENTS[recipient] || recipient,
-      sentAt: Date.now(), read: false,
-    });
-    document.getElementById('ctSuccess').style.display = 'block';
-    ['ctName','ctPhone','ctBody'].forEach(id => document.getElementById(id).value='');
-    document.getElementById('ctRecipient').value='';
-    document.getElementById('ctTopic').value='';
-    setTimeout(()=>document.getElementById('ctSuccess').style.display='none', 4000);
-  } catch(e) { alert('حدث خطأ، حاولي مجدداً'); }
-  btn.disabled = false;
-  btn.innerHTML = '<i class="ti ti-send"></i> إرسال الرسالة';
-};
+// Contact form removed — messages now handled via messages.html
