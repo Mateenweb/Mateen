@@ -636,15 +636,9 @@ html { overflow-x: hidden; }
   #mainSidebar #sidebar-user {
     display: flex !important;
     flex-direction: column !important;
-    min-height: 100% !important;
-  }
-  #mainSidebar .sidebar-nav {
-    flex: 1 1 auto !important;
-    overflow-y: auto !important;
   }
   #mainSidebar .sidebar-actions {
-    margin-top: auto !important;
-    flex-shrink: 0 !important;
+    margin-top: 0 !important;
   }
 
   .sidebar-overlay {
