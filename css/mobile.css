@@ -612,6 +612,21 @@ html { overflow-x: hidden; }
     width: 85% !important;
     max-width: 320px !important;
   }
+  #mainSidebar #sidebar-user.show-user {
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  #mainSidebar #sidebar-user .sidebar-nav {
+    position: static !important;
+    flex: 0 0 auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  #mainSidebar #sidebar-user .sidebar-actions {
+    position: static !important;
+    order: 99 !important;
+    margin-top: 8px !important;
+  }
 
   .sidebar-fab {
     display: flex;

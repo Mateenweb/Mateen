@@ -13,7 +13,7 @@ onAuthStateChanged(auth, async user => {
   const guest   = document.getElementById('sidebar-guest');
   const userDiv = document.getElementById('sidebar-user');
   if (!user) { guest.style.display='block'; userDiv.style.display='none'; return; }
-  guest.style.display='none'; userDiv.style.display='block';
+  guest.style.display='none'; userDiv.style.display='block'; userDiv.classList.add('show-user');
 
   // إخفاء زراير تسجيل الدخول/التسجيل لما تكون مسجلة دخول
   ['heroBtns','navBtns','mobNavBtns'].forEach(id => {

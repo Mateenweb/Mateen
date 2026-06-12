@@ -33,7 +33,7 @@ onAuthStateChanged(auth, async user => {
 
   // مسجلة دخول — اجلب بيانات المستخدمة
   guest.style.display   = 'none';
-  userDiv.style.display = 'block';
+  userDiv.style.display = 'block'; userDiv.classList.add('show-user');
 
   const snap = await getDoc(doc(db, 'users', user.uid));
   const role = snap.exists() ? snap.data().role : 'student';
