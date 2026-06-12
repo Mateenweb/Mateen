@@ -43,8 +43,8 @@ onAuthStateChanged(auth, async user => {
     return;
   }
 
-  // الإدارة والمشرفة: تشوف الكل
-  if (role === 'admin' || role === 'supervisor') {
+  // الإدارة فقط: تشوف الكل
+  if (role === 'admin') {
     document.getElementById('authGate').style.display    = 'none';
     document.getElementById('mainContent').style.display = 'block';
     initPage(studentId);

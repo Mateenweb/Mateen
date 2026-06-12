@@ -43,8 +43,8 @@ onAuthStateChanged(auth, async user => {
     return;
   }
 
-  // الإدارة والمشرفة: تشوف الكل
-  if (role === 'admin' || role === 'supervisor') {
+  // الإدارة فقط: تشوف الكل
+  if (role === 'admin') {
     if (!studentId) { window.location.href = '../html/home.html'; return; }
     initPage();
     return;

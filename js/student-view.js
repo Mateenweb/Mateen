@@ -29,8 +29,8 @@ onAuthStateChanged(auth, async user => {
     window.location.href = '../html/home.html'; return;
   }
 
-  // الإدارة والمشرفة: تشوف الكل
-  if (role === 'admin' || role === 'supervisor') {
+  // الإدارة فقط: تشوف الكل
+  if (role === 'admin') {
     document.getElementById('authGate').style.display    = 'none';
     document.getElementById('mainContent').style.display = 'block';
     initStudentView(userData);
