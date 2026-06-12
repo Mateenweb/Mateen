@@ -952,19 +952,19 @@ footer {
     display: flex !important;
     position: fixed;
     top: 0; bottom: 0;
-    right: -280px;
-    left: auto;
+    left: -280px;
+    right: auto;
     width: 260px;
     min-width: 260px;
     height: 100vh;
     z-index: 800;
-    box-shadow: -4px 0 24px rgba(0,0,0,0.18);
-    transition: right 0.3s ease;
+    box-shadow: 4px 0 24px rgba(0,0,0,0.18);
+    transition: left 0.3s ease;
     overflow-y: auto;
   }
 
   .sidebar.mobile-open {
-    right: 0;
+    left: 0;
   }
 
   /* Overlay behind sidebar */
