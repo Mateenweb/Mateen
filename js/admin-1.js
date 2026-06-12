@@ -29,6 +29,8 @@ onAuthStateChanged(auth, async user => {
   } else {
     document.getElementById('pendingSection').style.display = 'block';
     loadPendingAccounts();
+    loadAllUsers();
+    document.getElementById('allUsersSection').style.display = 'block';
   }
   loadMats();
 });
@@ -540,3 +542,116 @@ const _origToast = window.showToast ? null : null;
 
 function hideErr(){ document.getElementById('errMsg').classList.remove('show'); }
 function showToast(msg,err=false){ const t=document.getElementById('toast'); t.textContent=msg; t.className='toast'+(err?' error':''); t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),3000); }
+
+// ══════════════════════════════════════
+//  جميع الحسابات المسجلة (admin فقط)
+// ══════════════════════════════════════
+
+let allUsersData = [];
+
+const STATUS_LABELS = {
+  active:    '✅ مفعّل',
+  pending:   '⏳ معلق',
+  suspended: '🚫 موقوف',
+};
+const STATUS_COLORS = {
+  active:    '#2d6a4f',
+  pending:   '#c9a227',
+  suspended: '#c0392b',
+};
+const STATUS_BG = {
+  active:    '#d8f3dc',
+  pending:   '#fff3cd',
+  suspended: '#fde8e8',
+};
+
+function loadAllUsers() {
+  onSnapshot(
+    query(collection(db, 'users'), orderBy('createdAt', 'desc')),
+    snap => {
+      allUsersData = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      renderAllUsers();
+      updateUsersStats();
+
+      const badge = document.getElementById('allUsersBadge');
+      if (badge) {
+        badge.textContent = allUsersData.length;
+        badge.style.display = 'inline';
+      }
+    }
+  );
+}
+
+function updateUsersStats() {
+  const el = id => document.getElementById(id);
+  if (!el('uTotal')) return;
+  el('uTotal').textContent     = allUsersData.length;
+  el('uActive').textContent    = allUsersData.filter(u => u.status === 'active').length;
+  el('uPending').textContent   = allUsersData.filter(u => u.status === 'pending').length;
+  el('uSuspended').textContent = allUsersData.filter(u => u.status === 'suspended').length;
+}
+
+window.renderAllUsers = () => {
+  const q   = (document.getElementById('usersSearch')?.value || '').toLowerCase().trim();
+  const fr  = document.getElementById('usersFilterRole')?.value   || 'all';
+  const fs  = document.getElementById('usersFilterStatus')?.value || 'all';
+
+  const list = allUsersData.filter(u =>
+    (fr === 'all' || u.role === fr) &&
+    (fs === 'all' || u.status === fs) &&
+    (!q  || (u.name||'').toLowerCase().includes(q) || (u.email||'').toLowerCase().includes(q))
+  );
+
+  const tbody = document.getElementById('allUsersBody');
+  if (!tbody) return;
+
+  if (!list.length) {
+    tbody.innerHTML = `<tr><td colspan="8" class="empty-state"><i class="ti ti-user-off"></i> لا توجد نتائج</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = list.map((u, i) => {
+    const statusLabel = STATUS_LABELS[u.status] || u.status || '—';
+    const statusColor = STATUS_COLORS[u.status] || '#888';
+    const statusBg    = STATUS_BG[u.status]     || '#f5f5f5';
+    const roleLabel   = ROLE_LABELS[u.role]     || u.role || '—';
+    const createdAt   = u.createdAt
+      ? new Date(u.createdAt.seconds * 1000).toLocaleDateString('ar-EG', { year:'numeric', month:'short', day:'numeric' })
+      : '—';
+
+    const actionBtns = u.status === 'active'
+      ? `<button class="btn-reject" style="font-size:11px;padding:4px 10px"
+           onclick="suspendUser('${u.id}')">
+           <i class="ti ti-ban"></i> إيقاف
+         </button>`
+      : u.status === 'suspended'
+      ? `<button class="btn-approve" style="font-size:11px;padding:4px 10px"
+           onclick="reactivateUser('${u.id}')">
+           <i class="ti ti-player-play"></i> إعادة تفعيل
+         </button>`
+      : `<span style="color:var(--text-mid);font-size:12px">—</span>`;
+
+    return `<tr>
+      <td style="color:var(--text-mid);font-size:12px">${i + 1}</td>
+      <td style="font-weight:600;font-size:13.5px">${esc(u.name || '—')}</td>
+      <td><span style="font-size:12px;background:var(--beige2);padding:2px 8px;border-radius:4px">${roleLabel}</span></td>
+      <td dir="ltr" style="font-size:12px;color:var(--text-mid)">${esc(u.email || '—')}</td>
+      <td dir="ltr" style="font-size:12px">${esc(u.phone || '—')}</td>
+      <td style="font-size:12px;color:var(--text-mid);white-space:nowrap">${createdAt}</td>
+      <td><span style="font-size:12px;background:${statusBg};color:${statusColor};padding:3px 10px;border-radius:10px;white-space:nowrap">${statusLabel}</span></td>
+      <td>${actionBtns}</td>
+    </tr>`;
+  }).join('');
+};
+
+window.suspendUser = async id => {
+  if (!confirm('هل تريدين إيقاف هذا الحساب مؤقتاً؟')) return;
+  await updateDoc(doc(db, 'users', id), { status: 'suspended' });
+  showToast('تم إيقاف الحساب');
+};
+
+window.reactivateUser = async id => {
+  await updateDoc(doc(db, 'users', id), { status: 'active' });
+  showToast('✓ تم إعادة تفعيل الحساب');
+};
+
