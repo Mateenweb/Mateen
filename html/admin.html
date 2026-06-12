@@ -125,6 +125,57 @@
 <div class="empty-state"><i class="ti ti-inbox"></i>لا توجد حسابات معلقة</div>
 </div>
 </div>
+<!-- ALL USERS SECTION (admin only) -->
+<div class="section" id="allUsersSection" style="display:none">
+  <div class="section-head">
+    <div class="section-head-title">
+      <i class="ti ti-users"></i> جميع الحسابات المسجلة
+      <span class="pending-badge" id="allUsersBadge" style="display:none;background:#2d6a4f"></span>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <input id="usersSearch" type="text" placeholder="ابحثي بالاسم أو البريد..."
+        oninput="renderAllUsers()"
+        style="padding:7px 12px;border:1px solid var(--border);border-radius:8px;font-family:'Noto Naskh Arabic',serif;font-size:13px;width:190px"/>
+      <select id="usersFilterRole" onchange="renderAllUsers()"
+        style="padding:7px 10px;border:1px solid var(--border);border-radius:8px;font-family:'Noto Naskh Arabic',serif;font-size:13px">
+        <option value="all">كل الأدوار</option>
+        <option value="student">أصدقاء متين</option>
+        <option value="mateen">بنات متين</option>
+        <option value="teacher">معلمة</option>
+        <option value="supervisor">مشرفة</option>
+        <option value="admin">إدارة</option>
+      </select>
+      <select id="usersFilterStatus" onchange="renderAllUsers()"
+        style="padding:7px 10px;border:1px solid var(--border);border-radius:8px;font-family:'Noto Naskh Arabic',serif;font-size:13px">
+        <option value="all">كل الحالات</option>
+        <option value="active">مفعّل</option>
+        <option value="pending">معلق</option>
+        <option value="suspended">موقوف</option>
+      </select>
+    </div>
+  </div>
+  <div class="stu-stats-row">
+    <div class="stu-stat"><span id="uTotal">0</span><small>الكل</small></div>
+    <div class="stu-stat accepted"><span id="uActive">0</span><small>مفعّلون</small></div>
+    <div class="stu-stat pending"><span id="uPending">0</span><small>معلقون</small></div>
+    <div class="stu-stat rejected"><span id="uSuspended">0</span><small>موقوفون</small></div>
+  </div>
+  <div style="overflow-x:auto">
+    <table class="pending-table">
+      <thead><tr>
+        <th>#</th><th>الاسم</th><th>الدور</th>
+        <th>البريد الإلكتروني</th><th>الجوال</th>
+        <th>تاريخ التسجيل</th><th>الحالة</th><th>إجراء</th>
+      </tr></thead>
+      <tbody id="allUsersBody">
+        <tr><td colspan="8" style="text-align:center;padding:28px;color:var(--text-mid)">
+          <i class="ti ti-loader spin" style="font-size:20px"></i>
+        </td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
 <!-- STUDENTS / INTERVIEWS SECTION -->
 <div class="section" id="studentsSection">
 <div class="section-head">
