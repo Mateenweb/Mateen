@@ -80,8 +80,8 @@
 <div class="page-layout">
 
   <!-- SIDEBAR -->
-  <aside class="sidebar offcanvas offcanvas-start offcanvas-lg" tabindex="-1" id="mainSidebar">
-    <button type="button" class="btn-close btn-close-white d-lg-none" data-bs-dismiss="offcanvas" aria-label="إغلاق" style="position:absolute; right:14px; top:14px; z-index:10; background-color:rgba(0,0,0,0.25); border-radius:50%; padding:6px; opacity:1;"></button>
+  <aside class="sidebar offcanvas offcanvas-end offcanvas-lg" tabindex="-1" id="mainSidebar" style="overflow-y:auto;">
+    <button type="button" class="btn-close btn-close-white d-lg-none" data-bs-dismiss="offcanvas" aria-label="إغلاق" style="position:absolute; left:14px; top:14px; z-index:10; background-color:rgba(0,0,0,0.25); border-radius:50%; padding:6px; opacity:1;"></button>
     <!-- Guest State -->
     <div id="sidebar-guest">
       <div class="sidebar-guest-logo">
@@ -108,7 +108,7 @@
     </div>
 
     <!-- Logged-in State -->
-    <div id="sidebar-user" style="display:none; flex-direction:column; flex:1;">
+    <div id="sidebar-user" style="display:none; flex-direction:column; flex:1; min-height:100%;">
       <div class="sidebar-header">
         <div class="sidebar-avatar" id="sidebarAvatar">👩</div>
         <div class="user-info">

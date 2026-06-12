@@ -105,12 +105,34 @@ html { overflow-x: hidden; }
   .bsm-ornament { display: none !important; }
 }
 
-/* home.html — Mobile Menu (bootstrap offcanvas للـ sidebar) */
+/* home.html — Mobile offcanvas sidebar */
 @media (max-width: 991px) {
+  /* الـ offcanvas يفتح من اليمين (RTL) */
   #mainSidebar.offcanvas {
     width: 82% !important;
     max-width: 300px !important;
+    right: 0 !important;
+    left: auto !important;
   }
+
+  /* #sidebar-user يملأ ارتفاع الـ panel */
+  #sidebar-user {
+    display: none;
+    flex-direction: column !important;
+    flex: 1 !important;
+    min-height: 100% !important;
+  }
+  #sidebar-user.show-user,
+  #sidebar-user[style*="flex"] {
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  /* الـ nav يأخذ المساحة المتبقية فيتدفع logout للأسفل */
+  #sidebar-user .sidebar-nav { flex: 1 !important; overflow-y: auto !important; }
+  #sidebar-user .sidebar-actions { margin-top: auto !important; padding: 12px 16px !important; flex-shrink: 0 !important; }
+  #sidebar-user .sidebar-footer  { flex-shrink: 0 !important; }
+
   /* زرار "حسابي" */
   .sidebar-fab {
     display: flex !important;
