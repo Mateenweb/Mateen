@@ -936,7 +936,7 @@ footer {
 /* Mobile */
 @media (max-width: 767px) {
   .hero {
-    padding: 32px 20px;
+    padding: 20px 16px;
     text-align: center;
     min-height: unset;
     justify-content: center;
@@ -945,8 +945,8 @@ footer {
     background: rgba(247,239,227,0.88);
   }
   .hero-text { max-width: 100%; }
-  .hero-text h1 { font-size: 32px; }
-  .hero-text p { font-size: 13px; }
+  .hero-text h1 { font-size: 26px; }
+  .hero-text p { font-size: 12px; }
   .hero-btns { justify-content: center; }
   .hero-btn-primary, .hero-btn-secondary { padding: 9px 18px; font-size: 13px; }
 
