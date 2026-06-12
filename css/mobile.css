@@ -1,6 +1,6 @@
 /* ================================================
-   برنامج متين العلمي — mobile.css
-   Automatic Responsive for ALL pages
+   برنامج متين العلمي — mobile.css v2
+   Responsive rewrite — covers ALL pages
    ================================================ */
 
 :root {
@@ -9,34 +9,48 @@
 }
 
 /* ════════════════════════════════════════
-   1. BASE — أساسيات
+   0. GLOBAL — منع الـ overflow الأفقي
    ════════════════════════════════════════ */
 html { overflow-x: hidden; }
 
 @media (max-width: 768px) {
-  body {
-    font-size: 16px !important;
-    overflow-x: hidden !important;
-  }
+  body { overflow-x: hidden !important; font-size: 16px !important; }
   * { -webkit-tap-highlight-color: transparent; }
   button { touch-action: manipulation; }
-  img, video, iframe, table { max-width: 100%; }
+
+  /* أي عنصر بـ min-width ثابت يكسر التخطيط — نلغيه */
+  .main-wrap,
+  .content-area,
+  .page-wrap,
+  .teacher-wrap,
+  .t-wrap,
+  .sup-wrap,
+  .section-wrap { min-width: 0 !important; box-sizing: border-box !important; }
+
+  img, video, iframe { max-width: 100%; }
 }
 
+
 /* ════════════════════════════════════════
-   2. NAV — شريط التنقل
+   1. NAVBAR — shared.css / common.css
    ════════════════════════════════════════ */
-@media (max-width: 768px) {
+@media (max-width: 991px) {
+
   nav {
     padding: 0 var(--mob-pad) !important;
     height: 56px !important;
     overflow: visible !important;
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 500 !important;
   }
+
   .logo-circle  { width: 34px !important; height: 34px !important; }
-  .nav-brand    { font-size: 15px !important; }
+  .nav-brand    { font-size: 14px !important; }
   .nav-tagline  { display: none !important; }
 
-  .nav-links { display: none !important; }
+  /* روابط الـ nav — مخفية على موبايل */
+  .nav-links    { display: none !important; }
   .nav-links.open {
     display: flex !important;
     flex-direction: column !important;
@@ -55,208 +69,243 @@ html { overflow-x: hidden; }
   .nav-links.open li:last-child { border-bottom: none !important; }
   .nav-links.open a {
     padding: 14px 22px !important;
-    font-size: 16px !important;
+    font-size: 15px !important;
     display: flex !important;
     align-items: center !important;
+    gap: 10px !important;
     color: rgba(255,255,255,0.88) !important;
     text-decoration: none !important;
   }
   .nav-links.open a:hover,
   .nav-links.open a.active { background: rgba(201,162,39,0.15) !important; color: var(--gold-light) !important; }
-  .nav-links.open .mob-nav-btns {
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 8px !important;
-    padding: 12px 18px !important;
-  }
+
+  /* زرار الهمبرجر */
   .nav-toggle {
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
     font-size: 24px !important;
+    background: none !important;
+    border: none !important;
+    color: white !important;
+    cursor: pointer !important;
+    padding: 6px !important;
+    min-width: 40px !important;
+    min-height: 40px !important;
   }
-  .nav-btns     { display: none !important; }
-  .nav-user     { max-width: 120px; overflow: hidden; }
-  .nav-user-name { font-size: 14px !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-  .basmala-bar  { font-size: 15px !important; padding: 9px var(--mob-pad) !important; }
+  .nav-btns   { display: none !important; }
+
+  /* اسم المستخدم في الـ nav */
+  .nav-user     { max-width: 110px; overflow: hidden; }
+  .nav-user-name { font-size: 13px !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .nav-breadcrumb { font-size: 13px !important; padding: 10px var(--mob-pad) !important; }
+
+  .basmala-bar  { font-size: 14px !important; padding: 8px var(--mob-pad) !important; }
   .bsm-ornament { display: none !important; }
 }
 
+/* home.html — Mobile offcanvas sidebar */
+@media (max-width: 991px) {
+  /* الـ offcanvas يفتح من اليمين (RTL) */
+  #mainSidebar.offcanvas {
+    width: 82% !important;
+    max-width: 300px !important;
+    right: 0 !important;
+    left: auto !important;
+  }
+
+  /* #sidebar-user يملأ ارتفاع الـ panel */
+  #sidebar-user {
+    display: none;
+    flex-direction: column !important;
+    flex: 1 !important;
+    min-height: 100% !important;
+  }
+  #sidebar-user.show-user,
+  #sidebar-user[style*="flex"] {
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  /* الـ nav يأخذ المساحة المتبقية فيتدفع logout للأسفل */
+  #sidebar-user .sidebar-nav { flex: 1 !important; overflow-y: auto !important; }
+  #sidebar-user .sidebar-actions { margin-top: auto !important; padding: 12px 16px !important; flex-shrink: 0 !important; }
+  #sidebar-user .sidebar-footer  { flex-shrink: 0 !important; }
+
+  /* زرار "حسابي" */
+  .sidebar-fab {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    background: var(--green-dark, #1a4a2e) !important;
+    color: var(--gold, #c9a227) !important;
+    border: 1.5px solid var(--gold, #c9a227) !important;
+    border-radius: 8px !important;
+    padding: 6px 10px !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+  }
+  .sidebar-fab i { font-size: 18px !important; }
+}
+
+@media (min-width: 992px) {
+  .sidebar-fab { display: none !important; }
+}
+
+
 /* ════════════════════════════════════════
-   3. HERO — الهيرو
+   2. PAGE LAYOUT — main-wrap + sidebar
+   ════════════════════════════════════════ */
+@media (max-width: 991px) {
+  /* — صفحات الـ common.css / shared.css (teacher, admin, supervisor…) */
+  .main-wrap {
+    display: block !important;
+    padding: 0 !important;
+    width: 100% !important;
+  }
+
+  /* الـ sidebar تتحول offcanvas أو تختفي */
+  .sidebar {
+    width: 100% !important;
+    border-right: none !important;
+    border-left: none !important;
+    border-bottom: 2px solid var(--border) !important;
+    position: static !important;
+    height: auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  /* sticky sidebar في الصفحات بدون offcanvas */
+  .main-wrap:not(.has-offcanvas) .sidebar {
+    display: none !important;
+  }
+
+  .content-area {
+    width: 100% !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+    padding: 0 !important;
+  }
+
+  .section        { padding: 16px var(--mob-pad) !important; }
+  .section-body   { padding: 16px var(--mob-pad) !important; }
+  .teacher-wrap   { padding: 14px var(--mob-pad) !important; }
+  .section-wrap   { padding: 0 var(--mob-pad) 16px !important; }
+  .container      { padding: 14px var(--mob-pad) !important; }
+  .card           { padding: 14px !important; }
+  .t-wrap         { padding: 14px var(--mob-pad) !important; gap: 14px !important; }
+  .sup-wrap       { padding: 14px var(--mob-pad) !important; }
+}
+
+/* sidebar-header */
+@media (max-width: 991px) {
+  .sidebar-header { padding: 16px var(--mob-pad) !important; gap: 12px !important; }
+  .sidebar-avatar { width: 48px !important; height: 48px !important; font-size: 26px !important; }
+  .user-name      { font-size: 16px !important; }
+  .user-role      { font-size: 13px !important; }
+  .sidebar-nav a  {
+    padding: 13px var(--mob-pad) !important;
+    font-size: 15px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+  }
+  .sidebar-nav a i { font-size: 19px !important; width: 22px !important; }
+  .sidebar-logout-btn {
+    margin: 10px var(--mob-pad) !important;
+    padding: 12px !important;
+    font-size: 15px !important;
+    width: calc(100% - var(--mob-pad) * 2) !important;
+    border-radius: 10px !important;
+  }
+}
+
+
+/* ════════════════════════════════════════
+   3. HERO
    ════════════════════════════════════════ */
 @media (max-width: 768px) {
   .hero {
-    padding: 32px var(--mob-pad) !important;
+    padding: 28px var(--mob-pad) !important;
     flex-direction: column !important;
     align-items: center !important;
     text-align: center !important;
     min-height: unset !important;
     gap: 0 !important;
   }
-  .hero-img         { display: none !important; }
-  .hero-logo-mobile {
-    display: block !important;
-    width: 80px !important; height: 80px !important;
-    background: #1a4a2e !important;
-    margin: 0 auto 16px !important;
-  }
-  .hero-text { max-width: 100% !important; }
-  .hero-ornament    { font-size: 14px !important; margin-bottom: 10px !important; }
-  .hero-text h1     { font-size: 32px !important; line-height: 1.35 !important; margin-bottom: 14px !important; }
-  .hero-text h2     { font-size: 17px !important; }
-  .hero-text p      { font-size: 15px !important; line-height: 1.8 !important; margin-bottom: 22px !important; }
-  .hero-btns        { flex-direction: column !important; gap: 10px !important; align-items: stretch !important; width: 100% !important; }
+  .hero-img           { display: none !important; }
+  .hero-logo-mobile   { display: block !important; width: 76px !important; height: 76px !important; margin: 0 auto 14px !important; }
+  .hero-text          { max-width: 100% !important; }
+  .hero-ornament      { font-size: 13px !important; margin-bottom: 8px !important; }
+  .hero-text h1       { font-size: clamp(26px, 7vw, 36px) !important; line-height: 1.4 !important; margin-bottom: 12px !important; }
+  .hero-text h2       { font-size: 16px !important; }
+  .hero-text p        { font-size: 14px !important; line-height: 1.85 !important; margin-bottom: 20px !important; }
+  .hero-btns          { flex-direction: column !important; gap: 10px !important; align-items: stretch !important; width: 100% !important; }
   .hero-btn-primary,
   .hero-btn-secondary,
   .hero-btn-gold,
-  .hero-btn-white   { width: 100% !important; justify-content: center !important; text-align: center !important; padding: 14px !important; font-size: 16px !important; }
+  .hero-btn-white     { width: 100% !important; justify-content: center !important; text-align: center !important; padding: 14px !important; font-size: 15px !important; }
 
-  .page-hero        { padding: 24px var(--mob-pad) !important; }
-  .page-hero h1     { font-size: 22px !important; }
-  .page-hero p      { font-size: 14px !important; }
+  .page-hero          { padding: 22px var(--mob-pad) !important; }
+  .page-hero h1       { font-size: 21px !important; }
+  .page-hero p        { font-size: 13px !important; }
 
-  .teacher-hero     { flex-direction: column !important; text-align: center !important; padding: 24px var(--mob-pad) !important; gap: 14px !important; }
-  .teacher-avatar   { width: 76px !important; height: 76px !important; font-size: 34px !important; }
-  .teacher-name     { font-size: 20px !important; }
+  .teacher-hero       { flex-direction: column !important; text-align: center !important; padding: 22px var(--mob-pad) !important; gap: 12px !important; }
+  .teacher-avatar     { width: 72px !important; height: 72px !important; font-size: 32px !important; }
+  .teacher-name       { font-size: 20px !important; }
 }
 
-/* ════════════════════════════════════════
-   4. LAYOUT — الشبكة الرئيسية والـ Sidebar
-   ════════════════════════════════════════ */
-@media (max-width: 768px) {
-  /* الـ sidebar تأخذ العرض الكامل وتظهر فوق المحتوى */
-  .main-wrap {
-    display: block !important;
-    padding: 0 !important;
-    max-width: 100% !important;
-  }
-
-  .sidebar {
-    display: flex !important;
-    width: 100% !important;
-    border-right: none !important;
-    border-bottom: 2px solid var(--border) !important;
-    flex-direction: column !important;
-  }
-
-  /* header الـ sidebar أكبر وأوضح */
-  .sidebar-header {
-    padding: 18px var(--mob-pad) !important;
-    gap: 14px !important;
-  }
-  .sidebar-avatar {
-    width: 52px !important;
-    height: 52px !important;
-    font-size: 28px !important;
-    border-width: 2.5px !important;
-  }
-  .user-name  { font-size: 17px !important; }
-  .user-role  { font-size: 14px !important; }
-
-  /* روابط الـ sidebar — أكبر وأريح للإصبع */
-  .sidebar-nav a {
-    padding: 14px var(--mob-pad) !important;
-    font-size: 16px !important;
-    border-bottom: 1px solid var(--border) !important;
-    display: flex !important;
-    align-items: center !important;
-    gap: 12px !important;
-  }
-  .sidebar-nav a i {
-    font-size: 20px !important;
-    width: 24px !important;
-  }
-  .sidebar-nav a.active {
-    padding-right: calc(var(--mob-pad) + 3px) !important;
-  }
-
-  /* زر الخروج */
-  .sidebar-logout-btn {
-    margin: 12px var(--mob-pad) !important;
-    padding: 13px !important;
-    font-size: 16px !important;
-    width: calc(100% - var(--mob-pad) * 2) !important;
-    border-radius: 10px !important;
-  }
-
-  /* زرار تسجيل الدخول/التسجيل للزائر */
-  .sidebar-login-btn, .sidebar-reg-btn {
-    margin: 8px var(--mob-pad) !important;
-    padding: 14px !important;
-    font-size: 16px !important;
-    width: calc(100% - var(--mob-pad) * 2) !important;
-    border-radius: 10px !important;
-    text-align: center !important;
-    display: flex !important;
-    justify-content: center !important;
-    align-items: center !important;
-    gap: 8px !important;
-  }
-
-  /* لوجو الـ sidebar السفلي */
-  .sidebar-logo {
-    padding: 14px var(--mob-pad) !important;
-    gap: 10px !important;
-  }
-  .sidebar-logo-text { font-size: 17px !important; }
-
-  .sidebar-guest-logo img { width: 56px !important; height: 56px !important; }
-
-  /* روابط الـ sidebar-guest-nav */
-  .sidebar-nav { padding: 4px 0 !important; }
-
-  .content-area   { min-width: 0 !important; overflow: hidden !important; }
-
-  .section        { padding: 16px var(--mob-pad) !important; }
-  .section-body   { padding: 16px var(--mob-pad) !important; }
-  .teacher-wrap   { padding: 16px var(--mob-pad) !important; }
-  .section-wrap   { padding: 0 var(--mob-pad) 18px !important; }
-  .container      { padding: 14px var(--mob-pad) !important; gap: 16px !important; }
-  .card           { padding: 16px !important; }
-}
 
 /* ════════════════════════════════════════
-   5. GRIDS — شبكات البطاقات
+   4. GRIDS — شبكات البطاقات
    ════════════════════════════════════════ */
 @media (max-width: 768px) {
-  .paths-grid         { grid-template-columns: 1fr 1fr !important; gap: 12px !important; }
-  .teachers-grid      { grid-template-columns: 1fr 1fr !important; gap: 12px !important; }
-  .ann-grid           { grid-template-columns: 1fr !important; }
-  .ann-img            { display: none !important; }
-  .stats-bar          { grid-template-columns: 1fr 1fr !important; padding: 14px var(--mob-pad) !important; gap: 12px !important; }
-  .stat-item          { border-left: none !important; padding: 12px 8px !important; }
-  .stat-item:not(:last-child) { border-bottom: 1px solid rgba(255,255,255,0.1) !important; }
+  /* 2 أعمدة */
+  .paths-grid         { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
+  .teachers-grid      { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
   .schedule-grid      { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
-  .t-form-row         { grid-template-columns: 1fr !important; }
-  .form-row           { grid-template-columns: 1fr !important; }
-  .contact-grid       { grid-template-columns: 1fr !important; }
-  .charts-grid        { grid-template-columns: 1fr !important; gap: 14px !important; }
+  .books-grid         { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
+  .stats-bar          { grid-template-columns: 1fr 1fr !important; padding: 12px var(--mob-pad) !important; gap: 10px !important; }
   .summary-bar        { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
-  .cards-grid         { grid-template-columns: 1fr !important; }
-  .main-grid          { grid-template-columns: 1fr !important; }
   .msg-meta-grid      { grid-template-columns: 1fr 1fr !important; }
   .stats-row          { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
   .stu-stats-row      { grid-template-columns: repeat(3, 1fr) !important; gap: 8px !important; }
-  .form-row-2         { grid-template-columns: 1fr !important; }
   .role-grid          { grid-template-columns: repeat(3, 1fr) !important; gap: 8px !important; }
   .reg-role-grid      { grid-template-columns: 1fr 1fr !important; }
+  .sup-stats          { grid-template-columns: 1fr 1fr !important; }
+
+  /* عمود واحد */
+  .ann-grid           { grid-template-columns: 1fr !important; }
+  .ann-img            { display: none !important; }
+  .charts-grid        { grid-template-columns: 1fr !important; gap: 14px !important; }
+  .cards-grid         { grid-template-columns: 1fr !important; }
+  .main-grid          { grid-template-columns: 1fr !important; }
+  .form-row           { grid-template-columns: 1fr !important; }
+  .form-row-2         { grid-template-columns: 1fr !important; }
+  .t-form-row         { grid-template-columns: 1fr !important; }
+  .contact-grid       { grid-template-columns: 1fr !important; }
   .courses-grid       { grid-template-columns: 1fr !important; gap: 14px !important; }
-  .books-grid         { grid-template-columns: 1fr 1fr !important; gap: 12px !important; }
+  .profile-grid       { grid-template-columns: 1fr !important; gap: 14px !important; }
+
+  .stat-item          { border-left: none !important; padding: 12px 8px !important; }
+  .stat-item:not(:last-child) { border-bottom: 1px solid rgba(255,255,255,0.1) !important; }
 }
 
-@media (max-width: 420px) {
-  .paths-grid       { grid-template-columns: 1fr !important; }
-  .teachers-grid    { grid-template-columns: 1fr !important; }
-  .schedule-grid    { grid-template-columns: 1fr !important; }
-  .stu-stats-row    { grid-template-columns: 1fr 1fr !important; }
-  .books-grid       { grid-template-columns: 1fr !important; }
-  .role-grid        { grid-template-columns: repeat(2, 1fr) !important; }
+@media (max-width: 480px) {
+  .paths-grid         { grid-template-columns: 1fr !important; }
+  .teachers-grid      { grid-template-columns: 1fr !important; }
+  .schedule-grid      { grid-template-columns: 1fr !important; }
+  .books-grid         { grid-template-columns: 1fr !important; }
+  .stu-stats-row      { grid-template-columns: 1fr 1fr !important; }
+  .role-grid          { grid-template-columns: repeat(2, 1fr) !important; }
 }
+
 
 /* ════════════════════════════════════════
-   6. TABLES — الجداول
+   5. TABLES — جداول قابلة للتمرير
    ════════════════════════════════════════ */
 @media (max-width: 768px) {
   .stu-table-wrap,
@@ -268,28 +317,28 @@ html { overflow-x: hidden; }
     overflow-x: auto !important;
     -webkit-overflow-scrolling: touch !important;
     border-radius: var(--mob-radius) !important;
+    /* ظهور شريط التمرير على iOS */
+    -ms-overflow-style: -ms-autohiding-scrollbar;
   }
 
   .stu-table,
   .mat-table,
-  .pending-table { min-width: 700px !important; }
-
-  #studentsTableWrap table { min-width: 580px !important; }
+  .pending-table     { min-width: 680px !important; }
+  #studentsTableWrap table { min-width: 560px !important; }
 
   th, td {
     padding: 10px !important;
-    font-size: 14px !important;
+    font-size: 13px !important;
     white-space: nowrap !important;
   }
-
-  .stu-name-cell input { font-size: 14px !important; min-width: 90px !important; }
+  .stu-name-cell input { font-size: 13px !important; min-width: 88px !important; }
   .status-sel, .day-sel { font-size: 13px !important; }
-  .bulk-sel             { font-size: 13px !important; }
-  .placement-input      { width: 56px !important; font-size: 14px !important; }
+  .placement-input      { width: 52px !important; font-size: 13px !important; }
 }
 
+
 /* ════════════════════════════════════════
-   7. FILTER & TOPBAR — أشرطة البحث
+   6. FILTER & TOPBAR — أشرطة البحث
    ════════════════════════════════════════ */
 @media (max-width: 768px) {
   .topbar,
@@ -305,55 +354,55 @@ html { overflow-x: hidden; }
 
   .filter-bar input,
   .stu-filter-bar input,
-  .search-bar input {
-    width: 100% !important;
-    min-width: 0 !important;
-    font-size: 15px !important;
-  }
+  .search-bar input   { width: 100% !important; min-width: 0 !important; font-size: 15px !important; }
 
   .filter-bar select,
   .stu-filter-bar select,
-  .modern-select {
-    flex: 1 !important;
-    min-width: 0 !important;
-    font-size: 14px !important;
-  }
+  .modern-select      { flex: 1 !important; min-width: 0 !important; font-size: 14px !important; }
 
-  .stu-bulk-bar   { flex-direction: column !important; gap: 10px !important; padding: 14px var(--mob-pad) !important; }
-  .stu-bulk-fields { flex-wrap: wrap !important; gap: 8px !important; }
-  .stu-bulk-info  { flex-wrap: wrap; }
-  .bulk-num       { width: 52px !important; }
-  .bulk-apply-btn { width: 100% !important; }
+  .topbar-actions     { width: 100% !important; flex-wrap: wrap !important; gap: 8px !important; }
+
+  .stu-bulk-bar       { flex-direction: column !important; gap: 10px !important; padding: 14px var(--mob-pad) !important; }
+  .stu-bulk-fields    { flex-wrap: wrap !important; gap: 8px !important; }
+  .bulk-num           { width: 52px !important; }
+  .bulk-apply-btn     { width: 100% !important; }
 }
 
+
 /* ════════════════════════════════════════
-   8. CARDS — بطاقات عامة
+   7. CARDS — بطاقات عامة
    ════════════════════════════════════════ */
 @media (max-width: 768px) {
   .path-card, .teacher-card, .ann-card,
   .t-section, .section-card { border-radius: var(--mob-radius) !important; }
 
-  .path-card   { padding: 18px 12px !important; }
-  .path-icon   { font-size: 30px !important; margin-bottom: 8px !important; }
-  .path-name   { font-size: 15px !important; }
+  .path-card    { padding: 16px 10px !important; }
+  .path-icon    { font-size: 28px !important; margin-bottom: 6px !important; }
+  .path-name    { font-size: 14px !important; }
+  .path-btn     { font-size: 12px !important; padding: 6px 10px !important; }
 
-  .teacher-card { padding: 20px 12px !important; }
-  .tc-icon      { font-size: 32px !important; }
-  .tc-name      { font-size: 16px !important; }
-  .tc-btn       { padding: 8px 14px !important; font-size: 13px !important; }
+  .teacher-card { padding: 18px 10px !important; }
+  .tc-icon      { font-size: 30px !important; }
+  .tc-name      { font-size: 15px !important; }
+  .tc-btn       { padding: 7px 12px !important; font-size: 13px !important; }
 
-  .ann-card     { padding: 16px !important; }
-  .ann-card h4  { font-size: 15px !important; }
-  .ann-card p   { font-size: 14px !important; }
+  .ann-card     { padding: 14px !important; }
+  .ann-card h4  { font-size: 14px !important; }
+  .ann-card p   { font-size: 13px !important; }
 
-  .book-cover   { height: 100px !important; font-size: 34px !important; }
+  .book-cover   { height: 96px !important; font-size: 32px !important; }
   .book-info    { padding: 10px !important; }
-  .book-title   { font-size: 14px !important; }
-  .book-author  { font-size: 13px !important; }
+  .book-title   { font-size: 13px !important; }
+  .book-author  { font-size: 12px !important; }
+
+  .schedule-card { padding: 12px !important; }
+  .schedule-day  { font-size: 14px !important; }
+  .schedule-time { font-size: 13px !important; }
 }
 
+
 /* ════════════════════════════════════════
-   9. SECTION HEADERS
+   8. SECTION HEADERS
    ════════════════════════════════════════ */
 @media (max-width: 768px) {
   .section-head {
@@ -361,47 +410,47 @@ html { overflow-x: hidden; }
     flex-wrap: wrap !important;
     gap: 8px !important;
   }
-  .section-head-title { font-size: 16px !important; }
-  .section-title      { font-size: 18px !important; padding: 0 var(--mob-pad) !important; }
-  .breadcrumb         { padding: 9px var(--mob-pad) !important; font-size: 13px !important; flex-wrap: wrap; gap: 6px; }
+  .section-head-title { font-size: 15px !important; }
+  .section-title      { font-size: 17px !important; padding: 0 var(--mob-pad) !important; }
+  .breadcrumb         { padding: 8px var(--mob-pad) !important; font-size: 12px !important; flex-wrap: wrap; gap: 5px; }
   .card-head          { padding: 12px var(--mob-pad) !important; }
+  .t-section-head     { padding: 11px var(--mob-pad) !important; font-size: 15px !important; }
+  .t-section-body     { padding: 14px var(--mob-pad) !important; }
 }
 
+
 /* ════════════════════════════════════════
-   10. FORMS — نماذج
+   9. FORMS — input / select / button
    ════════════════════════════════════════ */
 @media (max-width: 768px) {
+  /* font-size 16px يمنع zoom تلقائي على iOS */
   input:not([type="checkbox"]):not([type="radio"]):not([type="number"]),
   textarea,
-  select {
-    font-size: 16px !important;
-  }
+  select { font-size: 16px !important; }
 
   .t-field input, .t-field textarea, .t-field select,
   .login-input, .form-input, .field input, .field select, .field textarea {
     font-size: 16px !important;
-    padding: 12px 14px !important;
+    padding: 11px 13px !important;
   }
 
   .t-submit, .login-btn, .btn-submit, .contact-submit,
   .btn-add, .btn-bulk-add {
     width: 100% !important;
     justify-content: center !important;
-    padding: 14px !important;
-    font-size: 16px !important;
+    padding: 13px !important;
+    font-size: 15px !important;
   }
 
-  .howto   { padding: 12px 14px !important; }
-  .howto-title { font-size: 14px !important; }
-  .howto-step  { font-size: 13px !important; }
-
-  .role-btn   { padding: 10px 6px !important; }
-  .role-icon  { font-size: 24px !important; }
-  .role-label { font-size: 12px !important; }
+  .howto       { padding: 11px 13px !important; }
+  .role-btn    { padding: 10px 6px !important; }
+  .role-icon   { font-size: 22px !important; }
+  .role-label  { font-size: 12px !important; }
 }
 
+
 /* ════════════════════════════════════════
-   11. MODALS — نوافذ منبثقة
+   10. MODALS — نوافذ منبثقة
    ════════════════════════════════════════ */
 @media (max-width: 768px) {
   .export-modal-box,
@@ -409,25 +458,26 @@ html { overflow-x: hidden; }
   .reg-modal-box,
   .del-modal,
   .modal-box {
-    width: calc(100vw - 24px) !important;
+    width: calc(100vw - 20px) !important;
     max-width: unset !important;
-    max-height: 92vh !important;
+    max-height: 90vh !important;
     overflow-y: auto !important;
-    margin: 12px !important;
+    margin: 10px !important;
     border-radius: 16px !important;
   }
 
   .reg-modal-box    { padding: 0 !important; }
-  .reg-modal-header { padding: 18px var(--mob-pad) !important; }
+  .reg-modal-header { padding: 16px var(--mob-pad) !important; }
   .msg-modal-body,
   .modal-body       { padding: 16px var(--mob-pad) !important; }
 
-  .stepper          { flex-wrap: nowrap !important; overflow-x: auto !important; padding-bottom: 4px !important; }
-  .step-label       { font-size: 12px !important; }
+  .stepper { flex-wrap: nowrap !important; overflow-x: auto !important; padding-bottom: 4px !important; }
+  .step-label { font-size: 11px !important; }
 }
 
+
 /* ════════════════════════════════════════
-   12. TABS — التبويبات
+   11. TABS — تبويبات
    ════════════════════════════════════════ */
 @media (max-width: 768px) {
   .page-tabs {
@@ -436,166 +486,175 @@ html { overflow-x: hidden; }
     -webkit-overflow-scrolling: touch !important;
     gap: 0 !important;
     border-radius: 0 !important;
+    /* إخفاء شريط التمرير بصرياً */
+    scrollbar-width: none !important;
   }
+  .page-tabs::-webkit-scrollbar { display: none; }
+
   .page-tab {
-    padding: 13px 16px !important;
+    padding: 12px 14px !important;
     font-size: 14px !important;
     white-space: nowrap !important;
     flex-shrink: 0 !important;
   }
-  .tabs   { gap: 8px !important; flex-wrap: wrap !important; }
-  .tab    { padding: 9px 14px !important; font-size: 14px !important; flex: 1 !important; text-align: center !important; }
+  .tabs { gap: 6px !important; flex-wrap: wrap !important; }
+  .tab  { padding: 8px 12px !important; font-size: 13px !important; flex: 1 !important; text-align: center !important; }
 }
 
+
 /* ════════════════════════════════════════
-   13. STUDENT PAGES — صفحات الطالبة
+   12. STUDENT PAGES
    ════════════════════════════════════════ */
 @media (max-width: 768px) {
   .student-header-bar {
-    padding: 12px var(--mob-pad) !important;
+    padding: 10px var(--mob-pad) !important;
     flex-wrap: wrap !important;
-    gap: 10px !important;
+    gap: 8px !important;
   }
-  .welcome-card     { padding: 16px var(--mob-pad) !important; gap: 12px !important; }
+  .welcome-card       { padding: 14px var(--mob-pad) !important; gap: 10px !important; }
+  .welcome-name       { font-size: 18px !important; }
+  .welcome-sub        { font-size: 12px !important; }
+
+  .sv-header          { flex-direction: column !important; gap: 10px !important; padding: 16px var(--mob-pad) !important; }
+  .sv-info            { text-align: center !important; }
+  .sv-avatar          { margin: 0 auto !important; }
+
+  .grade-row, .att-row { font-size: 13px !important; padding: 10px 13px !important; }
+  .att-badge           { font-size: 12px !important; padding: 3px 8px !important; }
+
+  .session-card        { border-radius: 10px !important; }
+  .session-header      { padding: 11px 13px !important; font-size: 14px !important; }
+
   .stats-bar.student-stats { grid-template-columns: repeat(2, 1fr) !important; }
 
-  .sv-header        { flex-direction: column !important; gap: 12px !important; padding: 16px var(--mob-pad) !important; }
-  .sv-info          { text-align: center !important; }
-  .sv-avatar        { margin: 0 auto !important; }
-
-  .grade-row, .att-row { font-size: 14px !important; padding: 10px 14px !important; }
-  .att-badge        { font-size: 13px !important; padding: 3px 10px !important; }
-
-  .session-card     { border-radius: 10px !important; }
-  .session-header   { padding: 12px 14px !important; font-size: 15px !important; }
+  .welcome-card .delete-acc-btn,
+  .welcome-card .logout-btn-s { font-size: 13px !important; padding: 7px 11px !important; }
 }
 
+
 /* ════════════════════════════════════════
-   14. TEACHER PAGES — صفحات المعلمة
+   13. TEACHER PAGES
    ════════════════════════════════════════ */
 @media (max-width: 768px) {
-  .t-wrap           { padding: 16px var(--mob-pad) !important; gap: 16px !important; }
-  .t-section        { border-radius: var(--mob-radius) !important; }
-  .t-section-head   { padding: 12px var(--mob-pad) !important; font-size: 16px !important; }
-  .t-section-body   { padding: 16px var(--mob-pad) !important; }
-
-  .schedule-card    { padding: 14px !important; }
-  .schedule-day     { font-size: 15px !important; }
-  .schedule-time    { font-size: 14px !important; }
-
   #studentsTableWrap th,
-  #studentsTableWrap td { font-size: 14px !important; padding: 10px !important; }
+  #studentsTableWrap td { font-size: 13px !important; padding: 10px !important; }
 
-  .msg-item         { padding: 14px var(--mob-pad) !important; }
-  .msg-sender       { font-size: 15px !important; }
-  .msg-preview      { font-size: 14px !important; }
+  .msg-item     { padding: 13px var(--mob-pad) !important; }
+  .msg-sender   { font-size: 14px !important; }
+  .msg-preview  { font-size: 13px !important; }
 
-  .profile-grid     { grid-template-columns: 1fr !important; gap: 14px !important; }
-  .profile-avatar   { width: 72px !important; height: 72px !important; }
+  .profile-avatar { width: 68px !important; height: 68px !important; }
+
+  /* جدول المعلمة */
+  .sched-day-name   { font-size: 15px !important; }
+  .sched-time-pill  { font-size: 13px !important; padding: 5px 11px !important; }
+  .sched-note-text  { font-size: 13px !important; }
+  .sched-slot       { padding: 10px 11px !important; gap: 10px !important; }
+  .sched-del-btn    { padding: 6px 8px !important; font-size: 14px !important; }
 }
 
+
 /* ════════════════════════════════════════
-   15. STATS PAGE — صفحة الإحصاءات
+   14. STATS PAGE
    ════════════════════════════════════════ */
 @media (max-width: 768px) {
-  .stat-box         { padding: 16px 12px !important; }
-  .stat-number      { font-size: 26px !important; }
-  .stat-label       { font-size: 14px !important; }
-  .chart-wrap       { padding: 12px !important; }
-  canvas            { max-height: 240px !important; }
+  .stat-box     { padding: 14px 10px !important; }
+  .stat-number  { font-size: 24px !important; }
+  .stat-label   { font-size: 13px !important; }
+  .chart-wrap   { padding: 12px !important; }
+  canvas        { max-height: 220px !important; }
 }
 
+
 /* ════════════════════════════════════════
-   16. ADMIN PAGE — لوحة الإدارة
+   15. ADMIN PAGE
    ════════════════════════════════════════ */
 @media (max-width: 768px) {
-  .add-form { gap: 12px !important; }
-  .pending-badge    { font-size: 13px !important; }
-  .btn-add-student  { font-size: 14px !important; padding: 9px 14px !important; }
-  .export-btn, #openExportBtn { width: 100% !important; justify-content: center !important; }
+  .add-form          { gap: 10px !important; }
+  .pending-badge     { font-size: 12px !important; }
+  .btn-add-student   { font-size: 13px !important; padding: 8px 13px !important; }
+  .export-btn,
+  #openExportBtn     { width: 100% !important; justify-content: center !important; }
 }
 
+
 /* ════════════════════════════════════════
-   17. LOGIN PAGE — صفحة الدخول
+   16. LOGIN PAGE
    ════════════════════════════════════════ */
 @media (max-width: 480px) {
-  .login-page   { padding: 20px 14px !important; padding-top: 28px !important; }
-  .login-card   { border-radius: 16px !important; max-width: 100% !important; }
-  .login-logo   { padding: 20px 18px 16px !important; }
-  .login-body   { padding: 18px 18px 22px !important; }
-  .login-logo h1 { font-size: 20px !important; }
+  .login-page  { padding: 18px 12px !important; padding-top: 24px !important; }
+  .login-card  { border-radius: 16px !important; max-width: 100% !important; }
+  .login-logo  { padding: 18px 16px 14px !important; }
+  .login-body  { padding: 16px 16px 20px !important; }
+  .login-logo h1 { font-size: 19px !important; }
 }
 
+
 /* ════════════════════════════════════════
-   18. MESSAGES — الرسائل
+   17. MESSAGES PAGE
    ════════════════════════════════════════ */
 @media (max-width: 768px) {
-  .messages-wrap    { flex-direction: column !important; }
-  .msg-sidebar      { width: 100% !important; max-height: 260px !important; }
-  .msg-detail       { border-right: none !important; border-top: 1px solid var(--border) !important; }
+  .messages-wrap { flex-direction: column !important; }
+  .msg-sidebar   { width: 100% !important; max-height: 240px !important; }
+  .msg-detail    { border-right: none !important; border-top: 1px solid var(--border) !important; }
 }
 
-/* ════════════════════════════════════════
-   19. LIBRARY — المكتبة
-   ════════════════════════════════════════ */
-@media (max-width: 768px) {
-  .lib-btn    { padding: 8px 14px !important; font-size: 14px !important; }
-}
 
 /* ════════════════════════════════════════
-   20. MISC — عناصر متفرقة
+   18. MISC — عناصر متفرقة
    ════════════════════════════════════════ */
 @media (max-width: 768px) {
-  .islamic-divider  { margin: 8px var(--mob-pad) !important; }
-  .islamic-divider span { font-size: 17px !important; letter-spacing: 4px !important; }
+  .islamic-divider      { margin: 6px var(--mob-pad) !important; }
+  .islamic-divider span { font-size: 15px !important; letter-spacing: 3px !important; }
 
-  .aya-banner       { padding: 16px var(--mob-pad) !important; }
-  .aya-text         { font-size: 18px !important; }
-  .aya-banner::after { display: none !important; }
+  .aya-banner           { padding: 14px var(--mob-pad) !important; }
+  .aya-text             { font-size: 17px !important; }
+  .aya-banner::after    { display: none !important; }
 
   footer {
     flex-direction: column !important;
     text-align: center !important;
-    padding: 16px var(--mob-pad) !important;
-    gap: 12px !important;
+    padding: 14px var(--mob-pad) !important;
+    gap: 10px !important;
   }
-  .footer-social    { justify-content: center !important; }
+  .footer-social { justify-content: center !important; }
 
-  .hero-badge       { font-size: 13px !important; padding: 4px 14px !important; }
+  .hero-badge    { font-size: 12px !important; padding: 4px 12px !important; }
 
-  .welcome-card .delete-acc-btn,
-  .welcome-card .logout-btn-s { font-size: 14px !important; padding: 8px 12px !important; }
-
-  .contact-section  { padding: 36px 0 !important; }
-  .contact-header h2 { font-size: 24px !important; }
+  .contact-section  { padding: 28px 0 !important; }
+  .contact-header h2 { font-size: 22px !important; }
   .contact-wrap     { padding: 0 var(--mob-pad) !important; }
 
-  .sup-wrap         { padding: 16px var(--mob-pad) !important; }
-  .sup-stats        { grid-template-columns: 1fr 1fr !important; }
+  .lib-btn       { padding: 8px 12px !important; font-size: 13px !important; }
 }
 
+
 /* ════════════════════════════════════════
-   21. EXTRA SMALL (< 380px)
+   19. EXTRA SMALL (≤ 380px)
    ════════════════════════════════════════ */
 @media (max-width: 380px) {
-  :root { --mob-pad: 12px; }
-  .hero-text h1     { font-size: 28px !important; }
-  .stats-bar        { grid-template-columns: 1fr 1fr !important; }
-  .paths-grid       { grid-template-columns: 1fr !important; }
-  .stu-stats-row    { grid-template-columns: 1fr 1fr !important; }
+  :root           { --mob-pad: 12px; }
+  .hero-text h1   { font-size: clamp(22px, 6vw, 28px) !important; }
+  .stats-bar      { grid-template-columns: 1fr 1fr !important; }
+  .paths-grid     { grid-template-columns: 1fr !important; }
+  .stu-stats-row  { grid-template-columns: 1fr 1fr !important; }
 }
 
+
 /* ════════════════════════════════════════
-   22. SCROLL & TOUCH IMPROVEMENTS
+   20. TOUCH & SCROLL IMPROVEMENTS
    ════════════════════════════════════════ */
 @media (max-width: 768px) {
   html { scroll-behavior: smooth; }
 
-  [style*="overflow-x: auto"],
-  [style*="overflow-x:auto"] {
-    -webkit-overflow-scrolling: touch;
-  }
+  /* أداء التمرير على الأجهزة المحمولة */
+  .stu-table-wrap,
+  .table-wrapper,
+  .table-wrap,
+  .page-tabs,
+  .msg-sidebar { will-change: transform; }
 
+  /* إلغاء hover effects على اللمس — يمنع التلبّد */
   @media (hover: none) {
     button:hover, .btn:hover, a:hover {
       transform: none !important;
@@ -604,49 +663,18 @@ html { overflow-x: hidden; }
   }
 }
 
+
 /* ════════════════════════════════════════
-   X. SIDEBAR كـ Offcanvas (Bootstrap) في الموبايل
+   21. SAFE AREA — iPhone notch / home bar
    ════════════════════════════════════════ */
-@media (max-width: 991px) {
-  #mainSidebar.offcanvas {
-    width: 85% !important;
-    max-width: 320px !important;
-  }
-  #mainSidebar #sidebar-user.show-user {
-    display: flex !important;
-    flex-direction: column !important;
-  }
-  #mainSidebar #sidebar-user .sidebar-nav {
-    position: static !important;
-    flex: 0 0 auto !important;
-    display: flex !important;
-    flex-direction: column !important;
-  }
-  #mainSidebar #sidebar-user .sidebar-actions {
-    position: static !important;
-    order: 99 !important;
-    margin-top: 8px !important;
-  }
-
-  .sidebar-fab {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    background: var(--green-dark, #1a4a2e);
-    color: var(--gold, #c9a227);
-    border: 1.5px solid var(--gold, #c9a227);
-    border-radius: 8px;
-    padding: 6px 12px;
-    font-size: 13px;
-    font-weight: 600;
-    margin-inline-start: 8px;
-    cursor: pointer;
-  }
-  .sidebar-fab i { font-size: 18px; }
-}
-
-@media (min-width: 992px) {
-  .sidebar-fab {
-    display: none !important;
+@supports (padding: max(0px)) {
+  @media (max-width: 768px) {
+    nav {
+      padding-right: max(var(--mob-pad), env(safe-area-inset-right)) !important;
+      padding-left:  max(var(--mob-pad), env(safe-area-inset-left))  !important;
+    }
+    footer {
+      padding-bottom: max(14px, env(safe-area-inset-bottom)) !important;
+    }
   }
 }

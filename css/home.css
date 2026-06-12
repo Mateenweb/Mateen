@@ -248,19 +248,54 @@ body {
 .sidebar {
   background: var(--white);
   border-left: 1px solid var(--border);
+  display: flex;
   flex-direction: column;
+  min-height: 100%;
 }
 
+/* Desktop: sticky sidebar */
 @media (min-width: 992px) {
   .sidebar {
     width: var(--sidebar-w);
     min-width: var(--sidebar-w);
-    display: flex;
     flex-shrink: 0;
     position: sticky;
     top: 58px;
     height: calc(100vh - 58px);
     overflow-y: auto;
+  }
+}
+
+/* Mobile offcanvas — يملأ الـ panel كاملاً */
+@media (max-width: 991px) {
+  #mainSidebar {
+    width: 82% !important;
+    max-width: 300px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100% !important;
+    overflow-y: auto !important;
+  }
+  #mainSidebar .sidebar-nav {
+    flex: 1;
+    overflow-y: auto;
+  }
+  #mainSidebar .sidebar-actions {
+    padding: 12px 16px;
+    margin-top: auto;
+  }
+  #mainSidebar .sidebar-footer {
+    padding: 10px 16px;
+    border-top: 1px solid var(--border);
+    margin-top: 0;
+    flex-shrink: 0;
+  }
+  /* زرار الإغلاق — يسار لأن RTL */
+  #mainSidebar .btn-close {
+    position: absolute;
+    left: 14px !important;
+    right: auto !important;
+    top: 14px;
   }
 }
 
