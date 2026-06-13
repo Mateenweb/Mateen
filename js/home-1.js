@@ -31,6 +31,10 @@ onAuthStateChanged(auth, async user => {
   const mobNavBtns = document.getElementById('mobNavBtns');
   if (mobNavBtns) { mobNavBtns.classList.remove('d-flex','d-lg-flex'); mobNavBtns.classList.add('d-none'); }
 
+  // إظهار زرار "رسائلي" في النافبار
+  const navMsgBtn = document.getElementById('navMsgBtn');
+  if (navMsgBtn) navMsgBtn.classList.remove('d-none');
+
   // مسجلة دخول — اجلب بيانات المستخدمة
   guest.style.display   = 'none';
   userDiv.style.display = 'block'; userDiv.classList.add('show-user');
