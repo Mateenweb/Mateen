@@ -718,14 +718,14 @@ window.renderAllUsers = () => {
          </button>`
       : `<span style="color:var(--text-mid);font-size:12px">—</span>`;
 
-    const actionBtns = `<div style="display:flex;gap:5px;align-items:center">
-      ${toggleBtn}
-      <button class="btn-del-stu" title="حذف الحساب نهائياً"
-        onclick="deleteUserAccount('${u.id}','${u.name ? u.name.replace(/'/g,"\\'"): ""}')"
-        style="padding:4px 8px;font-size:12px">
-        <i class="ti ti-trash"></i>
-      </button>
-    </div>`;
+     const actionBtns = `<div style="display:flex;gap:6px;align-items:center;white-space:nowrap">
+       ${toggleBtn}
+       <button title="حذف"
+         onclick="deleteUserAccount('${u.id}','${u.name ? u.name.replace(/'/g,\"\\\'\") : \"\"}')" 
+         style="padding:4px 12px;font-size:12px;background:#fff0f0;color:#c0392b;border:1px solid #f5c6c6;border-radius:6px;cursor:pointer;flex-shrink:0">
+         <i class="ti ti-trash"></i> حذف
+       </button>
+     </div>`;
 
     return `<tr>
       <td style="color:var(--text-mid);font-size:12px">${i + 1}</td>
@@ -735,7 +735,7 @@ window.renderAllUsers = () => {
       <td dir="ltr" style="font-size:12px">${esc(u.phone || '—')}</td>
       <td style="font-size:12px;color:var(--text-mid);white-space:nowrap">${createdAt}</td>
       <td><span style="font-size:12px;background:${statusBg};color:${statusColor};padding:3px 10px;border-radius:10px;white-space:nowrap">${statusLabel}</span></td>
-      <td>${actionBtns}</td>
+      <td style="white-space:nowrap;min-width:160px">${actionBtns}</td>
     </tr>`;
   }).join('');
 };
@@ -766,4 +766,5 @@ window.deleteUserAccount = async (id, name) => {
 window.addEventListener("resize", () => {
   if (allStudents.length) renderStudents(allStudents);
 });
+
 
