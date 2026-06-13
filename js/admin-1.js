@@ -408,9 +408,98 @@ window.applyStudentFilters = () => {
 };
 
 function renderStudents(list) {
-  const tb = document.getElementById('stuTableBody');
-  if(!list.length){tb.innerHTML=`<tr><td colspan="8" class="empty-state"><i class="ti ti-inbox"></i>لا توجد طالبات</td></tr>`;return;}
-  tb.innerHTML = list.map((s,i)=>{
+  const tb   = document.getElementById('stuTableBody');
+  const isMob = window.innerWidth <= 640;
+
+  if (!list.length) {
+    tb.innerHTML = `<tr><td colspan="9" class="empty-state"><i class="ti ti-inbox"></i>لا توجد طالبات</td></tr>`;
+    return;
+  }
+
+  if (isMob) {
+    // ── MOBILE: بطاقة لكل طالبة ──────────────────────────────
+    // نخرج من tbody ونبني cards في wrapper منفصل
+    const wrap = document.getElementById('stu-cards-wrap');
+    if (wrap) {
+      wrap.innerHTML = list.map((s, i) => {
+        const intClass = s.interview === 'done' ? 'btn-done' : 'btn-pending';
+        const intLabel = s.interview === 'done' ? '✅ تمت' : '⏳ لم تتم';
+        let accClass = 'btn-na', accLabel = '— لم يحدد';
+        if (s.accepted === 'accepted') { accClass = 'btn-accepted'; accLabel = '✔️ مقبولة'; }
+        if (s.accepted === 'rejected') { accClass = 'btn-rejected'; accLabel = '✖️ مرفوضة'; }
+
+        const statusLabel = s.status === 'mateen' ? '📖 بنات متين' : s.status === 'new' ? '✨ مستجدة' : '';
+        const dayTime = [s.day, s.hour ? `${s.hour} ${s.ampm || ''}` : ''].filter(Boolean).join(' — ');
+        const dateDisplay = s.dateH ? s.dateH.replace(/-/g, '/') : '';
+
+        return `<div class="stu-mob-card">
+          <div class="stu-mob-top">
+            <div class="stu-mob-name">
+              <a class="btn-stu-link" href="student-view.html?id=${s.id}" target="_blank">👤</a>
+              <input type="text" value="${esc(s.name || '')}"
+                oninput="stuAutoName('${s.id}', this.value)"
+                class="stu-mob-name-input"/>
+            </div>
+            <button class="btn-del-stu" onclick="stuDelete('${s.id}')" title="حذف">
+              <i class="ti ti-trash"></i>
+            </button>
+          </div>
+
+          <div class="stu-mob-row">
+            <select class="stu-mob-sel" onchange="stuField('${s.id}','status',this.value)">
+              <option value=""${!s.status ? ' selected' : ''}>🏷️ التصنيف</option>
+              <option value="mateen"${s.status === 'mateen' ? ' selected' : ''}>📖 بنات متين</option>
+              <option value="new"${s.status === 'new' ? ' selected' : ''}>✨ مستجدات</option>
+            </select>
+            ${s.status ? `<span class="stu-mob-badge">${statusLabel}</span>` : ''}
+          </div>
+
+          <div class="stu-mob-row">
+            <span class="stu-mob-label">📅 اليوم</span>
+            <select class="stu-mob-sel" onchange="stuField('${s.id}','day',this.value)">
+              <option value="">— اليوم —</option>
+              ${['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'].map(d => `<option${s.day === d ? ' selected' : ''}>${d}</option>`).join('')}
+            </select>
+          </div>
+
+          <div class="stu-mob-row">
+            <span class="stu-mob-label">📅 التاريخ</span>
+            ${makeDatePicker(s.id, s.dateH)}
+          </div>
+
+          <div class="stu-mob-row">
+            <span class="stu-mob-label">🕐 الوقت</span>
+            <select class="stu-mob-sel" onchange="stuField('${s.id}','hour',this.value)" style="width:60px">
+              <option value="">—</option>
+              ${[1,2,3,4,5,6,7,8,9,10,11,12].map(h => `<option${s.hour == h ? ' selected' : ''}>${h}</option>`).join('')}
+            </select>
+            <select class="stu-mob-sel" onchange="stuField('${s.id}','ampm',this.value)" style="width:80px">
+              <option value="ص"${s.ampm === 'ص' ? ' selected' : ''}>صباحاً</option>
+              <option value="م"${s.ampm === 'م' ? ' selected' : ''}>مساءً</option>
+            </select>
+          </div>
+
+          ${s.status === 'new' ? `<div class="stu-mob-row">
+            <span class="stu-mob-label">📊 الدرجة</span>
+            <input type="number" min="0" max="100" value="${s.placementScore ?? ''}"
+              placeholder="0" class="stu-mob-score"
+              onchange="stuField('${s.id}','placementScore',this.value===''?null:Number(this.value))">
+            <span style="font-size:12px;color:#999">/ 100</span>
+          </div>` : ''}
+
+          <div class="stu-mob-actions">
+            <button class="btn-interview ${intClass}" onclick="stuToggleInterview('${s.id}','${s.interview}')">${intLabel}</button>
+            <button class="btn-accept ${accClass}" onclick="stuToggleAccept('${s.id}','${s.accepted}','${s.interview}')">${accLabel}</button>
+          </div>
+        </div>`;
+      }).join('');
+    }
+    tb.innerHTML = '';  // الجدول فاضي على الموبايل
+    return;
+  }
+
+  // ── DESKTOP: الجدول العادي ────────────────────────────────
+  tb.innerHTML = list.map((s, i) => {
     const intClass = s.interview==='done'?'btn-done':'btn-pending';
     const intLabel = s.interview==='done'?'✅ تمت':'⏳ لم تتم';
     let accClass='btn-na', accLabel='— لم يحدد';
@@ -437,10 +526,8 @@ function renderStudents(list) {
     const placementCell = s.status === 'new'
       ? `<div class="placement-wrap">
            <input type="number" class="placement-input" min="0" max="100"
-             value="${s.placementScore ?? ''}"
-             placeholder="الدرجة"
-             onchange="stuField('${s.id}','placementScore',this.value===''?null:Number(this.value))"
-           >
+             value="${s.placementScore ?? ''}" placeholder="الدرجة"
+             onchange="stuField('${s.id}','placementScore',this.value===''?null:Number(this.value))">
            <span class="placement-unit">/ 100</span>
          </div>`
       : `<span style="color:var(--text-mid);font-size:12px">—</span>`;
@@ -672,4 +759,11 @@ window.deleteUserAccount = async (id, name) => {
   showToast('تم حذف الحساب نهائياً');
 };
 
+
+
+
+// إعادة render عند تغيير حجم الشاشة (موبايل ↔ ديسكتوب)
+window.addEventListener("resize", () => {
+  if (allStudents.length) renderStudents(allStudents);
+});
 
