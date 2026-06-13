@@ -48,7 +48,7 @@ onAuthStateChanged(auth, async user => {
     const nav = userDiv.querySelector('.sidebar-nav');
     if (nav) {
       nav.innerHTML = `
-        <a href="../html/admin.html" class="admin-link" style="display:flex;align-items:center;gap:12px;padding:10px 14px;color:var(--text-mid);text-decoration:none;border-radius:6px;transition:all 0.2s;">
+        <a href="admin.html" class="admin-link" style="display:flex;align-items:center;gap:12px;padding:10px 14px;color:var(--text-mid);text-decoration:none;border-radius:6px;transition:all 0.2s;">
           <i class="ti ti-shield"></i> لوحة الإداريات
         </a>`;
     }
