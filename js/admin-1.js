@@ -721,7 +721,7 @@ window.renderAllUsers = () => {
      const actionBtns = `<div style="display:flex;gap:6px;align-items:center;white-space:nowrap">
        ${toggleBtn}
        <button title="حذف"
-         onclick="deleteUserAccount('${u.id}','${u.name ? u.name.replace(/'/g,\"\\\'\") : \"\"}')" 
+         onclick="deleteUserAccount('${u.id}','${u.name ? u.name.replace(/'/g,"\\'") : ""}')" 
          style="padding:4px 12px;font-size:12px;background:#fff0f0;color:#c0392b;border:1px solid #f5c6c6;border-radius:6px;cursor:pointer;flex-shrink:0">
          <i class="ti ti-trash"></i> حذف
        </button>
