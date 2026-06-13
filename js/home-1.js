@@ -55,12 +55,6 @@ onAuthStateChanged(auth, async user => {
     return;
   }
 
-  // إخفاء زرار "عرض صفحات المعلمات" من الطالبات
-  if (role === 'student' || role === 'mateen') {
-    const teachersLink = document.querySelector('a[href="teachers.html"]');
-    if (teachersLink) teachersLink.closest('.contact-card').style.display = 'none';
-  }
-
   // إخفاء "ملفي الشخصي" من غير طالبات (عادية أو متين)
   const profileLink = document.getElementById('profileLink');
   if (profileLink && role !== 'mateen' && role !== 'student') {

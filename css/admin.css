@@ -370,3 +370,406 @@ body { background: var(--beige); min-height: 100vh; display: flex; flex-directio
 
   .nav-breadcrumb     { font-size: 13px !important; padding: 10px 16px !important; }
 }
+
+
+/* ══════════════════════════════════════════
+   MOBILE TABLE → CARDS  (max 600px)
+   ══════════════════════════════════════════ */
+@media (max-width: 600px) {
+
+  /* ── wrapper scroll fallback ── */
+  .stu-table-wrap { overflow-x: unset; }
+
+  /* ── hide thead, make each row a card ── */
+  .stu-table,
+  .stu-table thead,
+  .stu-table tbody,
+  .stu-table tr,
+  .stu-table th,
+  .stu-table td { display: block !important; }
+
+  .stu-table thead { display: none !important; }
+
+  .stu-table tr {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 10px;
+    padding: 10px 12px;
+    box-shadow: 0 1px 4px rgba(0,0,0,.06);
+  }
+  .stu-table tr:hover td { background: transparent; }
+
+  .stu-table td {
+    border: none !important;
+    padding: 4px 0 !important;
+    font-size: 13px !important;
+    display: flex !important;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  /* hide # column and checkbox column on mobile */
+  .stu-table td:nth-child(1),
+  .stu-table td:nth-child(2) { display: none !important; }
+
+  /* name cell – full width */
+  .stu-table td:nth-child(3) { font-size: 14px !important; font-weight: 600; }
+
+  /* day/date */
+  .stu-table td:nth-child(4)::before { content: "📅 "; }
+  /* time */
+  .stu-table td:nth-child(5)::before { content: "🕐 "; }
+  /* interview */
+  .stu-table td:nth-child(6) { justify-content: flex-start; }
+  /* result */
+  .stu-table td:nth-child(7) { justify-content: flex-start; }
+  /* score */
+  .stu-table td:nth-child(8)::before { content: "📊 "; }
+
+  /* inputs inside table */
+  .stu-table input[type=text],
+  .stu-table input[type=number] {
+    font-size: 14px !important;
+    padding: 6px 8px !important;
+    width: 100% !important;
+  }
+  .stu-table select,
+  .date-day-sel,
+  .date-month-sel,
+  .date-year-sel,
+  .time-hour,
+  .time-ampm {
+    font-size: 13px !important;
+    padding: 5px 6px !important;
+  }
+  .arabic-date { flex-wrap: wrap; }
+  .stu-name-cell { flex-wrap: wrap; width: 100%; }
+  .stu-name-cell input { width: 100% !important; }
+  .status-sel { width: 100% !important; font-size: 13px !important; }
+
+  /* ── pending-table & allUsers → cards ── */
+  .pending-table,
+  .pending-table thead,
+  .pending-table tbody,
+  .pending-table tr,
+  .pending-table th,
+  .pending-table td { display: block !important; }
+
+  .pending-table thead { display: none !important; }
+
+  .pending-table tr {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 10px;
+    padding: 12px 14px;
+    box-shadow: 0 1px 4px rgba(0,0,0,.06);
+  }
+  .pending-table tr:hover td { background: transparent; }
+
+  .pending-table td {
+    border: none !important;
+    padding: 3px 0 !important;
+    font-size: 13px !important;
+    display: flex !important;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  /* hide # column */
+  .pending-table td:nth-child(1) { display: none !important; }
+
+  /* name bold */
+  .pending-table td:nth-child(2) {
+    font-size: 15px !important;
+    font-weight: 700;
+    color: var(--green-dark);
+    padding-bottom: 6px !important;
+    border-bottom: 1px solid var(--border) !important;
+    margin-bottom: 4px !important;
+    width: 100%;
+  }
+
+  /* action buttons row */
+  .pending-table td:last-child {
+    padding-top: 8px !important;
+    border-top: 1px solid var(--border) !important;
+    margin-top: 4px !important;
+    gap: 8px;
+    justify-content: flex-end;
+  }
+
+  /* bulk bar – stack vertically */
+  .stu-bulk-bar {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 10px !important;
+  }
+  .stu-bulk-fields {
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+    width: 100%;
+  }
+  .bulk-sel, .bulk-num { font-size: 13px !important; }
+
+  /* filter bar stack */
+  .stu-filter-bar {
+    flex-direction: column !important;
+    gap: 8px !important;
+  }
+  .stu-filter-bar input,
+  .stu-filter-bar select { width: 100% !important; }
+
+  /* section head stack */
+  .section-head {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 10px !important;
+  }
+  .section-head > div:last-child {
+    width: 100%;
+    flex-wrap: wrap !important;
+  }
+  .section-head input,
+  .section-head select { width: 100% !important; }
+
+  /* stats row 2 cols */
+  .stu-stats-row {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8px !important;
+  }
+}
+
+
+/* ══════════════════════════════════════════
+   STU MOBILE CARDS
+   ══════════════════════════════════════════ */
+@media (max-width: 640px) {
+  /* إخفاء الجدول وإظهار البطاقات */
+  .stu-table-wrap          { display: none !important; }
+  #stu-cards-wrap          { display: block !important; }
+
+  /* البطاقة الواحدة */
+  .stu-mob-card {
+    background: #fff;
+    border: 1px solid var(--border, #e8e0d0);
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 12px;
+    box-shadow: 0 2px 6px rgba(0,0,0,.07);
+  }
+
+  /* السطر العلوي: الاسم + حذف */
+  .stu-mob-top {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border, #e8e0d0);
+  }
+  .stu-mob-name {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex: 1;
+    min-width: 0;
+  }
+  .stu-mob-name-input {
+    flex: 1;
+    font-family: 'Noto Naskh Arabic', serif;
+    font-size: 14.5px;
+    font-weight: 600;
+    color: var(--green-dark, #1a4a2e);
+    border: 1px solid transparent;
+    border-radius: 6px;
+    padding: 4px 8px;
+    background: transparent;
+    min-width: 0;
+  }
+  .stu-mob-name-input:focus {
+    border-color: var(--gold, #c9a227);
+    background: #fffef8;
+    outline: none;
+  }
+
+  /* صف بيانات */
+  .stu-mob-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 7px;
+    flex-wrap: wrap;
+  }
+  .stu-mob-label {
+    font-family: 'Noto Naskh Arabic', serif;
+    font-size: 12.5px;
+    color: #888;
+    white-space: nowrap;
+    min-width: 58px;
+  }
+  .stu-mob-sel {
+    font-family: 'Noto Naskh Arabic', serif;
+    font-size: 13px;
+    padding: 5px 8px;
+    border: 1px solid var(--border, #e8e0d0);
+    border-radius: 7px;
+    background: #fafafa;
+    flex: 1;
+    min-width: 0;
+  }
+  .stu-mob-badge {
+    font-size: 12px;
+    background: var(--beige2, #f5efe0);
+    padding: 2px 8px;
+    border-radius: 8px;
+    color: var(--green-dark, #1a4a2e);
+  }
+  .stu-mob-score {
+    width: 72px;
+    font-size: 14px;
+    padding: 5px 8px;
+    border: 1px solid var(--border, #e8e0d0);
+    border-radius: 7px;
+    text-align: center;
+  }
+
+  /* أزرار المقابلة والقبول */
+  .stu-mob-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border, #e8e0d0);
+  }
+  .stu-mob-actions button {
+    flex: 1;
+    padding: 8px 4px !important;
+    font-size: 13px !important;
+    border-radius: 8px !important;
+  }
+
+  /* تقليص date picker على الموبايل */
+  .arabic-date {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+    flex: 1;
+  }
+  .date-day-sel, .date-month-sel, .date-year-sel {
+    font-size: 12px !important;
+    padding: 5px 4px !important;
+    flex: 1;
+    min-width: 50px;
+  }
+
+  /* فلاتر section head */
+  .section-head {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+  }
+  .section-head > div:last-child {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+  }
+  .section-head input,
+  .section-head select { flex: 1; min-width: 130px; }
+
+  /* bulk bar */
+  .stu-bulk-bar {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 8px !important;
+  }
+  .stu-bulk-fields { flex-wrap: wrap !important; gap: 6px !important; }
+  .bulk-sel, .bulk-num { flex: 1; min-width: 100px; }
+
+  /* stats row */
+  .stu-stats-row {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8px !important;
+  }
+
+  /* pending-table → cards */
+  .pending-table thead            { display: none !important; }
+  .pending-table, .pending-table tbody { display: block !important; }
+  .pending-table tr {
+    display: block !important;
+    background: #fff;
+    border: 1px solid var(--border, #e8e0d0);
+    border-radius: 10px;
+    margin-bottom: 10px;
+    padding: 12px 14px;
+    box-shadow: 0 1px 4px rgba(0,0,0,.06);
+  }
+  .pending-table td {
+    display: flex !important;
+    align-items: center;
+    gap: 8px;
+    border: none !important;
+    padding: 3px 0 !important;
+    font-size: 13px !important;
+    flex-wrap: wrap;
+  }
+  .pending-table td:nth-child(1) { display: none !important; } /* # */
+  .pending-table td:nth-child(2) {
+    font-size: 15px !important;
+    font-weight: 700;
+    color: var(--green-dark, #1a4a2e);
+    border-bottom: 1px solid var(--border) !important;
+    padding-bottom: 8px !important;
+    margin-bottom: 4px !important;
+  }
+  .pending-table td:last-child {
+    border-top: 1px solid var(--border) !important;
+    padding-top: 10px !important;
+    margin-top: 4px !important;
+    gap: 8px;
+    justify-content: flex-end;
+  }
+
+  /* allUsers table → cards */
+  #allUsersTable thead            { display: none !important; }
+  #allUsersTable, #allUsersTable tbody { display: block !important; }
+  #allUsersTable tr {
+    display: block !important;
+    background: #fff;
+    border: 1px solid var(--border, #e8e0d0);
+    border-radius: 10px;
+    margin-bottom: 10px;
+    padding: 12px 14px;
+    box-shadow: 0 1px 4px rgba(0,0,0,.06);
+  }
+  #allUsersTable td {
+    display: flex !important;
+    align-items: center;
+    gap: 8px;
+    border: none !important;
+    padding: 3px 0 !important;
+    font-size: 13px !important;
+    flex-wrap: wrap;
+  }
+  #allUsersTable td:nth-child(1) { display: none !important; } /* # */
+  #allUsersTable td:nth-child(2) { /* الاسم */
+    font-size: 15px !important;
+    font-weight: 700;
+    color: var(--green-dark, #1a4a2e);
+    border-bottom: 1px solid var(--border) !important;
+    padding-bottom: 8px !important;
+    margin-bottom: 4px !important;
+  }
+  #allUsersTable td:nth-child(4)::before { content: "✉️ "; font-size: 12px; }
+  #allUsersTable td:nth-child(5)::before { content: "📱 "; font-size: 12px; }
+  #allUsersTable td:nth-child(6)::before { content: "📅 "; font-size: 12px; }
+  #allUsersTable td:last-child {
+    border-top: 1px solid var(--border) !important;
+    padding-top: 10px !important;
+    margin-top: 4px !important;
+    justify-content: flex-end;
+  }
+}

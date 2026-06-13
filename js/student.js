@@ -19,29 +19,49 @@ const auth = getAuth(app);
 // ── Auth Guard ───────────────────────────────
 onAuthStateChanged(auth, async user => {
   if (!user) { window.location.href = '../html/login.html'; return; }
-  const snap = await getDoc(doc(db, 'users', user.uid));
-  const role = snap.exists() ? snap.data().role : null;
 
-  // الطالبة: تأكدي أن الـ ?id= في الـ URL هو فعلاً صفحتها
-  if (role === 'student') {
-    const params    = new URLSearchParams(location.search);
-    const urlId     = params.get('id');
-    const userData  = snap.data();
-    // لو مفيش id أو الـ id مش مطابق لبياناتها — ارجعيها لـ login
-    if (!urlId) {
-      window.location.href = '../html/login.html'; return;
+  const snap   = await getDoc(doc(db, 'users', user.uid));
+  if (!snap.exists()) { window.location.href = '../html/login.html'; return; }
+
+  const userData = snap.data();
+  const role     = userData.role   || '';
+  const status   = userData.status || '';
+
+  if (status === 'pending' || status === 'suspended') {
+    window.location.href = '../html/home.html'; return;
+  }
+
+  const params    = new URLSearchParams(location.search);
+  const studentId = params.get('id');
+
+  // الطالبة: تشوف بس صفحتها هي
+  if (role === 'student' || role === 'mateen') {
+    if (!studentId || user.uid !== studentId) {
+      window.location.href = '../html/home.html'; return;
     }
     initPage();
     return;
   }
 
-  // المشرفة والمعلمة مسموح ليهم يشوفوا أي صفحة
-  if (role === 'admin' || role === 'teacher') {
+  // الإدارة فقط: تشوف الكل
+  if (role === 'admin') {
+    if (!studentId) { window.location.href = '../html/home.html'; return; }
     initPage();
     return;
   }
 
-  // غير ذلك — ارجع لـ login
+  // المعلمة: بس طالباتها
+  if (role === 'teacher') {
+    if (!studentId) { window.location.href = '../html/home.html'; return; }
+    const teacherSubject = userData.subject || '';
+    const studentSnap    = await getDoc(doc(db, 'students', studentId));
+    if (!studentSnap.exists() || studentSnap.data().teacherId !== teacherSubject) {
+      window.location.href = '../html/home.html'; return;
+    }
+    initPage();
+    return;
+  }
+
   window.location.href = '../html/login.html';
 });
 

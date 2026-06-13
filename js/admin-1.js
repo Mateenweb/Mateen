@@ -29,6 +29,8 @@ onAuthStateChanged(auth, async user => {
   } else {
     document.getElementById('pendingSection').style.display = 'block';
     loadPendingAccounts();
+    loadAllUsers();
+    document.getElementById('allUsersSection').style.display = 'block';
   }
   loadMats();
 });
@@ -223,9 +225,109 @@ function renderPending(list) {
   cont.innerHTML = html;
 }
 
+// ── مودال الربط ───────────────────────────────────────────
+let _pendingApproveId   = null;   // uid المستخدمة المنتظرة للموافقة
+window._selectedLinkId  = null;   // id الطالبة المختارة في الجدول
+
 window.approveUser = async id => {
-  await updateDoc(doc(db, 'users', id), { status: 'active' });
-  showToast('✓ تم قبول الحساب');
+  // اجلب بيانات المستخدمة لعرضها في المودال
+  const snap = await getDoc(doc(db, 'users', id));
+  const name = snap.exists() ? (snap.data().name || snap.data().email || id) : id;
+
+  _pendingApproveId      = id;
+  window._selectedLinkId = null;
+
+  // عنوان فرعي
+  document.getElementById('linkModalSubtitle').textContent =
+    'اختاري طالبة لربطها بحساب: ' + name;
+
+  // مسح البحث
+  document.getElementById('linkSearch').value = '';
+
+  // ابنِ قائمة الطالبات (من allStudents المحملة مسبقاً)
+  renderLinkList(allStudents);
+
+  // أظهر المودال
+  const modal = document.getElementById('linkModal');
+  modal.style.display = 'flex';
+};
+
+window.closeLinkModal = () => {
+  document.getElementById('linkModal').style.display = 'none';
+  _pendingApproveId = null;
+  window._selectedLinkId = null;
+};
+
+window.filterLinkList = () => {
+  const q = document.getElementById('linkSearch').value.trim().toLowerCase();
+  renderLinkList(q ? allStudents.filter(s => (s.name||'').toLowerCase().includes(q)) : allStudents);
+};
+
+function renderLinkList(list) {
+  const el = document.getElementById('linkStudentList');
+  if (!list.length) {
+    el.innerHTML = '<div style="text-align:center;color:#aaa;padding:28px;font-family:Noto Naskh Arabic,serif">لا توجد نتائج</div>';
+    return;
+  }
+  el.innerHTML = list.map(s => {
+    const linked    = s.uid ? `<span style="font-size:11px;background:#d8f3dc;color:#1a4a2e;padding:2px 8px;border-radius:10px;margin-right:6px">مرتبطة ✓</span>` : '';
+    const dayTime   = [s.day, s.hour ? s.hour + ' ' + (s.ampm||'') : ''].filter(Boolean).join(' — ');
+    return `<div id="linkItem_${s.id}"
+      onclick="selectLinkStudent('${s.id}')"
+      style="display:flex;align-items:center;gap:12px;padding:11px 18px;cursor:pointer;border-bottom:1px solid #f5f0e8;transition:background .15s">
+      <div style="width:38px;height:38px;border-radius:50%;background:#e9f5db;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:#1a4a2e;font-family:'Noto Naskh Arabic',serif;flex-shrink:0">
+        ${(s.name||'؟')[0]}
+      </div>
+      <div style="flex:1;min-width:0">
+        <div style="font-family:'Noto Naskh Arabic',serif;font-weight:600;font-size:14px;color:#1a4a2e">${s.name||'—'}${linked}</div>
+        <div style="font-size:12px;color:#999;font-family:'Noto Naskh Arabic',serif">${dayTime||'لم يحدد موعد'}</div>
+      </div>
+      <div id="linkCheck_${s.id}" style="width:22px;height:22px;border-radius:50%;border:2px solid #d4c9a8;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s"></div>
+    </div>`;
+  }).join('');
+}
+
+window.selectLinkStudent = id => {
+  // أزل تحديد القديم
+  if (window._selectedLinkId) {
+    const prev = document.getElementById('linkItem_' + window._selectedLinkId);
+    const prevCheck = document.getElementById('linkCheck_' + window._selectedLinkId);
+    if (prev)      prev.style.background = '';
+    if (prevCheck) { prevCheck.style.background = ''; prevCheck.style.borderColor = '#d4c9a8'; prevCheck.innerHTML = ''; }
+  }
+  window._selectedLinkId = id;
+  const item  = document.getElementById('linkItem_' + id);
+  const check = document.getElementById('linkCheck_' + id);
+  if (item)  item.style.background  = '#f0faf3';
+  if (check) { check.style.background = '#1a4a2e'; check.style.borderColor = '#1a4a2e'; check.innerHTML = '<i class="ti ti-check" style="font-size:12px;color:#fff"></i>'; }
+
+  const btn = document.getElementById('linkConfirmBtn');
+  btn.disabled = false;
+  btn.style.opacity = '1';
+};
+
+window.confirmLinkModal = async (studentId) => {
+  if (!_pendingApproveId) return;
+  const uid = _pendingApproveId;
+
+  // أغلق المودال أولاً
+  document.getElementById('linkModal').style.display = 'none';
+  _pendingApproveId = null;
+  window._selectedLinkId = null;
+
+  // فعّل الحساب
+  await updateDoc(doc(db, 'users', uid), {
+    status: 'active',
+    ...(studentId ? { linkedStudentId: studentId } : {})
+  });
+
+  // لو في ربط، حفظ uid في سجل الطالبة في الجدول
+  if (studentId) {
+    await updateDoc(doc(db, 'students', studentId), { uid });
+    showToast('✓ تم قبول الحساب وربطه بالطالبة');
+  } else {
+    showToast('✓ تم قبول الحساب بدون ربط');
+  }
 };
 
 window.rejectUser = async id => {
@@ -306,9 +408,98 @@ window.applyStudentFilters = () => {
 };
 
 function renderStudents(list) {
-  const tb = document.getElementById('stuTableBody');
-  if(!list.length){tb.innerHTML=`<tr><td colspan="8" class="empty-state"><i class="ti ti-inbox"></i>لا توجد طالبات</td></tr>`;return;}
-  tb.innerHTML = list.map((s,i)=>{
+  const tb   = document.getElementById('stuTableBody');
+  const isMob = window.innerWidth <= 640;
+
+  if (!list.length) {
+    tb.innerHTML = `<tr><td colspan="9" class="empty-state"><i class="ti ti-inbox"></i>لا توجد طالبات</td></tr>`;
+    return;
+  }
+
+  if (isMob) {
+    // ── MOBILE: بطاقة لكل طالبة ──────────────────────────────
+    // نخرج من tbody ونبني cards في wrapper منفصل
+    const wrap = document.getElementById('stu-cards-wrap');
+    if (wrap) {
+      wrap.innerHTML = list.map((s, i) => {
+        const intClass = s.interview === 'done' ? 'btn-done' : 'btn-pending';
+        const intLabel = s.interview === 'done' ? '✅ تمت' : '⏳ لم تتم';
+        let accClass = 'btn-na', accLabel = '— لم يحدد';
+        if (s.accepted === 'accepted') { accClass = 'btn-accepted'; accLabel = '✔️ مقبولة'; }
+        if (s.accepted === 'rejected') { accClass = 'btn-rejected'; accLabel = '✖️ مرفوضة'; }
+
+        const statusLabel = s.status === 'mateen' ? '📖 بنات متين' : s.status === 'new' ? '✨ مستجدة' : '';
+        const dayTime = [s.day, s.hour ? `${s.hour} ${s.ampm || ''}` : ''].filter(Boolean).join(' — ');
+        const dateDisplay = s.dateH ? s.dateH.replace(/-/g, '/') : '';
+
+        return `<div class="stu-mob-card">
+          <div class="stu-mob-top">
+            <div class="stu-mob-name">
+              <a class="btn-stu-link" href="student-view.html?id=${s.id}" target="_blank">👤</a>
+              <input type="text" value="${esc(s.name || '')}"
+                oninput="stuAutoName('${s.id}', this.value)"
+                class="stu-mob-name-input"/>
+            </div>
+            <button class="btn-del-stu" onclick="stuDelete('${s.id}')" title="حذف">
+              <i class="ti ti-trash"></i>
+            </button>
+          </div>
+
+          <div class="stu-mob-row">
+            <select class="stu-mob-sel" onchange="stuField('${s.id}','status',this.value)">
+              <option value=""${!s.status ? ' selected' : ''}>🏷️ التصنيف</option>
+              <option value="mateen"${s.status === 'mateen' ? ' selected' : ''}>📖 بنات متين</option>
+              <option value="new"${s.status === 'new' ? ' selected' : ''}>✨ مستجدات</option>
+            </select>
+            ${s.status ? `<span class="stu-mob-badge">${statusLabel}</span>` : ''}
+          </div>
+
+          <div class="stu-mob-row">
+            <span class="stu-mob-label">📅 اليوم</span>
+            <select class="stu-mob-sel" onchange="stuField('${s.id}','day',this.value)">
+              <option value="">— اليوم —</option>
+              ${['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'].map(d => `<option${s.day === d ? ' selected' : ''}>${d}</option>`).join('')}
+            </select>
+          </div>
+
+          <div class="stu-mob-row">
+            <span class="stu-mob-label">📅 التاريخ</span>
+            ${makeDatePicker(s.id, s.dateH)}
+          </div>
+
+          <div class="stu-mob-row">
+            <span class="stu-mob-label">🕐 الوقت</span>
+            <select class="stu-mob-sel" onchange="stuField('${s.id}','hour',this.value)" style="width:60px">
+              <option value="">—</option>
+              ${[1,2,3,4,5,6,7,8,9,10,11,12].map(h => `<option${s.hour == h ? ' selected' : ''}>${h}</option>`).join('')}
+            </select>
+            <select class="stu-mob-sel" onchange="stuField('${s.id}','ampm',this.value)" style="width:80px">
+              <option value="ص"${s.ampm === 'ص' ? ' selected' : ''}>صباحاً</option>
+              <option value="م"${s.ampm === 'م' ? ' selected' : ''}>مساءً</option>
+            </select>
+          </div>
+
+          ${s.status === 'new' ? `<div class="stu-mob-row">
+            <span class="stu-mob-label">📊 الدرجة</span>
+            <input type="number" min="0" max="100" value="${s.placementScore ?? ''}"
+              placeholder="0" class="stu-mob-score"
+              onchange="stuField('${s.id}','placementScore',this.value===''?null:Number(this.value))">
+            <span style="font-size:12px;color:#999">/ 100</span>
+          </div>` : ''}
+
+          <div class="stu-mob-actions">
+            <button class="btn-interview ${intClass}" onclick="stuToggleInterview('${s.id}','${s.interview}')">${intLabel}</button>
+            <button class="btn-accept ${accClass}" onclick="stuToggleAccept('${s.id}','${s.accepted}','${s.interview}')">${accLabel}</button>
+          </div>
+        </div>`;
+      }).join('');
+    }
+    tb.innerHTML = '';  // الجدول فاضي على الموبايل
+    return;
+  }
+
+  // ── DESKTOP: الجدول العادي ────────────────────────────────
+  tb.innerHTML = list.map((s, i) => {
     const intClass = s.interview==='done'?'btn-done':'btn-pending';
     const intLabel = s.interview==='done'?'✅ تمت':'⏳ لم تتم';
     let accClass='btn-na', accLabel='— لم يحدد';
@@ -335,10 +526,8 @@ function renderStudents(list) {
     const placementCell = s.status === 'new'
       ? `<div class="placement-wrap">
            <input type="number" class="placement-input" min="0" max="100"
-             value="${s.placementScore ?? ''}"
-             placeholder="الدرجة"
-             onchange="stuField('${s.id}','placementScore',this.value===''?null:Number(this.value))"
-           >
+             value="${s.placementScore ?? ''}" placeholder="الدرجة"
+             onchange="stuField('${s.id}','placementScore',this.value===''?null:Number(this.value))">
            <span class="placement-unit">/ 100</span>
          </div>`
       : `<span style="color:var(--text-mid);font-size:12px">—</span>`;
@@ -440,3 +629,142 @@ const _origToast = window.showToast ? null : null;
 
 function hideErr(){ document.getElementById('errMsg').classList.remove('show'); }
 function showToast(msg,err=false){ const t=document.getElementById('toast'); t.textContent=msg; t.className='toast'+(err?' error':''); t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),3000); }
+
+// ══════════════════════════════════════
+//  جميع الحسابات المسجلة (admin فقط)
+// ══════════════════════════════════════
+
+let allUsersData = [];
+
+const STATUS_LABELS = {
+  active:    '✅ مفعّل',
+  pending:   '⏳ معلق',
+  suspended: '🚫 موقوف',
+};
+const STATUS_COLORS = {
+  active:    '#2d6a4f',
+  pending:   '#c9a227',
+  suspended: '#c0392b',
+};
+const STATUS_BG = {
+  active:    '#d8f3dc',
+  pending:   '#fff3cd',
+  suspended: '#fde8e8',
+};
+
+function loadAllUsers() {
+  onSnapshot(
+    query(collection(db, 'users'), orderBy('createdAt', 'desc')),
+    snap => {
+      allUsersData = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      renderAllUsers();
+      updateUsersStats();
+
+      const badge = document.getElementById('allUsersBadge');
+      if (badge) {
+        badge.textContent = allUsersData.length;
+        badge.style.display = 'inline';
+      }
+    }
+  );
+}
+
+function updateUsersStats() {
+  const el = id => document.getElementById(id);
+  if (!el('uTotal')) return;
+  el('uTotal').textContent     = allUsersData.length;
+  el('uActive').textContent    = allUsersData.filter(u => u.status === 'active').length;
+  el('uPending').textContent   = allUsersData.filter(u => u.status === 'pending').length;
+  el('uSuspended').textContent = allUsersData.filter(u => u.status === 'suspended').length;
+}
+
+window.renderAllUsers = () => {
+  const q   = (document.getElementById('usersSearch')?.value || '').toLowerCase().trim();
+  const fr  = document.getElementById('usersFilterRole')?.value   || 'all';
+  const fs  = document.getElementById('usersFilterStatus')?.value || 'all';
+
+  const list = allUsersData.filter(u =>
+    (fr === 'all' || u.role === fr) &&
+    (fs === 'all' || u.status === fs) &&
+    (!q  || (u.name||'').toLowerCase().includes(q) || (u.email||'').toLowerCase().includes(q))
+  );
+
+  const tbody = document.getElementById('allUsersBody');
+  if (!tbody) return;
+
+  if (!list.length) {
+    tbody.innerHTML = `<tr><td colspan="8" class="empty-state"><i class="ti ti-user-off"></i> لا توجد نتائج</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = list.map((u, i) => {
+    const statusLabel = STATUS_LABELS[u.status] || u.status || '—';
+    const statusColor = STATUS_COLORS[u.status] || '#888';
+    const statusBg    = STATUS_BG[u.status]     || '#f5f5f5';
+    const roleLabel   = ROLE_LABELS[u.role]     || u.role || '—';
+    const createdAt   = u.createdAt
+      ? new Date(u.createdAt.seconds * 1000).toLocaleDateString('ar-EG', { year:'numeric', month:'short', day:'numeric' })
+      : '—';
+
+    const toggleBtn = u.status === 'active'
+      ? `<button class="btn-reject" style="font-size:11px;padding:4px 10px"
+           onclick="suspendUser('${u.id}')">
+           <i class="ti ti-ban"></i> إيقاف
+         </button>`
+      : u.status === 'suspended'
+      ? `<button class="btn-approve" style="font-size:11px;padding:4px 10px"
+           onclick="reactivateUser('${u.id}')">
+           <i class="ti ti-player-play"></i> إعادة تفعيل
+         </button>`
+      : `<span style="color:var(--text-mid);font-size:12px">—</span>`;
+
+     const actionBtns = `<div style="display:flex;gap:6px;align-items:center;white-space:nowrap">
+       ${toggleBtn}
+       <button title="حذف"
+         onclick="deleteUserAccount('${u.id}','${u.name ? u.name.replace(/'/g,\"\\\'\") : \"\"}')" 
+         style="padding:4px 12px;font-size:12px;background:#fff0f0;color:#c0392b;border:1px solid #f5c6c6;border-radius:6px;cursor:pointer;flex-shrink:0">
+         <i class="ti ti-trash"></i> حذف
+       </button>
+     </div>`;
+
+    return `<tr>
+      <td style="color:var(--text-mid);font-size:12px">${i + 1}</td>
+      <td style="font-weight:600;font-size:13.5px">${esc(u.name || '—')}</td>
+      <td><span style="font-size:12px;background:var(--beige2);padding:2px 8px;border-radius:4px">${roleLabel}</span></td>
+      <td dir="ltr" style="font-size:12px;color:var(--text-mid)">${esc(u.email || '—')}</td>
+      <td dir="ltr" style="font-size:12px">${esc(u.phone || '—')}</td>
+      <td style="font-size:12px;color:var(--text-mid);white-space:nowrap">${createdAt}</td>
+      <td><span style="font-size:12px;background:${statusBg};color:${statusColor};padding:3px 10px;border-radius:10px;white-space:nowrap">${statusLabel}</span></td>
+      <td style="white-space:nowrap;min-width:160px">${actionBtns}</td>
+    </tr>`;
+  }).join('');
+};
+
+window.suspendUser = async id => {
+  if (!confirm('هل تريدين إيقاف هذا الحساب مؤقتاً؟')) return;
+  await updateDoc(doc(db, 'users', id), { status: 'suspended' });
+  showToast('تم إيقاف الحساب');
+};
+
+window.reactivateUser = async id => {
+  await updateDoc(doc(db, 'users', id), { status: 'active' });
+  showToast('✓ تم إعادة تفعيل الحساب');
+};
+
+window.deleteUserAccount = async (id, name) => {
+  const label = name || 'هذا المستخدم';
+  if (!confirm(`هل أنتِ متأكدة من حذف حساب "${label}" نهائياً؟\nلا يمكن التراجع عن هذا الإجراء.`)) return;
+  if (!confirm(`تأكيد أخير: سيُحذف حساب "${label}" بشكل دائم.`)) return;
+  await deleteDoc(doc(db, 'users', id));
+  showToast('تم حذف الحساب نهائياً');
+};
+
+
+
+
+// إعادة render عند تغيير حجم الشاشة (موبايل ↔ ديسكتوب)
+window.addEventListener("resize", () => {
+  if (allStudents.length) renderStudents(allStudents);
+});
+
+

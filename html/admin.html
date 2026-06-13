@@ -6,7 +6,7 @@
 <link rel="icon" type="image/x-icon" href="../favicon.ico"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>لوحة الإداريات — متين العلمي</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;500;600;700&amp;family=Amiri:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<link href="../libs/fonts/arabic-fonts.css" rel="stylesheet"/>
 <link href="../libs/tabler-icons/tabler-icons.min.css" rel="stylesheet"/>
 <link rel="stylesheet" href="../css/common.css"/>
 <link href="../css/admin.css" rel="stylesheet"/>
@@ -125,6 +125,57 @@
 <div class="empty-state"><i class="ti ti-inbox"></i>لا توجد حسابات معلقة</div>
 </div>
 </div>
+<!-- ALL USERS SECTION (admin only) -->
+<div class="section" id="allUsersSection" style="display:none">
+  <div class="section-head">
+    <div class="section-head-title">
+      <i class="ti ti-users"></i> جميع الحسابات المسجلة
+      <span class="pending-badge" id="allUsersBadge" style="display:none;background:#2d6a4f"></span>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <input id="usersSearch" type="text" placeholder="ابحثي بالاسم أو البريد..."
+        oninput="renderAllUsers()"
+        style="padding:7px 12px;border:1px solid var(--border);border-radius:8px;font-family:'Noto Naskh Arabic',serif;font-size:13px;width:190px"/>
+      <select id="usersFilterRole" onchange="renderAllUsers()"
+        style="padding:7px 10px;border:1px solid var(--border);border-radius:8px;font-family:'Noto Naskh Arabic',serif;font-size:13px">
+        <option value="all">كل الأدوار</option>
+        <option value="student">أصدقاء متين</option>
+        <option value="mateen">بنات متين</option>
+        <option value="teacher">معلمة</option>
+        <option value="supervisor">مشرفة</option>
+        <option value="admin">إدارة</option>
+      </select>
+      <select id="usersFilterStatus" onchange="renderAllUsers()"
+        style="padding:7px 10px;border:1px solid var(--border);border-radius:8px;font-family:'Noto Naskh Arabic',serif;font-size:13px">
+        <option value="all">كل الحالات</option>
+        <option value="active">مفعّل</option>
+        <option value="pending">معلق</option>
+        <option value="suspended">موقوف</option>
+      </select>
+    </div>
+  </div>
+  <div class="stu-stats-row">
+    <div class="stu-stat"><span id="uTotal">0</span><small>الكل</small></div>
+    <div class="stu-stat accepted"><span id="uActive">0</span><small>مفعّلون</small></div>
+    <div class="stu-stat pending"><span id="uPending">0</span><small>معلقون</small></div>
+    <div class="stu-stat rejected"><span id="uSuspended">0</span><small>موقوفون</small></div>
+  </div>
+  <div style="overflow-x:auto">
+    <table class="pending-table">
+      <thead><tr>
+        <th>#</th><th>الاسم</th><th>الدور</th>
+        <th>البريد الإلكتروني</th><th>الجوال</th>
+        <th>تاريخ التسجيل</th><th>الحالة</th><th>إجراء</th>
+      </tr></thead>
+      <tbody id="allUsersBody">
+        <tr><td colspan="8" style="text-align:center;padding:28px;color:var(--text-mid)">
+          <i class="ti ti-loader spin" style="font-size:20px"></i>
+        </td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
 <!-- STUDENTS / INTERVIEWS SECTION -->
 <div class="section" id="studentsSection">
 <div class="section-head">
@@ -203,7 +254,9 @@
 <button class="bulk-apply-btn" onclick="applyBulkDateTime()">✅ تطبيق</button>
 </div>
 </div>
-<!-- Table -->
+<!-- Mobile cards (shown on small screens) -->
+<div id="stu-cards-wrap" style="padding:8px 12px;display:none"></div>
+<!-- Table (shown on desktop) -->
 <div class="stu-table-wrap">
 <table class="stu-table">
 <thead>
@@ -254,6 +307,45 @@
 </div>
 </div>
 <div class="toast" id="toast"></div>
+
+<!-- ── مودال ربط الحساب بطالبة في الجدول ── -->
+<div id="linkModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;align-items:center;justify-content:center;padding:16px">
+  <div style="background:#fff;border-radius:14px;width:100%;max-width:520px;max-height:85vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,.18)">
+
+    <!-- Header -->
+    <div style="padding:18px 20px 14px;border-bottom:1px solid #e8e0d0;display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <div style="font-family:'Amiri',serif;font-size:17px;font-weight:700;color:#1a4a2e">ربط الحساب بطالبة في الجدول</div>
+        <div style="font-size:12.5px;color:#888;margin-top:3px" id="linkModalSubtitle">اختاري طالبة من الجدول أو اضغطي "تخطي"</div>
+      </div>
+      <button onclick="closeLinkModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#999;padding:4px">✕</button>
+    </div>
+
+    <!-- Search -->
+    <div style="padding:12px 16px;border-bottom:1px solid #f0ebe0">
+      <input id="linkSearch" type="text" placeholder="ابحثي باسم الطالبة..."
+        oninput="filterLinkList()"
+        style="width:100%;padding:8px 12px;border:1px solid #d4c9a8;border-radius:8px;font-family:'Noto Naskh Arabic',serif;font-size:14px;outline:none;box-sizing:border-box"/>
+    </div>
+
+    <!-- List -->
+    <div id="linkStudentList" style="overflow-y:auto;flex:1;padding:8px 0"></div>
+
+    <!-- Footer -->
+    <div style="padding:14px 16px;border-top:1px solid #e8e0d0;display:flex;gap:10px;justify-content:flex-end">
+      <button onclick="confirmLinkModal(null)"
+        style="padding:9px 20px;border:1px solid #c9a227;border-radius:8px;background:#fff;color:#c9a227;font-family:'Noto Naskh Arabic',serif;font-size:13.5px;cursor:pointer;font-weight:600">
+        <i class="ti ti-player-skip-forward"></i> تخطي — بدون ربط
+      </button>
+      <button id="linkConfirmBtn" onclick="confirmLinkModal(window._selectedLinkId)" disabled
+        style="padding:9px 22px;border:none;border-radius:8px;background:#1a4a2e;color:#fff;font-family:'Noto Naskh Arabic',serif;font-size:13.5px;cursor:pointer;font-weight:600;opacity:.5">
+        <i class="ti ti-link"></i> ربط واعتماد
+      </button>
+    </div>
+  </div>
+</div>
+
 <script src="../js/admin-1.js" type="module"></script>
 </body>
 </html>
+

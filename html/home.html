@@ -5,13 +5,93 @@
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <link rel="icon" type="image/x-icon" href="../favicon.ico"/>
 <title>برنامج متين العلمي — الصفحة الرئيسية</title>
-<link href="https://fonts.googleapis.com" rel="preconnect"/>
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;500;600;700&family=Amiri:wght@400;700&display=swap" rel="stylesheet"/>
-<link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.42.0/dist/tabler-icons.min.css" rel="stylesheet"/>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css" rel="stylesheet"/>
+<link href="../libs/fonts/arabic-fonts.css" rel="stylesheet"/>
+<link href="../libs/tabler-icons/tabler-icons.min.css" rel="stylesheet"/>
+<link href="../libs/bootstrap/bootstrap.rtl.min.css" rel="stylesheet"/>
 <link href="../css/home.css" rel="stylesheet"/>
 <link href="../css/mobile.css" rel="stylesheet"/>
+<style>
+/* ── Home Messages Widget ─────────────────────────── */
+.msg-widget-section { display:none; padding-top:24px; padding-bottom:8px; }
+.msg-widget-header {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 14px;
+}
+.msg-widget-header .section-title { flex:1; margin-bottom:0; }
+.msg-widget-actions { display:flex; align-items:center; gap:8px; }
+.msg-compose-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--green-dark, #1a4a2e);
+  color: #fff;
+  font-family: 'Noto Naskh Arabic', serif;
+  font-size: 13px;
+  border: none; border-radius: 20px;
+  padding: 6px 16px; cursor: pointer;
+  transition: background .2s, box-shadow .2s;
+  text-decoration: none;
+}
+.msg-compose-btn:hover { background: #245c38; box-shadow: 0 3px 10px rgba(26,74,46,.25); color:#fff; }
+.msg-viewall-btn {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-family: 'Noto Naskh Arabic', serif;
+  font-size: 13px;
+  color: var(--green-dark, #1a4a2e);
+  text-decoration: none;
+  border: 1px solid var(--green-dark, #1a4a2e);
+  border-radius: 20px;
+  padding: 5px 14px;
+  transition: all .2s;
+}
+.msg-viewall-btn:hover { background: var(--green-dark,#1a4a2e); color:#fff; }
+.home-conv-list { display:flex; flex-direction:column; gap:9px; }
+.home-conv-loading, .home-conv-empty {
+  text-align:center; color:#999; padding:20px;
+  font-family:'Noto Naskh Arabic',serif; font-size:13.5px;
+}
+.home-conv-item {
+  display:flex; align-items:center; gap:12px;
+  padding:11px 16px;
+  background:#fff;
+  border-radius:10px;
+  border:1px solid #e8e0d0;
+  cursor:pointer; text-decoration:none;
+  transition: box-shadow .18s, border-color .18s;
+}
+.home-conv-item:hover {
+  box-shadow: 0 3px 12px rgba(26,74,46,.10);
+  border-color: var(--gold, #c9a227);
+  text-decoration:none;
+}
+.home-conv-avatar {
+  width:42px; height:42px; border-radius:50%;
+  background:#d8f3dc;
+  display:flex; align-items:center; justify-content:center;
+  font-size:16px; font-weight:700;
+  color:var(--green-dark,#1a4a2e);
+  flex-shrink:0;
+  font-family:'Noto Naskh Arabic',serif;
+}
+.home-conv-body { flex:1; min-width:0; }
+.home-conv-name {
+  font-family:'Noto Naskh Arabic',serif; font-weight:600;
+  font-size:14px; color:var(--green-dark,#1a4a2e);
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.home-conv-preview {
+  font-family:'Noto Naskh Arabic',serif; font-size:12.5px;
+  color:#888; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  margin-top:2px;
+}
+.home-conv-meta { display:flex; flex-direction:column; align-items:flex-start; gap:4px; flex-shrink:0; }
+.home-conv-time { font-size:11px; color:#bbb; font-family:'Noto Naskh Arabic',serif; white-space:nowrap; }
+.home-conv-unread {
+  background:var(--green-dark,#1a4a2e); color:#fff;
+  font-size:11px; font-weight:700;
+  padding:1px 7px; border-radius:10px;
+  min-width:20px; text-align:center; font-family:sans-serif;
+}
+</style>
 </head>
 <body>
 
@@ -158,6 +238,24 @@
             <i class="ti ti-user-plus"></i> انضمي إلى متين
           </a>
         </div>
+      </div>
+    </section>
+
+    <!-- MESSAGES WIDGET (logged-in only) -->
+    <section class="page-section msg-widget-section" id="homeMessagesSection">
+      <div class="msg-widget-header">
+        <div class="section-title"><i class="ti ti-message-2" style="color:var(--gold);margin-left:6px"></i>رسائلي الأخيرة</div>
+        <div class="msg-widget-actions">
+          <a href="messages.html?compose=1" class="msg-compose-btn">
+            <i class="ti ti-edit"></i> رسالة جديدة
+          </a>
+          <a href="messages.html" class="msg-viewall-btn">
+            عرض الكل <i class="ti ti-arrow-left"></i>
+          </a>
+        </div>
+      </div>
+      <div id="homeConvList" class="home-conv-list">
+        <div class="home-conv-loading"><i class="ti ti-loader-2"></i> جارٍ التحميل...</div>
       </div>
     </section>
 
@@ -454,7 +552,7 @@
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../libs/bootstrap/bootstrap.bundle.min.js"></script>
 <script src="../js/home-1.js" type="module"></script>
 <script src="../js/home-2.js" type="module"></script>
 <script src="../js/home-3.js"></script>
@@ -464,5 +562,6 @@ document.getElementById('mobileMenuToggle').addEventListener('click', function()
   document.getElementById('mobileMenu').classList.toggle('open');
 });
 </script>
+<script src="../js/home-msg.js" type="module"></script>
 </body>
 </html>
