@@ -57,7 +57,7 @@ async function loadRecipients() {
   try {
     // جيبي الإدارة والمعلمات النشطين فقط
     const [adminSnap, teacherSnap] = await Promise.all([
-      getDocs(query(collection(db,'users'), where('role','==','admin'), where('status','==','active'))),
+      getDocs(query(collection(db,'users'), where('role','==','admin'))),
       getDocs(query(collection(db,'users'), where('role','==','teacher'), where('status','==','active')))
     ]);
 
