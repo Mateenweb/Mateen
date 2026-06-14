@@ -66,7 +66,7 @@ function showError(msg = 'الرابط غير صحيح') {
     </div>`;
 }
 
-if (!studentNum || isNaN(studentNum)) { showError(); throw new Error('No student number'); }
+if (!studentNum || isNaN(studentNum)) { showError(); return; }
 
 // ── Load Student ─────────────────────────────
 async function loadAll() {
