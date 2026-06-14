@@ -35,6 +35,10 @@ onAuthStateChanged(auth, async user => {
   const navMsgBtn = document.getElementById('navMsgBtn');
   if (navMsgBtn) navMsgBtn.classList.remove('d-none');
 
+  // إظهار أيقونة البروفايل
+  const navProfileBtn = document.getElementById('navProfileBtn');
+  if (navProfileBtn) navProfileBtn.classList.remove('d-none');
+
   // مسجلة دخول — اجلب بيانات المستخدمة
   guest.style.display   = 'none';
   userDiv.style.display = 'block'; userDiv.classList.add('show-user');
