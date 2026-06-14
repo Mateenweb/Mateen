@@ -325,7 +325,6 @@ box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 .sidebar { background: var(--beige2) !important; border-left: 2px solid var(--gold) !important; }
 .sidebar-logo-text { color: var(--green-dark) !important; }
 
-/* أزرار الـ path / teachers  */
 .path-btn {
   background: var(--beige2) !important;
   color: var(--green-dark) !important;

@@ -497,7 +497,6 @@ gap: 0 !important;
   .paths-grid     { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
 
   /* المعلمات */
-  .teachers-grid  { grid-template-columns: 1fr 1fr !important; gap: 12px !important; }
 
   /* الإعلانات */
   .ann-grid       { grid-template-columns: 1fr !important; }
@@ -527,7 +526,6 @@ gap: 0 !important;
 
 @media (max-width: 420px) {
   .paths-grid    { grid-template-columns: 1fr !important; }
-  .teachers-grid { grid-template-columns: 1fr !important; }
   .schedule-grid { grid-template-columns: 1fr !important; }
   .stats-bar     { grid-template-columns: 1fr 1fr !important; }
 }
@@ -1287,7 +1285,6 @@ box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 .sidebar { background: var(--beige2) !important; border-left: 2px solid var(--gold) !important; }
 .sidebar-logo-text { color: var(--green-dark) !important; }
 
-/* أزرار الـ path / teachers  */
 .path-btn {
   background: var(--beige2) !important;
   color: var(--green-dark) !important;
