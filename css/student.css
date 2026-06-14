@@ -49,11 +49,11 @@ body { background: var(--beige); font-family: 'Noto Naskh Arabic', serif; direct
 .stu-stat i { font-size: 20px; color: var(--green-mid); margin-bottom: 2px; }
 .stu-stat.absent i { color: var(--red); }
 .stu-stat.pct i { color: var(--gold); }
-.stu-stat.grade i { color: #8e44ad; }
+.stu-stat.grade i { color: #9b7a52; }
 .stu-stat-num { font-size: 22px; font-weight: 700; color: var(--green-dark); font-family: Amiri, serif; line-height: 1; }
 .stu-stat.absent .stu-stat-num { color: var(--red); }
 .stu-stat.pct .stu-stat-num { color: var(--gold); }
-.stu-stat.grade .stu-stat-num { color: #8e44ad; }
+.stu-stat.grade .stu-stat-num { color: #9b7a52; }
 .stu-stat-label { font-size: 11px; color: var(--text-mid); text-align: center; }
 
 /* Tabs */
@@ -100,8 +100,8 @@ body { background: var(--beige); font-family: 'Noto Naskh Arabic', serif; direct
 .subj-row:last-child { border-bottom: none; }
 .subj-name { font-size: 13px; color: var(--text-dark); }
 .att-chip { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; }
-.att-chip.present { background: #d4edda; color: #1a6b35; }
-.att-chip.absent  { background: #fde8e8; color: var(--red); }
+.att-chip.present { background: #e8dfc8; color: #6b4f2a; }
+.att-chip.absent  { background: #f2ddd8; color: #8b3a2a; }
 .att-chip.empty   { background: var(--beige2); color: var(--text-mid); }
 
 /* Grade Item */
@@ -111,9 +111,9 @@ body { background: var(--beige); font-family: 'Noto Naskh Arabic', serif; direct
 .grade-subject-tag { display: inline-block; font-size: 11px; background: var(--beige2); color: var(--green-dark); padding: 2px 8px; border-radius: 10px; margin-top: 3px; }
 .grade-score-wrap { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
 .grade-pct { font-size: 13px; font-weight: 700; padding: 3px 10px; border-radius: 20px; }
-.grade-pct.high { background: #d4edda; color: #1a6b35; }
-.grade-pct.mid  { background: #fff3cd; color: #856404; }
-.grade-pct.low  { background: #fde8e8; color: var(--red); }
+.grade-pct.high { background: #e8dfc8; color: #6b4f2a; }
+.grade-pct.mid  { background: #ede0c4; color: #7a5c2e; }
+.grade-pct.low  { background: #f2ddd8; color: #8b3a2a; }
 .grade-num { font-size: 18px; font-weight: 700; color: var(--green-dark); font-family: Amiri, serif; }
 .grade-total { font-size: 13px; color: var(--text-mid); }
 
