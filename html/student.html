@@ -1,109 +1,144 @@
 <!DOCTYPE html>
-
 <html dir="rtl" lang="ar">
 <head>
 <meta charset="utf-8"/>
 <link rel="icon" type="image/x-icon" href="../favicon.ico"/>
 <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport"/>
-<title>صفحة الطالبة</title>
+<title>ملفي الشخصي — متين</title>
 <link href="../libs/fonts/arabic-fonts.css" rel="stylesheet"/>
+<link href="../libs/tabler-icons/tabler-icons.min.css" rel="stylesheet"/>
 <link href="../css/student.css" rel="stylesheet"/>
-<link href="../css/islamic.css" rel="stylesheet"/>
 <link href="../css/mobile.css" rel="stylesheet"/>
-<link href="../css/student.css" rel="stylesheet"/>
 </head>
 <body>
-<div class="basmala-bar"><span class="bsm-ornament">❦</span>بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ<span class="bsm-ornament">❦</span></div>
-<!-- Auth Loading Gate -->
-<div id="authGate" style="display:flex;align-items:center;justify-content:center;min-height:100vh;flex-direction:column;gap:12px;background:var(--beige);">
-<img alt="متين" src="../logo.png" style="width:64px;height:64px;border-radius:50%;object-fit:cover;border:2px solid var(--gold);"/>
-<div style="font-family:Amiri,serif;font-size:16px;color:var(--green-dark)">جارٍ التحقق من الصلاحيات...</div>
+
+<!-- Auth Gate -->
+<div id="authGate" class="auth-gate">
+  <img src="../logo.png" alt="متين" class="gate-logo"/>
+  <div class="gate-text">جارٍ التحقق من الصلاحيات...</div>
 </div>
-<div class="page-wrap" id="mainContent" style="display:none">
-<!-- Header بار -->
-<div class="student-header-bar">
-<div class="logo-area">
-<img alt="متين" src="../logo.png"/>
-<span class="brand">برنامج متين العلمي</span>
-</div>
-<div style="display:flex;gap:8px;align-items:center;">
-<button class="delete-acc-btn" id="deleteAccBtn">🗑️ حذف حسابي</button>
-<button class="logout-btn-s" id="logoutBtn">🚪 خروج</button>
-</div>
-</div>
+
+<!-- Main Content -->
+<div id="mainContent" style="display:none">
+
+  <!-- Navbar -->
+  <nav class="stu-nav">
+    <a href="home.html" class="stu-nav-logo">
+      <img src="../logo.png" alt="متين"/>
+      <span>برنامج متين العلمي</span>
+    </a>
+    <div class="stu-nav-btns">
+      <a href="home.html" class="stu-btn-home"><i class="ti ti-home"></i> الرئيسية</a>
+      <button class="stu-btn-logout" id="logoutBtn"><i class="ti ti-logout"></i> خروج</button>
+    </div>
+  </nav>
+
+  <!-- Profile Header -->
+  <div class="stu-profile-header">
+    <div class="stu-avatar-wrap">
+      <div class="stu-avatar" id="stuAvatar">👩</div>
+    </div>
+    <div class="stu-profile-info">
+      <div class="stu-name" id="studentName">...</div>
+      <div class="stu-meta">
+        <span class="stu-badge" id="studentStatus"></span>
+        <span class="stu-email" id="studentEmail"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats Bar -->
+  <div class="stu-stats-bar">
+    <div class="stu-stat">
+      <i class="ti ti-checks"></i>
+      <div class="stu-stat-num" id="statPresent">0</div>
+      <div class="stu-stat-label">جلسات حاضرة</div>
+    </div>
+    <div class="stu-stat absent">
+      <i class="ti ti-x"></i>
+      <div class="stu-stat-num" id="statAbsent">0</div>
+      <div class="stu-stat-label">جلسات غائبة</div>
+    </div>
+    <div class="stu-stat pct">
+      <i class="ti ti-chart-pie"></i>
+      <div class="stu-stat-num" id="statPct">—</div>
+      <div class="stu-stat-label">نسبة الحضور</div>
+    </div>
+    <div class="stu-stat grade">
+      <i class="ti ti-star"></i>
+      <div class="stu-stat-num" id="statGrade">—</div>
+      <div class="stu-stat-label">متوسط الدرجات</div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="stu-tabs-wrap">
+    <div class="stu-tabs">
+      <button class="stu-tab active" onclick="switchTab('info')"><i class="ti ti-user"></i> بياناتي</button>
+      <button class="stu-tab" onclick="switchTab('attend')"><i class="ti ti-calendar"></i> حضوري</button>
+      <button class="stu-tab" onclick="switchTab('grades')"><i class="ti ti-school"></i> درجاتي</button>
+      <button class="stu-tab" onclick="switchTab('notes')"><i class="ti ti-notes"></i> ملاحظات</button>
+    </div>
+
+    <!-- Tab: بياناتي -->
+    <div class="stu-panel active" id="tab-info">
+      <div class="info-grid">
+        <div class="info-row"><span class="info-label"><i class="ti ti-user"></i> الاسم</span><span class="info-val" id="infoName">—</span></div>
+        <div class="info-row"><span class="info-label"><i class="ti ti-id-badge"></i> الحالة</span><span class="info-val" id="infoStatus">—</span></div>
+        <div class="info-row"><span class="info-label"><i class="ti ti-check-circle"></i> القبول</span><span class="info-val" id="infoAccepted">—</span></div>
+        <div class="info-row"><span class="info-label"><i class="ti ti-calendar-event"></i> يوم المقابلة</span><span class="info-val" id="infoDay">—</span></div>
+        <div class="info-row"><span class="info-label"><i class="ti ti-clock"></i> وقت المقابلة</span><span class="info-val" id="infoTime">—</span></div>
+        <div class="info-row"><span class="info-label"><i class="ti ti-microphone"></i> المقابلة</span><span class="info-val" id="infoInterview">—</span></div>
+      </div>
+
+      <!-- حذف الحساب -->
+      <div class="delete-acc-section">
+        <button class="delete-acc-btn" id="deleteAccBtn"><i class="ti ti-trash"></i> حذف حسابي</button>
+      </div>
+    </div>
+
+    <!-- Tab: حضوري -->
+    <div class="stu-panel" id="tab-attend">
+      <div id="attendanceList" class="stu-list">
+        <div class="stu-empty"><i class="ti ti-calendar-off"></i><span>لا توجد جلسات مسجلة بعد</span></div>
+      </div>
+    </div>
+
+    <!-- Tab: درجاتي -->
+    <div class="stu-panel" id="tab-grades">
+      <div id="gradesList" class="stu-list">
+        <div class="stu-empty"><i class="ti ti-school-off"></i><span>لا توجد درجات مسجلة</span></div>
+      </div>
+    </div>
+
+    <!-- Tab: ملاحظات -->
+    <div class="stu-panel" id="tab-notes">
+      <div class="notes-wrap">
+        <div class="notes-label"><i class="ti ti-notes"></i> ملاحظات المعلمة</div>
+        <div class="notes-content" id="notesContent">لا توجد ملاحظات بعد.</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end mainContent -->
+
 <!-- Modal تأكيد حذف الحساب -->
 <div class="del-modal-overlay" id="delModal">
-<div class="del-modal">
-<div class="del-modal-icon">🗑️</div>
-<h3>حذف الحساب نهائياً</h3>
-<p>هذا الإجراء لا يمكن التراجع عنه.<br/>ستُحذف جميع بيانات حسابك من النظام.<br/>أدخلي كلمة المرور للتأكيد.</p>
-<div class="del-pass-wrap">
-<input dir="ltr" id="delPassInput" placeholder="كلمة المرور" type="password"/>
+  <div class="del-modal">
+    <div class="del-modal-icon"><i class="ti ti-alert-triangle"></i></div>
+    <h3>حذف الحساب نهائياً</h3>
+    <p>هذا الإجراء لا يمكن التراجع عنه.<br/>ستُحذف جميع بيانات حسابك من النظام.<br/>أدخلي كلمة المرور للتأكيد.</p>
+    <div class="del-pass-wrap">
+      <input dir="ltr" id="delPassInput" placeholder="كلمة المرور" type="password"/>
+    </div>
+    <div class="del-error" id="delError"></div>
+    <div class="del-modal-btns">
+      <button class="del-confirm-btn" id="delConfirmBtn">تأكيد الحذف</button>
+      <button class="del-cancel-btn" id="delCancelBtn">إلغاء</button>
+    </div>
+  </div>
 </div>
-<div class="del-error" id="delError"></div>
-<div class="del-modal-btns">
-<button class="del-confirm-btn" id="delConfirmBtn">تأكيد الحذف</button>
-<button class="del-cancel-btn" id="delCancelBtn">إلغاء</button>
-</div>
-</div>
-</div>
-<!-- بطاقة ترحيب -->
-<div class="welcome-card">
-<div class="welcome-avatar">👩</div>
-<div>
-<div class="welcome-name" id="studentName">...</div>
-<div class="welcome-sub">أهلاً بكِ في برنامج متين العلمي</div>
-<span class="welcome-badge" id="studentStatus"></span>
-</div>
-</div>
-<!-- Stats Bar -->
-<div class="stats-bar">
-<div class="stat-card">
-<div class="stat-num" id="statPresent">0</div>
-<div class="stat-label">حاضرة</div>
-</div>
-<div class="stat-card absent">
-<div class="stat-num" id="statAbsent">0</div>
-<div class="stat-label">غائبة</div>
-</div>
-<div class="stat-card pct">
-<div class="stat-num" id="statPct">—</div>
-<div class="stat-label">نسبة الحضور</div>
-</div>
-<div class="stat-card grade">
-<div class="stat-num" id="statGrade">—</div>
-<div class="stat-label">متوسط الدرجات</div>
-</div>
-</div>
-<div class="main-grid">
-<!-- سجل الحضور — عرض فقط -->
-<div class="card attendance-card">
-<div class="card-head">
-<span>📅 سجل الحضور</span>
-</div>
-<div class="attendance-list" id="attendanceList">
-<div class="empty-msg">لا توجد جلسات مسجلة بعد</div>
-</div>
-</div>
-<!-- الدرجات والملاحظات — عرض فقط -->
-<div class="side-col">
-<div class="card grades-card">
-<div class="card-head">
-<span>📝 الاختبارات والدرجات</span>
-</div>
-<div class="grades-list" id="gradesList">
-<div class="empty-msg">لا توجد درجات مسجلة</div>
-</div>
-</div>
-<div class="card notes-card">
-<div class="card-head">
-<span>🗒️ ملاحظات المعلمة</span>
-</div>
-<textarea class="notes-area" id="notesArea" placeholder="لا توجد ملاحظات بعد..." readonly=""></textarea>
-</div>
-</div>
-</div>
-</div><!-- end mainContent -->
+
 <script src="../js/student-1.js" type="module"></script>
 </body>
 </html>
