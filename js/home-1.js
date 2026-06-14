@@ -12,14 +12,18 @@ const auth = getAuth(app);
 const db   = getFirestore(app);
 
 onAuthStateChanged(auth, async user => {
-  const guest = document.getElementById('sidebar-guest');
+  const guest   = document.getElementById('sidebar-guest');
   const userDiv = document.getElementById('sidebar-user');
+  const layout  = document.querySelector('.page-layout');
 
   if (!user) {
     guest.style.display   = 'block';
     userDiv.style.display = 'none';
+    if (layout) layout.classList.add('guest-layout');
     return;
   }
+
+  if (layout) layout.classList.remove('guest-layout');
 
   // إخفاء زراير الـ hero لما تسجل دخول
   const heroBtns = document.getElementById('heroBtns');

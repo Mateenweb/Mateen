@@ -345,6 +345,14 @@ body {
     height: calc(100vh - 58px);
     overflow-y: auto;
   }
+
+  /* لو guest — اخفي المساحة كلياً */
+  .page-layout.guest-layout .sidebar {
+    width: 0 !important;
+    min-width: 0 !important;
+    border: none !important;
+    overflow: hidden !important;
+  }
 }
 
 /* Mobile offcanvas — يملأ الـ panel كاملاً */
