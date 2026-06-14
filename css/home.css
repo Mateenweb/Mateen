@@ -346,7 +346,11 @@ body {
     overflow-y: auto;
   }
 
-  /* لو guest — أخفي الـ aside خالص من الـ layout */
+/* لو guest على desktop — خلي الـ content يملأ كل العرض */
+@media (min-width: 992px) {
+  .page-layout.guest-layout {
+    display: block;
+  }
   .page-layout.guest-layout > aside {
     display: none !important;
   }
