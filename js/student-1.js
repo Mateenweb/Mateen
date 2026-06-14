@@ -32,9 +32,21 @@ onAuthStateChanged(auth, async user => {
     window.location.href = '../html/home.html'; return;
   }
 
-  // الطالبة: تشوف بس صفحتها هي
-  if (role === 'student' || role === 'mateen') {
+  // الطالبة العادية: تشوف بس صفحتها (uid = studentId)
+  if (role === 'student') {
     if (user.uid !== studentId) {
+      window.location.href = '../html/home.html'; return;
+    }
+    document.getElementById('authGate').style.display    = 'none';
+    document.getElementById('mainContent').style.display = 'block';
+    initPage(studentId);
+    return;
+  }
+
+  // بنات متين: تشوف صفحتها المربوطة (linkedStudentId)
+  if (role === 'mateen') {
+    const linkedId = userData.linkedStudentId || '';
+    if (!linkedId || linkedId !== studentId) {
       window.location.href = '../html/home.html'; return;
     }
     document.getElementById('authGate').style.display    = 'none';
