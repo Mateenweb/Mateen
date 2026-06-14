@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
-import { getFirestore, collection, doc, getDoc, getDocs, addDoc, query, where, orderBy, onSnapshot, serverTimestamp, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
+import { getFirestore, collection, doc, getDoc, getDocs, addDoc, deleteDoc, query, where, orderBy, onSnapshot, serverTimestamp, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
 import { FIREBASE_CONFIG } from "./config.js";
 
@@ -275,6 +275,9 @@ window.openConv = async (cid, otherId, otherName, otherRole) => {
       .sort((a, b) => (a.sentAt?.seconds || 0) - (b.sentAt?.seconds || 0));
     const bubbles = document.getElementById('msgBubbles');
 
+    // بيانات المحادثة الحالية (للتحقق من unread)
+    const convData = allConvs.find(c => c.id === cid);
+
     // Group by day
     let lastDay = '';
     bubbles.innerHTML = sorted.map(m => {
@@ -290,14 +293,20 @@ window.openConv = async (cid, otherId, otherName, otherRole) => {
         dayDivider = `<div class="msg-day-divider"><span>${dayStr}</span></div>`;
       }
 
+      // هل الرسالة لم تُقرأ بعد (unread للطرف الثاني > 0 وهي من إرسالي)
+      const notSeenYet = mine && (convData?.unread?.[otherId] > 0);
+
       return `${dayDivider}
         <div class="msg-row ${mine ? 'mine' : 'theirs'}">
           ${!mine ? avatarHtml(otherName, otherRole, 28) : ''}
           <div class="msg-bubble-wrap">
             ${!mine ? `<div class="msg-sender-name">${otherName}</div>` : ''}
-            <div class="msg-bubble ${mine ? 'mine' : 'theirs'}" title="${fullTime}">
-              <span class="msg-text">${escapeHtml(m.text)}</span>
-              <span class="msg-time">${time}${mine ? ' <i class="ti ti-check"></i>' : ''}</span>
+            <div class="msg-bubble-outer">
+              ${notSeenYet ? `<button class="msg-delete-btn" title="حذف الرسالة" onclick="deleteMsg('${activeConvId}','${m.id}')"><i class="ti ti-trash"></i></button>` : ''}
+              <div class="msg-bubble ${mine ? 'mine' : 'theirs'}" title="${fullTime}">
+                <span class="msg-text">${escapeHtml(m.text)}</span>
+                <span class="msg-time">${time}${mine ? ` <i class="ti ti-check${notSeenYet ? '' : '-all'}" style="color:${notSeenYet ? '#aaa' : '#4fc3f7'}"></i>` : ''}</span>
+              </div>
             </div>
           </div>
         </div>`;
@@ -427,4 +436,17 @@ function escapeAttr(str) {
   return String(str).replace(/'/g,"\\'").replace(/"/g,'\\"');
 }
 
-
+// ── حذف رسالة لم تُشاهَد بعد ──────────────────────────────
+window.deleteMsg = async (convId, msgId) => {
+  if (!confirm('هل تريدين حذف هذه الرسالة؟')) return;
+  await deleteDoc(doc(db, 'conversations', convId, 'messages', msgId));
+  // لو كانت آخر رسالة، حدّث lastMsg في المحادثة
+  const msgsSnap = await getDocs(
+    query(collection(db, 'conversations', convId, 'messages'))
+  );
+  const msgs = msgsSnap.docs.map(d => ({ id: d.id, ...d.data() }))
+    .sort((a, b) => (b.sentAt?.seconds || 0) - (a.sentAt?.seconds || 0));
+  if (msgs.length > 0) {
+    await updateDoc(doc(db, 'conversations', convId), { lastMsg: msgs[0].text });
+  }
+};
