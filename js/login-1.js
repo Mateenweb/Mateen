@@ -1,4 +1,3 @@
-
 import { initializeApp }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail,
@@ -119,6 +118,7 @@ window.selectRegRole = (role, btn) => {
   btn.classList.add('active');
   // إظهار حقل المادة فقط للمعلمة
   document.getElementById('regSubjectGroup').style.display = role === 'teacher' ? 'flex' : 'none';
+  document.getElementById('regYearGroup').style.display = role === 'mateen' ? 'block' : 'none';
 };
 
 /* ── Eye toggle ── */
