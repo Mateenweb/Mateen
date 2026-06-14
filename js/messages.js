@@ -166,6 +166,12 @@ function loadConversations() {
     await Promise.all(promises);
     allConvs.sort((a, b) => (b.lastAt?.seconds || 0) - (a.lastAt?.seconds || 0));
     renderConvList(allConvs);
+
+    // افتح أحدث محادثة تلقائياً لو مفيش محادثة مفتوحة
+    if (!activeConvId && allConvs.length > 0) {
+      const first = allConvs[0];
+      openConv(first.id, first.otherId, first.otherName, first.otherRole);
+    }
   });
 }
 
