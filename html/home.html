@@ -4,8 +4,12 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <link rel="icon" type="image/x-icon" href="../favicon.ico"/>
+
+<!-- Preconnect لتسريع تحميل الفونتات -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
 <title>برنامج متين العلمي — الصفحة الرئيسية</title>
-<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
 <link href="../libs/fonts/arabic-fonts.css" rel="stylesheet"/>
 <link href="../libs/tabler-icons/tabler-icons.min.css" rel="stylesheet"/>
 <link href="../libs/bootstrap/bootstrap.rtl.min.css" rel="stylesheet"/>
@@ -473,5 +477,29 @@ document.getElementById('mobileMenuToggle').addEventListener('click', function()
 });
 </script>
 <script src="../js/home-msg.js" type="module"></script>
+
+<script>
+// ── FOUC Prevention ──────────────────────────────────────────
+// بنستنى الـ fonts تتحمل ثم بنظهر الصفحة
+(function() {
+  function revealPage() {
+    document.documentElement.classList.add('ready');
+  }
+
+  if (document.fonts && document.fonts.ready) {
+    // استنى الـ fonts (max 1.5 ثانية fallback)
+    var timeout = setTimeout(revealPage, 1500);
+    document.fonts.ready.then(function() {
+      clearTimeout(timeout);
+      revealPage();
+    });
+  } else {
+    // مش بيدعم Font Loading API — اظهر بعد الـ load
+    window.addEventListener('load', revealPage);
+    // fallback لو الـ load اتأخر
+    setTimeout(revealPage, 1000);
+  }
+})();
+</script>
 </body>
 </html>

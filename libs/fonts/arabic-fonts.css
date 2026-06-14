@@ -3,3 +3,13 @@
    مصدر واحد يسهّل التغيير لاحقاً
    ─────────────────────────────────────────────────────────── */
 @import url("https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;500;600;700&family=Amiri:wght@400;700&display=swap");
+
+/* ── Font display: swap يمنع blocking ── */
+@font-face {
+  font-family: 'Noto Naskh Arabic';
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Amiri';
+  font-display: swap;
+}
