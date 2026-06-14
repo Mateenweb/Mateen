@@ -6,6 +6,7 @@ import { getAuth, onAuthStateChanged, signOut }
 import { getFirestore, collection, addDoc, deleteDoc, doc,
          onSnapshot, query, orderBy, getDoc, updateDoc, getDocs }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
+import { fullDeleteUser } from "./delete-account.js";
 import { FIREBASE_CONFIG } from "./config.js";
 
 const app  = getApps().length ? getApp() : initializeApp(FIREBASE_CONFIG);
@@ -332,7 +333,7 @@ window.confirmLinkModal = async (studentId) => {
 
 window.rejectUser = async id => {
   if (!confirm('هل تريدين رفض هذا الحساب وحذفه نهائياً؟')) return;
-  await deleteDoc(doc(db, 'users', id));
+  await fullDeleteUser(id);
   showToast('تم رفض الحساب وحذفه');
 };
 
@@ -585,9 +586,9 @@ window.stuToggleAccept = async (id,cur,interview) => {
 };
 
 window.stuDelete = async id => {
-  if(!confirm('حذف الطالبة؟')) return;
-  await deleteDoc(doc(db,'students',id));
-  showToast('تم الحذف');
+  if(!confirm('حذف الطالبة وكل بياناتها نهائياً؟')) return;
+  await fullDeleteUser(id);
+  showToast('تم الحذف الكامل');
 };
 
 window.toggleSelectAll = checked => {

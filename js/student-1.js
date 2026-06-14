@@ -6,6 +6,7 @@ import { getAuth, onAuthStateChanged, signOut,
          EmailAuthProvider, reauthenticateWithCredential, deleteUser }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
 import { FIREBASE_CONFIG } from "./config.js";
+import { fullDeleteUser } from "./delete-account.js";
 
 const app  = getApps().length ? getApp() : initializeApp(FIREBASE_CONFIG);
 const db   = getFirestore(app);
@@ -109,8 +110,8 @@ document.getElementById('delConfirmBtn').addEventListener('click', async () => {
     // إعادة المصادقة
     await reauthenticateWithCredential(user, credential);
 
-    // حذف مستند المستخدم من Firestore
-    await deleteDoc(doc(db, 'users', user.uid));
+    // حذف كل بيانات المستخدم من Firestore (users, students, conversations, messages)
+    await fullDeleteUser(user.uid);
 
     // حذف حساب Auth
     await deleteUser(user);
