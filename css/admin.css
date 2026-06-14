@@ -583,7 +583,7 @@ body { background: var(--beige); min-height: 100vh; display: flex; flex-directio
     font-family: 'Noto Naskh Arabic', serif;
     font-size: 14.5px;
     font-weight: 600;
-    color: var(--green-dark, #1a4a2e);
+    color: var(--green-dark, #5c3d2e);
     border: 1px solid transparent;
     border-radius: 6px;
     padding: 4px 8px;
@@ -626,7 +626,7 @@ body { background: var(--beige); min-height: 100vh; display: flex; flex-directio
     background: var(--beige2, #f5efe0);
     padding: 2px 8px;
     border-radius: 8px;
-    color: var(--green-dark, #1a4a2e);
+    color: var(--green-dark, #5c3d2e);
   }
   .stu-mob-score {
     width: 72px;
@@ -720,7 +720,7 @@ body { background: var(--beige); min-height: 100vh; display: flex; flex-directio
   .pending-table td:nth-child(2) {
     font-size: 15px !important;
     font-weight: 700;
-    color: var(--green-dark, #1a4a2e);
+    color: var(--green-dark, #5c3d2e);
     border-bottom: 1px solid var(--border) !important;
     padding-bottom: 8px !important;
     margin-bottom: 4px !important;
@@ -758,7 +758,7 @@ body { background: var(--beige); min-height: 100vh; display: flex; flex-directio
   #allUsersTable td:nth-child(2) { /* الاسم */
     font-size: 15px !important;
     font-weight: 700;
-    color: var(--green-dark, #1a4a2e);
+    color: var(--green-dark, #5c3d2e);
     border-bottom: 1px solid var(--border) !important;
     padding-bottom: 8px !important;
     margin-bottom: 4px !important;

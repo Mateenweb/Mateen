@@ -1,14 +1,14 @@
 /* ===== student.css — ملف الطالبة ===== */
 :root {
-  --green-dark: #1a4a2e;
-  --green-mid:  #2d6a4f;
+  --green-dark: #5c3d2e;
+  --green-mid:  #8a5e3c;
   --gold:       #c9a227;
   --gold-light: #e0b84a;
-  --beige:      #f5f0e8;
-  --beige2:     #ede7d9;
+  --beige:      #f7efe3;
+  --beige2:     #ede0cc;
   --white:      #ffffff;
   --text-dark:  #2c1a0e;
-  --text-mid:   #6b4f3a;
+  --text-mid:   #8a6a52;
   --border:     #e0d5c5;
   --red:        #c0392b;
 }
