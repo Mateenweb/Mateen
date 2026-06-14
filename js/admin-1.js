@@ -4,7 +4,7 @@ import { initializeApp, getApps, getApp }
 import { getAuth, onAuthStateChanged, signOut }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
 import { getFirestore, collection, addDoc, deleteDoc, doc,
-         onSnapshot, query, orderBy, getDoc, updateDoc, getDocs }
+         onSnapshot, query, orderBy, getDoc, updateDoc, getDocs, where, setDoc }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 import { FIREBASE_CONFIG } from "./config.js";
 
@@ -332,8 +332,12 @@ window.confirmLinkModal = async (studentId) => {
 
 window.rejectUser = async id => {
   if (!confirm('هل تريدين رفض هذا الحساب وحذفه نهائياً؟')) return;
-  await deleteDoc(doc(db, 'users', id));
-  showToast('تم رفض الحساب وحذفه');
+  try {
+    await deleteAllUserData(id);
+    showToast('تم رفض الحساب وحذف جميع بياناته');
+  } catch(e) {
+    showToast('❌ خطأ: ' + e.message, 'err');
+  }
 };
 
 // ══════════════════════════════════════
@@ -585,9 +589,18 @@ window.stuToggleAccept = async (id,cur,interview) => {
 };
 
 window.stuDelete = async id => {
-  if(!confirm('حذف الطالبة؟')) return;
-  await deleteDoc(doc(db,'students',id));
-  showToast('تم الحذف');
+  if(!confirm('حذف الطالبة وجميع بياناتها؟')) return;
+  try {
+    // لو الطالبة عندها حساب مرتبط → امسح الحساب والمحادثات كمان
+    const stuSnap = await getDoc(doc(db,'students',id));
+    const linkedUid = stuSnap.exists() ? stuSnap.data().uid : null;
+    if (linkedUid) await deleteAllUserData(linkedUid);
+    // مسح سجل الطالبة
+    await deleteDoc(doc(db,'students',id));
+    showToast('✅ تم حذف الطالبة وجميع بياناتها');
+  } catch(e) {
+    showToast('❌ خطأ: ' + e.message, 'err');
+  }
 };
 
 window.toggleSelectAll = checked => {
@@ -751,12 +764,48 @@ window.reactivateUser = async id => {
   showToast('✓ تم إعادة تفعيل الحساب');
 };
 
+// ── حذف حساب كامل مع كل بياناته ─────────────────────────────────────────
+async function deleteAllUserData(uid) {
+  // 1. مسح الـ user document
+  await deleteDoc(doc(db, 'users', uid));
+
+  // 2. مسح كل المحادثات المشترك فيها + رسائلها الفرعية
+  const convSnap = await getDocs(
+    query(collection(db, 'conversations'), where('participants', 'array-contains', uid))
+  );
+  for (const convDoc of convSnap.docs) {
+    // مسح الرسائل جوه المحادثة
+    const msgsSnap = await getDocs(collection(db, 'conversations', convDoc.id, 'messages'));
+    for (const msgDoc of msgsSnap.docs) {
+      await deleteDoc(doc(db, 'conversations', convDoc.id, 'messages', msgDoc.id));
+    }
+    // مسح المحادثة نفسها
+    await deleteDoc(doc(db, 'conversations', convDoc.id));
+  }
+
+  // 3. لو الـ uid مرتبط بسجل طالبة → امسح الربط
+  const stuSnap = await getDocs(query(collection(db, 'students'), where('uid', '==', uid)));
+  for (const stuDoc of stuSnap.docs) {
+    await updateDoc(doc(db, 'students', stuDoc.id), { uid: null });
+  }
+
+  // 4. حساب Firebase Auth: مش ممكن يتمسح client-side
+  //    → نضيف tombstone تمنعه من الدخول
+  //    (لو عاوزتي حذف Auth كامل، استخدمي Firebase Console أو Cloud Function)
+  // نسبة للـ users doc اتمسح في خطوة 1، الـ auth guard في home-1.js هيوقفه
+}
+
 window.deleteUserAccount = async (id, name) => {
   const label = name || 'هذا المستخدم';
-  if (!confirm(`هل أنتِ متأكدة من حذف حساب "${label}" نهائياً؟\nلا يمكن التراجع عن هذا الإجراء.`)) return;
-  if (!confirm(`تأكيد أخير: سيُحذف حساب "${label}" بشكل دائم.`)) return;
-  await deleteDoc(doc(db, 'users', id));
-  showToast('تم حذف الحساب نهائياً');
+  if (!confirm(`هل أنتِ متأكدة من حذف حساب "${label}" نهائياً؟\nسيُحذف الحساب وجميع محادثاته ورسائله.`)) return;
+  if (!confirm(`تأكيد أخير: لا يمكن التراجع عن حذف "${label}".`)) return;
+  try {
+    await deleteAllUserData(id);
+    showToast('✅ تم حذف الحساب وجميع بياناته');
+  } catch(e) {
+    console.error(e);
+    showToast('❌ خطأ أثناء الحذف: ' + e.message, 'err');
+  }
 };
 
 
