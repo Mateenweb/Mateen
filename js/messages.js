@@ -148,22 +148,42 @@ async function loadAllUsers() {
 
 // ── Load conversations ─────────────────────────────────────────────────────
 function loadConversations() {
+  // بدون orderBy عشان مش محتاجين composite index في Firestore
+  // الترتيب بيتعمل في الـ client بعد ما البيانات ترجع
   const q = query(
     collection(db, 'conversations'),
-    where('participants', 'array-contains', currentUser.uid),
-    orderBy('lastAt', 'desc')
+    where('participants', 'array-contains', currentUser.uid)
   );
 
   convUnsub = onSnapshot(q, async snap => {
     allConvs = [];
+
+    if (snap.empty) {
+      renderConvList([]);
+      return;
+    }
+
     const promises = snap.docs.map(async d => {
-      const data    = d.data();
-      const otherId = data.participants.find(p => p !== currentUser.uid);
-      const otherSnap = await getDoc(doc(db, 'users', otherId));
-      const other = otherSnap.exists() ? otherSnap.data() : {};
-      allConvs.push({ id: d.id, ...data, otherId, otherName: other.name || otherId, otherRole: other.role || '' });
+      const data = d.data();
+      const otherId = data.participants?.find(p => p !== currentUser.uid);
+      if (!otherId) return;
+
+      let otherName = otherId;
+      let otherRole = '';
+      try {
+        const otherSnap = await getDoc(doc(db, 'users', otherId));
+        if (otherSnap.exists()) {
+          otherName = otherSnap.data().name || otherId;
+          otherRole = otherSnap.data().role  || '';
+        }
+      } catch(e) { /* مش قادر يجيب بيانات المستخدم — نكمل */ }
+
+      allConvs.push({ id: d.id, ...data, otherId, otherName, otherRole });
     });
+
     await Promise.all(promises);
+
+    // ترتيب من الأحدث للأقدم في الـ client
     allConvs.sort((a, b) => (b.lastAt?.seconds || 0) - (a.lastAt?.seconds || 0));
     renderConvList(allConvs);
 
@@ -172,6 +192,14 @@ function loadConversations() {
       const first = allConvs[0];
       openConv(first.id, first.otherId, first.otherName, first.otherRole);
     }
+  }, err => {
+    console.error('conversations query error:', err);
+    document.getElementById('convList').innerHTML = `
+      <div class="empty-state">
+        <i class="ti ti-wifi-off"></i>
+        <p>تعذر تحميل المحادثات</p>
+        <p style="font-size:11px;opacity:0.6">${err.message}</p>
+      </div>`;
   });
 }
 
@@ -239,14 +267,17 @@ window.openConv = async (cid, otherId, otherName, otherRole) => {
   await updateDoc(doc(db, 'conversations', cid), { [`unread.${currentUser.uid}`]: 0 });
 
   // Listen to messages
-  const q = query(collection(db, 'conversations', cid, 'messages'), orderBy('sentAt'));
+  const q = query(collection(db, 'conversations', cid, 'messages'));
   msgUnsub = onSnapshot(q, snap => {
+    // ترتيب الرسائل بالوقت في الـ client
+    const sorted = snap.docs
+      .map(d => ({ id: d.id, ...d.data() }))
+      .sort((a, b) => (a.sentAt?.seconds || 0) - (b.sentAt?.seconds || 0));
     const bubbles = document.getElementById('msgBubbles');
 
     // Group by day
     let lastDay = '';
-    bubbles.innerHTML = snap.docs.map(d => {
-      const m    = d.data();
+    bubbles.innerHTML = sorted.map(m => {
       const mine = m.senderId === currentUser.uid;
       const sec  = m.sentAt?.seconds;
       const time = sec ? new Date(sec * 1000).toLocaleTimeString('ar', { hour: '2-digit', minute: '2-digit' }) : '';
