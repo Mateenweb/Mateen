@@ -323,8 +323,8 @@ window.sendMsg = async () => {
   await addDoc(collection(db, 'conversations', activeConvId, 'messages'), {
     text,
     senderId:   currentUser.uid,
-    senderName: currentUserData.name || currentUser.email,
-    senderRole: currentUserData.role || '',
+    senderName: currentUserData?.name  || currentUser.email || '',
+    senderRole: currentUserData?.role  || '',
     sentAt:     serverTimestamp(),
   });
 
@@ -336,7 +336,7 @@ window.sendMsg = async () => {
 
   await setDoc(doc(db, 'conversations', activeConvId), {
     participants: [currentUser.uid, otherId].filter(Boolean),
-    lastMsg:  text,
+    lastMsg:  text || '',
     lastAt:   serverTimestamp(),
     [`unread.${otherId}`]: currentUnread + 1,
     [`unread.${currentUser.uid}`]: 0,
