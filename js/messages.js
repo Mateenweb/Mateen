@@ -167,8 +167,8 @@ function loadConversations() {
     const promises = snap.docs.map(async d => {
       const data = d.data();
 
-      // تجاهل المحادثات المخفية
-      if (data.hiddenBy?.[currentUser.uid]) return;
+      // تجاهل المحادثات المخفية — إلا لو كانت هي المحادثة المفتوحة حالياً
+      if (data.hiddenBy?.[currentUser.uid] && d.id !== activeConvId) return;
 
       const otherId = data.participants?.find(p => p !== currentUser.uid);
       if (!otherId) return;
