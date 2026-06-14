@@ -140,7 +140,8 @@ async function loadAllUsers() {
   const snap = await getDocs(collection(db, 'users'));
   allUsers = [];
   snap.forEach(d => {
-    if (d.id !== currentUser.uid && d.data().status === 'active') {
+    const ud = d.data();
+    if (d.id !== currentUser.uid && (ud.status === 'active' || ud.role === 'admin')) {
       allUsers.push({ id: d.id, ...d.data() });
     }
   });
