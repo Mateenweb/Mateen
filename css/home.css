@@ -19,8 +19,21 @@
   --sidebar-w:   260px;
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
-html { overflow-x: hidden; }
+/* ===== FOUC PREVENTION ===== */
+html {
+  overflow-x: hidden;
+  visibility: hidden;   /* إخفاء كل حاجة لحد ما CSS يتحمل */
+}
+
+html.ready {
+  visibility: visible;
+  animation: pageReveal 0.25s ease forwards;
+}
+
+@keyframes pageReveal {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
 
 body {
   font-family: "Noto Naskh Arabic", serif;

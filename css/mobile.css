@@ -265,7 +265,6 @@ html { overflow-x: hidden; }
 @media (max-width: 768px) {
   /* 2 أعمدة */
   .paths-grid         { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
-  .teachers-grid      { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
   .schedule-grid      { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
   .books-grid         { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
   .stats-bar          { grid-template-columns: 1fr 1fr !important; padding: 12px var(--mob-pad) !important; gap: 10px !important; }
@@ -296,7 +295,6 @@ html { overflow-x: hidden; }
 
 @media (max-width: 480px) {
   .paths-grid         { grid-template-columns: 1fr !important; }
-  .teachers-grid      { grid-template-columns: 1fr !important; }
   .schedule-grid      { grid-template-columns: 1fr !important; }
   .books-grid         { grid-template-columns: 1fr !important; }
   .stu-stats-row      { grid-template-columns: 1fr 1fr !important; }

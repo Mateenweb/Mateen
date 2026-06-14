@@ -7,6 +7,7 @@ import { initializeApp }
 import { getFirestore, collection, addDoc, updateDoc, deleteDoc,
          doc, onSnapshot, getDocs, query, orderBy, getDoc }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
+import { fullDeleteUser } from "./delete-account.js";
 import { getAuth, onAuthStateChanged }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
 
@@ -84,9 +85,9 @@ window.toggleAcceptance = async (id, current, interview) => {
 };
 
 window.deleteStudent = async id => {
-  if(confirm('حذف الطالبة؟')) {
-    await deleteDoc(doc(db,'students',id));
-    showToast('تم الحذف');
+  if(confirm('حذف الطالبة وكل بياناتها نهائياً؟')) {
+    await fullDeleteUser(id);
+    showToast('تم الحذف الكامل');
   }
 };
 

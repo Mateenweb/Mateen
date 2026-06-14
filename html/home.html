@@ -4,8 +4,12 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <link rel="icon" type="image/x-icon" href="../favicon.ico"/>
+
+<!-- Preconnect لتسريع تحميل الفونتات -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
 <title>برنامج متين العلمي — الصفحة الرئيسية</title>
-<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
 <link href="../libs/fonts/arabic-fonts.css" rel="stylesheet"/>
 <link href="../libs/tabler-icons/tabler-icons.min.css" rel="stylesheet"/>
 <link href="../libs/bootstrap/bootstrap.rtl.min.css" rel="stylesheet"/>
@@ -312,13 +316,7 @@
               <div class="contact-val">الأحد — الخميس، ٩ص — ٩م</div>
             </div>
           </div>
-          <div class="contact-card contact-card-gold">
-            <div class="contact-icon contact-icon-gold"><i class="ti ti-users"></i></div>
-            <div>
-              <div class="contact-label">تواصل مع المعلمات</div>
-              <a class="contact-val-gold" href="teachers.html">عرض صفحات المعلمات ←</a>
-            </div>
-          </div>
+
         </div>
       </div>
 
@@ -337,18 +335,7 @@
             <div class="col-12 col-sm-6">
               <label class="form-label-custom">إلى من تودّين الإرسال؟</label>
               <select class="form-input" id="ctRecipient">
-                <option value="">اختاري الجهة</option>
-                <optgroup label="── الإدارة ──">
-                  <option value="admin">الإدارة العامة</option>
-                </optgroup>
-                <optgroup label="── المعلمات ──">
-                  <option value="tafseer">دكتورة عبير عقلان - التفسير</option>
-                  <option value="fiqh">دكتورة أماني عقلان - الفقه</option>
-                  <option value="aqeedah">أستاذة رشا حمدي - العقيدة</option>
-                  <option value="hadeeth">دكتورة حصة بنت عبدالعزيز - الحديث</option>
-                  <option value="quran1">أستاذة رُميساء محمد السيد الزهري - القرآن</option>
-                  <option value="quran2">أستاذة أسماء محمد السيد الزهري - القرآن</option>
-                </optgroup>
+                <option value="">جارٍ التحميل...</option>
               </select>
             </div>
             <div class="col-12 col-sm-6">
@@ -377,6 +364,7 @@
           </button>
         </div>
       </div>
+
     </div>
   </div>
 </section>
@@ -473,5 +461,29 @@ document.getElementById('mobileMenuToggle').addEventListener('click', function()
 });
 </script>
 <script src="../js/home-msg.js" type="module"></script>
+
+<script>
+// ── FOUC Prevention ──────────────────────────────────────────
+// بنستنى الـ fonts تتحمل ثم بنظهر الصفحة
+(function() {
+  function revealPage() {
+    document.documentElement.classList.add('ready');
+  }
+
+  if (document.fonts && document.fonts.ready) {
+    // استنى الـ fonts (max 1.5 ثانية fallback)
+    var timeout = setTimeout(revealPage, 1500);
+    document.fonts.ready.then(function() {
+      clearTimeout(timeout);
+      revealPage();
+    });
+  } else {
+    // مش بيدعم Font Loading API — اظهر بعد الـ load
+    window.addEventListener('load', revealPage);
+    // fallback لو الـ load اتأخر
+    setTimeout(revealPage, 1000);
+  }
+})();
+</script>
 </body>
 </html>

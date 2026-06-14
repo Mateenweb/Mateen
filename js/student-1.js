@@ -6,6 +6,7 @@ import { getAuth, onAuthStateChanged, signOut,
          EmailAuthProvider, reauthenticateWithCredential, deleteUser }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
 import { FIREBASE_CONFIG } from "./config.js";
+import { fullDeleteUser } from "./delete-account.js";
 
 const app  = getApps().length ? getApp() : initializeApp(FIREBASE_CONFIG);
 const db   = getFirestore(app);
@@ -31,9 +32,21 @@ onAuthStateChanged(auth, async user => {
     window.location.href = '../html/home.html'; return;
   }
 
-  // الطالبة: تشوف بس صفحتها هي
-  if (role === 'student' || role === 'mateen') {
+  // الطالبة العادية: تشوف بس صفحتها (uid = studentId)
+  if (role === 'student') {
     if (user.uid !== studentId) {
+      window.location.href = '../html/home.html'; return;
+    }
+    document.getElementById('authGate').style.display    = 'none';
+    document.getElementById('mainContent').style.display = 'block';
+    initPage(studentId);
+    return;
+  }
+
+  // بنات متين: تشوف صفحتها المربوطة (linkedStudentId)
+  if (role === 'mateen') {
+    const linkedId = userData.linkedStudentId || '';
+    if (!linkedId || linkedId !== studentId) {
       window.location.href = '../html/home.html'; return;
     }
     document.getElementById('authGate').style.display    = 'none';
@@ -109,8 +122,8 @@ document.getElementById('delConfirmBtn').addEventListener('click', async () => {
     // إعادة المصادقة
     await reauthenticateWithCredential(user, credential);
 
-    // حذف مستند المستخدم من Firestore
-    await deleteDoc(doc(db, 'users', user.uid));
+    // حذف كل بيانات المستخدم من Firestore (users, students, conversations, messages)
+    await fullDeleteUser(user.uid);
 
     // حذف حساب Auth
     await deleteUser(user);

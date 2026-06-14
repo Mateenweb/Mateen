@@ -1,7 +1,8 @@
-
-import { initializeApp, getApps, getApp }   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
+import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, collection, addDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc, getDocs, addDoc, setDoc,
+         collection, query, where, orderBy, serverTimestamp }
+  from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 import { FIREBASE_CONFIG } from "./config.js";
 
 const app  = getApps().length ? getApp() : initializeApp(FIREBASE_CONFIG);
@@ -15,16 +16,17 @@ onAuthStateChanged(auth, async user => {
   if (!user) { guest.style.display='block'; userDiv.style.display='none'; return; }
   guest.style.display='none'; userDiv.style.display='flex'; userDiv.classList.add('show-user');
 
-  // إخفاء زراير تسجيل الدخول/التسجيل لما تكون مسجلة دخول
   ['heroBtns','navBtns','mobNavBtns'].forEach(id => {
     const el = document.getElementById(id);
     if (el) { el.classList.remove('d-flex','d-lg-flex'); el.classList.add('d-none'); }
   });
+
   const snap = await getDoc(doc(db, 'users', user.uid));
   const role = snap.exists() ? snap.data().role : 'student';
   const name = user.displayName || user.email.split('@')[0];
   document.getElementById('sidebarName').textContent = 'مرحباً، ' + name;
   document.getElementById('sidebarRole').textContent = role === 'admin' ? 'مشرفة / معلمة' : 'الطالبة';
+
   if (role === 'admin') {
     const nav = userDiv.querySelector('.sidebar-nav');
     if (nav && !nav.querySelector('.admin-link')) {
@@ -34,11 +36,57 @@ onAuthStateChanged(auth, async user => {
     }
   }
 });
+
 window.doLogout = () => signOut(auth).then(() => window.location.href='../html/login.html');
 
-// ── إرسال رسالة من نموذج تواصل الهوم إلى Firestore ───────────────────────
-const SUBJECT_ROLE = { admin:'admin', tafseer:'teacher', fiqh:'teacher', aqeedah:'teacher', hadeeth:'teacher', quran1:'teacher', quran2:'teacher' };
+// ── تحميل المستلمين من Firebase ──────────────
+async function loadRecipients() {
+  const select = document.getElementById('ctRecipient');
+  if (!select) return;
 
+  try {
+    // جيبي الإدارة والمعلمات النشطين فقط
+    const [adminSnap, teacherSnap] = await Promise.all([
+      getDocs(query(collection(db,'users'), where('role','==','admin'), where('status','==','active'))),
+      getDocs(query(collection(db,'users'), where('role','==','teacher'), where('status','==','active')))
+    ]);
+
+    let html = '<option value="">اختاري الجهة</option>';
+
+    // الإدارة
+    if (!adminSnap.empty) {
+      html += '<optgroup label="── الإدارة ──">';
+      adminSnap.forEach(d => {
+        html += `<option value="${d.id}">${d.data().name || 'الإدارة العامة'}</option>`;
+      });
+      html += '</optgroup>';
+    }
+
+    // المعلمات
+    if (!teacherSnap.empty) {
+      html += '<optgroup label="── المعلمات ──">';
+      teacherSnap.forEach(d => {
+        const data = d.data();
+        html += `<option value="${d.id}">${data.name || 'معلمة'}</option>`;
+      });
+      html += '</optgroup>';
+    }
+
+    if (adminSnap.empty && teacherSnap.empty) {
+      html = '<option value="">لا يوجد مستلمون متاحون</option>';
+    }
+
+    select.innerHTML = html;
+  } catch(e) {
+    console.error('loadRecipients error:', e);
+    select.innerHTML = '<option value="">تعذر التحميل</option>';
+  }
+}
+
+// تحميل المستلمين عند فتح الصفحة
+loadRecipients();
+
+// ── إرسال الرسالة ─────────────────────────────
 window.submitContactNew = async () => {
   const nameEl      = document.getElementById('ctName');
   const recipientEl = document.getElementById('ctRecipient');
@@ -47,66 +95,63 @@ window.submitContactNew = async () => {
   const btn         = document.getElementById('ctBtn');
   const successEl   = document.getElementById('ctSuccess');
 
-  // التحقق من الحقول
+  // تحقق من الحقول المطلوبة
   let valid = true;
   [nameEl, recipientEl, topicEl, bodyEl].forEach(el => {
-    if (!el.value.trim()) { el.style.borderColor='#c0392b'; valid=false; }
+    if (!el || !el.value.trim()) { if(el) el.style.borderColor='#c0392b'; valid=false; }
     else el.style.borderColor='';
   });
   if (!valid) return;
 
-  const subject  = recipientEl.value;
-  const bodyText = `[${topicEl.value}]\n${bodyEl.value.trim()}`;
+  const recipientUid = recipientEl.value;
+  const bodyText     = `[${topicEl.value}]\n${bodyEl.value.trim()}`;
 
   btn.disabled = true;
   btn.innerHTML = '<i class="ti ti-loader ti-spin"></i> جارٍ الإرسال...';
 
   try {
-    // جلب أول مستخدم بـ role/subject مطابق
-    const { getDocs, query, where, collection: col } = await import('https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js');
     const user = auth.currentUser;
     if (!user) { alert('يجب تسجيل الدخول أولاً'); btn.disabled=false; btn.innerHTML='<i class="ti ti-send"></i> إرسال الرسالة'; return; }
 
-    let recipientUid = null;
-    if (subject === 'admin') {
-      const snap = await getDocs(query(col(db,'users'), where('role','==','admin')));
-      if (!snap.empty) recipientUid = snap.docs[0].id;
-    } else {
-      const snap = await getDocs(query(col(db,'users'), where('role','==','teacher'), where('subject','==',subject)));
-      if (!snap.empty) recipientUid = snap.docs[0].id;
-    }
-
-    if (!recipientUid) throw new Error('لم يتم إيجاد المستلم في قاعدة البيانات');
+    // جيبي اسم المرسلة من Firestore أو استخدمي ما كتبته
+    const senderSnap = await getDoc(doc(db,'users',user.uid));
+    const senderName = (senderSnap.exists() && senderSnap.data().name)
+      ? senderSnap.data().name
+      : (nameEl.value.trim() || user.email || '');
+    const senderRole = (senderSnap.exists() && senderSnap.data().role) || 'student';
 
     // إنشاء أو تحديث المحادثة
     const cid = [user.uid, recipientUid].sort().join('__');
     await setDoc(doc(db,'conversations',cid), {
       participants: [user.uid, recipientUid],
-      lastMsg: bodyText.slice(0,60),
-      lastAt: serverTimestamp(),
+      lastMsg:  bodyText.slice(0,60) || '',
+      lastAt:   serverTimestamp(),
       [`unread.${recipientUid}`]: 1,
-      [`unread.${user.uid}`]: 0,
+      [`unread.${user.uid}`]:     0,
     }, { merge: true });
 
     // إضافة الرسالة
-    const senderSnap = await getDoc(doc(db,'users',user.uid));
-    const senderName = senderSnap.exists() ? senderSnap.data().name : (nameEl.value.trim());
     await addDoc(collection(db,'conversations',cid,'messages'), {
-      text: bodyText,
-      senderId:   user.uid,
-      senderName: senderName,
-      senderRole: senderSnap.exists() ? senderSnap.data().role : 'student',
-      sentAt: serverTimestamp(),
+      text:       bodyText     || '',
+      senderId:   user.uid     || '',
+      senderName: senderName   || '',
+      senderRole: senderRole   || '',
+      sentAt:     serverTimestamp(),
     });
 
     // نجاح
     btn.innerHTML = '<i class="ti ti-check"></i> تم الإرسال بنجاح!';
     btn.style.background = 'var(--green-mid)';
     if (successEl) successEl.style.display = 'block';
-    [nameEl, recipientEl, topicEl, bodyEl].forEach(el => el.value='');
+    [nameEl, recipientEl, topicEl, bodyEl].forEach(el => { if(el) el.value=''; });
+    // إعادة تحميل الخيارات
+    loadRecipients();
+
     setTimeout(() => {
-      btn.disabled=false; btn.innerHTML='<i class="ti ti-send"></i> إرسال الرسالة';
-      btn.style.background=''; if (successEl) successEl.style.display='none';
+      btn.disabled=false;
+      btn.innerHTML='<i class="ti ti-send"></i> إرسال الرسالة';
+      btn.style.background='';
+      if (successEl) successEl.style.display='none';
     }, 3500);
 
   } catch(e) {

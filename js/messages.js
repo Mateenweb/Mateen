@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
-import { getFirestore, collection, doc, getDoc, getDocs, addDoc, query, where, orderBy, onSnapshot, serverTimestamp, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
+import { getFirestore, collection, doc, getDoc, getDocs, addDoc, deleteDoc, query, where, orderBy, onSnapshot, serverTimestamp, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
 import { FIREBASE_CONFIG } from "./config.js";
 
@@ -148,22 +148,42 @@ async function loadAllUsers() {
 
 // ── Load conversations ─────────────────────────────────────────────────────
 function loadConversations() {
+  // بدون orderBy عشان مش محتاجين composite index في Firestore
+  // الترتيب بيتعمل في الـ client بعد ما البيانات ترجع
   const q = query(
     collection(db, 'conversations'),
-    where('participants', 'array-contains', currentUser.uid),
-    orderBy('lastAt', 'desc')
+    where('participants', 'array-contains', currentUser.uid)
   );
 
   convUnsub = onSnapshot(q, async snap => {
     allConvs = [];
+
+    if (snap.empty) {
+      renderConvList([]);
+      return;
+    }
+
     const promises = snap.docs.map(async d => {
-      const data    = d.data();
-      const otherId = data.participants.find(p => p !== currentUser.uid);
-      const otherSnap = await getDoc(doc(db, 'users', otherId));
-      const other = otherSnap.exists() ? otherSnap.data() : {};
-      allConvs.push({ id: d.id, ...data, otherId, otherName: other.name || otherId, otherRole: other.role || '' });
+      const data = d.data();
+      const otherId = data.participants?.find(p => p !== currentUser.uid);
+      if (!otherId) return;
+
+      let otherName = otherId;
+      let otherRole = '';
+      try {
+        const otherSnap = await getDoc(doc(db, 'users', otherId));
+        if (otherSnap.exists()) {
+          otherName = otherSnap.data().name || otherId;
+          otherRole = otherSnap.data().role  || '';
+        }
+      } catch(e) { /* مش قادر يجيب بيانات المستخدم — نكمل */ }
+
+      allConvs.push({ id: d.id, ...data, otherId, otherName, otherRole });
     });
+
     await Promise.all(promises);
+
+    // ترتيب من الأحدث للأقدم في الـ client
     allConvs.sort((a, b) => (b.lastAt?.seconds || 0) - (a.lastAt?.seconds || 0));
     renderConvList(allConvs);
 
@@ -172,6 +192,14 @@ function loadConversations() {
       const first = allConvs[0];
       openConv(first.id, first.otherId, first.otherName, first.otherRole);
     }
+  }, err => {
+    console.error('conversations query error:', err);
+    document.getElementById('convList').innerHTML = `
+      <div class="empty-state">
+        <i class="ti ti-wifi-off"></i>
+        <p>تعذر تحميل المحادثات</p>
+        <p style="font-size:11px;opacity:0.6">${err.message}</p>
+      </div>`;
   });
 }
 
@@ -238,15 +266,26 @@ window.openConv = async (cid, otherId, otherName, otherRole) => {
   // Mark as read
   await updateDoc(doc(db, 'conversations', cid), { [`unread.${currentUser.uid}`]: 0 });
 
+  // علّم رسائل الطرف الثاني كمقروءة (عشان يعرف المرسل إن رسالته اتقرأت)
+  const allMsgsSnap = await getDocs(collection(db, 'conversations', cid, 'messages'));
+  const toMark = allMsgsSnap.docs.filter(d => d.data().senderId !== currentUser.uid && !d.data().read);
+  await Promise.all(toMark.map(d => updateDoc(d.ref, { read: true })));
+
   // Listen to messages
-  const q = query(collection(db, 'conversations', cid, 'messages'), orderBy('sentAt'));
+  const q = query(collection(db, 'conversations', cid, 'messages'));
   msgUnsub = onSnapshot(q, snap => {
+    // ترتيب الرسائل بالوقت في الـ client
+    const sorted = snap.docs
+      .map(d => ({ id: d.id, ...d.data() }))
+      .sort((a, b) => (a.sentAt?.seconds || 0) - (b.sentAt?.seconds || 0));
     const bubbles = document.getElementById('msgBubbles');
+
+    // بيانات المحادثة الحالية (للتحقق من unread)
+    const convData = allConvs.find(c => c.id === cid);
 
     // Group by day
     let lastDay = '';
-    bubbles.innerHTML = snap.docs.map(d => {
-      const m    = d.data();
+    bubbles.innerHTML = sorted.map(m => {
       const mine = m.senderId === currentUser.uid;
       const sec  = m.sentAt?.seconds;
       const time = sec ? new Date(sec * 1000).toLocaleTimeString('ar', { hour: '2-digit', minute: '2-digit' }) : '';
@@ -259,14 +298,20 @@ window.openConv = async (cid, otherId, otherName, otherRole) => {
         dayDivider = `<div class="msg-day-divider"><span>${dayStr}</span></div>`;
       }
 
+      // تحقق من حالة القراءة: الرسالة مقروءة لو فيها read:true أو لو المستلم فتح المحادثة
+      const seen = !mine ? false : (m.read === true);
+
       return `${dayDivider}
-        <div class="msg-row ${mine ? 'mine' : 'theirs'}">
+        <div class="msg-row ${mine ? 'mine' : 'theirs'}" data-id="${m.id}">
           ${!mine ? avatarHtml(otherName, otherRole, 28) : ''}
           <div class="msg-bubble-wrap">
             ${!mine ? `<div class="msg-sender-name">${otherName}</div>` : ''}
-            <div class="msg-bubble ${mine ? 'mine' : 'theirs'}" title="${fullTime}">
-              <span class="msg-text">${escapeHtml(m.text)}</span>
-              <span class="msg-time">${time}${mine ? ' <i class="ti ti-check"></i>' : ''}</span>
+            <div class="msg-bubble-outer">
+              ${mine ? `<button class="msg-delete-btn ${seen ? 'seen' : ''}" title="${seen ? 'لا يمكن الحذف — تمت القراءة' : 'حذف الرسالة'}" onclick="deleteMsg('${activeConvId}','${m.id}',${seen})"><i class="ti ti-trash"></i></button>` : ''}
+              <div class="msg-bubble ${mine ? 'mine' : 'theirs'}" title="${fullTime}">
+                <span class="msg-text">${escapeHtml(m.text)}</span>
+                <span class="msg-time">${time}${mine ? ` <i class="ti ti-${seen ? 'checks' : 'check'}" style="color:${seen ? '#4fc3f7' : '#aaa'}"></i>` : ''}</span>
+              </div>
             </div>
           </div>
         </div>`;
@@ -292,8 +337,8 @@ window.sendMsg = async () => {
   await addDoc(collection(db, 'conversations', activeConvId, 'messages'), {
     text,
     senderId:   currentUser.uid,
-    senderName: currentUserData.name || currentUser.email,
-    senderRole: currentUserData.role || '',
+    senderName: currentUserData?.name  || currentUser.email || '',
+    senderRole: currentUserData?.role  || '',
     sentAt:     serverTimestamp(),
   });
 
@@ -305,7 +350,7 @@ window.sendMsg = async () => {
 
   await setDoc(doc(db, 'conversations', activeConvId), {
     participants: [currentUser.uid, otherId].filter(Boolean),
-    lastMsg:  text,
+    lastMsg:  text || '',
     lastAt:   serverTimestamp(),
     [`unread.${otherId}`]: currentUnread + 1,
     [`unread.${currentUser.uid}`]: 0,
@@ -396,4 +441,22 @@ function escapeAttr(str) {
   return String(str).replace(/'/g,"\\'").replace(/"/g,'\\"');
 }
 
+// ── حذف رسالة ──────────────────────────────────────────────
+window.deleteMsg = async (convId, msgId, seen) => {
+  if (seen) {
+    alert('لا يمكن حذف هذه الرسالة — تمت قراءتها بالفعل');
+    return;
+  }
+  if (!confirm('هل تريدين حذف هذه الرسالة؟')) return;
+  await deleteDoc(doc(db, 'conversations', convId, 'messages', msgId));
+  // حدّث lastMsg لو كانت آخر رسالة
+  const msgsSnap = await getDocs(
+    query(collection(db, 'conversations', convId, 'messages'))
+  );
+  const msgs = msgsSnap.docs.map(d => ({ id: d.id, ...d.data() }))
+    .sort((a, b) => (b.sentAt?.seconds || 0) - (a.sentAt?.seconds || 0));
+  await updateDoc(doc(db, 'conversations', convId), {
+    lastMsg: msgs.length > 0 ? msgs[0].text : ''
+  });
+};
 

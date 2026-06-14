@@ -59,10 +59,24 @@ onAuthStateChanged(auth, async user => {
     return;
   }
 
-  // إخفاء "ملفي الشخصي" من غير طالبات (عادية أو متين)
+  // ضبط رابط "ملفي الشخصي"
   const profileLink = document.getElementById('profileLink');
-  if (profileLink && role !== 'mateen' && role !== 'student') {
-    profileLink.style.display = 'none';
+  if (profileLink) {
+    if (role !== 'mateen' && role !== 'student') {
+      profileLink.style.display = 'none';
+    } else if (role === 'mateen') {
+      // بنات متين: روحي لصفحتها في الجدول عبر linkedStudentId
+      const linkedId = snap.data().linkedStudentId;
+      if (linkedId) {
+        profileLink.href = `student.html?id=${linkedId}`;
+      } else {
+        // مش مربوطة بعد — أخفي الرابط
+        profileLink.style.display = 'none';
+      }
+    } else {
+      // طالبة عادية: صفحتها الشخصية بـ uid بتاعها
+      profileLink.href = `student.html?id=${user.uid}`;
+    }
   }
 });
 
