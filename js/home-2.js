@@ -27,6 +27,10 @@ onAuthStateChanged(auth, async user => {
   document.getElementById('sidebarName').textContent = 'مرحباً، ' + name;
   document.getElementById('sidebarRole').textContent = role === 'admin' ? 'مشرفة / معلمة' : 'الطالبة';
 
+  // مزامنة أيقونة البروفايل في الناف بار
+  const navAvatar = document.getElementById('navProfileAvatar');
+  if (navAvatar) navAvatar.textContent = role === 'admin' ? '👑' : role === 'teacher' ? '👩‍🏫' : role === 'supervisor' ? '🛡️' : '👩';
+
   if (role === 'admin') {
     const nav = userDiv.querySelector('.sidebar-nav');
     if (nav && !nav.querySelector('.admin-link')) {
