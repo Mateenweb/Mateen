@@ -424,10 +424,10 @@ window.searchUsers = () => {
     .map(r => `
       <div class="user-group-label">${ROLE_LABELS[r] || r}</div>
       ${groups[r].map(u => `
-        <div class="user-result-item" onclick="startConv('${u.id}','${escapeAttr(u.name || u.email)}','${u.role}')">
-          ${avatarHtml(u.name || u.email, u.role, 38)}
+        <div class="user-result-item" onclick="startConv('${u.id}','${escapeAttr(u.name || u.email || 'مستخدم')}','${u.role}')">
+          ${avatarHtml(u.name || u.email || 'مستخدم', u.role, 38)}
           <div>
-            <div class="user-result-name">${u.name || u.email}</div>
+            <div class="user-result-name">${u.name || u.email || 'مستخدم'}</div>
             <div class="user-result-role" style="color:${ROLE_COLORS[u.role]||'#888'}">${ROLE_LABELS[u.role] || ''}</div>
           </div>
         </div>`).join('')}
