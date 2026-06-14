@@ -287,6 +287,7 @@ window.openConv = async (cid, otherId, otherName, otherRole) => {
     // ترتيب الرسائل بالوقت في الـ client
     const sorted = snap.docs
       .map(d => ({ id: d.id, ...d.data() }))
+      .filter(m => !m.deletedBy?.[currentUser.uid])   // اخفِ الرسائل المحذوفة منك
       .sort((a, b) => (a.sentAt?.seconds || 0) - (b.sentAt?.seconds || 0));
     const bubbles = document.getElementById('msgBubbles');
 
@@ -458,15 +459,10 @@ window.deleteMsg = async (convId, msgId, seen) => {
     return;
   }
   if (!confirm('هل تريدين حذف هذه الرسالة؟')) return;
-  await deleteDoc(doc(db, 'conversations', convId, 'messages', msgId));
-  // حدّث lastMsg لو كانت آخر رسالة
-  const msgsSnap = await getDocs(
-    query(collection(db, 'conversations', convId, 'messages'))
-  );
-  const msgs = msgsSnap.docs.map(d => ({ id: d.id, ...d.data() }))
-    .sort((a, b) => (b.sentAt?.seconds || 0) - (a.sentAt?.seconds || 0));
-  await updateDoc(doc(db, 'conversations', convId), {
-    lastMsg: msgs.length > 0 ? msgs[0].text : ''
+
+  // حذف ناعم — الرسالة تختفي منك فقط والطرف الثاني لا يتأثر
+  await updateDoc(doc(db, 'conversations', convId, 'messages', msgId), {
+    [`deletedBy.${currentUser.uid}`]: true
   });
 };
 
@@ -487,3 +483,4 @@ window.deleteConv = async (cid) => {
     document.getElementById('msgEmpty').style.display = 'flex';
   }
 };
+
