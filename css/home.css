@@ -346,12 +346,9 @@ body {
     overflow-y: auto;
   }
 
-  /* لو guest — اخفي المساحة كلياً */
-  .page-layout.guest-layout .sidebar {
-    width: 0 !important;
-    min-width: 0 !important;
-    border: none !important;
-    overflow: hidden !important;
+  /* لو guest — أخفي الـ aside خالص من الـ layout */
+  .page-layout.guest-layout > aside {
+    display: none !important;
   }
 }
 
