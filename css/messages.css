@@ -635,3 +635,33 @@
   .conv-preview { font-size: 12.5px; }
   .msg-sidebar-head { padding: 16px 14px 12px; }
 }
+
+
+/* ── Delete unseen message ──────────────────────────── */
+.msg-bubble-outer {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.msg-row.mine .msg-bubble-outer {
+  flex-direction: row-reverse;
+}
+.msg-delete-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #ccc;
+  font-size: 15px;
+  padding: 4px;
+  border-radius: 50%;
+  opacity: 0;
+  transition: opacity .2s, color .2s, background .2s;
+  flex-shrink: 0;
+}
+.msg-row:hover .msg-delete-btn {
+  opacity: 1;
+}
+.msg-delete-btn:hover {
+  color: #e74c3c;
+  background: #fde8e8;
+}
