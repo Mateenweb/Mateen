@@ -650,13 +650,14 @@
   background: none;
   border: none;
   cursor: pointer;
-  color: #ccc;
-  font-size: 15px;
-  padding: 4px;
-  border-radius: 50%;
+  color: #bbb;
+  font-size: 14px;
+  padding: 5px 6px;
+  border-radius: 6px;
   opacity: 0;
-  transition: opacity .2s, color .2s, background .2s;
+  transition: opacity .15s, color .15s, background .15s;
   flex-shrink: 0;
+  line-height: 1;
 }
 .msg-row:hover .msg-delete-btn {
   opacity: 1;
@@ -664,4 +665,13 @@
 .msg-delete-btn:hover {
   color: #e74c3c;
   background: #fde8e8;
+}
+/* مقروءة — رمادية ولا تتغير عند hover */
+.msg-delete-btn.seen {
+  color: #ddd;
+  cursor: not-allowed;
+}
+.msg-delete-btn.seen:hover {
+  color: #ddd;
+  background: none;
 }
