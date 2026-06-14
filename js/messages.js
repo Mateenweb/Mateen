@@ -167,9 +167,6 @@ function loadConversations() {
     const promises = snap.docs.map(async d => {
       const data = d.data();
 
-      // تجاهل المحادثات المخفية من عند المستخدم
-      if (data.hiddenBy?.[currentUser.uid]) return;
-
       const otherId = data.participants?.find(p => p !== currentUser.uid);
       if (!otherId) return;
 
@@ -190,26 +187,6 @@ function loadConversations() {
 
     // ترتيب من الأحدث للأقدم في الـ client
     allConvs.sort((a, b) => (b.lastAt?.seconds || 0) - (a.lastAt?.seconds || 0));
-
-    // لو كل المحادثات مخفية، اعرض الأشخاص اللي سبق التواصل معهم
-    if (!allConvs.length && !snap.empty) {
-      const hiddenPromises = snap.docs.map(async d => {
-        const data = d.data();
-        if (!data.hiddenBy?.[currentUser.uid]) return null;
-        const otherId = data.participants?.find(p => p !== currentUser.uid);
-        if (!otherId) return null;
-        let otherName = otherId, otherRole = '';
-        try {
-          const s = await getDoc(doc(db, 'users', otherId));
-          if (s.exists()) { otherName = s.data().name || otherId; otherRole = s.data().role || ''; }
-        } catch(e) {}
-        return { id: d.id, ...data, otherId, otherName, otherRole, isHidden: true };
-      });
-      const hiddenConvs = (await Promise.all(hiddenPromises)).filter(Boolean);
-      hiddenConvs.sort((a, b) => (b.lastAt?.seconds || 0) - (a.lastAt?.seconds || 0));
-      renderConvList(hiddenConvs);
-      return;
-    }
 
     renderConvList(allConvs);
 
