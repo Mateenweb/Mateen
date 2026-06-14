@@ -51,15 +51,17 @@
       <button class="btn-solid" onclick="document.getElementById('reg-modal').classList.add('open')">التسجيل في البرنامج</button>
     </div>
 
-    <a class="sidebar-fab nav-msg-btn d-none" id="navMsgBtn" href="messages.html" aria-label="رسائلي">
-      <i class="ti ti-message-2"></i>
-      <span>رسائلي</span>
-      <span class="nav-msg-badge d-none" id="navMsgBadge">0</span>
-    </a>
-
-    <a class="nav-profile-btn d-none" id="navProfileBtn" href="student.html" aria-label="ملفي الشخصي">
-      <div class="nav-profile-avatar" id="navProfileAvatar">👩</div>
-    </a>
+    <!-- رسائلي + البروفايل (مخفيين للزوار، ظاهرين لما تسجلي دخول) -->
+    <div class="nav-user-actions d-none" id="navUserActions">
+      <a class="nav-msg-btn" id="navMsgBtn" href="messages.html" aria-label="رسائلي">
+        <i class="ti ti-message-2"></i>
+        <span class="d-none d-lg-inline">رسائلي</span>
+        <span class="nav-msg-badge d-none" id="navMsgBadge">0</span>
+      </a>
+      <a class="nav-profile-btn" id="navProfileBtn" href="student.html" aria-label="ملفي الشخصي">
+        <div class="nav-profile-avatar" id="navProfileAvatar">👩</div>
+      </a>
+    </div>
 
     <button class="sidebar-fab d-lg-none" id="sidebarFab" aria-label="ملفي وحسابي" data-bs-toggle="offcanvas" data-bs-target="#mainSidebar" aria-controls="mainSidebar">
       <i class="ti ti-user-circle"></i>

@@ -20,6 +20,8 @@ onAuthStateChanged(auth, async user => {
     const el = document.getElementById(id);
     if (el) { el.classList.remove('d-flex','d-lg-flex'); el.classList.add('d-none'); }
   });
+  const navUserActions = document.getElementById('navUserActions');
+  if (navUserActions) navUserActions.classList.remove('d-none');
 
   const snap = await getDoc(doc(db, 'users', user.uid));
   const role = snap.exists() ? snap.data().role : 'student';
