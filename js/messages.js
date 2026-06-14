@@ -167,6 +167,9 @@ function loadConversations() {
     const promises = snap.docs.map(async d => {
       const data = d.data();
 
+      // تجاهل المحادثات المخفية
+      if (data.hiddenBy?.[currentUser.uid]) return;
+
       const otherId = data.participants?.find(p => p !== currentUser.uid);
       if (!otherId) return;
 
@@ -363,6 +366,9 @@ window.sendMsg = async () => {
     lastAt:   serverTimestamp(),
     [`unread.${otherId}`]: currentUnread + 1,
     [`unread.${currentUser.uid}`]: 0,
+    // لو أي طرف كان حاذف المحادثة، ترجع تظهر عند إرسال رسالة جديدة
+    [`hiddenBy.${currentUser.uid}`]: false,
+    [`hiddenBy.${otherId}`]: false,
   }, { merge: true });
 };
 
