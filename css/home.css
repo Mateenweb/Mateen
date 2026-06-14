@@ -154,13 +154,27 @@ body {
 .btn-outline:hover { background: rgba(201,162,39,0.1); }
 
 /* ===== بروفايل الناف بار ===== */
-.nav-profile-btn {
+.nav-user-actions {
   display: flex;
   align-items: center;
-  text-decoration: none;
-  margin-inline-end: 4px;
+  gap: 8px;
   flex-shrink: 0;
 }
+.nav-msg-btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--gold);
+  text-decoration: none;
+  border: 1px solid rgba(201,162,39,0.5);
+  border-radius: 7px;
+  padding: 6px 12px;
+  font-size: 12.5px;
+  transition: background 0.2s;
+}
+.nav-msg-btn:hover { background: rgba(201,162,39,0.1); color: var(--gold-light); }
+.nav-msg-btn i { font-size: 17px; }
 .nav-profile-avatar {
   width: 36px;
   height: 36px;
@@ -334,16 +348,21 @@ body {
   min-height: 100%;
 }
 
-/* Desktop: sticky sidebar */
+/* Desktop: sticky sidebar — override Bootstrap offcanvas hide */
 @media (min-width: 992px) {
-  .sidebar {
-    width: var(--sidebar-w);
-    min-width: var(--sidebar-w);
-    flex-shrink: 0;
-    position: sticky;
-    top: 58px;
-    height: calc(100vh - 58px);
-    overflow-y: auto;
+  #mainSidebar.sidebar {
+    display: flex !important;
+    visibility: visible !important;
+    transform: none !important;
+    position: sticky !important;
+    top: 58px !important;
+    width: var(--sidebar-w) !important;
+    min-width: var(--sidebar-w) !important;
+    height: calc(100vh - 58px) !important;
+    overflow-y: auto !important;
+    flex-shrink: 0 !important;
+    inset: unset !important;
+    z-index: 1 !important;
   }
 }
 

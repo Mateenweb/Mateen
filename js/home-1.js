@@ -35,13 +35,9 @@ onAuthStateChanged(auth, async user => {
   const mobNavBtns = document.getElementById('mobNavBtns');
   if (mobNavBtns) { mobNavBtns.classList.remove('d-flex','d-lg-flex'); mobNavBtns.classList.add('d-none'); }
 
-  // إظهار زرار "رسائلي" في النافبار
-  const navMsgBtn = document.getElementById('navMsgBtn');
-  if (navMsgBtn) navMsgBtn.classList.remove('d-none');
-
-  // إظهار أيقونة البروفايل
-  const navProfileBtn = document.getElementById('navProfileBtn');
-  if (navProfileBtn) navProfileBtn.classList.remove('d-none');
+  // إظهار أيقونات الرسائل والبروفايل لما تسجلي دخول
+  const navUserActions = document.getElementById('navUserActions');
+  if (navUserActions) navUserActions.classList.remove('d-none');
 
   // مسجلة دخول — اجلب بيانات المستخدمة
   guest.style.display   = 'none';
