@@ -57,7 +57,7 @@ body { background: var(--beige); font-family: 'Noto Naskh Arabic', serif; direct
 .stu-stat-label { font-size: 11px; color: var(--text-mid); text-align: center; }
 
 /* Tabs */
-.stu-tabs-wrap { max-width: 800px; margin: 0 auto; padding: 0 16px 40px; }
+.stu-tabs-wrap { max-width: 100%; margin: 0 auto; padding: 0 16px 40px; }
 .stu-tabs { display: flex; gap: 0; border-bottom: 2px solid var(--border); margin-bottom: 0; margin-top: 0; background: var(--white); border-radius: 0; position: sticky; top: 56px; z-index: 50; }
 .stu-tab { flex: 1; padding: 14px 8px; border: none; background: none; font-family: inherit; font-size: 13px; color: var(--text-mid); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; border-bottom: 3px solid transparent; margin-bottom: -2px; transition: all 0.2s; }
 .stu-tab:hover { color: var(--green-dark); background: var(--beige2); }
