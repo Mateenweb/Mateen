@@ -230,24 +230,29 @@ function renderConvList(list) {
       ? c.lastMsg.slice(0, 45) + '…'
       : (c.lastMsg || 'ابدئي المحادثة');
 
+    const isHidden = c.hiddenBy?.[currentUser.uid] === true;
+
     return `
-      <div class="conv-item ${isActive ? 'active' : ''} ${unread ? 'unread' : ''}"
+      <div class="conv-item ${isActive ? 'active' : ''} ${unread ? 'unread' : ''} ${isHidden ? 'hidden-conv' : ''}"
            onclick="openConv('${c.id}','${c.otherId}','${c.otherName}','${c.otherRole}')">
-        ${avatarHtml(c.otherName, c.otherRole, 44)}
+        <div class="conv-avatar-wrap">
+          ${avatarHtml(c.otherName, c.otherRole, 44)}
+          ${isHidden ? `<span class="conv-hidden-badge" title="محادثة مخفية"><i class="ti ti-eye-off"></i></span>` : ''}
+        </div>
         <div class="conv-meta">
           <div class="conv-top-row">
             <span class="conv-name">${c.otherName}</span>
             <span class="conv-time">${time}</span>
           </div>
           <div class="conv-bottom-row">
-            <span class="conv-preview">${preview}</span>
+            <span class="conv-preview ${isHidden ? 'hidden-preview' : ''}">${isHidden ? 'محادثة مخفية' : preview}</span>
             ${unread ? `<span class="conv-unread">${unread > 9 ? '9+' : unread}</span>` : ''}
           </div>
           <span class="conv-role-pill" style="background:${ROLE_INITIALS_BG[c.otherRole]||'#eee'};color:${ROLE_COLORS[c.otherRole]||'#555'}">${roleLabel}</span>
         </div>
-        <button class="conv-delete-btn" title="حذف المحادثة"
-          onclick="event.stopPropagation(); deleteConv('${c.id}')">
-          <i class="ti ti-trash"></i>
+        <button class="conv-delete-btn" title="${isHidden ? 'إظهار المحادثة' : 'إخفاء المحادثة'}"
+          onclick="event.stopPropagation(); ${isHidden ? `unhideConv('${c.id}')` : `deleteConv('${c.id}')`}">
+          <i class="ti ti-${isHidden ? 'eye' : 'trash'}"></i>
         </button>
         </div>
       </div>`;
@@ -472,6 +477,12 @@ window.deleteMsg = async (convId, msgId, seen) => {
 
 
 // ── حذف المحادثة من عند المستخدم فقط ────────────────────────
+window.unhideConv = async (cid) => {
+  await updateDoc(doc(db, 'conversations', cid), {
+    [`hiddenBy.${currentUser.uid}`]: false
+  });
+};
+
 window.deleteConv = async (cid) => {
   if (!confirm('هل تريدين إخفاء هذه المحادثة من قائمتك؟\nالمحادثة ستختفي منك فقط والطرف الآخر لن يتأثر.')) return;
 
