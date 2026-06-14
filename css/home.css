@@ -347,14 +347,9 @@ body {
   }
 }
 
-/* لو guest على desktop — خلي الـ content يملأ كل العرض */
-@media (min-width: 992px) {
-  .page-layout.guest-layout {
-    display: block;
-  }
-  .page-layout.guest-layout > aside {
-    display: none !important;
-  }
+/* لو guest — أخفي الـ sidebar خالص في كل الأحجام */
+.page-layout.guest-layout > aside {
+  display: none !important;
 }
 
 /* Mobile offcanvas — يملأ الـ panel كاملاً */
