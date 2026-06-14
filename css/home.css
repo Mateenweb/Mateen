@@ -345,6 +345,7 @@ body {
     height: calc(100vh - 58px);
     overflow-y: auto;
   }
+}
 
 /* لو guest على desktop — خلي الـ content يملأ كل العرض */
 @media (min-width: 992px) {
