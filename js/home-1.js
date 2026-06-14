@@ -59,10 +59,14 @@ onAuthStateChanged(auth, async user => {
     return;
   }
 
-  // إخفاء "ملفي الشخصي" من غير طالبات (عادية أو متين)
+  // إخفاء "ملفي الشخصي" من غير طالبات، وضبط الرابط بـ ?id=
   const profileLink = document.getElementById('profileLink');
-  if (profileLink && role !== 'mateen' && role !== 'student') {
-    profileLink.style.display = 'none';
+  if (profileLink) {
+    if (role !== 'mateen' && role !== 'student') {
+      profileLink.style.display = 'none';
+    } else {
+      profileLink.href = `student.html?id=${user.uid}`;
+    }
   }
 });
 
