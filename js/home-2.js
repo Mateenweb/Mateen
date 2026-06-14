@@ -33,6 +33,10 @@ onAuthStateChanged(auth, async user => {
   const navAvatar = document.getElementById('navProfileAvatar');
   if (navAvatar) navAvatar.textContent = role === 'admin' ? '👑' : role === 'teacher' ? '👩‍🏫' : role === 'supervisor' ? '🛡️' : '👩';
 
+  // ملء الاسم تلقائياً في نموذج التواصل
+  const ctName = document.getElementById('ctName');
+  if (ctName) ctName.value = (snap.exists() && snap.data().name) ? snap.data().name : name;
+
   if (role === 'admin') {
     const nav = userDiv.querySelector('.sidebar-nav');
     if (nav && !nav.querySelector('.admin-link')) {
@@ -107,7 +111,6 @@ window.submitContactNew = async () => {
     if (!el || !el.value.trim()) { if(el) el.style.borderColor='#c0392b'; valid=false; }
     else el.style.borderColor='';
   });
-  if (!valid) return;
 
   const recipientUid = recipientEl.value;
   const bodyText     = `[${topicEl.value}]\n${bodyEl.value.trim()}`;

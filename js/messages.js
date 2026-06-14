@@ -165,6 +165,10 @@ function loadConversations() {
 
     const promises = snap.docs.map(async d => {
       const data = d.data();
+
+      // تجاهل المحادثات المخفية من عند المستخدم
+      if (data.hiddenBy?.[currentUser.uid]) return;
+
       const otherId = data.participants?.find(p => p !== currentUser.uid);
       if (!otherId) return;
 
@@ -238,6 +242,11 @@ function renderConvList(list) {
             ${unread ? `<span class="conv-unread">${unread > 9 ? '9+' : unread}</span>` : ''}
           </div>
           <span class="conv-role-pill" style="background:${ROLE_INITIALS_BG[c.otherRole]||'#eee'};color:${ROLE_COLORS[c.otherRole]||'#555'}">${roleLabel}</span>
+        </div>
+        <button class="conv-delete-btn" title="حذف المحادثة"
+          onclick="event.stopPropagation(); deleteConv('${c.id}')">
+          <i class="ti ti-trash"></i>
+        </button>
         </div>
       </div>`;
   }).join('');
@@ -460,3 +469,20 @@ window.deleteMsg = async (convId, msgId, seen) => {
   });
 };
 
+
+// ── حذف المحادثة من عند المستخدم فقط ────────────────────────
+window.deleteConv = async (cid) => {
+  if (!confirm('هل تريدين إخفاء هذه المحادثة من قائمتك؟\nالمحادثة ستختفي منك فقط والطرف الآخر لن يتأثر.')) return;
+
+  // نضيف uid المستخدم لـ hiddenBy array
+  await updateDoc(doc(db, 'conversations', cid), {
+    [`hiddenBy.${currentUser.uid}`]: true
+  });
+
+  // لو الشات المفتوح هو اللي اتحذف — أغلقه
+  if (activeConvId === cid) {
+    activeConvId = null;
+    document.getElementById('msgConv').style.display = 'none';
+    document.getElementById('msgEmpty').style.display = 'flex';
+  }
+};
