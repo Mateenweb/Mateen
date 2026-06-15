@@ -28,24 +28,7 @@ onAuthStateChanged(auth, async user => {
 });
 
 function addNewsButton() {
-  // لو الزرار موجود مش تضيف تاني
-  if (document.getElementById('newsBtn')) return;
-
-  const btn = document.createElement('button');
-  btn.id = 'newsBtn';
-  btn.innerHTML = '<i class="ti ti-speakerphone"></i> إدارة الأخبار';
-  btn.style.cssText = `
-    position: fixed; bottom: 24px; left: 24px; z-index: 500;
-    background: #5c3d2e; color: #fff; border: none;
-    border-radius: 12px; padding: 12px 20px;
-    font-family: inherit; font-size: 14px; font-weight: 700;
-    cursor: pointer; box-shadow: 0 4px 16px rgba(0,0,0,0.2);
-    display: flex; align-items: center; gap: 8px;
-  `;
-  btn.onclick = () => {
-    document.getElementById('newsSection').style.display = 'flex';
-  };
-  document.body.appendChild(btn);
+  // الزرار موجود في الـ navbar — مش محتاجين floating button
 }
 
 // ── تحميل قائمة الأخبار في الأدمن ───────────────────────────
