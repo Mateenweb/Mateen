@@ -50,25 +50,49 @@ function playSound() {
   } catch(e) {}
 }
 // ── Toast إشعار ──────────────────────────────────────────────────────────
-function showNotifToast(title, body, url) {
-  document.getElementById('mateen-notif-toast')?.remove();
+let msgCount  = 0;
+let newsCount = 0;
+
+function updateBadges() {
+  ['navMsgBadge','sidebarMsgBadge'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (msgCount > 0) { el.textContent = msgCount > 99 ? '99+' : msgCount; el.classList.remove('d-none'); }
+    else el.classList.add('d-none');
+  });
+  ['navNewsBadge','sidebarNewsBadge'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (newsCount > 0) { el.textContent = newsCount > 99 ? '99+' : newsCount; el.classList.remove('d-none'); }
+    else el.classList.add('d-none');
+  });
+}
+
+function showNotifToast(title, body, url, type = 'msg') {
+  const toastId = 'mateen-notif-toast-' + Date.now();
   const t = document.createElement('div');
-  t.id = 'mateen-notif-toast';
+  t.id = toastId;
   t.innerHTML = `
-    <div onclick="window.location.href='${url || '/Mateen/html/messages.html'}'" style="
+    <div style="
       position:fixed;top:24px;left:24px;z-index:99999;
       background:#1a4a2e;color:#fff;border-radius:14px;
       padding:14px 18px;min-width:260px;max-width:320px;
       box-shadow:0 6px 24px rgba(0,0,0,.35);
-      font-family:'Noto Naskh Arabic',serif;direction:rtl;cursor:pointer;
+      font-family:'Noto Naskh Arabic',serif;direction:rtl;
       animation:notifIn .3s ease">
-      <div style="font-weight:700;font-size:14px;margin-bottom:4px">💬 ${title}</div>
-      <div style="font-size:13px;opacity:.85">${body}</div>
-      <div style="font-size:11px;opacity:.55;margin-top:6px">اضغطي للفتح</div>
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div onclick="window.location.href='${url || '/Mateen/html/messages.html'}';document.getElementById('${toastId}')?.remove();" style="cursor:pointer;flex:1">
+          <div style="font-weight:700;font-size:14px;margin-bottom:4px">💬 ${title}</div>
+          <div style="font-size:13px;opacity:.85">${body}</div>
+          <div style="font-size:11px;opacity:.55;margin-top:6px">اضغطي للفتح</div>
+        </div>
+        <button onclick="document.getElementById('${toastId}')?.remove();${type==='msg'?'msgCount=Math.max(0,msgCount-1)':'newsCount=Math.max(0,newsCount-1)'};updateBadges();"
+          style="background:none;border:none;color:rgba(255,255,255,0.7);font-size:18px;cursor:pointer;padding:0 0 0 8px;line-height:1">✕</button>
+      </div>
     </div>
     <style>@keyframes notifIn{from{transform:translateY(-20px);opacity:0}to{transform:translateY(0);opacity:1}}</style>`;
   document.body.appendChild(t);
-  setTimeout(() => t.remove(), 6000);
+  // مش بيختفي تلقائي — بس لما تضغطي ✕ أو تفتحيه
 }
 
 // ── Browser Notification ─────────────────────────────────────────────────
