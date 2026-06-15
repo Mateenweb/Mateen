@@ -1,0 +1,22 @@
+{
+  "name": "برنامج متين العلمي",
+  "short_name": "متين",
+  "start_url": "/Mateen/html/home.html",
+  "display": "standalone",
+  "background_color": "#1a4a2e",
+  "theme_color": "#1a4a2e",
+  "lang": "ar",
+  "dir": "rtl",
+  "icons": [
+    {
+      "src": "/Mateen/logo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/Mateen/logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
