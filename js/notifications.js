@@ -65,8 +65,8 @@ async function showBrowserNotif(title, body) {
   if (Notification.permission === 'granted') {
     new Notification(title, {
       body,
-      icon: '/Mateen/logo.png',
-      badge: '/Mateen/favicon.ico',
+      icon: 'https://mateenweb.github.io/Mateen/logo.png',
+      badge: 'https://mateenweb.github.io/Mateen/favicon.ico',
       dir: 'rtl',
       lang: 'ar',
       tag: 'mateen-msg',
