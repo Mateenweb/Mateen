@@ -187,3 +187,165 @@ export async function exportPdf(students) {
   setTimeout(() => { win.print(); }, 800);
   showToast('تم فتح نافذة الطباعة ✅');
 }
+
+// ===========================
+//  Export — Attendance / غياب وحضور
+// ===========================
+
+const SUBJ_LABEL = { 'قرآن':'قرآن', 'فقه':'فقه', 'تفسير':'تفسير', 'عقيدة':'عقيدة', 'حديث':'حديث' };
+
+const ATT_CSS = `
+  @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Cairo', Arial, sans-serif; direction: rtl; background: #f0f0f0; padding: 20px; }
+  @media print {
+    body { background: white; padding: 0; }
+    .att-page { box-shadow: none; margin: 0; border-radius: 0; page-break-after: always; }
+    .att-page:last-child { page-break-after: avoid; }
+  }
+  .att-page { background: white; max-width: 800px; margin: 0 auto 30px; padding: 32px 36px 24px;
+    border-radius: 8px; box-shadow: 0 2px 12px rgba(0,0,0,.1); page-break-after: always; }
+  .att-page:last-child { page-break-after: avoid; }
+  .att-header { display: flex; justify-content: space-between; align-items: flex-start;
+    padding-bottom: 14px; border-bottom: 2.5px solid #1a3a5c; margin-bottom: 18px; }
+  .att-prog { font-size: 24px; font-weight: 600; color: #1a3a5c; }
+  .att-title { text-align: center; font-size: 22px; font-weight: 600; color: #1a3a5c; margin-bottom: 4px; }
+  .att-subtitle { text-align: center; font-size: 16px; color: #666; margin-bottom: 14px; }
+  table { width: 100%; border-collapse: collapse; font-size: 15px; margin-top: 10px; }
+  thead tr { background: #1a3a5c; }
+  thead th { color: white; padding: 10px 10px; text-align: center; font-weight: 600; font-size: 15px; }
+  tbody tr:nth-child(odd)  { background: white; }
+  tbody tr:nth-child(even) { background: #f5f8fb; }
+  tbody td { padding: 9px 10px; text-align: center; color: #333; border-bottom: 0.5px solid #e8edf2; font-size: 14px; }
+  .td-name { text-align: right; font-weight: 600; }
+  .chip-present { background:#d4edda; color:#1a6b36; padding:2px 10px; border-radius:20px; font-size:13px; }
+  .chip-absent  { background:#fde8e8; color:#b71c1c; padding:2px 10px; border-radius:20px; font-size:13px; }
+  .chip-empty   { color:#bbb; font-size:13px; }
+  .att-footer { display:flex; justify-content:space-between; margin-top:16px; padding-top:10px;
+    border-top:0.5px solid #ddd; font-size:13px; color:#bbb; }
+`;
+
+function buildAttHtml(pages) {
+  return `<html xmlns:o="urn:schemas-microsoft-com:office:office"
+    xmlns:w="urn:schemas-microsoft-com:office:word"
+    xmlns="http://www.w3.org/TR/REC-html40">
+  <head><meta charset="UTF-8">
+  <xml><w:WordDocument><w:View>Print</w:View><w:Zoom>90</w:Zoom></w:WordDocument></xml>
+  <style>${ATT_CSS}</style></head>
+  <body>${pages}</body></html>`;
+}
+
+function chipAtt(v) {
+  if (v === 'present') return '<span class="chip-present">✔ حاضرة</span>';
+  if (v === 'absent')  return '<span class="chip-absent">✖ غائبة</span>';
+  return '<span class="chip-empty">—</span>';
+}
+
+/**
+ * studentsData = [
+ *   { name, sessions: [ { date, day, subjects:{قرآن:'present'|'absent'|'',...} } ] }
+ * ]
+ * mode: 'perStudent' = صفحة لكل طالبة | 'combined' = جدول مشترك
+ */
+function buildAttPages(studentsData, mode) {
+  // اجمع كل المواد الموجودة
+  const allSubjects = new Set();
+  studentsData.forEach(st =>
+    st.sessions.forEach(se =>
+      Object.keys(se.subjects || {}).forEach(k => allSubjects.add(k))
+    )
+  );
+  const subjects = [...allSubjects];
+
+  if (mode === 'perStudent') {
+    // ── صفحة لكل طالبة ──────────────────────────────
+    return studentsData.map(st => {
+      const sessions = [...(st.sessions || [])].sort((a,b) => (a.date||'') < (b.date||'') ? -1 : 1);
+      const subjs = subjects.length ? subjects : [...new Set(sessions.flatMap(se => Object.keys(se.subjects||{})))];
+      const headCells = `<th>#</th><th>اليوم</th><th>التاريخ</th>` + subjs.map(s=>`<th>${s}</th>`).join('') + `<th>الإجمالي</th>`;
+      let totalP = 0, totalA = 0;
+      const rows = sessions.map((se, i) => {
+        const subjCells = subjs.map(s => `<td>${chipAtt((se.subjects||{})[s]||'')}</td>`).join('');
+        const p = subjs.filter(s => (se.subjects||{})[s]==='present').length;
+        const a = subjs.filter(s => (se.subjects||{})[s]==='absent').length;
+        totalP += p; totalA += a;
+        const total = subjs.length ? `${p}✔ / ${a}✖` : '—';
+        return `<tr><td>${i+1}</td><td>${se.day||''}</td><td>${se.date||''}</td>${subjCells}<td>${total}</td></tr>`;
+      }).join('');
+      const summaryRow = `<tr style="background:#eef3ff;font-weight:600"><td colspan="3">الإجمالي</td>${subjs.map(()=>'<td></td>').join('')}<td>${totalP}✔ / ${totalA}✖</td></tr>`;
+
+      return `<div class="att-page">
+        <div class="att-header"><div class="att-prog">📖 برنامج متين العلمي</div></div>
+        <div class="att-title">سجل الحضور والغياب</div>
+        <div class="att-subtitle">${st.name}</div>
+        <table>
+          <thead><tr>${headCells}</tr></thead>
+          <tbody>${rows}${summaryRow}</tbody>
+        </table>
+        <div class="att-footer"><span>برنامج متين العلمي</span><span>◆</span><span>${st.name}</span></div>
+      </div>`;
+    }).join('');
+
+  } else {
+    // ── جدول مشترك — عمود لكل طالبة ─────────────────
+    // نجمع كل الجلسات (date+day) المميزة
+    const dateMap = {};
+    studentsData.forEach(st =>
+      (st.sessions||[]).forEach(se => {
+        const key = se.date||'';
+        if (!dateMap[key]) dateMap[key] = { date: se.date||'', day: se.day||'' };
+      })
+    );
+    const allDates = Object.values(dateMap).sort((a,b)=>a.date<b.date?-1:1);
+
+    const nameHeads = studentsData.map(st => `<th>${st.name}</th>`).join('');
+    const headCells = `<th>#</th><th>اليوم</th><th>التاريخ</th>${nameHeads}`;
+
+    const rows = allDates.map((dd, i) => {
+      const cells = studentsData.map(st => {
+        const se = (st.sessions||[]).find(x=>(x.date||'')===(dd.date||''));
+        if (!se) return '<td><span class="chip-empty">—</span></td>';
+        const p = Object.values(se.subjects||{}).filter(v=>v==='present').length;
+        const a = Object.values(se.subjects||{}).filter(v=>v==='absent').length;
+        const total = (p+a)>0 ? `${p}✔ ${a}✖` : '—';
+        return `<td>${total}</td>`;
+      }).join('');
+      return `<tr><td>${i+1}</td><td>${dd.day}</td><td>${dd.date}</td>${cells}</tr>`;
+    }).join('');
+
+    return `<div class="att-page">
+      <div class="att-header"><div class="att-prog">📖 برنامج متين العلمي</div></div>
+      <div class="att-title">سجل الحضور والغياب — جدول مشترك</div>
+      <table>
+        <thead><tr>${headCells}</tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+      <div class="att-footer"><span>برنامج متين العلمي</span><span>◆</span><span>إجمالي الجلسات: ${allDates.length}</span></div>
+    </div>`;
+  }
+}
+
+export async function exportAttendanceWord(studentsData, mode='perStudent') {
+  if (!studentsData.length) { showToast('لا توجد بيانات للتصدير'); return; }
+  const html = buildAttHtml(buildAttPages(studentsData, mode));
+  const blob = new Blob(['\uFEFF'+html], {
+    type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document;charset=utf-8'
+  });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'متين_حضور_غياب.doc';
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a);
+  showToast('تم التصدير Word ✅');
+}
+
+export async function exportAttendancePdf(studentsData, mode='perStudent') {
+  if (!studentsData.length) { showToast('لا توجد بيانات للتصدير'); return; }
+  const html = buildAttHtml(buildAttPages(studentsData, mode));
+  const win = window.open('', '_blank');
+  win.document.write(html);
+  win.document.close();
+  win.focus();
+  setTimeout(() => { win.print(); }, 800);
+  showToast('تم فتح نافذة الطباعة ✅');
+}

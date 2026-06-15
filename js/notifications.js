@@ -14,7 +14,7 @@ import { FIREBASE_CONFIG } from "./config.js";
 // ── مفتاح VAPID من Firebase Console ──────────────────────────────────────
 // ⬇ استبدلي هذا بمفتاح VAPID الخاص بمشروعك من:
 //   Firebase Console → Project Settings → Cloud Messaging → Web Push certificates
-const VAPID_KEY = "BMlwnqkDtZAFIh2KxrfUAe08_7JfplwzssWX2X0PZbCofaQgkzQqOOhJ1VE2OdFQdxokwmqxgi9AHnS0XzonFmU";
+const VAPID_KEY = "BMlwnqkDtZAFIh2KxrfUAeO8_7JfplwzssWX2X0PZbCofaQglkzQqOOhJ1VE2OdFQdxokwmqxgi9AHnS0XzonFmU";
 
 const app       = getApps().length ? getApp() : initializeApp(FIREBASE_CONFIG);
 const messaging = getMessaging(app);

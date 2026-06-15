@@ -695,3 +695,29 @@ tr.selected-row { background: rgba(201,162,39,0.08) !important; }
   margin-top: 14px;
   flex-wrap: wrap;
 }
+.sort-alpha-btn {
+  padding: 8px 14px;
+  border-radius: 10px;
+  border: 1.5px solid #1565c0;
+  background: #e8f0fb;
+  color: #1565c0;
+  font-family: Cairo, sans-serif;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.sort-alpha-btn.active {
+  background: #1565c0;
+  color: white;
+}
+.att-student-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 4px;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+}
+.att-student-item:hover { background: #f0f4ff; }
+.att-student-item input { cursor: pointer; accent-color: #1565c0; }
