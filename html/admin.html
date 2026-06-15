@@ -216,6 +216,7 @@
 <option value="mateen">📖 بنات متين</option>
 <option value="new">✨ المستجدات</option>
 </select>
+<button id="sortAlphaBtn" class="sort-alpha-btn" onclick="toggleAlphaSort()">🔤 أبجدي</button>
 </div>
 <!-- Bulk apply bar -->
 <div class="stu-bulk-bar">
@@ -279,8 +280,9 @@
 </tbody>
 </table>
 </div>
-<div style="padding:12px 16px;border-top:1px solid var(--border)">
+<div style="padding:12px 16px;border-top:1px solid var(--border);display:flex;gap:10px;flex-wrap:wrap">
 <button class="btn-add-row" onclick="addStudentRow()"><i class="ti ti-plus"></i> إضافة طالبة</button>
+<button class="btn-add-row" style="background:#e8fdf0;border-color:#4CAF50;color:#2e7d32" onclick="openExportModal()"><i class="ti ti-download"></i> تصدير Word / PDF</button>
 </div>
 </div>
 <!-- MATERIALS LIST -->
@@ -308,6 +310,50 @@
 </div>
 </div>
 </div>
+<!-- ── مودال التصدير ── -->
+<div class="modal-overlay" id="exportModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9000;align-items:center;justify-content:center;padding:16px">
+  <div style="background:#fff;border-radius:14px;width:100%;max-width:460px;box-shadow:0 8px 40px rgba(0,0,0,.2);overflow:hidden">
+    <div style="padding:18px 20px 14px;border-bottom:1px solid #e8e8e8;display:flex;align-items:center;justify-content:space-between">
+      <div style="font-size:17px;font-weight:700;color:#1a4a2e">⬇️ إعدادات التصدير</div>
+      <button onclick="closeExportModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#999;padding:4px">✕</button>
+    </div>
+    <div style="padding:16px 20px">
+      <div style="font-size:13px;font-weight:600;color:#555;margin-bottom:8px">الأعمدة المطلوبة:</div>
+      <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px">
+        <label style="display:flex;align-items:center;gap:5px;font-size:13px"><input type="checkbox" id="col_name" checked> اسم الطالبة</label>
+        <label style="display:flex;align-items:center;gap:5px;font-size:13px"><input type="checkbox" id="col_day" checked> اليوم</label>
+        <label style="display:flex;align-items:center;gap:5px;font-size:13px"><input type="checkbox" id="col_dateH" checked> التاريخ الهجري</label>
+        <label style="display:flex;align-items:center;gap:5px;font-size:13px"><input type="checkbox" id="col_dateG"> التاريخ الميلادي</label>
+        <label style="display:flex;align-items:center;gap:5px;font-size:13px"><input type="checkbox" id="col_time" checked> الوقت</label>
+        <label style="display:flex;align-items:center;gap:5px;font-size:13px"><input type="checkbox" id="col_interview"> المقابلة</label>
+        <label style="display:flex;align-items:center;gap:5px;font-size:13px"><input type="checkbox" id="col_result"> القبول</label>
+      </div>
+      <hr style="border:none;border-top:1px solid #eee;margin-bottom:14px">
+      <div style="margin-bottom:12px">
+        <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer">
+          <input type="checkbox" id="groupByTime" onchange="document.getElementById('groupOptions').style.display=this.checked?'block':'none'">
+          تقسيم كل نطاق وقت في صفحة مستقلة
+        </label>
+        <div id="groupOptions" style="display:none;margin-top:10px;padding:10px;background:#f8f8f8;border-radius:8px">
+          <label style="font-size:13px;display:flex;align-items:center;gap:8px">
+            حجم النطاق:
+            <select id="rangeSize" style="padding:4px 8px;border-radius:6px;border:1px solid #ddd;font-size:13px">
+              <option value="60">ساعة واحدة</option>
+              <option value="30">نصف ساعة</option>
+              <option value="120">ساعتين</option>
+            </select>
+          </label>
+        </div>
+      </div>
+    </div>
+    <div style="padding:14px 20px;border-top:1px solid #eee;display:flex;gap:10px;justify-content:flex-end">
+      <button onclick="doExport('word')" style="padding:9px 20px;border:none;border-radius:8px;background:#1a4a2e;color:#fff;font-size:13.5px;cursor:pointer;font-weight:600">⬇️ Word</button>
+      <button onclick="doExport('pdf')" style="padding:9px 20px;border:none;border-radius:8px;background:#c0392b;color:#fff;font-size:13.5px;cursor:pointer;font-weight:600">🖨️ PDF</button>
+      <button onclick="closeExportModal()" style="padding:9px 18px;border:1px solid #ddd;border-radius:8px;background:#fff;color:#666;font-size:13.5px;cursor:pointer">إلغاء</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <!-- ── مودال ربط الحساب بطالبة في الجدول ── -->
