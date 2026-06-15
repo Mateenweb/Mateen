@@ -112,7 +112,8 @@ function startListening(userId) {
 
       // إشعار لو آخر رسالة جديدة ومش من المستخدم الحالي
       const isNewMsg   = lastAt > (lastSeen[convId] || 0);
-      const notFromMe  = lastSenderId !== userId && lastSenderId !== '';
+      // لو lastSenderId فاضي (رسائل قديمة) نكتفي بـ isNewMsg
+      const notFromMe = lastSenderId === '' ? true : lastSenderId !== userId;
 
       if (isNewMsg && notFromMe) {
         lastSeen[convId] = lastAt;
