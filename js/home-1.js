@@ -3,6 +3,7 @@ import { initializeApp, getApps, getApp }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
+import { initNotifications } from "./notifications.js";
 import { getFirestore, doc, getDoc }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 import { FIREBASE_CONFIG } from "./config.js";
@@ -44,6 +45,9 @@ onAuthStateChanged(auth, async user => {
   // مسجلة دخول — اجلب بيانات المستخدمة
   guest.style.display   = 'none';
   userDiv.style.display = 'block'; userDiv.classList.add('show-user');
+
+  // تفعيل إشعارات الموقع
+  initNotifications(user.uid);
 
   const snap = await getDoc(doc(db, 'users', user.uid));
   const role = snap.exists() ? snap.data().role : 'student';
