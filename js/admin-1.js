@@ -8,7 +8,7 @@ import { getFirestore, collection, addDoc, deleteDoc, doc,
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 import { fullDeleteUser } from "./delete-account.js";
 import { FIREBASE_CONFIG } from "./config.js";
-import { exportWord, exportPdf } from "./export.js";
+import { exportWord, exportPdf, exportAttendanceWord, exportAttendancePdf } from "./export.js";
 
 const app  = getApps().length ? getApp() : initializeApp(FIREBASE_CONFIG);
 const auth = getAuth(app);
@@ -815,3 +815,49 @@ window.addEventListener("resize", () => {
 });
 
 
+
+// ── تصدير الغياب والحضور ─────────────────────────────
+window.openAttModal = () => {
+  const list = document.getElementById('attStudentList');
+  if (list) {
+    list.innerHTML = allStudents.map(s => `
+      <label class="att-stu-label">
+        <input type="checkbox" class="att-stu-cb" value="${s.id}" data-name="${(s.name||'').replace(/"/g,'&quot;')}">
+        <span>${s.name || '(بدون اسم)'}</span>
+      </label>`).join('');
+  }
+  const m = document.getElementById('attModal');
+  if (m) m.style.display = 'flex';
+};
+
+window.closeAttModal = () => {
+  const m = document.getElementById('attModal');
+  if (m) m.style.display = 'none';
+};
+
+window.attSelectAll = (val) => {
+  document.querySelectorAll('.att-stu-cb').forEach(cb => cb.checked = val);
+};
+
+window.doAttExport = async (type) => {
+  const checked = [...document.querySelectorAll('.att-stu-cb:checked')];
+  if (!checked.length) { showToast('اختاري طالبة واحدة على الأقل'); return; }
+
+  const mode = document.getElementById('attMode')?.value || 'perStudent';
+
+  showToast('جاري تحميل البيانات…');
+  const studentsData = [];
+  for (const cb of checked) {
+    const sid  = cb.value;
+    const name = cb.dataset.name || sid;
+    const sessSnap = await getDocs(
+      query(collection(db, 'students', sid, 'sessions'), orderBy('date', 'asc'))
+    );
+    const sessions = sessSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+    studentsData.push({ name, sessions });
+  }
+
+  window.closeAttModal();
+  if (type === 'word') await exportAttendanceWord(studentsData, mode);
+  else                 await exportAttendancePdf(studentsData, mode);
+};
