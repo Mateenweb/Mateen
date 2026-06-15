@@ -220,7 +220,7 @@ onAuthStateChanged(auth, user => {
   if (user) {
     console.log('[Notif] user logged in:', user.uid);
     startListening(user.uid);
-    registerSW(user.uid);
+    localStorage.setItem('mateen_uid', user.uid);
     if ('Notification' in window && Notification.permission === 'default') {
       setTimeout(() => Notification.requestPermission().then(p => {
         console.log('[Notif] permission:', p);
