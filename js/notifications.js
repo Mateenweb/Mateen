@@ -173,17 +173,15 @@ function startListening(userId) {
 
 // ── تفعيل تلقائي عند لوجين ───────────────────────────────────────────────
 // unlock audio on first user interaction
-let audioUnlocked = false;
 function unlockAudio() {
-  if (audioUnlocked) return;
-  audioUnlocked = true;
   try {
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    ctx.resume();
+    const ctx = getAudioCtx();
+    if (ctx.state === 'suspended') ctx.resume().catch(() => {});
   } catch(e) {}
 }
-document.addEventListener('click', unlockAudio, { once: true });
+document.addEventListener('click',      unlockAudio, { once: true });
 document.addEventListener('touchstart', unlockAudio, { once: true });
+document.addEventListener('touchend',   unlockAudio, { once: true });
 
 onAuthStateChanged(auth, user => {
   if (user) {
