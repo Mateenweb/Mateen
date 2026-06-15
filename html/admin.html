@@ -362,7 +362,8 @@
       <div style="font-size:17px;font-weight:700;color:#1a4a2e">⬇️ إعدادات التصدير</div>
       <button onclick="closeExportModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#999;padding:4px">✕</button>
     </div>
-    <div style="padding:16px 20px">
+    <div style="padding:16px 20px;overflow-y:auto;max-height:60vh">
+      <!-- الأعمدة -->
       <div style="font-size:13px;font-weight:600;color:#555;margin-bottom:8px">الأعمدة المطلوبة:</div>
       <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px">
         <label style="display:flex;align-items:center;gap:5px;font-size:13px"><input type="checkbox" id="col_name" checked> اسم الطالبة</label>
@@ -374,7 +375,8 @@
         <label style="display:flex;align-items:center;gap:5px;font-size:13px"><input type="checkbox" id="col_result"> القبول</label>
       </div>
       <hr style="border:none;border-top:1px solid #eee;margin-bottom:14px">
-      <div style="margin-bottom:12px">
+      <!-- تقسيم الوقت -->
+      <div style="margin-bottom:14px">
         <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer">
           <input type="checkbox" id="groupByTime" onchange="document.getElementById('groupOptions').style.display=this.checked?'block':'none'">
           تقسيم كل نطاق وقت في صفحة مستقلة
@@ -389,6 +391,16 @@
             </select>
           </label>
         </div>
+      </div>
+      <hr style="border:none;border-top:1px solid #eee;margin-bottom:12px">
+      <!-- اختيار الطالبات -->
+      <div style="font-size:13px;font-weight:600;color:#555;margin-bottom:8px">اختاري الطالبات للتصدير:</div>
+      <div style="display:flex;gap:8px;margin-bottom:10px">
+        <button onclick="exportSelectAll(true)"  style="flex:1;padding:6px;border:1px solid #4CAF50;border-radius:6px;background:#f0fff4;color:#2e7d32;font-size:12px;cursor:pointer;font-family:Cairo,sans-serif">✔ تحديد الكل</button>
+        <button onclick="exportSelectAll(false)" style="flex:1;padding:6px;border:1px solid #e57373;border-radius:6px;background:#fff8f8;color:#b71c1c;font-size:12px;cursor:pointer;font-family:Cairo,sans-serif">✖ إلغاء الكل</button>
+      </div>
+      <div id="exportStudentList" style="display:flex;flex-direction:column;gap:6px;max-height:200px;overflow-y:auto;padding:4px 2px">
+        <!-- تُبنى بـ JS -->
       </div>
     </div>
     <div style="padding:14px 20px;border-top:1px solid #eee;display:flex;gap:10px;justify-content:flex-end">
