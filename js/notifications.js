@@ -107,9 +107,14 @@ function startListening(userId) {
       const lastAt  = data.lastAt?.seconds || 0;
       const unread  = data.unread?.[userId] || 0;
 
-      console.log('[Notif] conv change:', change.type, convId, 'unread:', unread, 'lastAt:', lastAt, 'lastSeen:', lastSeen[convId]);
+      const lastSenderId = data.lastSenderId || '';
+      console.log('[Notif] conv change:', change.type, convId, 'unread:', unread, 'lastAt:', lastAt, 'lastSeen:', lastSeen[convId], 'sender:', lastSenderId);
 
-      if (unread > 0 && lastAt > (lastSeen[convId] || 0)) {
+      // إشعار لو آخر رسالة جديدة ومش من المستخدم الحالي
+      const isNewMsg   = lastAt > (lastSeen[convId] || 0);
+      const notFromMe  = lastSenderId !== userId && lastSenderId !== '';
+
+      if (isNewMsg && notFromMe) {
         lastSeen[convId] = lastAt;
         console.log('[Notif] 🔔 NEW MESSAGE! showing notification');
         const onMsgsPage = window.location.pathname.includes('messages.html');
