@@ -34,6 +34,7 @@ onAuthStateChanged(auth, async user => {
 });
 
 let students = [];
+let alphaSortActive = false;
 const dateParts = {};
 
 const defaultDoc = () => ({
@@ -124,12 +125,25 @@ window.applyFilters = () => {
   const interview = document.getElementById('interviewFilter').value;
   const result    = document.getElementById('resultFilter').value;
   const status    = document.getElementById('statusFilter').value;
-  renderTable(students, students.filter(s =>
+  let filtered = students.filter(s =>
     (s.name||'').toLowerCase().includes(search) &&
     (interview==='all' || s.interview===interview) &&
     (result==='all'    || s.accepted===result) &&
     (status==='all'    || s.status===status)
-  ));
+  );
+  if (alphaSortActive) {
+    filtered = [...filtered].sort((a, b) =>
+      (a.name||'').localeCompare(b.name||'', 'ar')
+    );
+  }
+  renderTable(students, filtered);
+};
+
+window.toggleAlphaSort = () => {
+  alphaSortActive = !alphaSortActive;
+  const btn = document.getElementById('sortAlphaBtn');
+  btn.classList.toggle('active', alphaSortActive);
+  applyFilters();
 };
 
 // ── Export Modal ─────────────────────────────────────────────────
