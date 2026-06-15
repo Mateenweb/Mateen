@@ -107,8 +107,11 @@ function startListening(userId) {
       const lastAt  = data.lastAt?.seconds || 0;
       const unread  = data.unread?.[userId] || 0;
 
+      console.log('[Notif] conv change:', change.type, convId, 'unread:', unread, 'lastAt:', lastAt, 'lastSeen:', lastSeen[convId]);
+
       if (unread > 0 && lastAt > (lastSeen[convId] || 0)) {
         lastSeen[convId] = lastAt;
+        console.log('[Notif] 🔔 NEW MESSAGE! showing notification');
         const onMsgsPage = window.location.pathname.includes('messages.html');
         playSound();
         if (!onMsgsPage) {
@@ -148,18 +151,38 @@ function startListening(userId) {
 }
 
 // ── تفعيل تلقائي عند لوجين ───────────────────────────────────────────────
+// unlock audio on first user interaction
+let audioUnlocked = false;
+function unlockAudio() {
+  if (audioUnlocked) return;
+  audioUnlocked = true;
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    ctx.resume();
+  } catch(e) {}
+}
+document.addEventListener('click', unlockAudio, { once: true });
+document.addEventListener('touchstart', unlockAudio, { once: true });
+
 onAuthStateChanged(auth, user => {
   if (user) {
+    console.log('[Notif] user logged in:', user.uid);
     startListening(user.uid);
-    // طلب إذن الإشعارات بعد تفاعل المستخدم
     if ('Notification' in window && Notification.permission === 'default') {
-      setTimeout(() => Notification.requestPermission(), 3000);
+      setTimeout(() => Notification.requestPermission().then(p => {
+        console.log('[Notif] permission:', p);
+      }), 3000);
+    } else {
+      console.log('[Notif] notification permission:', Notification.permission);
     }
   } else {
+    console.log('[Notif] no user');
     if (notifUnsub) { notifUnsub(); notifUnsub = null; }
+    if (newsUnsub)  { newsUnsub();  newsUnsub  = null; }
   }
 });
 
 // ── export للاستخدام الخارجي لو محتاج ───────────────────────────────────
 export function initNotifications() {}
 export { showNotifToast as showToast };
+
