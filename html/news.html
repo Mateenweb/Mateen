@@ -32,7 +32,13 @@
 <div class="main-wrap">
   <div class="news-layout">
     <div class="news-main">
-      <div class="section-title">آخر الإعلانات</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:4px">
+        <div class="section-title" style="margin-bottom:0">آخر الإعلانات</div>
+        <button id="addNewsBtn" style="display:none;align-items:center;gap:6px;background:#1a4a2e;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer"
+          onclick="document.getElementById('addNewsModal').style.display='flex'">
+          <i class="ti ti-plus"></i> إضافة خبر
+        </button>
+      </div>
       <div class="section-sub">كل جديد من البرنامج</div>
 
       <!-- Loading -->
@@ -71,6 +77,62 @@
   <div class="footer-social"><a href="#"><i class="ti ti-brand-telegram"></i></a><a href="#"><i class="ti ti-brand-twitter"></i></a></div>
 </footer>
 
+<!-- Add News Modal -->
+<div id="addNewsModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;align-items:center;justify-content:center;padding:16px">
+  <div style="background:#fff;border-radius:14px;width:100%;max-width:500px;padding:24px;box-shadow:0 8px 40px rgba(0,0,0,.18)">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+      <div style="font-family:'Amiri',serif;font-size:18px;font-weight:700;color:#1a4a2e">إضافة خبر جديد</div>
+      <button onclick="document.getElementById('addNewsModal').style.display='none'"
+        style="background:none;border:none;font-size:20px;cursor:pointer;color:#999">✕</button>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div>
+        <label style="font-family:'Noto Naskh Arabic',serif;font-size:13px;color:#555;display:block;margin-bottom:4px">العنوان *</label>
+        <input id="newsTitle" type="text" placeholder="عنوان الخبر أو الإعلان"
+          style="width:100%;padding:9px 12px;border:1px solid #d4c9a8;border-radius:8px;font-family:'Noto Naskh Arabic',serif;font-size:14px;box-sizing:border-box"/>
+      </div>
+
+      <div>
+        <label style="font-family:'Noto Naskh Arabic',serif;font-size:13px;color:#555;display:block;margin-bottom:4px">التفاصيل</label>
+        <textarea id="newsBody" rows="4" placeholder="تفاصيل الخبر..."
+          style="width:100%;padding:9px 12px;border:1px solid #d4c9a8;border-radius:8px;font-family:'Noto Naskh Arabic',serif;font-size:14px;resize:vertical;box-sizing:border-box"></textarea>
+      </div>
+
+      <div style="display:flex;gap:10px">
+        <div style="flex:1">
+          <label style="font-family:'Noto Naskh Arabic',serif;font-size:13px;color:#555;display:block;margin-bottom:4px">التصنيف</label>
+          <select id="newsTag"
+            style="width:100%;padding:9px 10px;border:1px solid #d4c9a8;border-radius:8px;font-family:'Noto Naskh Arabic',serif;font-size:13px">
+            <option value="📝 خبر">📝 خبر</option>
+            <option value="📢 إعلان">📢 إعلان</option>
+            <option value="⚠️ تنبيه">⚠️ تنبيه</option>
+            <option value="🎉 مناسبة">🎉 مناسبة</option>
+            <option value="📅 موعد">📅 موعد</option>
+          </select>
+        </div>
+        <div style="display:flex;align-items:flex-end;padding-bottom:2px">
+          <label style="display:flex;align-items:center;gap:6px;font-family:'Noto Naskh Arabic',serif;font-size:13px;cursor:pointer">
+            <input type="checkbox" id="newsPinned" style="width:16px;height:16px"/>
+            📌 تثبيت
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px">
+      <button onclick="document.getElementById('addNewsModal').style.display='none'"
+        style="padding:9px 20px;border:1px solid #d4c9a8;border-radius:8px;background:#fff;color:#888;font-family:'Noto Naskh Arabic',serif;font-size:13px;cursor:pointer">
+        إلغاء
+      </button>
+      <button onclick="submitNews()"
+        style="padding:9px 24px;border:none;border-radius:8px;background:#1a4a2e;color:#fff;font-family:'Noto Naskh Arabic',serif;font-size:13px;font-weight:600;cursor:pointer">
+        <i class="ti ti-send"></i> نشر
+      </button>
+    </div>
+  </div>
+</div>
+
 <script src="../js/nav.js"></script>
 <script type="module">
 import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
@@ -89,7 +151,11 @@ onAuthStateChanged(auth, async user => {
   if (!user) return;
   const { getDoc } = await import("https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js");
   const snap = await getDoc(doc(db, 'users', user.uid));
-  if (snap.exists() && snap.data().role === 'admin') isAdmin = true;
+  if (snap.exists() && snap.data().role === 'admin') {
+    isAdmin = true;
+    const btn = document.getElementById('addNewsBtn');
+    if (btn) btn.style.display = 'flex';
+  }
 });
 
 // تحميل الأخبار
@@ -127,7 +193,30 @@ window.deleteNews = async id => {
   if (!confirm('حذف هذا الخبر نهائياً؟')) return;
   await deleteDoc(doc(db, 'news', id));
 };
+
+const { addDoc, serverTimestamp } = await import("https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js");
+
+window.submitNews = async () => {
+  const title  = document.getElementById('newsTitle').value.trim();
+  const body   = document.getElementById('newsBody').value.trim();
+  const tag    = document.getElementById('newsTag').value;
+  const pinned = document.getElementById('newsPinned').checked;
+
+  if (!title) { alert('يرجى إدخال العنوان'); return; }
+
+  await addDoc(collection(db, 'news'), {
+    title, body, tag, pinned,
+    createdAt: serverTimestamp()
+  });
+
+  // Reset form
+  document.getElementById('newsTitle').value  = '';
+  document.getElementById('newsBody').value   = '';
+  document.getElementById('newsPinned').checked = false;
+  document.getElementById('addNewsModal').style.display = 'none';
+};
 </script>
 <script type="module" src="../js/notifications.js"></script>
 </body>
 </html>
+
