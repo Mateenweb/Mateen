@@ -173,12 +173,12 @@ function loadConversations() {
       const otherId = data.participants?.find(p => p !== currentUser.uid);
       if (!otherId) return;
 
-      let otherName = 'Admin';
+      let otherName = 'الإدارة';
       let otherRole = '';
       try {
         const otherSnap = await getDoc(doc(db, 'users', otherId));
         if (otherSnap.exists()) {
-          otherName = otherSnap.data().name || 'Admin';
+          otherName = otherSnap.data().name ||  'الإدارة';
           otherRole = otherSnap.data().role  || '';
         }
       } catch(e) { /* مش قادر يجيب بيانات المستخدم — نكمل */ }
