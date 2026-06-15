@@ -7,9 +7,8 @@ import { getFirestore, collection, addDoc, deleteDoc, doc,
          onSnapshot, query, orderBy, getDoc, updateDoc, getDocs }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 import { fullDeleteUser } from "./delete-account.js";
-import { initNotifications } from "./notifications.js";
 import { FIREBASE_CONFIG } from "./config.js";
-import { exportWord, exportPdf, exportAttendanceWord, exportAttendancePdf } from "./export.js";
+import { exportWord, exportPdf } from "./export.js";
 
 const app  = getApps().length ? getApp() : initializeApp(FIREBASE_CONFIG);
 const auth = getAuth(app);
@@ -27,7 +26,6 @@ onAuthStateChanged(auth, async user => {
   document.getElementById('navUserName').textContent  = user.displayName || user.email.split('@')[0];
   document.getElementById('authGate').style.display   = 'none';
   document.getElementById('mainContent').style.display = 'flex';
-  initNotifications(user.uid);
   if (role !== 'admin') {
     document.getElementById('studentsSection').style.display = 'none';
   } else {
@@ -430,17 +428,8 @@ window.toggleAlphaSort = () => {
 };
 
 window.openExportModal = () => {
-  // ابنِ قائمة الطالبات في المودال
-  const list = document.getElementById('exportStudentList');
-  if (list) {
-    list.innerHTML = allStudents.map(s => `
-      <label class="att-stu-label">
-        <input type="checkbox" class="export-stu-cb" value="${s.id}" checked>
-        <span>${s.name || '(بدون اسم)'}</span>
-      </label>`).join('');
-  }
   const m = document.getElementById('exportModal');
-  if (m) m.style.display = 'flex';
+  if (m) { m.style.display = 'flex'; }
 };
 
 window.closeExportModal = () => {
@@ -448,17 +437,17 @@ window.closeExportModal = () => {
   if (m) { m.style.display = 'none'; }
 };
 
-window.exportSelectAll = (val) => {
-  document.querySelectorAll('.export-stu-cb').forEach(cb => cb.checked = val);
-};
-
 window.doExport = async (type) => {
-  // الطالبات المختارة فقط
-  const checked = [...document.querySelectorAll('.export-stu-cb:checked')].map(cb => cb.value);
-  let data = checked.length
-    ? allStudents.filter(s => checked.includes(s.id))
-    : allStudents;
-  if (!data.length) { showToast('اختاري طالبة واحدة على الأقل'); return; }
+  const q  = (document.getElementById('stuSearch').value||'').toLowerCase();
+  const fi = document.getElementById('stuFilterInterview').value;
+  const fr = document.getElementById('stuFilterResult').value;
+  const fs = document.getElementById('stuFilterStatus').value;
+  let data = allStudents.filter(s=>
+    (!q  || (s.name||'').toLowerCase().includes(q)) &&
+    (fi==='all' || s.interview===fi) &&
+    (fr==='all' || s.accepted===fr) &&
+    (fs==='all' || s.status===fs)
+  );
   if (stuSortAlpha) data = [...data].sort((a,b)=>(a.name||'').localeCompare(b.name||'','ar'));
   if (type === 'word') await exportWord(data);
   else await exportPdf(data);
@@ -687,6 +676,7 @@ const _origToast = window.showToast ? null : null;
 
 function hideErr(){ document.getElementById('errMsg').classList.remove('show'); }
 function showToast(msg,err=false){ const t=document.getElementById('toast'); t.textContent=msg; t.className='toast'+(err?' error':''); t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),3000); }
+function showErr(msg){ showToast(msg, true); }
 
 // ══════════════════════════════════════
 //  جميع الحسابات المسجلة (admin فقط)
@@ -827,48 +817,3 @@ window.addEventListener("resize", () => {
 
 
 
-// ── تصدير الغياب والحضور ─────────────────────────────
-window.openAttModal = () => {
-  const list = document.getElementById('attStudentList');
-  if (list) {
-    list.innerHTML = allStudents.map(s => `
-      <label class="att-stu-label">
-        <input type="checkbox" class="att-stu-cb" value="${s.id}" data-name="${(s.name||'').replace(/"/g,'&quot;')}">
-        <span>${s.name || '(بدون اسم)'}</span>
-      </label>`).join('');
-  }
-  const m = document.getElementById('attModal');
-  if (m) m.style.display = 'flex';
-};
-
-window.closeAttModal = () => {
-  const m = document.getElementById('attModal');
-  if (m) m.style.display = 'none';
-};
-
-window.attSelectAll = (val) => {
-  document.querySelectorAll('.att-stu-cb').forEach(cb => cb.checked = val);
-};
-
-window.doAttExport = async (type) => {
-  const checked = [...document.querySelectorAll('.att-stu-cb:checked')];
-  if (!checked.length) { showToast('اختاري طالبة واحدة على الأقل'); return; }
-
-  const mode = document.getElementById('attMode')?.value || 'perStudent';
-
-  showToast('جاري تحميل البيانات…');
-  const studentsData = [];
-  for (const cb of checked) {
-    const sid  = cb.value;
-    const name = cb.dataset.name || sid;
-    const sessSnap = await getDocs(
-      query(collection(db, 'students', sid, 'sessions'), orderBy('date', 'asc'))
-    );
-    const sessions = sessSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-    studentsData.push({ name, sessions });
-  }
-
-  window.closeAttModal();
-  if (type === 'word') await exportAttendanceWord(studentsData, mode);
-  else                 await exportAttendancePdf(studentsData, mode);
-};
