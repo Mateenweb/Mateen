@@ -41,7 +41,7 @@ function showNotifToast(title, body, url) {
   t.id = 'mateen-notif-toast';
   t.innerHTML = `
     <div onclick="window.location.href='${url || '/Mateen/html/messages.html'}'" style="
-      position:fixed;bottom:24px;left:24px;z-index:99999;
+      position:fixed;top:24px;left:24px;z-index:99999;
       background:#1a4a2e;color:#fff;border-radius:14px;
       padding:14px 18px;min-width:260px;max-width:320px;
       box-shadow:0 6px 24px rgba(0,0,0,.35);
@@ -51,7 +51,7 @@ function showNotifToast(title, body, url) {
       <div style="font-size:13px;opacity:.85">${body}</div>
       <div style="font-size:11px;opacity:.55;margin-top:6px">اضغطي للفتح</div>
     </div>
-    <style>@keyframes notifIn{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}</style>`;
+    <style>@keyframes notifIn{from{transform:translateY(-20px);opacity:0}to{transform:translateY(0);opacity:1}}</style>`;
   document.body.appendChild(t);
   setTimeout(() => t.remove(), 6000);
 }
