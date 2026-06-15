@@ -428,8 +428,17 @@ window.toggleAlphaSort = () => {
 };
 
 window.openExportModal = () => {
+  // ابنِ قائمة الطالبات في المودال
+  const list = document.getElementById('exportStudentList');
+  if (list) {
+    list.innerHTML = allStudents.map(s => `
+      <label class="att-stu-label">
+        <input type="checkbox" class="export-stu-cb" value="${s.id}" checked>
+        <span>${s.name || '(بدون اسم)'}</span>
+      </label>`).join('');
+  }
   const m = document.getElementById('exportModal');
-  if (m) { m.style.display = 'flex'; }
+  if (m) m.style.display = 'flex';
 };
 
 window.closeExportModal = () => {
@@ -437,17 +446,17 @@ window.closeExportModal = () => {
   if (m) { m.style.display = 'none'; }
 };
 
+window.exportSelectAll = (val) => {
+  document.querySelectorAll('.export-stu-cb').forEach(cb => cb.checked = val);
+};
+
 window.doExport = async (type) => {
-  const q  = (document.getElementById('stuSearch').value||'').toLowerCase();
-  const fi = document.getElementById('stuFilterInterview').value;
-  const fr = document.getElementById('stuFilterResult').value;
-  const fs = document.getElementById('stuFilterStatus').value;
-  let data = allStudents.filter(s=>
-    (!q  || (s.name||'').toLowerCase().includes(q)) &&
-    (fi==='all' || s.interview===fi) &&
-    (fr==='all' || s.accepted===fr) &&
-    (fs==='all' || s.status===fs)
-  );
+  // الطالبات المختارة فقط
+  const checked = [...document.querySelectorAll('.export-stu-cb:checked')].map(cb => cb.value);
+  let data = checked.length
+    ? allStudents.filter(s => checked.includes(s.id))
+    : allStudents;
+  if (!data.length) { showToast('اختاري طالبة واحدة على الأقل'); return; }
   if (stuSortAlpha) data = [...data].sort((a,b)=>(a.name||'').localeCompare(b.name||'','ar'));
   if (type === 'word') await exportWord(data);
   else await exportPdf(data);
