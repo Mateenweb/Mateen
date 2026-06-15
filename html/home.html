@@ -134,16 +134,22 @@
         </div>
       </div>
       <div class="sidebar-divider"></div>
-      <nav class="sidebar-nav">
+      <nav class="sidebar-nav" id="sidebarNav">
         <a class="active" href="home.html"><i class="ti ti-home"></i> الرئيسية</a>
         <a href="messages.html" id="sidebarMsgLink"><i class="ti ti-message-2"></i> رسائلي
           <span class="nav-msg-badge d-none" id="sidebarMsgBadge">0</span>
         </a>
-        <a href="student.html" id="profileLink"><i class="ti ti-user"></i> ملفي الشخصي</a>
-        <a href="#"><i class="ti ti-certificate"></i> شهاداتي</a>
-        <a href="#"><i class="ti ti-award"></i> إجازاتي</a>
-        <a href="#"><i class="ti ti-chart-bar"></i> درجاتي</a>
-        <a href="schedule.html"><i class="ti ti-calendar"></i> جدولي الدراسي</a>
+        <!-- طالبة / بنات متين -->
+        <a href="student.html" id="profileLink" style="display:none"><i class="ti ti-user"></i> ملفي الشخصي</a>
+        <a href="#" id="linkCerts" style="display:none"><i class="ti ti-certificate"></i> شهاداتي</a>
+        <a href="#" id="linkAwards" style="display:none"><i class="ti ti-award"></i> إجازاتي</a>
+        <a href="#" id="linkGrades" style="display:none"><i class="ti ti-chart-bar"></i> درجاتي</a>
+        <a href="schedule.html" id="linkSchedule" style="display:none"><i class="ti ti-calendar"></i> جدولي الدراسي</a>
+        <!-- إدارة / مشرفة -->
+        <a href="admin.html" id="linkAdmin" style="display:none"><i class="ti ti-shield"></i> لوحة الإدارة</a>
+        <a href="news.html" id="linkNews" style="display:none"><i class="ti ti-speakerphone"></i> الأخبار</a>
+        <!-- معلمة -->
+        <a href="#" id="linkTeacher" style="display:none"><i class="ti ti-users"></i> طالباتي</a>
       </nav>
       <div class="sidebar-divider"></div>
       <div class="sidebar-actions">

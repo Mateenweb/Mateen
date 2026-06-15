@@ -55,35 +55,40 @@ onAuthStateChanged(auth, async user => {
 
   document.getElementById('sidebarName').textContent = 'مرحباً، ' + name;
   document.getElementById('sidebarRole').textContent =
-    role === 'admin' ? 'إدارية' : 'الطالبة';
+    role === 'admin'      ? 'إدارية' :
+    role === 'supervisor' ? 'مشرفة' :
+    role === 'teacher'    ? 'معلمة' :
+    role === 'mateen'     ? 'بنات متين' : 'الطالبة';
 
-  // لو إدارية — امسح كل الروابط وأضيف بس لوحة الإدارة
-  if (role === 'admin') {
-    const nav = userDiv.querySelector('.sidebar-nav');
-    if (nav) {
-      nav.innerHTML = `
-        <a href="admin.html" class="admin-link" style="display:flex;align-items:center;gap:12px;padding:10px 14px;color:var(--text-mid);text-decoration:none;border-radius:6px;transition:all 0.2s;">
-          <i class="ti ti-shield"></i> لوحة الإداريات
-        </a>`;
-    }
-    return;
+  // ── إظهار الـ links حسب الـ role ──────────────────────────
+  function show(id) { const el = document.getElementById(id); if(el) el.style.display = ''; }
+
+  if (role === 'admin' || role === 'supervisor') {
+    show('linkAdmin');
+    show('linkNews');
+  } else if (role === 'teacher') {
+    show('linkTeacher');
+  } else if (role === 'mateen') {
+    show('linkCerts');
+    show('linkAwards');
+    show('linkGrades');
+    show('linkSchedule');
   }
+  // student: مش بيظهرله روابط إضافية
 
-  // ضبط رابط "ملفي الشخصي" وأيقونة البروفايل — لبنات متين فقط
+  // ── أيقونة البروفايل وملفي الشخصي — بنات متين فقط ──────
   const profileLink   = document.getElementById('profileLink');
   const navProfileBtn = document.getElementById('navProfileBtn');
 
   if (role === 'mateen') {
     const linkedId = snap.data().linkedStudentId;
     if (linkedId) {
-      if (profileLink)   profileLink.href = `student.html?id=${linkedId}`;
+      if (profileLink)   { profileLink.href = `student.html?id=${linkedId}`; profileLink.style.display = ''; }
       if (navProfileBtn) { navProfileBtn.href = `student.html?id=${linkedId}`; navProfileBtn.classList.remove('d-none'); }
     } else {
-      if (profileLink)   profileLink.style.display = 'none';
       if (navProfileBtn) navProfileBtn.classList.add('d-none');
     }
   } else {
-    if (profileLink)   profileLink.style.display = 'none';
     if (navProfileBtn) navProfileBtn.classList.add('d-none');
   }
 });
