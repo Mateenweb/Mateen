@@ -76,23 +76,22 @@ async function showBrowserNotif(title, body) {
 }
 
 // ── الاستماع لرسائل جديدة ────────────────────────────────────────────────
+let newsUnsub = null;
+
 function startListening(userId) {
   if (notifUnsub) { notifUnsub(); notifUnsub = null; }
 
-  // استمع للمحادثات اللي المستخدم طرف فيها
+  // ── رسائل ────────────────────────────────────────────
   const q = query(
     collection(db, 'conversations'),
     where('participants', 'array-contains', userId)
   );
 
-  // لا نبعت إشعار أول تحميل — بس للرسائل الجديدة بعد كده
   let firstLoad = true;
-  // حفظ آخر lastAt لكل محادثة
   const lastSeen = {};
 
   notifUnsub = onSnapshot(q, snap => {
     if (firstLoad) {
-      // سجّل الحالة الحالية بدون إشعار
       snap.docs.forEach(d => {
         lastSeen[d.id] = d.data().lastAt?.seconds || 0;
       });
@@ -102,21 +101,15 @@ function startListening(userId) {
 
     snap.docChanges().forEach(async change => {
       if (change.type !== 'modified' && change.type !== 'added') return;
-      const data = change.doc.data();
+      const data   = change.doc.data();
       const convId = change.doc.id;
-
-      // تجاهل لو الرسالة من المستخدم نفسه
       const lastMsg = data.lastMsg || '';
       const lastAt  = data.lastAt?.seconds || 0;
       const unread  = data.unread?.[userId] || 0;
 
-      // إشعار بس لو في unread وآخر رسالة أحدث من اللي شفناه
       if (unread > 0 && lastAt > (lastSeen[convId] || 0)) {
         lastSeen[convId] = lastAt;
-
-        // مش في صفحة الرسائل
         const onMsgsPage = window.location.pathname.includes('messages.html');
-
         playSound();
         if (!onMsgsPage) {
           showNotifToast('رسالة جديدة 💬', lastMsg, '/Mateen/html/messages.html');
@@ -125,6 +118,33 @@ function startListening(userId) {
       }
     });
   });
+
+  // ── أخبار جديدة ───────────────────────────────────────
+  if (newsUnsub) { newsUnsub(); newsUnsub = null; }
+
+  let newsFirstLoad = true;
+
+  newsUnsub = onSnapshot(
+    query(collection(db, 'news'), orderBy('createdAt', 'desc')),
+    snap => {
+      if (newsFirstLoad) { newsFirstLoad = false; return; }
+
+      snap.docChanges().forEach(change => {
+        if (change.type !== 'added') return;
+        const n = change.doc.data();
+        const onNewsPage = window.location.pathname.includes('news.html');
+        playSound();
+        if (!onNewsPage) {
+          showNotifToast(
+            '📢 ' + (n.title || 'خبر جديد'),
+            n.body ? n.body.slice(0, 80) : '',
+            '/Mateen/html/news.html'
+          );
+          showBrowserNotif('📢 ' + (n.title || 'خبر جديد — متين'), n.body?.slice(0, 80) || '');
+        }
+      });
+    }
+  );
 }
 
 // ── تفعيل تلقائي عند لوجين ───────────────────────────────────────────────
