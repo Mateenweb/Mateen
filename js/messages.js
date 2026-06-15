@@ -371,10 +371,22 @@ window.sendMsg = async () => {
     lastAt:   serverTimestamp(),
     [`unread.${otherId}`]: currentUnread + 1,
     [`unread.${currentUser.uid}`]: 0,
-    // لو أي طرف كان حاذف المحادثة، ترجع تظهر عند إرسال رسالة جديدة
     [`hiddenBy.${currentUser.uid}`]: false,
     [`hiddenBy.${otherId}`]: false,
   }, { merge: true });
+
+  // ── بعت إشعار للمستلم عبر Firestore (بيشتغل مجاناً بدون سيرفر) ──────
+  if (otherId) {
+    const senderName = currentUserData?.name || currentUser.email?.split('@')[0] || 'متين';
+    const preview    = text.length > 80 ? text.slice(0, 80) + '…' : text;
+    await addDoc(collection(db, 'notifications', otherId, 'pending'), {
+      title:     `💬 ${senderName}`,
+      body:      preview,
+      url:       'https://mateenweb.github.io/Mateen/html/messages.html',
+      senderId:  currentUser.uid,
+      createdAt: serverTimestamp(),
+    });
+  }
 };
 
 window.handleMsgKey = e => {

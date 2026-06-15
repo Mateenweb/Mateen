@@ -148,6 +148,17 @@ window.submitContactNew = async () => {
       sentAt:     serverTimestamp(),
     });
 
+    // إشعار Firestore للمستلم
+    if (recipientUid) {
+      await addDoc(collection(db,'notifications',recipientUid,'pending'), {
+        title:     `💬 ${senderName}`,
+        body:      bodyText.slice(0, 80),
+        url:       'https://mateenweb.github.io/Mateen/html/messages.html',
+        senderId:  user.uid,
+        createdAt: serverTimestamp(),
+      });
+    }
+
     // نجاح
     btn.innerHTML = '<i class="ti ti-check"></i> تم الإرسال بنجاح!';
     btn.style.background = 'var(--green-mid)';
