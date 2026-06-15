@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
-import { getFirestore, collection, doc, getDoc, getDocs, query, where, orderBy } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
+import { getFirestore, collection, doc, getDoc, getDocs, query, where } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
 import { FIREBASE_CONFIG } from "./config.js";
 
@@ -57,10 +57,11 @@ window.doLogout = () => signOut(auth).then(() => window.location.href = '../html
 // ── Load mateen students ──────────────────────
 async function loadMateenStudents() {
   try {
-    const q = query(collection(db, 'users'), where('role', '==', 'mateen'), orderBy('name'));
+    const q = query(collection(db, 'users'), where('role', '==', 'mateen'));
     const snap = await getDocs(q);
     allMateenStudents = [];
     snap.forEach(d => allMateenStudents.push({ id: d.id, ...d.data() }));
+    allMateenStudents.sort((a, b) => (a.name || '').localeCompare(b.name || '', 'ar'));
     document.getElementById('mateenCount').textContent = allMateenStudents.length;
     renderMateenList(allMateenStudents);
   } catch(e) {

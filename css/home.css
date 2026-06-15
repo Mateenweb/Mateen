@@ -1019,52 +1019,61 @@ footer {
 }
 .reg-close:hover { background: #fde8e8; color: #c0392b; }
 
-/* ===== RESPONSIVE BREAKPOINTS ===== */
+/* ===== RESPONSIVE — FLUID DESIGN ===== */
 
-/* Tablet */
+/* Typography — fluid at all sizes */
+.hero-text h1 {
+  font-size: clamp(22px, 4vw, 56px);
+}
+.hero-text p {
+  font-size: clamp(12px, 1.4vw, 16px);
+}
+.section-title {
+  font-size: clamp(16px, 2vw, 22px);
+}
+
+/* Sections — fluid padding */
+.page-section {
+  padding: clamp(16px, 3vw, 32px) clamp(16px, 4vw, 40px);
+}
+.hero {
+  padding: clamp(20px, 5vw, 80px) clamp(16px, 5vw, 60px);
+  min-height: clamp(260px, 40vw, 480px);
+}
+
+/* Grid columns — fluid */
+.col-xl-2dot4 {
+  width: clamp(50%, calc(100% / 3), 20%);
+}
+
+/* Tablet (768–1199px) */
 @media (max-width: 1199px) {
-  .hero { padding: 60px 40px; }
-  .hero-text h1 { font-size: 44px; }
-  .page-section { padding: 24px 24px; }
   .col-xl-2dot4 { width: 33.333%; }
 }
 
-/* Small tablet */
+/* Small tablet (≤ 991px) */
 @media (max-width: 991px) {
   .page-layout { flex-direction: column; }
-  .hero { padding: 44px 28px; min-height: 340px; }
-  .hero-text h1 { font-size: 38px; }
   .col-xl-2dot4 { width: 33.333%; }
   footer { padding: 14px 20px; }
 }
 
-/* Mobile */
+/* Mobile (≤ 767px) */
 @media (max-width: 767px) {
   .hero {
-    padding: 20px 16px;
     text-align: center;
-    min-height: unset;
     justify-content: center;
   }
-  .hero::before {
-    background: rgba(247,239,227,0.88);
-  }
+  .hero::before { background: rgba(247,239,227,0.88); }
   .hero-text { max-width: 100%; }
-  .hero-text h1 { font-size: 26px; }
-  .hero-text p { font-size: 12px; }
   .hero-btns { justify-content: center; }
   .hero-btn-primary, .hero-btn-secondary { padding: 9px 18px; font-size: 13px; }
-
   .col-xl-2dot4 { width: 50%; }
-
-  .page-section { padding: 20px 16px; }
   .stats-bar { padding: 16px 12px; }
-
   .contact-section { padding: 40px 0; }
   .contact-form-wrap { padding: 20px; }
   .reg-modal-box { padding: 22px; }
   .reg-modal-header { flex-wrap: wrap; gap: 10px; }
-
   footer {
     padding: 14px 16px;
     flex-direction: column;
@@ -1075,9 +1084,8 @@ footer {
   .footer-social { justify-content: center; }
 }
 
-/* Very small mobile */
+/* Very small (≤ 420px) */
 @media (max-width: 420px) {
-  .hero-text h1 { font-size: 26px; }
   .col-xl-2dot4 { width: 50%; }
   .nav-brand { font-size: 13px; }
 }

@@ -129,9 +129,9 @@ body {
   box-shadow: 0 2px 8px rgba(92,61,46,0.07);
 }
 
-.stat-card.absent { border-top-color: #c0392b; }
+.stat-card.absent { border-top-color: #a05a40; }
 .stat-card.pct    { border-top-color: var(--green-mid); }
-.stat-card.grade  { border-top-color: #e67e22; }
+.stat-card.grade  { border-top-color: #9b7a52; }
 
 .stat-num {
   font-family: Amiri, serif;
@@ -238,8 +238,8 @@ body {
   font-weight: 700;
 }
 .att-badge.present { background: rgba(138,94,60,0.12); color: var(--green-mid); }
-.att-badge.absent  { background: rgba(192,57,43,0.1); color: #c0392b; }
-.att-badge.unknown { background: var(--beige2); color: #aaa; }
+.att-badge.absent  { background: #f2ddd8; color: #8b3a2a; }
+.att-badge.unknown { background: var(--beige2); color: #9b8470; }
 
 /* ── Grades ── */
 .grades-list { display: flex; flex-direction: column; gap: 7px; }
@@ -269,8 +269,8 @@ body {
   font-weight: 600;
 }
 .grade-pct.high { background: rgba(138,94,60,0.12); color: var(--green-mid); }
-.grade-pct.mid  { background: rgba(201,162,39,0.15); color: #7a5c00; }
-.grade-pct.low  { background: rgba(192,57,43,0.1); color: #c0392b; }
+.grade-pct.mid  { background: rgba(201,162,39,0.12); color: #7a5c2e; }
+.grade-pct.low  { background: #f2ddd8; color: #8b3a2a; }
 
 /* ── Notes ── */
 .notes-content {

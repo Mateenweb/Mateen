@@ -1,12 +1,11 @@
-
 import { initializeApp }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail,
          createUserWithEmailAndPassword, setPersistence, browserLocalPersistence,
-         onAuthStateChanged }
+         onAuthStateChanged, deleteUser }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
 import { getFirestore, doc, getDoc, setDoc, addDoc, serverTimestamp,
-         collection, getDocs, query, orderBy }
+         collection, getDocs, query, orderBy, deleteDoc }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 import { FIREBASE_CONFIG } from "./config.js";
 
@@ -119,6 +118,7 @@ window.selectRegRole = (role, btn) => {
   btn.classList.add('active');
   // إظهار حقل المادة فقط للمعلمة
   document.getElementById('regSubjectGroup').style.display = role === 'teacher' ? 'flex' : 'none';
+  document.getElementById('regYearGroup').style.display = role === 'mateen' ? 'block' : 'none';
 };
 
 /* ── Eye toggle ── */
@@ -316,6 +316,48 @@ window.doReset = async () => {
   } catch(e) {
     showError(ERRORS[e.code] || 'تعذر الإرسال');
     setLoading('resetBtn', false, '<i class="ti ti-send"></i> إرسال رابط الاستعادة');
+  }
+};
+
+
+/* ══════════════════════════════════════
+   حذف الحساب من صفحة الدخول
+══════════════════════════════════════ */
+window.doDeleteAccount = async () => {
+  hideError();
+  const email = document.getElementById('emailInput').value.trim();
+  const pass  = document.getElementById('passInput').value;
+
+  if (!email || !pass) {
+    showError('أدخلي البريد الإلكتروني وكلمة المرور أولاً لتأكيد هويتك');
+    return;
+  }
+
+  const confirmed = confirm('هل أنتِ متأكدة من حذف حسابك نهائياً؟\nهذا الإجراء لا يمكن التراجع عنه.');
+  if (!confirmed) return;
+
+  setLoading('deleteAccountBtn', true);
+  try {
+    // تسجيل الدخول أولاً للتحقق من الهوية
+    const cred = await signInWithEmailAndPassword(auth, email, pass);
+    const uid  = cred.user.uid;
+    const db2  = getFirestore(app);
+
+    // حذف بيانات المستخدم من Firestore
+    await deleteDoc(doc(db2, 'users', uid));
+
+    // حذف الحساب من Firebase Auth
+    await deleteUser(cred.user);
+
+    showSuccess('تم الحذف ✅', 'تم حذف حسابك بنجاح.');
+  } catch(e) {
+    showError(ERRORS[e.code] || 'تعذر حذف الحساب، تأكدي من البيانات وحاولي مجدداً');
+  } finally {
+    const btn = document.getElementById('deleteAccountBtn');
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="ti ti-trash"></i> حذف حسابي';
+    }
   }
 };
 

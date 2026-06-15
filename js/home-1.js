@@ -35,9 +35,11 @@ onAuthStateChanged(auth, async user => {
   const mobNavBtns = document.getElementById('mobNavBtns');
   if (mobNavBtns) { mobNavBtns.classList.remove('d-flex','d-lg-flex'); mobNavBtns.classList.add('d-none'); }
 
-  // إظهار أيقونات الرسائل والبروفايل لما تسجلي دخول
-  const navUserActions = document.getElementById('navUserActions');
-  if (navUserActions) navUserActions.classList.remove('d-none');
+  // إظهار زرار "رسائلي" في النافبار
+  const navMsgBtn = document.getElementById('navMsgBtn');
+  if (navMsgBtn) navMsgBtn.classList.remove('d-none');
+
+  // أيقونة البروفايل — هتتحدد بعد ما نجيب الـ role
 
   // مسجلة دخول — اجلب بيانات المستخدمة
   guest.style.display   = 'none';
@@ -63,20 +65,22 @@ onAuthStateChanged(auth, async user => {
     return;
   }
 
-  // ضبط رابط "ملفي الشخصي" — لبنات متين فقط
-  const profileLink = document.getElementById('profileLink');
-  if (profileLink) {
-    if (role !== 'mateen') {
-      profileLink.style.display = 'none';
+  // ضبط رابط "ملفي الشخصي" وأيقونة البروفايل — لبنات متين فقط
+  const profileLink   = document.getElementById('profileLink');
+  const navProfileBtn = document.getElementById('navProfileBtn');
+
+  if (role === 'mateen') {
+    const linkedId = snap.data().linkedStudentId;
+    if (linkedId) {
+      if (profileLink)   profileLink.href = `student.html?id=${linkedId}`;
+      if (navProfileBtn) { navProfileBtn.href = `student.html?id=${linkedId}`; navProfileBtn.classList.remove('d-none'); }
     } else {
-      // بنات متين: روحي لصفحتها في الجدول عبر linkedStudentId
-      const linkedId = snap.data().linkedStudentId;
-      if (linkedId) {
-        profileLink.href = `student.html?id=${linkedId}`;
-      } else {
-        profileLink.style.display = 'none';
-      }
+      if (profileLink)   profileLink.style.display = 'none';
+      if (navProfileBtn) navProfileBtn.classList.add('d-none');
     }
+  } else {
+    if (profileLink)   profileLink.style.display = 'none';
+    if (navProfileBtn) navProfileBtn.classList.add('d-none');
   }
 });
 

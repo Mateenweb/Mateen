@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+<meta charset="utf-8"/>
+<link rel="icon" type="image/x-icon" href="../favicon.ico"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>جدولي الدراسي — متين</title>
+<link href="../libs/fonts/arabic-fonts.css" rel="stylesheet"/>
+<link href="../libs/tabler-icons/tabler-icons.min.css" rel="stylesheet"/>
+<link href="../css/student.css" rel="stylesheet"/>
+<link href="../css/mobile.css" rel="stylesheet"/>
+<style>
+  :root {
+    --gold: #c9a227;
+    --gold-light: #f0d080;
+    --green-dark: #1b4332;
+    --green-mid: #2d6a4f;
+    --beige: #faf7f2;
+    --white: #fff;
+    --border: #e8dcc8;
+    --text-dark: #1a1a1a;
+    --text-mid: #6b7280;
+  }
+
+  body { background: var(--beige); margin: 0; font-family: 'Noto Naskh Arabic', serif; }
+
+  /* ── Auth Gate ── */
+  .auth-gate {
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; min-height: 100vh; gap: 16px;
+    background: var(--beige);
+  }
+  .gate-logo { width: 72px; height: 72px; border-radius: 50%; object-fit: cover; }
+  .gate-text { font-family: Amiri, serif; font-size: 16px; color: var(--green-dark); }
+
+  /* ── Page ── */
+  .sched-page {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 24px 16px 48px;
+  }
+
+  /* ── Header ── */
+  .sched-header {
+    text-align: center;
+    margin-bottom: 28px;
+  }
+  .sched-header .logo {
+    width: 64px; height: 64px;
+    border-radius: 50%; object-fit: cover;
+    border: 2px solid var(--gold);
+    margin-bottom: 10px;
+  }
+  .sched-title {
+    font-family: Amiri, serif;
+    font-size: 28px;
+    color: var(--green-dark);
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .sched-subtitle {
+    font-size: 13px;
+    color: var(--gold);
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+  .sched-level {
+    display: inline-block;
+    background: var(--green-dark);
+    color: var(--gold-light);
+    font-size: 13px;
+    font-weight: 700;
+    padding: 4px 18px;
+    border-radius: 20px;
+    margin-top: 10px;
+    font-family: Amiri, serif;
+  }
+
+  /* ── Table ── */
+  .sched-table-wrap {
+    background: var(--white);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.09);
+    border: 2px solid var(--gold);
+    overflow-x: auto;
+  }
+
+  .sched-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 500px;
+  }
+
+  .sched-table th {
+    background: var(--green-dark);
+    color: var(--gold-light);
+    font-family: Amiri, serif;
+    font-size: 14px;
+    font-weight: 700;
+    padding: 14px 12px;
+    text-align: center;
+    border: 1px solid rgba(255,255,255,0.15);
+  }
+
+  .sched-table td {
+    padding: 14px 12px;
+    text-align: center;
+    font-size: 15px;
+    font-weight: 600;
+    border: 1px solid var(--border);
+    color: var(--text-dark);
+  }
+
+  .sched-table tr:nth-child(even) td { background: #f9f6f0; }
+  .sched-table tr:hover td { background: #f0ebe0; transition: background 0.15s; }
+
+  /* يوم */
+  .day-cell {
+    background: #faf3e0 !important;
+    color: var(--gold) !important;
+    font-family: Amiri, serif;
+    font-size: 16px;
+    font-weight: 700;
+    white-space: nowrap;
+    border-left: 3px solid var(--gold) !important;
+  }
+
+  /* فسحة */
+  .break-cell {
+    color: var(--text-mid) !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    font-style: italic;
+  }
+
+  /* مواد */
+  .subject-fiqh    { color: #7a5c3a; }
+  .subject-tafseer { color: #8b6914; }
+  .subject-hadeeth { color: #6b5040; }
+  .subject-aqeedah { color: #7d5a2e; }
+  .subject-quran   { color: #5c4a1e; }
+  .subject-empty   { color: #ccc; }
+
+  /* ── Footer note ── */
+  .sched-note {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 13px;
+    color: var(--text-mid);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .sched-note i { color: var(--gold); font-size: 15px; }
+
+  /* ── Back button ── */
+  .back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: none;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 7px 14px;
+    font-family: inherit;
+    font-size: 13px;
+    color: var(--green-dark);
+    cursor: pointer;
+    margin-bottom: 20px;
+    text-decoration: none;
+    transition: background 0.15s;
+  }
+  .back-btn:hover { background: var(--beige); }
+</style>
+</head>
+<body>
+
+<!-- Auth Gate -->
+<div id="authGate" class="auth-gate">
+  <img src="../logo.png" alt="متين" class="gate-logo"/>
+  <div class="gate-text">جارٍ التحقق من الصلاحيات...</div>
+</div>
+
+<!-- Main Content -->
+<div id="mainContent" style="display:none">
+
+  <nav class="stu-nav">
+    <a href="home.html" class="stu-nav-logo">
+      <img src="../logo.png" alt="متين"/>
+      <span>برنامج متين العلمي</span>
+    </a>
+    <div class="stu-nav-btns">
+      <a href="home.html" style="color:var(--gold-light);text-decoration:none;font-size:13px;display:flex;align-items:center;gap:5px">
+        <i class="ti ti-home"></i> الرئيسية
+      </a>
+    </div>
+  </nav>
+
+  <div class="sched-page">
+
+    <a href="home.html" class="back-btn">
+      <i class="ti ti-arrow-right"></i> رجوع
+    </a>
+
+    <!-- Header -->
+    <div class="sched-header">
+      <img src="../logo.png" alt="متين" class="logo"/>
+      <div class="sched-title">جدول متين</div>
+      <div class="sched-subtitle">بتوقيت مكة المكرمة</div>
+      <div class="sched-level">المستوى الثاني</div>
+    </div>
+
+    <!-- Table -->
+    <div class="sched-table-wrap">
+      <table class="sched-table">
+        <thead>
+          <tr>
+            <th>اليوم</th>
+            <th>اللقاء الأول<br><small style="font-weight:400;font-size:12px">٨ — ٩:١٠</small></th>
+            <th>الفسحة<br><small style="font-weight:400;font-size:12px">٩:١٠ — ٩:٣٠</small></th>
+            <th>اللقاء الثاني<br><small style="font-weight:400;font-size:12px">٩:٣٠ — ١٠:٣٠</small></th>
+            <th>اللقاء الثالث<br><small style="font-weight:400;font-size:12px">١٠:٣٠ — ١٢</small></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="day-cell">الأحد</td>
+            <td class="subject-fiqh">فقه</td>
+            <td class="break-cell">—</td>
+            <td class="subject-tafseer">تفسير</td>
+            <td class="subject-quran" rowspan="5" style="font-size:18px;font-family:Amiri,serif;vertical-align:middle;">القرآن</td>
+          </tr>
+          <tr>
+            <td class="day-cell">الإثنين</td>
+            <td class="subject-hadeeth">حديث</td>
+            <td class="break-cell">—</td>
+            <td class="subject-fiqh">فقه</td>
+          </tr>
+          <tr>
+            <td class="day-cell">الثلاثاء</td>
+            <td class="subject-aqeedah">عقيدة</td>
+            <td class="break-cell">الفسحة</td>
+            <td class="subject-tafseer">تفسير</td>
+          </tr>
+          <tr>
+            <td class="day-cell">الأربعاء</td>
+            <td class="subject-fiqh">فقه</td>
+            <td class="break-cell">—</td>
+            <td class="subject-hadeeth">حديث</td>
+          </tr>
+          <tr>
+            <td class="day-cell">الخميس</td>
+            <td class="subject-tafseer">تفسير</td>
+            <td class="break-cell">—</td>
+            <td class="subject-aqeedah">عقيدة</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sched-note">
+      <i class="ti ti-map-pin"></i>
+      بتوقيت مكة المكرمة
+    </div>
+
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
+import { FIREBASE_CONFIG } from "../js/config.js";
+
+const app  = getApps().length ? getApp() : initializeApp(FIREBASE_CONFIG);
+const auth = getAuth(app);
+const db   = getFirestore(app);
+
+onAuthStateChanged(auth, async user => {
+  if (!user) { window.location.href = 'login.html'; return; }
+
+  const snap = await getDoc(doc(db, 'users', user.uid));
+  if (!snap.exists()) { window.location.href = 'login.html'; return; }
+
+  const role   = snap.data().role   || '';
+  const status = snap.data().status || '';
+
+  // بس بنات متين
+  if (role !== 'mateen' || status === 'pending' || status === 'suspended') {
+    window.location.href = 'home.html'; return;
+  }
+
+  document.getElementById('authGate').style.display    = 'none';
+  document.getElementById('mainContent').style.display = 'block';
+});
+</script>
+
+<script>
+// FOUC Prevention
+(function() {
+  function revealPage() { document.documentElement.classList.add('ready'); }
+  if (document.fonts && document.fonts.ready) {
+    var t = setTimeout(revealPage, 1500);
+    document.fonts.ready.then(function() { clearTimeout(t); revealPage(); });
+  } else {
+    window.addEventListener('load', revealPage);
+    setTimeout(revealPage, 1000);
+  }
+})();
+</script>
+
+</body>
+</html>

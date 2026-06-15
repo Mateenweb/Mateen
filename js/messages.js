@@ -140,8 +140,9 @@ async function loadAllUsers() {
   const snap = await getDocs(collection(db, 'users'));
   allUsers = [];
   snap.forEach(d => {
-    if (d.id !== currentUser.uid && d.data().status === 'active') {
-      allUsers.push({ id: d.id, ...d.data() });
+    const ud = d.data();
+    if (d.id !== currentUser.uid && (ud.status === 'active' || ud.role === 'admin')) {
+      allUsers.push({ id: d.id, ...ud });
     }
   });
 }
@@ -165,15 +166,19 @@ function loadConversations() {
 
     const promises = snap.docs.map(async d => {
       const data = d.data();
+
+      // تجاهل المحادثات المخفية — إلا لو كانت هي المحادثة المفتوحة حالياً
+      if (data.hiddenBy?.[currentUser.uid] && d.id !== activeConvId) return;
+
       const otherId = data.participants?.find(p => p !== currentUser.uid);
       if (!otherId) return;
 
-      let otherName = otherId;
+      let otherName = 'مستخدم';
       let otherRole = '';
       try {
         const otherSnap = await getDoc(doc(db, 'users', otherId));
         if (otherSnap.exists()) {
-          otherName = otherSnap.data().name || otherId;
+          otherName = otherSnap.data().name || 'مستخدم';
           otherRole = otherSnap.data().role  || '';
         }
       } catch(e) { /* مش قادر يجيب بيانات المستخدم — نكمل */ }
@@ -185,6 +190,7 @@ function loadConversations() {
 
     // ترتيب من الأحدث للأقدم في الـ client
     allConvs.sort((a, b) => (b.lastAt?.seconds || 0) - (a.lastAt?.seconds || 0));
+
     renderConvList(allConvs);
 
     // افتح أحدث محادثة تلقائياً لو مفيش محادثة مفتوحة
@@ -227,7 +233,9 @@ function renderConvList(list) {
     return `
       <div class="conv-item ${isActive ? 'active' : ''} ${unread ? 'unread' : ''}"
            onclick="openConv('${c.id}','${c.otherId}','${c.otherName}','${c.otherRole}')">
-        ${avatarHtml(c.otherName, c.otherRole, 44)}
+        <div class="conv-avatar-wrap">
+          ${avatarHtml(c.otherName, c.otherRole, 44)}
+        </div>
         <div class="conv-meta">
           <div class="conv-top-row">
             <span class="conv-name">${c.otherName}</span>
@@ -238,6 +246,11 @@ function renderConvList(list) {
             ${unread ? `<span class="conv-unread">${unread > 9 ? '9+' : unread}</span>` : ''}
           </div>
           <span class="conv-role-pill" style="background:${ROLE_INITIALS_BG[c.otherRole]||'#eee'};color:${ROLE_COLORS[c.otherRole]||'#555'}">${roleLabel}</span>
+        </div>
+        <button class="conv-delete-btn" title="حذف المحادثة"
+          onclick="event.stopPropagation(); deleteConv('${c.id}')">
+          <i class="ti ti-trash"></i>
+        </button>
         </div>
       </div>`;
   }).join('');
@@ -277,6 +290,7 @@ window.openConv = async (cid, otherId, otherName, otherRole) => {
     // ترتيب الرسائل بالوقت في الـ client
     const sorted = snap.docs
       .map(d => ({ id: d.id, ...d.data() }))
+      .filter(m => !m.deletedBy?.[currentUser.uid])   // اخفِ الرسائل المحذوفة منك
       .sort((a, b) => (a.sentAt?.seconds || 0) - (b.sentAt?.seconds || 0));
     const bubbles = document.getElementById('msgBubbles');
 
@@ -354,6 +368,9 @@ window.sendMsg = async () => {
     lastAt:   serverTimestamp(),
     [`unread.${otherId}`]: currentUnread + 1,
     [`unread.${currentUser.uid}`]: 0,
+    // لو أي طرف كان حاذف المحادثة، ترجع تظهر عند إرسال رسالة جديدة
+    [`hiddenBy.${currentUser.uid}`]: false,
+    [`hiddenBy.${otherId}`]: false,
   }, { merge: true });
 };
 
@@ -407,10 +424,10 @@ window.searchUsers = () => {
     .map(r => `
       <div class="user-group-label">${ROLE_LABELS[r] || r}</div>
       ${groups[r].map(u => `
-        <div class="user-result-item" onclick="startConv('${u.id}','${escapeAttr(u.name || u.email)}','${u.role}')">
-          ${avatarHtml(u.name || u.email, u.role, 38)}
+        <div class="user-result-item" onclick="startConv('${u.id}','${escapeAttr(u.name || u.email || 'مستخدم')}','${u.role}')">
+          ${avatarHtml(u.name || u.email || 'مستخدم', u.role, 38)}
           <div>
-            <div class="user-result-name">${u.name || u.email}</div>
+            <div class="user-result-name">${u.name || u.email || 'مستخدم'}</div>
             <div class="user-result-role" style="color:${ROLE_COLORS[u.role]||'#888'}">${ROLE_LABELS[u.role] || ''}</div>
           </div>
         </div>`).join('')}
@@ -448,15 +465,37 @@ window.deleteMsg = async (convId, msgId, seen) => {
     return;
   }
   if (!confirm('هل تريدين حذف هذه الرسالة؟')) return;
-  await deleteDoc(doc(db, 'conversations', convId, 'messages', msgId));
-  // حدّث lastMsg لو كانت آخر رسالة
-  const msgsSnap = await getDocs(
-    query(collection(db, 'conversations', convId, 'messages'))
-  );
-  const msgs = msgsSnap.docs.map(d => ({ id: d.id, ...d.data() }))
-    .sort((a, b) => (b.sentAt?.seconds || 0) - (a.sentAt?.seconds || 0));
-  await updateDoc(doc(db, 'conversations', convId), {
-    lastMsg: msgs.length > 0 ? msgs[0].text : ''
+
+  // حذف ناعم — الرسالة تختفي منك فقط والطرف الثاني لا يتأثر
+  await updateDoc(doc(db, 'conversations', convId, 'messages', msgId), {
+    [`deletedBy.${currentUser.uid}`]: true
   });
+};
+
+
+// ── حذف المحادثة من عند المستخدم فقط ────────────────────────
+window.unhideConv = async (cid) => {
+  await updateDoc(doc(db, 'conversations', cid), {
+    [`hiddenBy.${currentUser.uid}`]: false
+  });
+};
+
+window.deleteConv = async (cid) => {
+  if (!confirm('هل تريدين حذف هذه المحادثة من قائمتك؟\nستختفي منك فقط والطرف الآخر لن يتأثر.')) return;
+
+  await updateDoc(doc(db, 'conversations', cid), {
+    [`hiddenBy.${currentUser.uid}`]: true
+  });
+
+  // أزلها فوراً من الـ allConvs وأعد الرسم
+  allConvs = allConvs.filter(c => c.id !== cid);
+  renderConvList(allConvs);
+
+  // لو الشات المفتوح هو اللي اتحذف — أغلقه
+  if (activeConvId === cid) {
+    activeConvId = null;
+    document.getElementById('msgConv').style.display = 'none';
+    document.getElementById('msgEmpty').style.display = 'flex';
+  }
 };
 
