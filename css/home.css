@@ -553,9 +553,10 @@ body {
 
 /* ===== CONTENT AREA ===== */
 .content-area {
-  flex: 1;
+  flex: 1 1 0;
   min-width: 0;
   overflow: hidden;
+  width: 0; /* يجبره يملأ الـ flex space */
 }
 
 /* ===== HERO ===== */
