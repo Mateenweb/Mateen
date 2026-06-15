@@ -91,6 +91,10 @@ function showNotifToast(title, body, url, type = 'msg') {
       </div>
     </div>
     <style>@keyframes notifIn{from{transform:translateY(-20px);opacity:0}to{transform:translateY(0);opacity:1}}</style>`;
+     const existing = document.querySelectorAll('[id^="mateen-notif-toast-"]');
+    let offset = 0;
+    existing.forEach(el => { offset += el.offsetHeight + 10; });
+    t.querySelector('div').style.top = (24 + offset) + 'px';
   document.body.appendChild(t);
   // مش بيختفي تلقائي — بس لما تضغطي ✕ أو تفتحيه
 }
