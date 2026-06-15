@@ -1,7 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
 import { getFirestore, collection, doc, getDoc, getDocs, addDoc, deleteDoc, query, where, orderBy, onSnapshot, serverTimestamp, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
-import { initNotifications } from "./notifications.js";
 import { FIREBASE_CONFIG } from "./config.js";
 
 const app  = initializeApp(FIREBASE_CONFIG);
@@ -64,8 +63,6 @@ onAuthStateChanged(auth, async user => {
     window.location.href = '../html/home.html'; return;
   }
 
-  // تفعيل الإشعارات
-  initNotifications(user.uid);
   currentUser     = user;
   currentUserData = data;
 
@@ -367,26 +364,14 @@ window.sendMsg = async () => {
 
   await setDoc(doc(db, 'conversations', activeConvId), {
     participants: [currentUser.uid, otherId].filter(Boolean),
-    lastMsg:  text || '',
-    lastAt:   serverTimestamp(),
+    lastMsg:      text || '',
+    lastAt:       serverTimestamp(),
+    lastSenderId: currentUser.uid,
     [`unread.${otherId}`]: currentUnread + 1,
     [`unread.${currentUser.uid}`]: 0,
     [`hiddenBy.${currentUser.uid}`]: false,
     [`hiddenBy.${otherId}`]: false,
   }, { merge: true });
-
-  // ── بعت إشعار للمستلم عبر Firestore (بيشتغل مجاناً بدون سيرفر) ──────
-  if (otherId) {
-    const senderName = currentUserData?.name || currentUser.email?.split('@')[0] || 'متين';
-    const preview    = text.length > 80 ? text.slice(0, 80) + '…' : text;
-    await addDoc(collection(db, 'notifications', otherId, 'pending'), {
-      title:     `💬 ${senderName}`,
-      body:      preview,
-      url:       'https://mateenweb.github.io/Mateen/html/messages.html',
-      senderId:  currentUser.uid,
-      createdAt: serverTimestamp(),
-    });
-  }
 };
 
 window.handleMsgKey = e => {
