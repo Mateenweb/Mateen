@@ -21,16 +21,20 @@ let currentUid  = null;
 
 // ── استقبال الـ UID من الصفحة الرئيسية ────────────────────────────────────
 self.addEventListener('message', event => {
-  if (event.data?.type === 'SET_USER' && event.data.uid) {
-    if (event.data.uid !== currentUid) {
-      currentUid = event.data.uid;
-      setupFirestoreListener();
+  // استخدام waitUntil لمنع إغلاق الـ port قبل الاستجابة
+  if (!event.data) return;
+  event.waitUntil(Promise.resolve().then(() => {
+    if (event.data?.type === 'SET_USER' && event.data.uid) {
+      if (event.data.uid !== currentUid) {
+        currentUid = event.data.uid;
+        setupFirestoreListener();
+      }
     }
-  }
-  if (event.data?.type === 'CLEAR_USER') {
-    if (unsubscribe) { unsubscribe(); unsubscribe = null; }
-    currentUid = null;
-  }
+    if (event.data?.type === 'CLEAR_USER') {
+      if (unsubscribe) { unsubscribe(); unsubscribe = null; }
+      currentUid = null;
+    }
+  }));
 });
 
 // ── الاستماع لمجموعة الإشعارات في Firestore ──────────────────────────────
