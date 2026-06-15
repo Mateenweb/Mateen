@@ -710,3 +710,14 @@ tr.selected-row { background: rgba(201,162,39,0.08) !important; }
   background: #1565c0;
   color: white;
 }
+.att-student-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 4px;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+}
+.att-student-item:hover { background: #f0f4ff; }
+.att-student-item input { cursor: pointer; accent-color: #1565c0; }
