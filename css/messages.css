@@ -359,8 +359,8 @@
   gap: 8px;
   margin-bottom: 2px;
 }
-.msg-row.mine    { flex-direction: row-reverse; }
-.msg-row.theirs  { flex-direction: row; }
+.msg-row.mine    { flex-direction: row-reverse; justify-content: flex-start; }
+.msg-row.theirs  { flex-direction: row;         justify-content: flex-start; }
 
 .msg-bubble-wrap {
   display: flex;
@@ -368,8 +368,8 @@
   max-width: 68%;
 }
 
-.msg-row.mine .msg-bubble-wrap { align-items: flex-start; }
-.msg-row.theirs .msg-bubble-wrap { align-items: flex-end; }
+.msg-row.mine .msg-bubble-wrap { align-items: flex-end; }
+.msg-row.theirs .msg-bubble-wrap { align-items: flex-start; }
 
 .msg-sender-name {
   font-size: 10.5px;
