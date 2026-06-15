@@ -160,7 +160,9 @@ function startListening(userId) {
         const onMsgsPage = window.location.pathname.includes('messages.html');
         playSound();
         if (!onMsgsPage) {
-          showNotifToast('رسالة جديدة 💬', lastMsg, '/Mateen/html/messages.html');
+          msgCount++;
+          updateBadges();
+          showNotifToast('رسالة جديدة 💬', lastMsg, '/Mateen/html/messages.html', 'msg');
           showBrowserNotif('رسالة جديدة — متين 💬', lastMsg);
         }
       }
@@ -181,12 +183,15 @@ function startListening(userId) {
         if (change.type !== 'added') return;
         const n = change.doc.data();
         const onNewsPage = window.location.pathname.includes('news.html');
-        playSound();
+       playSound();
         if (!onNewsPage) {
+          newsCount++;
+          updateBadges();
           showNotifToast(
             '📢 ' + (n.title || 'خبر جديد'),
             n.body ? n.body.slice(0, 80) : '',
-            '/Mateen/html/news.html'
+            '/Mateen/html/news.html',
+            'news'
           );
           showBrowserNotif('📢 ' + (n.title || 'خبر جديد — متين'), n.body?.slice(0, 80) || '');
         }
