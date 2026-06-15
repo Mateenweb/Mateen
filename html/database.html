@@ -179,6 +179,42 @@
 </div>
 </div>
 </div>
+  <!-- Attendance Export Modal -->
+<div class="modal-overlay" id="attendanceModal">
+  <div class="modal-box" style="max-width:560px;max-height:85vh;overflow-y:auto">
+    <h3>📋 تصدير الحضور والغياب</h3>
+
+    <div class="modal-section">
+      <label style="font-weight:600;margin-bottom:8px;display:block">اختاري الطالبات:</label>
+      <div style="display:flex;gap:8px;margin-bottom:10px">
+        <button onclick="selectAllAttStudents(true)"  style="font-size:12px;padding:4px 10px;border-radius:6px;border:1px solid #1565c0;background:#e8f0fb;color:#1565c0;cursor:pointer">تحديد الكل</button>
+        <button onclick="selectAllAttStudents(false)" style="font-size:12px;padding:4px 10px;border-radius:6px;border:1px solid #999;background:#f5f5f5;color:#555;cursor:pointer">إلغاء الكل</button>
+      </div>
+      <div id="attStudentList" style="display:flex;flex-direction:column;gap:6px;max-height:250px;overflow-y:auto;border:1px solid #e0e0e0;border-radius:8px;padding:10px;background:#fafafa">
+        <div style="color:#aaa;font-size:13px;text-align:center">جارٍ التحميل...</div>
+      </div>
+    </div>
+
+    <hr class="modal-divider"/>
+
+    <div class="modal-section">
+      <label style="font-weight:600;margin-bottom:8px;display:block">المواد المطلوبة:</label>
+      <div id="attSubjectChecks" style="display:flex;flex-wrap:wrap;gap:8px">
+        <label><input type="checkbox" class="att-subj-check" value="قرآن" checked> قرآن</label>
+        <label><input type="checkbox" class="att-subj-check" value="فقه" checked> فقه</label>
+        <label><input type="checkbox" class="att-subj-check" value="تفسير" checked> تفسير</label>
+        <label><input type="checkbox" class="att-subj-check" value="عقيدة" checked> عقيدة</label>
+        <label><input type="checkbox" class="att-subj-check" value="حديث" checked> حديث</label>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-export-go" onclick="doExportAttendance('word')">⬇️ Word</button>
+      <button class="btn-export-go" onclick="doExportAttendance('pdf')" style="background:#e65100;border-color:#e65100">🖨️ PDF</button>
+      <button class="btn-cancel" onclick="closeAttendanceModal()">إلغاء</button>
+    </div>
+  </div>
+</div>
 </div><!-- end mainContent -->
 <script src="../js/firebase.js" type="module"></script>
 <script src="../js/database-2.js"></script>
