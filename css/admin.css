@@ -283,6 +283,16 @@ body { background: var(--beige); min-height: 100vh; display: flex; flex-directio
 }
 .btn-add-row:hover { border-color: var(--green-mid); color: var(--green-dark); }
 
+.sort-alpha-btn {
+  background: var(--beige); border: 1.5px solid var(--border); color: var(--text-mid);
+  border-radius: 7px; padding: 7px 14px; font-family: inherit; font-size: 13px;
+  cursor: pointer; transition: all .2s; white-space: nowrap;
+}
+.sort-alpha-btn.active {
+  background: var(--green-dark); border-color: var(--green-dark); color: #fff; font-weight: 600;
+}
+.sort-alpha-btn:hover { border-color: var(--green-mid); color: var(--green-dark); }
+
 @media (max-width: 768px) {
   .container    { padding: 12px 12px; gap: 14px; }
   .hero         { padding: 18px 14px !important; }
