@@ -7,6 +7,7 @@ import { getFirestore, collection, addDoc, deleteDoc, doc,
          onSnapshot, query, orderBy, getDoc, updateDoc, getDocs }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 import { fullDeleteUser } from "./delete-account.js";
+import { initNotifications } from "./notifications.js";
 import { FIREBASE_CONFIG } from "./config.js";
 import { exportWord, exportPdf, exportAttendanceWord, exportAttendancePdf } from "./export.js";
 
@@ -26,6 +27,7 @@ onAuthStateChanged(auth, async user => {
   document.getElementById('navUserName').textContent  = user.displayName || user.email.split('@')[0];
   document.getElementById('authGate').style.display   = 'none';
   document.getElementById('mainContent').style.display = 'flex';
+  initNotifications(user.uid);
   if (role !== 'admin') {
     document.getElementById('studentsSection').style.display = 'none';
   } else {

@@ -1,6 +1,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
 import { getFirestore, collection, doc, getDoc, getDocs, addDoc, deleteDoc, query, where, orderBy, onSnapshot, serverTimestamp, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
+import { initNotifications } from "./notifications.js";
 import { FIREBASE_CONFIG } from "./config.js";
 
 const app  = initializeApp(FIREBASE_CONFIG);
@@ -63,6 +64,8 @@ onAuthStateChanged(auth, async user => {
     window.location.href = '../html/home.html'; return;
   }
 
+  // تفعيل الإشعارات
+  initNotifications(user.uid);
   currentUser     = user;
   currentUserData = data;
 
