@@ -220,6 +220,7 @@ onAuthStateChanged(auth, user => {
   if (user) {
     console.log('[Notif] user logged in:', user.uid);
     startListening(user.uid);
+    registerSW(user.uid);
     if ('Notification' in window && Notification.permission === 'default') {
       setTimeout(() => Notification.requestPermission().then(p => {
         console.log('[Notif] permission:', p);
@@ -235,6 +236,16 @@ onAuthStateChanged(auth, user => {
 });
 
 // ── export للاستخدام الخارجي لو محتاج ───────────────────────────────────
+// ── تسجيل Service Worker وإرسال الـ UID ──────────────────────────────────
+async function registerSW(uid) {
+  if (!('serviceWorker' in navigator)) return;
+  try {
+    const reg = await navigator.serviceWorker.register('/Mateen/firebase-messaging-sw.js');
+    await navigator.serviceWorker.ready;
+    const sw = reg.active || reg.waiting || reg.installing;
+    if (sw) sw.postMessage({ type: 'SET_USER', uid });
+  } catch(e) {}
+}
 export function initNotifications() {}
 export { showNotifToast as showToast };
 
