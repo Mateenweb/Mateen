@@ -223,6 +223,7 @@ onAuthStateChanged(auth, user => {
     }
     startListening(user.uid);
     saveFCMToken(user.uid);
+    showMissedNotifications(user.uid);
     if ('Notification' in window && Notification.permission === 'default') {
       setTimeout(() => Notification.requestPermission().then(p => {
         console.log('[Notif] permission:', p);
@@ -268,6 +269,29 @@ async function saveFCMToken(userId) {
     }
   } catch(e) {
     console.warn('[Notif] FCM token error:', e);
+  }
+}
+
+// ── إشعارات الفائتة لما يفتح الموقع ─────────────────────────────────────
+async function showMissedNotifications(userId) {
+  try {
+    const { getDocs, collection, query, orderBy } = await import(
+      "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js"
+    );
+    const pendingSnap = await getDocs(
+      query(collection(db, 'notifications', userId, 'pending'), orderBy('createdAt', 'asc'))
+    );
+    if (pendingSnap.empty) return;
+
+    pendingSnap.forEach(d => {
+      const n = d.data();
+      showNotifToast(n.title || 'إشعار جديد', n.body || '', n.url || '');
+      playSound();
+      // امسح بعد العرض
+      d.ref.delete().catch(() => {});
+    });
+  } catch(e) {
+    console.warn('[Notif] missed notifications error:', e);
   }
 }
 
