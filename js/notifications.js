@@ -4,7 +4,7 @@
 import { initializeApp, getApps, getApp }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
 import { getFirestore, collection, query, where, orderBy,
-         onSnapshot, doc, updateDoc }
+         onSnapshot, doc, updateDoc, addDoc, serverTimestamp, deleteDoc }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 import { getAuth, onAuthStateChanged }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
@@ -18,85 +18,52 @@ let notifUnsub = null;
 let initialized = false;
 
 // ── صوت إشعار ────────────────────────────────────────────────────────────
-let _audioCtx = null;
-
-function getAudioCtx() {
-  if (!_audioCtx || _audioCtx.state === 'closed') {
-    _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  }
-  return _audioCtx;
-}
-
 function playSound() {
   try {
-    const ctx = getAudioCtx();
-    const doPlay = () => {
-      const osc  = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.frequency.setValueAtTime(880, ctx.currentTime);
-      osc.frequency.setValueAtTime(660, ctx.currentTime + 0.1);
-      gain.gain.setValueAtTime(0.3, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
-      osc.start(ctx.currentTime);
-      osc.stop(ctx.currentTime + 0.4);
-    };
-    if (ctx.state === 'suspended') {
-      ctx.resume().then(doPlay).catch(() => {});
-    } else {
-      doPlay();
-    }
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.frequency.setValueAtTime(880, ctx.currentTime);
+    osc.frequency.setValueAtTime(660, ctx.currentTime + 0.1);
+    gain.gain.setValueAtTime(0.3, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.4);
   } catch(e) {}
 }
-// ── Toast إشعار ──────────────────────────────────────────────────────────
-let msgCount  = 0;
-let newsCount = 0;
 
-function updateBadges() {
-  ['navMsgBadge','sidebarMsgBadge'].forEach(id => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    if (msgCount > 0) { el.textContent = msgCount > 99 ? '99+' : msgCount; el.classList.remove('d-none'); }
-    else el.classList.add('d-none');
-  });
-  ['navNewsBadge','sidebarNewsBadge'].forEach(id => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    if (newsCount > 0) { el.textContent = newsCount > 99 ? '99+' : newsCount; el.classList.remove('d-none'); }
-    else el.classList.add('d-none');
-  });
+// ── كتابة إشعار للـ Service Worker (للموبايل PWA) ───────────────────────
+async function pushToSW(userId, title, body, url) {
+  try {
+    await addDoc(
+      collection(db, 'notifications', userId, 'pending'),
+      { title, body, url, createdAt: serverTimestamp() }
+    );
+  } catch(e) { console.warn('[Notif] SW push failed:', e); }
 }
 
-function showNotifToast(title, body, url, type = 'msg') {
-  const toastId = 'mateen-notif-toast-' + Date.now();
+// ── Toast إشعار ──────────────────────────────────────────────────────────
+function showNotifToast(title, body, url) {
+  document.getElementById('mateen-notif-toast')?.remove();
   const t = document.createElement('div');
-  t.id = toastId;
+  t.id = 'mateen-notif-toast';
   t.innerHTML = `
-    <div style="
-      position:fixed;left:24px;z-index:99999;
+    <div onclick="window.location.href='${url || '/Mateen/html/messages.html'}'" style="
+      position:fixed;top:24px;left:24px;z-index:99999;
       background:#1a4a2e;color:#fff;border-radius:14px;
       padding:14px 18px;min-width:260px;max-width:320px;
       box-shadow:0 6px 24px rgba(0,0,0,.35);
-      font-family:'Noto Naskh Arabic',serif;direction:rtl;
+      font-family:'Noto Naskh Arabic',serif;direction:rtl;cursor:pointer;
       animation:notifIn .3s ease">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start">
-        <div onclick="window.location.href='${url || '/Mateen/html/messages.html'}';document.getElementById('${toastId}')?.remove();" style="cursor:pointer;flex:1">
-          <div style="font-weight:700;font-size:14px;margin-bottom:4px">💬 ${title}</div>
-          <div style="font-size:13px;opacity:.85">${body}</div>
-          <div style="font-size:11px;opacity:.55;margin-top:6px">اضغطي للفتح</div>
-        </div>
-        <button onclick="document.getElementById('${toastId}')?.remove();${type==='msg'?'msgCount=Math.max(0,msgCount-1)':'newsCount=Math.max(0,newsCount-1)'};updateBadges();"
-          style="background:none;border:none;color:rgba(255,255,255,0.7);font-size:18px;cursor:pointer;padding:0 0 0 8px;line-height:1">✕</button>
-      </div>
+      <div style="font-weight:700;font-size:14px;margin-bottom:4px">💬 ${title}</div>
+      <div style="font-size:13px;opacity:.85">${body}</div>
+      <div style="font-size:11px;opacity:.55;margin-top:6px">اضغطي للفتح</div>
     </div>
     <style>@keyframes notifIn{from{transform:translateY(-20px);opacity:0}to{transform:translateY(0);opacity:1}}</style>`;
-     const existing = document.querySelectorAll('[id^="mateen-notif-toast-"]');
-    let offset = 0;
-    existing.forEach(el => { offset += el.offsetHeight + 10; });
-    t.querySelector('div').style.top = (24 + offset) + 'px';
   document.body.appendChild(t);
-  // مش بيختفي تلقائي — بس لما تضغطي ✕ أو تفتحيه
+  setTimeout(() => t.remove(), 6000);
 }
 
 // ── Browser Notification ─────────────────────────────────────────────────
@@ -163,10 +130,11 @@ function startListening(userId) {
         console.log('[Notif] 🔔 NEW MESSAGE! showing notification');
         const onMsgsPage = window.location.pathname.includes('messages.html');
         playSound();
+        // إشعار للـ SW عشان يشتغل على الموبايل في الخلفية
+        pushToSW(userId, 'رسالة جديدة 💬', lastMsg,
+          'https://mateenweb.github.io/Mateen/html/messages.html');
         if (!onMsgsPage) {
-          msgCount++;
-          updateBadges();
-          showNotifToast('رسالة جديدة 💬', lastMsg, '/Mateen/html/messages.html', 'msg');
+          showNotifToast('رسالة جديدة 💬', lastMsg, '/Mateen/html/messages.html');
           showBrowserNotif('رسالة جديدة — متين 💬', lastMsg);
         }
       }
@@ -187,15 +155,16 @@ function startListening(userId) {
         if (change.type !== 'added') return;
         const n = change.doc.data();
         const onNewsPage = window.location.pathname.includes('news.html');
-       playSound();
+        playSound();
+        // إشعار للـ SW للموبايل
+        pushToSW(userId, '📢 ' + (n.title || 'خبر جديد'),
+          n.body?.slice(0, 80) || '',
+          'https://mateenweb.github.io/Mateen/html/news.html');
         if (!onNewsPage) {
-          newsCount++;
-          updateBadges();
           showNotifToast(
             '📢 ' + (n.title || 'خبر جديد'),
             n.body ? n.body.slice(0, 80) : '',
-            '/Mateen/html/news.html',
-            'news'
+            '/Mateen/html/news.html'
           );
           showBrowserNotif('📢 ' + (n.title || 'خبر جديد — متين'), n.body?.slice(0, 80) || '');
         }
@@ -206,21 +175,28 @@ function startListening(userId) {
 
 // ── تفعيل تلقائي عند لوجين ───────────────────────────────────────────────
 // unlock audio on first user interaction
+let audioUnlocked = false;
 function unlockAudio() {
+  if (audioUnlocked) return;
+  audioUnlocked = true;
   try {
-    const ctx = getAudioCtx();
-    if (ctx.state === 'suspended') ctx.resume().catch(() => {});
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    ctx.resume();
   } catch(e) {}
 }
-document.addEventListener('click',      unlockAudio, { once: true });
+document.addEventListener('click', unlockAudio, { once: true });
 document.addEventListener('touchstart', unlockAudio, { once: true });
-document.addEventListener('touchend',   unlockAudio, { once: true });
 
 onAuthStateChanged(auth, user => {
   if (user) {
     console.log('[Notif] user logged in:', user.uid);
+    // أرسل الـ UID للـ Service Worker عشان يبدأ يستمع
+    if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+      navigator.serviceWorker.controller.postMessage({
+        type: 'SET_USER', uid: user.uid
+      });
+    }
     startListening(user.uid);
-    localStorage.setItem('mateen_uid', user.uid);
     if ('Notification' in window && Notification.permission === 'default') {
       setTimeout(() => Notification.requestPermission().then(p => {
         console.log('[Notif] permission:', p);
@@ -236,16 +212,6 @@ onAuthStateChanged(auth, user => {
 });
 
 // ── export للاستخدام الخارجي لو محتاج ───────────────────────────────────
-// ── تسجيل Service Worker وإرسال الـ UID ──────────────────────────────────
-async function registerSW(uid) {
-  if (!('serviceWorker' in navigator)) return;
-  try {
-    const reg = await navigator.serviceWorker.register('/Mateen/firebase-messaging-sw.js');
-    await navigator.serviceWorker.ready;
-    const sw = reg.active || reg.waiting || reg.installing;
-    if (sw) sw.postMessage({ type: 'SET_USER', uid });
-  } catch(e) {}
-}
 export function initNotifications() {}
 export { showNotifToast as showToast };
 
