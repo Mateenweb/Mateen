@@ -89,12 +89,6 @@ function showNotifToast(title, body, url) {
   }
 
   container.appendChild(t);
-
-  // يروح تلقائي بعد 5 ثواني
-  setTimeout(() => {
-    t.style.opacity = '0';
-    setTimeout(() => t.remove(), 300);
-  }, 5000);
 }
 
 // ── Browser Notification ─────────────────────────────────────────────────
