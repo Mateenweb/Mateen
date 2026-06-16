@@ -369,7 +369,6 @@ window.sendMsg = async () => {
     lastSenderId: currentUser.uid,
     [`unread.${otherId}`]: currentUnread + 1,
     [`unread.${currentUser.uid}`]: 0,
-    [`hiddenBy.${currentUser.uid}`]: false,
     [`hiddenBy.${otherId}`]: false,
   }, { merge: true });
 };
