@@ -45,25 +45,56 @@ async function pushToSW(userId, title, body, url) {
 }
 
 // ── Toast إشعار ──────────────────────────────────────────────────────────
+// container واحد لكل الـ toasts
+function getToastContainer() {
+  let c = document.getElementById('mateen-toast-container');
+  if (!c) {
+    c = document.createElement('div');
+    c.id = 'mateen-toast-container';
+    c.style.cssText = 'position:fixed;top:16px;left:16px;z-index:99999;display:flex;flex-direction:column;gap:8px;max-width:320px';
+    document.body.appendChild(c);
+  }
+  return c;
+}
+
 function showNotifToast(title, body, url) {
-  document.getElementById('mateen-notif-toast')?.remove();
+  const container = getToastContainer();
+
   const t = document.createElement('div');
-  t.id = 'mateen-notif-toast';
+  t.style.cssText = `
+    background:#1a4a2e;color:#fff;border-radius:12px;
+    padding:12px 16px;min-width:260px;max-width:320px;
+    box-shadow:0 4px 20px rgba(0,0,0,.3);
+    font-family:'Noto Naskh Arabic',serif;direction:rtl;cursor:pointer;
+    animation:notifIn .3s ease;position:relative;
+    transition:opacity .3s ease;`;
+
   t.innerHTML = `
-    <div onclick="window.location.href='${url || '/Mateen/html/messages.html'}'" style="
-      position:fixed;top:24px;left:24px;z-index:99999;
-      background:#1a4a2e;color:#fff;border-radius:14px;
-      padding:14px 18px;min-width:260px;max-width:320px;
-      box-shadow:0 6px 24px rgba(0,0,0,.35);
-      font-family:'Noto Naskh Arabic',serif;direction:rtl;cursor:pointer;
-      animation:notifIn .3s ease">
-      <div style="font-weight:700;font-size:14px;margin-bottom:4px">💬 ${title}</div>
-      <div style="font-size:13px;opacity:.85">${body}</div>
-      <div style="font-size:11px;opacity:.55;margin-top:6px">اضغطي للفتح</div>
-    </div>
-    <style>@keyframes notifIn{from{transform:translateY(-20px);opacity:0}to{transform:translateY(0);opacity:1}}</style>`;
-  document.body.appendChild(t);
-  setTimeout(() => t.remove(), 6000);
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">
+      <div onclick="window.location.href='${url || '/Mateen/html/messages.html'}'" style="flex:1">
+        <div style="font-weight:700;font-size:14px;margin-bottom:3px">${title}</div>
+        <div style="font-size:12.5px;opacity:.85">${body}</div>
+      </div>
+      <button style="background:none;border:none;color:rgba(255,255,255,.6);font-size:16px;cursor:pointer;padding:0;line-height:1;flex-shrink:0"
+        onclick="this.closest('[data-notif]').remove()">✕</button>
+    </div>`;
+  t.setAttribute('data-notif', '1');
+
+  // إضافة style مرة واحدة
+  if (!document.getElementById('notif-style')) {
+    const s = document.createElement('style');
+    s.id = 'notif-style';
+    s.textContent = '@keyframes notifIn{from{transform:translateY(-10px);opacity:0}to{transform:translateY(0);opacity:1}}';
+    document.head.appendChild(s);
+  }
+
+  container.appendChild(t);
+
+  // يروح تلقائي بعد 5 ثواني
+  setTimeout(() => {
+    t.style.opacity = '0';
+    setTimeout(() => t.remove(), 300);
+  }, 5000);
 }
 
 // ── Browser Notification ─────────────────────────────────────────────────
