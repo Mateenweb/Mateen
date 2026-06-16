@@ -290,7 +290,7 @@ window.openConv = async (cid, otherId, otherName, otherRole) => {
     // ترتيب الرسائل بالوقت في الـ client
     const sorted = snap.docs
       .map(d => ({ id: d.id, ...d.data() }))
-      .filter(m => !!m.id)   // تأكد من وجود الـ id
+      .filter(m => !m.deletedBy?.[currentUser.uid])   // اخفِ الرسائل المحذوفة منك
       .sort((a, b) => (a.sentAt?.seconds || 0) - (b.sentAt?.seconds || 0));
     const bubbles = document.getElementById('msgBubbles');
 
@@ -458,15 +458,17 @@ function escapeAttr(str) {
   return String(str).replace(/'/g,"\\'").replace(/"/g,'\\"');
 }
 
-// ── حذف رسالة نهائياً ────────────────────────────────────────
+// ── حذف رسالة من عند المستخدم فقط ───────────────────────────
 window.deleteMsg = async (convId, msgId, seen) => {
   if (seen) {
     alert('لا يمكن حذف هذه الرسالة — تمت قراءتها بالفعل');
     return;
   }
-  if (!confirm('هل تريدين حذف هذه الرسالة نهائياً؟\nلن تظهر لأي طرف بعد الحذف.')) return;
+  if (!confirm('هل تريدين حذف هذه الرسالة؟\nستختفي منك فقط ولن تظهر مرة أخرى.')) return;
 
-  await deleteDoc(doc(db, 'conversations', convId, 'messages', msgId));
+  await updateDoc(doc(db, 'conversations', convId, 'messages', msgId), {
+    [`deletedBy.${currentUser.uid}`]: true
+  });
 };
 
 
@@ -478,22 +480,15 @@ window.unhideConv = async (cid) => {
 };
 
 window.deleteConv = async (cid) => {
-  if (!confirm('هل تريدين حذف هذه المحادثة نهائياً؟\nسيُحذف كل الرسائل فيها ولن يمكن استرجاعها.')) return;
+  if (!confirm('هل تريدين حذف هذه المحادثة؟\nستختفي منك فقط والطرف الآخر لن يتأثر.')) return;
 
-  // احذف كل الرسائل جوه المحادثة
-  const msgsSnap = await getDocs(collection(db, 'conversations', cid, 'messages'));
-  for (const m of msgsSnap.docs) {
-    await deleteDoc(doc(db, 'conversations', cid, 'messages', m.id));
-  }
+  await updateDoc(doc(db, 'conversations', cid), {
+    [`hiddenBy.${currentUser.uid}`]: true
+  });
 
-  // احذف المحادثة نفسها
-  await deleteDoc(doc(db, 'conversations', cid));
-
-  // أزلها فوراً من الـ allConvs وأعد الرسم
   allConvs = allConvs.filter(c => c.id !== cid);
   renderConvList(allConvs);
 
-  // لو الشات المفتوح هو اللي اتحذف — أغلقه
   if (activeConvId === cid) {
     if (msgUnsub) { msgUnsub(); msgUnsub = null; }
     activeConvId = null;
