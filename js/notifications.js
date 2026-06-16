@@ -222,6 +222,7 @@ onAuthStateChanged(auth, user => {
       });
     }
     startListening(user.uid);
+    saveFCMToken(user.uid);
     if ('Notification' in window && Notification.permission === 'default') {
       setTimeout(() => Notification.requestPermission().then(p => {
         console.log('[Notif] permission:', p);
@@ -235,6 +236,40 @@ onAuthStateChanged(auth, user => {
     if (newsUnsub)  { newsUnsub();  newsUnsub  = null; }
   }
 });
+
+// ── حفظ FCM Token في Firestore ───────────────────────────────────────────
+async function saveFCMToken(userId) {
+  try {
+    // طلب إذن الإشعارات
+    const permission = await Notification.requestPermission();
+    if (permission !== 'granted') return;
+
+    // جيب الـ VAPID key من Firebase Console
+    // Firebase Console → Project Settings → Cloud Messaging → Web Push certificates
+    const VAPID_KEY = 'BGpdEBdSHx8TkFZ95X_9kwFOvKbq4iCqLaRE5dPEh7JvvAzPz2yjbF_7BnuJF4uWBpNZ8YHf3KCpXlOiMOEY9mo';
+
+    const swReg = await navigator.serviceWorker.ready;
+
+    // استورد Firebase Messaging
+    const { getMessaging, getToken } = await import(
+      "https://www.gstatic.com/firebasejs/12.13.0/firebase-messaging.js"
+    );
+    const messaging = getMessaging(app);
+    const token = await getToken(messaging, {
+      vapidKey: VAPID_KEY,
+      serviceWorkerRegistration: swReg
+    });
+
+    if (token) {
+      console.log('[Notif] FCM token saved');
+      await updateDoc(doc(db, 'users', userId), {
+        [`fcmTokens.${token}`]: true
+      });
+    }
+  } catch(e) {
+    console.warn('[Notif] FCM token error:', e);
+  }
+}
 
 // ── export للاستخدام الخارجي لو محتاج ───────────────────────────────────
 export function initNotifications() {}
