@@ -4,7 +4,7 @@
 import { initializeApp, getApps, getApp }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
 import { getFirestore, collection, query, where, orderBy,
-         onSnapshot, doc, updateDoc, addDoc, serverTimestamp, deleteDoc }
+         onSnapshot, doc, updateDoc, addDoc, serverTimestamp, deleteDoc, getDocs }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 import { getAuth, onAuthStateChanged }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
@@ -275,9 +275,6 @@ async function saveFCMToken(userId) {
 // ── إشعارات الفائتة لما يفتح الموقع ─────────────────────────────────────
 async function showMissedNotifications(userId) {
   try {
-    const { getDocs, collection, query, orderBy } = await import(
-      "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js"
-    );
     const pendingSnap = await getDocs(
       query(collection(db, 'notifications', userId, 'pending'), orderBy('createdAt', 'asc'))
     );
