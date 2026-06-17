@@ -12,6 +12,7 @@
 <link href="../css/admin.css" rel="stylesheet"/>
 <link href="../css/mobile.css" rel="stylesheet"/>
   <link href="../css/responsive-fix.css" rel="stylesheet"/>
+  <link href="../css/modals.css" rel="stylesheet"/>
 <link href="../css/notifications.css" rel="stylesheet"/>
   <link rel="manifest" href="/Mateen/manifest.json">
 <meta name="theme-color" content="#1a4a2e">
@@ -25,19 +26,17 @@
 <!-- NAV -->
 <nav>
 <a class="nav-logo" href="home.html">
-<div class="logo-circle"><img alt="متين" src="../logo.png" style="width:100%;height:100%;border-radius:50%;object-fit:cover;"/></div>
+<div class="logo-circle"><img alt="متين" src="../logo.png" class="logo-circle-img"/></div>
 <div>
 <div class="nav-brand">برنامج متين العلمي</div>
 <div class="nav-tagline">نحو بناء علميٍّ متين</div>
 </div>
 </a>
 <div class="nav-btns">
-<a href="news.html"
-  style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.25);border-radius:8px;padding:7px 14px;color:#f0d080;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;text-decoration:none">
+<a href="news.html" class="nav-pill-btn">
   <i class="ti ti-speakerphone"></i> الأخبار
 </a>
-<a href="messages.html"
-  style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.25);border-radius:8px;padding:7px 14px;color:#f0d080;font-family:inherit;font-size:13px;font-weight:600;text-decoration:none">
+<a href="messages.html" class="nav-pill-btn">
   <i class="ti ti-message-2"></i> الرسائل
 </a>
 <div class="nav-user">
@@ -53,7 +52,7 @@
 <p>جارٍ التحقق من الصلاحيات...</p>
 </div>
 <!-- MAIN -->
-<div id="mainContent" style="display:none; flex-direction:column; flex:1;">
+<div id="mainContent" class="main-content-hidden">
 <div class="hero">
 <div class="hero-badge">🛡️ لوحة الإداريات</div>
 <h1>إدارة المواد العلمية</h1>
@@ -84,7 +83,7 @@
 <div class="err-msg" id="errMsg"><i class="ti ti-alert-circle"></i><span id="errText"></span></div>
 <div class="add-form">
 <div class="field">
-<label>رابط الملف <span style="color:#c0392b">*</span></label>
+<label>رابط الملف <span class="required-star">*</span></label>
 <div class="link-wrap">
 <i class="ti ti-link"></i>
 <input id="fUrl" placeholder="https://drive.google.com/file/d/..." type="url"/>
@@ -93,7 +92,7 @@
 </div>
 <div class="form-row">
 <div class="field">
-<label>المادة / المسار <span style="color:#c0392b">*</span></label>
+<label>المادة / المسار <span class="required-star">*</span></label>
 <select id="fCourse">
 <option value="">اختاري المادة</option>
 <option>التفسير</option><option>الفقه</option><option>العقيدة</option>
@@ -115,7 +114,7 @@
 </div>
 </div>
 <div class="field">
-<label>عنوان المادة <span style="color:#c0392b">*</span></label>
+<label>عنوان المادة <span class="required-star">*</span></label>
 <input id="fTitle" placeholder="مثال: محاضرة تفسير سورة الفاتحة — الأسبوع الأول" type="text"/>
 </div>
 <div class="field">
@@ -129,11 +128,11 @@
 </div>
 </div>
 <!-- PENDING ACCOUNTS SECTION (admin only) -->
-<div class="section" id="pendingSection" style="display:none">
+<div class="section section-collapsed" id="pendingSection">
 <div class="section-head">
 <div class="section-head-title">
 <i class="ti ti-user-check"></i> الحسابات المعلقة — بانتظار الموافقة
-          <span class="pending-badge" id="pendingBadge" style="display:none"></span>
+          <span class="pending-badge badge-hidden" id="pendingBadge"></span>
 </div>
 </div>
 <div id="pendingContainer">
@@ -141,18 +140,18 @@
 </div>
 </div>
 <!-- ALL USERS SECTION (admin only) -->
-<div class="section" id="allUsersSection" style="display:none">
+<div class="section section-collapsed" id="allUsersSection">
   <div class="section-head">
     <div class="section-head-title">
       <i class="ti ti-users"></i> جميع الحسابات المسجلة
-      <span class="pending-badge" id="allUsersBadge" style="display:none;background:#2d6a4f"></span>
+      <span class="pending-badge badge-hidden badge-green" id="allUsersBadge"></span>
     </div>
-    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+    <div class="users-filter-row">
       <input id="usersSearch" type="text" placeholder="ابحثي بالاسم أو البريد..."
         oninput="renderAllUsers()"
-        style="padding:7px 12px;border:1px solid var(--border);border-radius:8px;font-family:'Noto Naskh Arabic',serif;font-size:13px;width:190px"/>
+        class="users-search-input"/>
       <select id="usersFilterRole" onchange="renderAllUsers()"
-        style="padding:7px 10px;border:1px solid var(--border);border-radius:8px;font-family:'Noto Naskh Arabic',serif;font-size:13px">
+        class="users-filter-select">
         <option value="all">كل الأدوار</option>
         <option value="student">أصدقاء متين</option>
         <option value="mateen">بنات متين</option>
@@ -161,7 +160,7 @@
         <option value="admin">إدارة</option>
       </select>
       <select id="usersFilterStatus" onchange="renderAllUsers()"
-        style="padding:7px 10px;border:1px solid var(--border);border-radius:8px;font-family:'Noto Naskh Arabic',serif;font-size:13px">
+        class="users-filter-select">
         <option value="all">كل الحالات</option>
         <option value="active">مفعّل</option>
         <option value="pending">معلق</option>
@@ -175,7 +174,7 @@
     <div class="stu-stat pending"><span id="uPending">0</span><small>معلقون</small></div>
     <div class="stu-stat rejected"><span id="uSuspended">0</span><small>موقوفون</small></div>
   </div>
-  <div style="overflow-x:auto">
+  <div class="table-scroll-wrap">
     <table class="pending-table">
       <thead><tr>
         <th>#</th><th>الاسم</th><th>الدور</th>
@@ -183,8 +182,8 @@
         <th>تاريخ التسجيل</th><th>الحالة</th><th>إجراء</th>
       </tr></thead>
       <tbody id="allUsersBody">
-        <tr><td colspan="8" style="text-align:center;padding:28px;color:var(--text-mid)">
-          <i class="ti ti-loader spin" style="font-size:20px"></i>
+        <tr><td colspan="8" class="table-loader-cell">
+          <i class="ti ti-loader spin loader-spin-lg"></i>
         </td></tr>
       </tbody>
     </table>
@@ -254,15 +253,15 @@
 <option value="09">رمضان</option><option value="10">شوال</option>
 <option value="11">ذو القعدة</option><option value="12">ذو الحجة</option>
 </select>
-<input class="bulk-num" id="bulkYY" placeholder="سنة" style="width:60px" type="number"/>
-<span style="color:var(--text-mid)">|</span>
-<select class="bulk-sel" id="bulkHour" style="width:52px">
+<input class="bulk-num bulk-num-narrow" id="bulkYY" placeholder="سنة" type="number"/>
+<span class="bulk-divider">|</span>
+<select class="bulk-sel bulk-sel-hour" id="bulkHour">
 <option value="">-الساعة-</option>
 <option>1</option><option>2</option><option>3</option><option>4</option>
 <option>5</option><option>6</option><option>7</option><option>8</option>
 <option>9</option><option>10</option><option>11</option><option>12</option>
 </select>
-<select class="bulk-sel" id="bulkAmpm" style="width:72px">
+<select class="bulk-sel bulk-sel-ampm" id="bulkAmpm">
 <option value="">-ص/م-</option>
 <option value="ص">صباحاً</option>
 <option value="م">مساءً</option>
@@ -271,13 +270,13 @@
 </div>
 </div>
 <!-- Mobile cards (shown on small screens) -->
-<div id="stu-cards-wrap" style="padding:8px 12px;display:none"></div>
+<div id="stu-cards-wrap" class="stu-cards-wrap-base"></div>
 <!-- Table (shown on desktop) -->
 <div class="stu-table-wrap">
 <table class="stu-table">
 <thead>
 <tr>
-<th style="width:32px"></th>
+<th class="col-narrow"></th>
 <th>#</th>
 <th>اسم الطالبة</th>
 <th>اليوم والتاريخ</th>
@@ -289,14 +288,14 @@
 </tr>
 </thead>
 <tbody id="stuTableBody">
-<tr><td colspan="9" style="text-align:center;padding:30px;color:var(--text-mid)"><i class="ti ti-loader spin" style="font-size:20px"></i></td></tr>
+<tr><td colspan="9" class="table-loader-cell-lg"><i class="ti ti-loader spin loader-spin-lg"></i></td></tr>
 </tbody>
 </table>
 </div>
-<div style="padding:12px 16px;border-top:1px solid var(--border);display:flex;gap:10px;flex-wrap:wrap">
+<div class="foot-actions-row">
 <button class="btn-add-row" onclick="addStudentRow()"><i class="ti ti-plus"></i> إضافة طالبة</button>
-<button class="btn-add-row" style="background:#e8fdf0;border-color:#4CAF50;color:#2e7d32" onclick="openExportModal()"><i class="ti ti-download"></i> تصدير Word / PDF</button>
-<button class="btn-add-row" style="background:#fff8e1;border-color:#f9a825;color:#7a5c00" onclick="openAttModal()"><i class="ti ti-clipboard-list"></i> تصدير الحضور والغياب</button>
+<button class="btn-add-row btn-export-word" onclick="openExportModal()"><i class="ti ti-download"></i> تصدير Word / PDF</button>
+<button class="btn-add-row btn-export-att" onclick="openAttModal()"><i class="ti ti-clipboard-list"></i> تصدير الحضور والغياب</button>
 </div>
 </div>
 <!-- MATERIALS LIST -->
@@ -326,39 +325,39 @@
 </div>
 
 <!-- ── مودال تصدير الحضور والغياب ── -->
-<div class="modal-overlay" id="attModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9100;align-items:center;justify-content:center;padding:16px">
-  <div style="background:#fff;border-radius:14px;width:100%;max-width:500px;max-height:90vh;display:flex;flex-direction:column;box-shadow:0 8px 40px rgba(0,0,0,.2);overflow:hidden">
+<div class="modal-overlay m-overlay z-mid" id="attModal">
+  <div class="m-box m-box-md m-box-flex">
     <!-- Header -->
-    <div style="padding:18px 20px 14px;border-bottom:1px solid #e8e8e8;display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
-      <div style="font-size:17px;font-weight:700;color:#7a5c00">📋 تصدير الحضور والغياب</div>
-      <button onclick="closeAttModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#999;padding:4px">✕</button>
+    <div class="m-head">
+      <div class="m-title m-title-amber">📋 تصدير الحضور والغياب</div>
+      <button onclick="closeAttModal()" class="m-close">✕</button>
     </div>
     <!-- Body -->
-    <div style="padding:16px 20px;overflow-y:auto;flex:1">
+    <div class="m-body">
       <!-- اختيار الطريقة -->
-      <div style="margin-bottom:14px">
-        <div style="font-size:13px;font-weight:600;color:#555;margin-bottom:8px">طريقة التصدير:</div>
-        <select id="attMode" style="width:100%;padding:8px 12px;border-radius:8px;border:1px solid #ddd;font-size:13px;font-family:Cairo,sans-serif">
+      <div class="m-block">
+        <div class="m-label-row">طريقة التصدير:</div>
+        <select id="attMode" class="m-select">
           <option value="perStudent">صفحة مستقلة لكل طالبة</option>
           <option value="combined">جدول مشترك لكل الطالبات</option>
         </select>
       </div>
-      <hr style="border:none;border-top:1px solid #eee;margin-bottom:12px">
+      <hr class="m-hr">
       <!-- اختيار الطالبات -->
-      <div style="font-size:13px;font-weight:600;color:#555;margin-bottom:8px">اختاري الطالبات:</div>
-      <div style="display:flex;gap:8px;margin-bottom:10px">
-        <button onclick="attSelectAll(true)"  style="flex:1;padding:6px;border:1px solid #4CAF50;border-radius:6px;background:#f0fff4;color:#2e7d32;font-size:12px;cursor:pointer;font-family:Cairo,sans-serif">✔ تحديد الكل</button>
-        <button onclick="attSelectAll(false)" style="flex:1;padding:6px;border:1px solid #e57373;border-radius:6px;background:#fff8f8;color:#b71c1c;font-size:12px;cursor:pointer;font-family:Cairo,sans-serif">✖ إلغاء الكل</button>
+      <div class="m-label-row">اختاري الطالبات:</div>
+      <div class="m-select-row">
+        <button onclick="attSelectAll(true)"  class="m-btn-select-all">✔ تحديد الكل</button>
+        <button onclick="attSelectAll(false)" class="m-btn-deselect-all">✖ إلغاء الكل</button>
       </div>
-      <div id="attStudentList" style="display:flex;flex-direction:column;gap:6px;max-height:280px;overflow-y:auto;padding:4px 2px">
+      <div id="attStudentList" class="m-student-list m-student-list-lg">
         <!-- تُبنى بـ JS -->
       </div>
     </div>
     <!-- Footer -->
-    <div style="padding:14px 20px;border-top:1px solid #eee;display:flex;gap:10px;justify-content:flex-end;flex-shrink:0">
-      <button onclick="doAttExport('word')" style="padding:9px 20px;border:none;border-radius:8px;background:#1a4a2e;color:#fff;font-size:13.5px;cursor:pointer;font-weight:600;font-family:Cairo,sans-serif">⬇️ Word</button>
-      <button onclick="doAttExport('pdf')"  style="padding:9px 20px;border:none;border-radius:8px;background:#c0392b;color:#fff;font-size:13.5px;cursor:pointer;font-weight:600;font-family:Cairo,sans-serif">🖨️ PDF</button>
-      <button onclick="closeAttModal()"     style="padding:9px 18px;border:1px solid #ddd;border-radius:8px;background:#fff;color:#666;font-size:13.5px;cursor:pointer;font-family:Cairo,sans-serif">إلغاء</button>
+    <div class="m-foot">
+      <button onclick="doAttExport('word')" class="m-btn-word">⬇️ Word</button>
+      <button onclick="doAttExport('pdf')"  class="m-btn-pdf">🖨️ PDF</button>
+      <button onclick="closeAttModal()"     class="m-btn-cancel">إلغاء</button>
     </div>
   </div>
 </div>
@@ -369,35 +368,35 @@
 </style>
 
 <!-- ── مودال التصدير ── -->
-<div class="modal-overlay" id="exportModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9000;align-items:center;justify-content:center;padding:16px">
-  <div style="background:#fff;border-radius:14px;width:100%;max-width:460px;box-shadow:0 8px 40px rgba(0,0,0,.2);overflow:hidden">
-    <div style="padding:18px 20px 14px;border-bottom:1px solid #e8e8e8;display:flex;align-items:center;justify-content:space-between">
-      <div style="font-size:17px;font-weight:700;color:#1a4a2e">⬇️ إعدادات التصدير</div>
-      <button onclick="closeExportModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#999;padding:4px">✕</button>
+<div class="modal-overlay m-overlay z-low" id="exportModal">
+  <div class="m-box m-box-sm">
+    <div class="m-head">
+      <div class="m-title">⬇️ إعدادات التصدير</div>
+      <button onclick="closeExportModal()" class="m-close">✕</button>
     </div>
-    <div style="padding:16px 20px;overflow-y:auto;max-height:60vh">
+    <div class="m-body-scroll">
       <!-- الأعمدة -->
-      <div style="font-size:13px;font-weight:600;color:#555;margin-bottom:8px">الأعمدة المطلوبة:</div>
-      <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px">
-        <label style="display:flex;align-items:center;gap:5px;font-size:13px"><input type="checkbox" id="col_name" checked> اسم الطالبة</label>
-        <label style="display:flex;align-items:center;gap:5px;font-size:13px"><input type="checkbox" id="col_day" checked> اليوم</label>
-        <label style="display:flex;align-items:center;gap:5px;font-size:13px"><input type="checkbox" id="col_dateH" checked> التاريخ الهجري</label>
-        <label style="display:flex;align-items:center;gap:5px;font-size:13px"><input type="checkbox" id="col_dateG"> التاريخ الميلادي</label>
-        <label style="display:flex;align-items:center;gap:5px;font-size:13px"><input type="checkbox" id="col_time" checked> الوقت</label>
-        <label style="display:flex;align-items:center;gap:5px;font-size:13px"><input type="checkbox" id="col_interview"> المقابلة</label>
-        <label style="display:flex;align-items:center;gap:5px;font-size:13px"><input type="checkbox" id="col_result"> القبول</label>
+      <div class="m-label-row">الأعمدة المطلوبة:</div>
+      <div class="m-checkbox-row">
+        <label class="m-checkbox-label"><input type="checkbox" id="col_name" checked> اسم الطالبة</label>
+        <label class="m-checkbox-label"><input type="checkbox" id="col_day" checked> اليوم</label>
+        <label class="m-checkbox-label"><input type="checkbox" id="col_dateH" checked> التاريخ الهجري</label>
+        <label class="m-checkbox-label"><input type="checkbox" id="col_dateG"> التاريخ الميلادي</label>
+        <label class="m-checkbox-label"><input type="checkbox" id="col_time" checked> الوقت</label>
+        <label class="m-checkbox-label"><input type="checkbox" id="col_interview"> المقابلة</label>
+        <label class="m-checkbox-label"><input type="checkbox" id="col_result"> القبول</label>
       </div>
-      <hr style="border:none;border-top:1px solid #eee;margin-bottom:14px">
+      <hr class="m-hr m-hr-lg">
       <!-- تقسيم الوقت -->
-      <div style="margin-bottom:14px">
-        <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer">
-          <input type="checkbox" id="groupByTime" onchange="document.getElementById('groupOptions').style.display=this.checked?'block':'none'">
+      <div class="m-block">
+        <label class="m-checkbox-label-lg">
+          <input type="checkbox" id="groupByTime" onchange="document.getElementById('groupOptions').classList.toggle('show', this.checked)">
           تقسيم كل نطاق وقت في صفحة مستقلة
         </label>
-        <div id="groupOptions" style="display:none;margin-top:10px;padding:10px;background:#f8f8f8;border-radius:8px">
-          <label style="font-size:13px;display:flex;align-items:center;gap:8px">
+        <div id="groupOptions" class="m-group-options">
+          <label class="m-checkbox-label-lg">
             حجم النطاق:
-            <select id="rangeSize" style="padding:4px 8px;border-radius:6px;border:1px solid #ddd;font-size:13px">
+            <select id="rangeSize" class="m-select-sm">
               <option value="60">ساعة واحدة</option>
               <option value="30">نصف ساعة</option>
               <option value="120">ساعتين</option>
@@ -405,21 +404,21 @@
           </label>
         </div>
       </div>
-      <hr style="border:none;border-top:1px solid #eee;margin-bottom:12px">
+      <hr class="m-hr">
       <!-- اختيار الطالبات -->
-      <div style="font-size:13px;font-weight:600;color:#555;margin-bottom:8px">اختاري الطالبات للتصدير:</div>
-      <div style="display:flex;gap:8px;margin-bottom:10px">
-        <button onclick="exportSelectAll(true)"  style="flex:1;padding:6px;border:1px solid #4CAF50;border-radius:6px;background:#f0fff4;color:#2e7d32;font-size:12px;cursor:pointer;font-family:Cairo,sans-serif">✔ تحديد الكل</button>
-        <button onclick="exportSelectAll(false)" style="flex:1;padding:6px;border:1px solid #e57373;border-radius:6px;background:#fff8f8;color:#b71c1c;font-size:12px;cursor:pointer;font-family:Cairo,sans-serif">✖ إلغاء الكل</button>
+      <div class="m-label-row">اختاري الطالبات للتصدير:</div>
+      <div class="m-select-row">
+        <button onclick="exportSelectAll(true)"  class="m-btn-select-all">✔ تحديد الكل</button>
+        <button onclick="exportSelectAll(false)" class="m-btn-deselect-all">✖ إلغاء الكل</button>
       </div>
-      <div id="exportStudentList" style="display:flex;flex-direction:column;gap:6px;max-height:200px;overflow-y:auto;padding:4px 2px">
+      <div id="exportStudentList" class="m-student-list m-student-list-sm">
         <!-- تُبنى بـ JS -->
       </div>
     </div>
-    <div style="padding:14px 20px;border-top:1px solid #eee;display:flex;gap:10px;justify-content:flex-end">
-      <button onclick="doExport('word')" style="padding:9px 20px;border:none;border-radius:8px;background:#1a4a2e;color:#fff;font-size:13.5px;cursor:pointer;font-weight:600">⬇️ Word</button>
-      <button onclick="doExport('pdf')" style="padding:9px 20px;border:none;border-radius:8px;background:#c0392b;color:#fff;font-size:13.5px;cursor:pointer;font-weight:600">🖨️ PDF</button>
-      <button onclick="closeExportModal()" style="padding:9px 18px;border:1px solid #ddd;border-radius:8px;background:#fff;color:#666;font-size:13.5px;cursor:pointer">إلغاء</button>
+    <div class="m-foot">
+      <button onclick="doExport('word')" class="m-btn-word">⬇️ Word</button>
+      <button onclick="doExport('pdf')" class="m-btn-pdf">🖨️ PDF</button>
+      <button onclick="closeExportModal()" class="m-btn-cancel">إلغاء</button>
     </div>
   </div>
 </div>
@@ -427,36 +426,35 @@
 <div class="toast" id="toast"></div>
 
 <!-- ── مودال ربط الحساب بطالبة في الجدول ── -->
-<div id="linkModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;align-items:center;justify-content:center;padding:16px">
-  <div style="background:#fff;border-radius:14px;width:100%;max-width:520px;max-height:85vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,.18)">
+<div id="linkModal" class="m-overlay z-high">
+  <div class="m-box m-box-lg m-box-flex">
 
     <!-- Header -->
-    <div style="padding:18px 20px 14px;border-bottom:1px solid #e8e0d0;display:flex;align-items:center;justify-content:space-between">
+    <div class="m-head m-head-light">
       <div>
-        <div style="font-family:'Amiri',serif;font-size:17px;font-weight:700;color:#1a4a2e">📖 قبول حساب بنات متين</div>
-        <div style="font-size:12.5px;color:#888;margin-top:3px" id="linkModalSubtitle">اختاري طالبة لربطها أو اضغطي "قبول بدون ربط"</div>
+        <div class="m-title-serif">📖 قبول حساب بنات متين</div>
+        <div class="m-subtitle" id="linkModalSubtitle">اختاري طالبة لربطها أو اضغطي "قبول بدون ربط"</div>
       </div>
-      <button onclick="closeLinkModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#999;padding:4px">✕</button>
+      <button onclick="closeLinkModal()" class="m-close">✕</button>
     </div>
 
     <!-- Search -->
-    <div style="padding:12px 16px;border-bottom:1px solid #f0ebe0">
+    <div class="m-search-wrap">
       <input id="linkSearch" type="text" placeholder="ابحثي باسم الطالبة..."
         oninput="filterLinkList()"
-        style="width:100%;padding:8px 12px;border:1px solid #d4c9a8;border-radius:8px;font-family:'Noto Naskh Arabic',serif;font-size:14px;outline:none;box-sizing:border-box"/>
+        class="m-search-input"/>
     </div>
 
     <!-- List -->
-    <div id="linkStudentList" style="overflow-y:auto;flex:1;padding:8px 0"></div>
+    <div id="linkStudentList" class="m-list-flex"></div>
 
     <!-- Footer -->
-    <div style="padding:14px 16px;border-top:1px solid #e8e0d0;display:flex;gap:10px;justify-content:flex-end">
-      <button onclick="confirmLinkModal(null)"
-        style="padding:9px 20px;border:1px solid #c9a227;border-radius:8px;background:#fff;color:#c9a227;font-family:'Noto Naskh Arabic',serif;font-size:13.5px;cursor:pointer;font-weight:600">
+    <div class="m-foot m-foot-light">
+      <button onclick="confirmLinkModal(null)" class="m-btn-cancel-gold">
         <i class="ti ti-check"></i> قبول بدون ربط
       </button>
       <button id="linkConfirmBtn" onclick="confirmLinkModal(window._selectedLinkId)" disabled
-        style="padding:9px 22px;border:none;border-radius:8px;background:#1a4a2e;color:#fff;font-family:'Noto Naskh Arabic',serif;font-size:13.5px;cursor:pointer;font-weight:600;opacity:.5">
+        class="m-btn-confirm-green">
         <i class="ti ti-link"></i> ربط واعتماد
       </button>
     </div>
@@ -469,5 +467,6 @@
   <script src="../js/sw-register.js"></script>
 </body>
 </html>
+
 
 
