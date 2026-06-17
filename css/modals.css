@@ -1,0 +1,382 @@
+/* ════════════════════════════════════════════════════════════
+   modals.css — أنماط الـ modals والعناصر المتولّدة من JS
+   مستخرجة من inline styles لمنع تعارضات الـ override
+   ════════════════════════════════════════════════════════════ */
+
+/* ── Overlay عام لكل المودالز ── */
+.m-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, .5);
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+.m-overlay.z-low  { z-index: 9000; }
+.m-overlay.z-mid  { z-index: 9100; }
+.m-overlay.z-high { z-index: 9999; }
+.m-overlay.show   { display: flex; }
+
+/* ── صندوق المودال ── */
+.m-box {
+  background: #fff;
+  border-radius: 14px;
+  width: 100%;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, .2);
+  overflow: hidden;
+}
+.m-box-flex {
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+}
+.m-box-sm  { max-width: 460px; }
+.m-box-md  { max-width: 500px; }
+.m-box-lg  { max-width: 520px; }
+.m-box-lg.m-box-flex { max-height: 85vh; }
+
+/* ── Header ── */
+.m-head {
+  padding: 18px 20px 14px;
+  border-bottom: 1px solid #e8e8e8;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+.m-head-light { border-bottom-color: #e8e0d0; }
+.m-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: #1a4a2e;
+}
+.m-title-amber { color: #7a5c00; }
+.m-title-serif {
+  font-family: 'Amiri', serif;
+  font-size: 17px;
+  font-weight: 700;
+  color: #1a4a2e;
+}
+.m-subtitle {
+  font-size: 12.5px;
+  color: #888;
+  margin-top: 3px;
+}
+.m-close {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: #999;
+  padding: 4px;
+}
+
+/* ── Body ── */
+.m-body {
+  padding: 16px 20px;
+  overflow-y: auto;
+  flex: 1;
+}
+.m-body-scroll {
+  padding: 16px 20px;
+  overflow-y: auto;
+  max-height: 60vh;
+}
+
+/* ── Footer ── */
+.m-foot {
+  padding: 14px 20px;
+  border-top: 1px solid #eee;
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  flex-shrink: 0;
+}
+.m-foot-light { border-top-color: #e8e0d0; }
+
+/* ── عناصر داخل المودال ── */
+.m-block { margin-bottom: 14px; }
+.m-label-row {
+  font-size: 13px;
+  font-weight: 600;
+  color: #555;
+  margin-bottom: 8px;
+}
+.m-hr {
+  border: none;
+  border-top: 1px solid #eee;
+  margin-bottom: 12px;
+}
+.m-hr-lg { margin-bottom: 14px; }
+
+.m-select {
+  width: 100%;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  font-size: 13px;
+  font-family: Cairo, sans-serif;
+}
+.m-select-sm {
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  font-size: 13px;
+  width: auto;
+}
+
+.m-checkbox-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.m-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+}
+.m-checkbox-label-lg {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.m-group-options {
+  display: none;
+  margin-top: 10px;
+  padding: 10px;
+  background: #f8f8f8;
+  border-radius: 8px;
+}
+.m-group-options.show { display: block; }
+
+/* ── أزرار تحديد الكل/إلغاء الكل ── */
+.m-select-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.m-btn-select-all,
+.m-btn-deselect-all {
+  flex: 1;
+  padding: 6px;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  font-family: Cairo, sans-serif;
+}
+.m-btn-select-all {
+  border: 1px solid #4CAF50;
+  background: #f0fff4;
+  color: #2e7d32;
+}
+.m-btn-deselect-all {
+  border: 1px solid #e57373;
+  background: #fff8f8;
+  color: #b71c1c;
+}
+
+/* ── قائمة طالبات (scrollable) ── */
+.m-student-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  overflow-y: auto;
+  padding: 4px 2px;
+}
+.m-student-list-sm { max-height: 200px; }
+.m-student-list-lg { max-height: 280px; }
+
+/* ── أزرار التصدير / الإجراء النهائي ── */
+.m-btn-word {
+  padding: 9px 20px;
+  border: none;
+  border-radius: 8px;
+  background: #1a4a2e;
+  color: #fff;
+  font-size: 13.5px;
+  cursor: pointer;
+  font-weight: 600;
+}
+.m-btn-pdf {
+  padding: 9px 20px;
+  border: none;
+  border-radius: 8px;
+  background: #c0392b;
+  color: #fff;
+  font-size: 13.5px;
+  cursor: pointer;
+  font-weight: 600;
+}
+.m-btn-cancel {
+  padding: 9px 18px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: #fff;
+  color: #666;
+  font-size: 13.5px;
+  cursor: pointer;
+}
+.m-btn-cancel-gold {
+  padding: 9px 20px;
+  border: 1px solid #c9a227;
+  border-radius: 8px;
+  background: #fff;
+  color: #c9a227;
+  font-family: 'Noto Naskh Arabic', serif;
+  font-size: 13.5px;
+  cursor: pointer;
+  font-weight: 600;
+}
+.m-btn-confirm-green {
+  padding: 9px 22px;
+  border: none;
+  border-radius: 8px;
+  background: #1a4a2e;
+  color: #fff;
+  font-family: 'Noto Naskh Arabic', serif;
+  font-size: 13.5px;
+  cursor: pointer;
+  font-weight: 600;
+}
+.m-btn-confirm-green:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+
+/* ── حقل بحث داخل المودال ── */
+.m-search-wrap {
+  padding: 12px 16px;
+  border-bottom: 1px solid #f0ebe0;
+}
+.m-search-input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #d4c9a8;
+  border-radius: 8px;
+  font-family: 'Noto Naskh Arabic', serif;
+  font-size: 14px;
+  outline: none;
+  box-sizing: border-box;
+}
+
+/* ── قائمة طالبات قابلة للتمرير دون padding علوي ── */
+.m-list-flex {
+  overflow-y: auto;
+  flex: 1;
+  padding: 8px 0;
+}
+
+/* ════════════════════════════════════════════════════════════
+   عناصر متفرقة كانت inline في admin.html
+   ════════════════════════════════════════════════════════════ */
+
+.btn-export-word {
+  background: #e8fdf0;
+  border-color: #4CAF50;
+  color: #2e7d32;
+}
+.btn-export-att {
+  background: #fff8e1;
+  border-color: #f9a825;
+  color: #7a5c00;
+}
+
+.required-star { color: #c0392b; }
+
+.table-loader-cell {
+  text-align: center;
+  padding: 28px;
+  color: var(--text-mid);
+}
+.table-loader-cell-lg {
+  text-align: center;
+  padding: 30px;
+  color: var(--text-mid);
+}
+.loader-spin-lg { font-size: 20px; }
+
+.section-collapsed { display: none; }
+.badge-hidden { display: none; }
+.badge-green { background: #2d6a4f; }
+
+.users-filter-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.users-search-input {
+  padding: 7px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-family: 'Noto Naskh Arabic', serif;
+  font-size: 13px;
+  width: 190px;
+}
+.users-filter-select {
+  padding: 7px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-family: 'Noto Naskh Arabic', serif;
+  font-size: 13px;
+}
+
+.table-scroll-wrap { overflow-x: auto; }
+
+.stu-cards-wrap-base {
+  padding: 8px 12px;
+  display: none;
+}
+.col-narrow { width: 32px; }
+
+.foot-actions-row {
+  padding: 12px 16px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.logo-circle-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.main-content-hidden {
+  display: none;
+  flex-direction: column;
+  flex: 1;
+}
+
+.bulk-num-narrow { width: 60px; }
+.bulk-sel-hour   { width: 52px; }
+.bulk-sel-ampm   { width: 72px; }
+.bulk-divider    { color: var(--text-mid); }
+
+.nav-pill-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 8px;
+  padding: 7px 14px;
+  color: #f0d080;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+}
+.nav-pill-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: #f0d080;
+}
