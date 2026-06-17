@@ -18,8 +18,8 @@ onAuthStateChanged(auth, async user => {
   const layout  = document.querySelector('.page-layout');
 
   if (!user) {
-    guest.style.display   = 'block';
-    userDiv.style.display = 'none';
+    guest.classList.remove('d-none');
+    userDiv.classList.add('sidebar-user-hidden');
     if (layout) layout.classList.add('guest-layout');
     return;
   }
@@ -43,8 +43,8 @@ onAuthStateChanged(auth, async user => {
   // أيقونة البروفايل — هتتحدد بعد ما نجيب الـ role
 
   // مسجلة دخول — اجلب بيانات المستخدمة
-  guest.style.display   = 'none';
-  userDiv.style.display = 'block'; userDiv.classList.add('show-user');
+  guest.classList.add('d-none');
+  userDiv.classList.remove('sidebar-user-hidden'); userDiv.classList.add('show-user');
 
   // تفعيل إشعارات الموقع
   initNotifications(user.uid);
@@ -61,7 +61,7 @@ onAuthStateChanged(auth, async user => {
     role === 'mateen'     ? 'بنات متين' : 'الطالبة';
 
   // ── إظهار الـ links حسب الـ role ──────────────────────────
-  function show(id) { const el = document.getElementById(id); if(el) el.style.display = ''; }
+  function show(id) { const el = document.getElementById(id); if(el) el.classList.remove('d-none'); }
 
   if (role === 'admin' || role === 'supervisor') {
     show('linkAdmin');
@@ -83,7 +83,7 @@ onAuthStateChanged(auth, async user => {
   if (role === 'mateen') {
     const linkedId = snap.data().linkedStudentId;
     if (linkedId) {
-      if (profileLink)   { profileLink.href = `student.html?id=${linkedId}`; profileLink.style.display = ''; }
+      if (profileLink)   { profileLink.href = `student.html?id=${linkedId}`; profileLink.classList.remove('d-none'); }
       if (navProfileBtn) { navProfileBtn.href = `student.html?id=${linkedId}`; navProfileBtn.classList.remove('d-none'); }
     } else {
       if (navProfileBtn) navProfileBtn.classList.add('d-none');
@@ -95,3 +95,4 @@ onAuthStateChanged(auth, async user => {
 
 window.doLogout = () =>
   signOut(auth).then(() => window.location.href = '../html/login.html');
+
