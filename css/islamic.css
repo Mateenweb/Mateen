@@ -364,3 +364,24 @@ footer::before {
   .aya-text { font-size: 13px !important; }
   .aya-source { font-size: 10px !important; }
 }
+
+/* ── شعار شركاء الخير في شريط البسملة ─────────────────────── */
+.basmala-bar { position: relative; }
+.basmala-bar::after {
+  content: "";
+  position: absolute;
+  inset-inline-end: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--green-dark, #1a4a2e) url("../shuraka-logo.png") center/65% no-repeat;
+  border: 1.5px solid var(--gold);
+  box-shadow: 0 0 0 1px rgba(201,162,39,0.25);
+  pointer-events: none;
+}
+@media (max-width: 480px) {
+  .basmala-bar::after { display: none; }
+}
+
