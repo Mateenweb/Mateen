@@ -815,25 +815,6 @@ body {
 }
 .view-all-btn:hover { background: var(--green-mid); color: white; }
 
-
-/* ===== شركاء الخير ===== */
-.shuraka-section {
-  background: var(--green-dark);
-  padding: 48px 24px;
-  text-align: center;
-}
-.shuraka-inner {
-  max-width: 260px;
-  margin: 0 auto;
-}
-.shuraka-logo {
-  width: 100%;
-  height: auto;
-  display: block;
-  mix-blend-mode: screen;
-  filter: brightness(1.15);
-}
-
 /* ===== CONTACT SECTION ===== */
 .contact-section {
   background: var(--beige);
@@ -1108,4 +1089,39 @@ footer {
 @media (max-width: 420px) {
   .col-xl-2dot4 { width: 50%; }
   .nav-brand { font-size: 13px; }
+}
+
+
+/* ════════════════════════════════════════════════════════════
+   عناصر كانت inline styles في home.html
+   ════════════════════════════════════════════════════════════ */
+
+.nav-msg-badge-orange { background: #e65100; }
+
+.sidebar-user-hidden {
+  display: none;
+  flex-direction: column;
+  flex: 1;
+}
+#sidebar-user.show-user {
+  display: flex;
+}
+
+.form-input-readonly {
+  background: #f5f5f5;
+  cursor: not-allowed;
+}
+
+.footer-logo-img-dark {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1.5px solid var(--gold);
+  background: #1a4a2e;
+}
+
+.hero-badge-inline {
+  display: inline-block;
+  margin-bottom: 6px;
 }
