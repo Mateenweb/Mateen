@@ -18,6 +18,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="متين">
   <link href="../css/responsive-fix.css" rel="stylesheet"/>
+  <link href="../css/modals.css" rel="stylesheet"/>
 </head>
 <body>
 <div class="basmala-bar"><span class="bsm-ornament">❦</span>بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ<span class="bsm-ornament">❦</span></div>
@@ -38,28 +39,28 @@
 <div class="main-wrap">
   <div class="news-layout">
     <div class="news-main">
-      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:4px">
-        <div class="section-title" style="margin-bottom:0">آخر الإعلانات</div>
-        <button id="addNewsBtn" style="display:none;align-items:center;gap:6px;background:#1a4a2e;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer"
-          onclick="document.getElementById('addNewsModal').style.display='flex'">
+      <div class="news-header-row">
+        <div class="section-title news-section-title">آخر الإعلانات</div>
+        <button id="addNewsBtn" class="btn-add-news"
+          onclick="document.getElementById('addNewsModal').classList.add('show')">
           <i class="ti ti-plus"></i> إضافة خبر
         </button>
       </div>
       <div class="section-sub">كل جديد من البرنامج</div>
 
       <!-- Loading -->
-      <div id="newsLoading" style="text-align:center;padding:40px;color:var(--text-mid)">
-        <i class="ti ti-loader-2" style="font-size:28px;animation:spin .8s linear infinite;display:inline-block"></i>
-        <div style="margin-top:8px;font-size:14px">جارٍ تحميل الأخبار...</div>
+      <div id="newsLoading" class="news-state-box">
+        <i class="ti ti-loader-2 news-state-icon-loading"></i>
+        <div class="news-state-text-sm">جارٍ تحميل الأخبار...</div>
       </div>
 
       <!-- News List -->
       <div id="newsList"></div>
 
       <!-- Empty -->
-      <div id="newsEmpty" style="display:none;text-align:center;padding:40px;color:var(--text-mid)">
-        <i class="ti ti-news-off" style="font-size:36px;opacity:0.4"></i>
-        <div style="margin-top:8px">لا توجد أخبار حالياً</div>
+      <div id="newsEmpty" class="news-state-box hidden">
+        <i class="ti ti-news-off news-state-icon-empty"></i>
+        <div class="news-state-text">لا توجد أخبار حالياً</div>
       </div>
     </div>
 
@@ -78,38 +79,38 @@
 </div>
 
 <footer>
-  <div class="footer-logo"><img alt="متين" src="../logo.png" style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:1.5px solid var(--gold);"/><span style="color:rgba(255,255,255,0.8);font-family:Amiri,serif;font-size:14px">متين العلمي</span></div>
+  <div class="footer-logo"><img alt="متين" src="../logo.png" class="footer-logo-img"/><span class="footer-logo-text">متين العلمي</span></div>
   <div class="footer-dua">اللهم علمنا ما ينفعنا وانفعنا بما علمتنا</div>
   <div class="footer-social"><a href="#"><i class="ti ti-brand-telegram"></i></a><a href="#"><i class="ti ti-brand-twitter"></i></a></div>
 </footer>
 
 <!-- Add News Modal -->
-<div id="addNewsModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;align-items:center;justify-content:center;padding:16px">
-  <div style="background:#fff;border-radius:14px;width:100%;max-width:500px;padding:24px;box-shadow:0 8px 40px rgba(0,0,0,.18)">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
-      <div style="font-family:'Amiri',serif;font-size:18px;font-weight:700;color:#1a4a2e">إضافة خبر جديد</div>
-      <button onclick="document.getElementById('addNewsModal').style.display='none'"
-        style="background:none;border:none;font-size:20px;cursor:pointer;color:#999">✕</button>
+<div id="addNewsModal" class="m-overlay z-high">
+  <div class="m-box-news">
+    <div class="m-head-news">
+      <div class="m-title-news">إضافة خبر جديد</div>
+      <button onclick="document.getElementById('addNewsModal').classList.remove('show')"
+        class="m-close-news">✕</button>
     </div>
 
-    <div style="display:flex;flex-direction:column;gap:12px">
+    <div class="m-form-stack">
       <div>
-        <label style="font-family:'Noto Naskh Arabic',serif;font-size:13px;color:#555;display:block;margin-bottom:4px">العنوان *</label>
+        <label class="m-field-label">العنوان *</label>
         <input id="newsTitle" type="text" placeholder="عنوان الخبر أو الإعلان"
-          style="width:100%;padding:9px 12px;border:1px solid #d4c9a8;border-radius:8px;font-family:'Noto Naskh Arabic',serif;font-size:14px;box-sizing:border-box"/>
+          class="m-text-input"/>
       </div>
 
       <div>
-        <label style="font-family:'Noto Naskh Arabic',serif;font-size:13px;color:#555;display:block;margin-bottom:4px">التفاصيل</label>
+        <label class="m-field-label">التفاصيل</label>
         <textarea id="newsBody" rows="4" placeholder="تفاصيل الخبر..."
-          style="width:100%;padding:9px 12px;border:1px solid #d4c9a8;border-radius:8px;font-family:'Noto Naskh Arabic',serif;font-size:14px;resize:vertical;box-sizing:border-box"></textarea>
+          class="m-textarea"></textarea>
       </div>
 
-      <div style="display:flex;gap:10px">
-        <div style="flex:1">
-          <label style="font-family:'Noto Naskh Arabic',serif;font-size:13px;color:#555;display:block;margin-bottom:4px">التصنيف</label>
+      <div class="m-row-gap10">
+        <div class="m-col-flex1">
+          <label class="m-field-label">التصنيف</label>
           <select id="newsTag"
-            style="width:100%;padding:9px 10px;border:1px solid #d4c9a8;border-radius:8px;font-family:'Noto Naskh Arabic',serif;font-size:13px">
+            class="m-select-news">
             <option value="📝 خبر">📝 خبر</option>
             <option value="📢 إعلان">📢 إعلان</option>
             <option value="⚠️ تنبيه">⚠️ تنبيه</option>
@@ -117,22 +118,22 @@
             <option value="📅 موعد">📅 موعد</option>
           </select>
         </div>
-        <div style="display:flex;align-items:flex-end;padding-bottom:2px">
-          <label style="display:flex;align-items:center;gap:6px;font-family:'Noto Naskh Arabic',serif;font-size:13px;cursor:pointer">
-            <input type="checkbox" id="newsPinned" style="width:16px;height:16px"/>
+        <div class="m-pin-wrap">
+          <label class="m-pin-label">
+            <input type="checkbox" id="newsPinned" class="m-pin-checkbox"/>
             📌 تثبيت
           </label>
         </div>
       </div>
     </div>
 
-    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px">
-      <button onclick="document.getElementById('addNewsModal').style.display='none'"
-        style="padding:9px 20px;border:1px solid #d4c9a8;border-radius:8px;background:#fff;color:#888;font-family:'Noto Naskh Arabic',serif;font-size:13px;cursor:pointer">
+    <div class="m-foot-news">
+      <button onclick="document.getElementById('addNewsModal').classList.remove('show')"
+        class="m-btn-cancel-news">
         إلغاء
       </button>
       <button onclick="submitNews()"
-        style="padding:9px 24px;border:none;border-radius:8px;background:#1a4a2e;color:#fff;font-family:'Noto Naskh Arabic',serif;font-size:13px;font-weight:600;cursor:pointer">
+        class="m-btn-publish">
         <i class="ti ti-send"></i> نشر
       </button>
     </div>
@@ -160,34 +161,34 @@ onAuthStateChanged(auth, async user => {
   if (snap.exists() && snap.data().role === 'admin') {
     isAdmin = true;
     const btn = document.getElementById('addNewsBtn');
-    if (btn) btn.style.display = 'flex';
+    if (btn) btn.classList.add('show');
   }
 });
 
 // تحميل الأخبار
 const q = query(collection(db, 'news'), orderBy('createdAt', 'desc'));
 onSnapshot(q, snap => {
-  document.getElementById('newsLoading').style.display = 'none';
+  document.getElementById('newsLoading').classList.add('hidden');
   const list = document.getElementById('newsList');
 
   if (snap.empty) {
-    document.getElementById('newsEmpty').style.display = 'block';
+    document.getElementById('newsEmpty').classList.remove('hidden');
     list.innerHTML = '';
     return;
   }
 
-  document.getElementById('newsEmpty').style.display = 'none';
+  document.getElementById('newsEmpty').classList.add('hidden');
   list.innerHTML = snap.docs.map(d => {
     const n = d.data();
     const date = n.createdAt?.toDate?.()?.toLocaleDateString('ar', { day:'numeric', month:'long', year:'numeric' }) || '';
     return `
       <div class="news-card ${n.pinned ? 'featured' : ''}">
-        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+        <div class="news-card-head">
           <div>
             ${n.pinned ? '<div class="news-tag">📌 مثبت</div>' : `<div class="news-tag">${n.tag || '📝 خبر'}</div>`}
             <div class="news-date"><i class="ti ti-calendar"></i> ${date}</div>
           </div>
-          ${isAdmin ? `<button onclick="deleteNews('${d.id}')" style="background:#fee2e2;border:none;border-radius:8px;padding:5px 12px;color:#8b3a2a;cursor:pointer;font-family:inherit;font-size:12px"><i class="ti ti-trash"></i> حذف</button>` : ''}
+          ${isAdmin ? `<button onclick="deleteNews('${d.id}')" class="btn-delete-news"><i class="ti ti-trash"></i> حذف</button>` : ''}
         </div>
         <h3>${n.title || ''}</h3>
         <p>${n.body || ''}</p>
@@ -219,11 +220,12 @@ window.submitNews = async () => {
   document.getElementById('newsTitle').value  = '';
   document.getElementById('newsBody').value   = '';
   document.getElementById('newsPinned').checked = false;
-  document.getElementById('addNewsModal').style.display = 'none';
+  document.getElementById('addNewsModal').classList.remove('show');
 };
 </script>
 <script type="module" src="../js/notifications.js"></script>
   <script src="../js/sw-register.js"></script>
 </body>
 </html>
+
 
