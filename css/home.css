@@ -815,6 +815,25 @@ body {
 }
 .view-all-btn:hover { background: var(--green-mid); color: white; }
 
+
+/* ===== شركاء الخير ===== */
+.shuraka-section {
+  background: var(--green-dark);
+  padding: 48px 24px;
+  text-align: center;
+}
+.shuraka-inner {
+  max-width: 260px;
+  margin: 0 auto;
+}
+.shuraka-logo {
+  width: 100%;
+  height: auto;
+  display: block;
+  mix-blend-mode: screen;
+  filter: brightness(1.15);
+}
+
 /* ===== CONTACT SECTION ===== */
 .contact-section {
   background: var(--beige);
