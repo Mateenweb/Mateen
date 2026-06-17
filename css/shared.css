@@ -475,3 +475,20 @@ box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 
   .alert, .notification { padding: 10px 12px !important; font-size: 12px !important; }
 }
+/* ===== شركاء الخير — navbar logo ===== */
+.nav-shuraka {
+  display: flex;
+  align-items: center;
+  margin-inline-end: 8px;
+  opacity: 0.92;
+}
+.nav-shuraka-img {
+  height: 38px;
+  width: 38px;
+  object-fit: contain;
+  border-radius: 50%;
+  border: 1.5px solid var(--gold, #c9a227);
+  background: #1a2e24;
+  mix-blend-mode: normal;
+  display: block;
+}
