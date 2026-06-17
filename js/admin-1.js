@@ -257,11 +257,11 @@ window.approveUser = async id => {
   renderLinkList(allStudents);
 
   const modal = document.getElementById('linkModal');
-  modal.style.display = 'flex';
+  modal.classList.add('show');
 };
 
 window.closeLinkModal = () => {
-  document.getElementById('linkModal').style.display = 'none';
+  document.getElementById('linkModal').classList.remove('show');
   _pendingApproveId = null;
   window._selectedLinkId = null;
 };
@@ -319,7 +319,7 @@ window.confirmLinkModal = async (studentId) => {
   const uid = _pendingApproveId;
 
   // أغلق المودال أولاً
-  document.getElementById('linkModal').style.display = 'none';
+  document.getElementById('linkModal').classList.remove('show');
   _pendingApproveId = null;
   window._selectedLinkId = null;
 
@@ -429,12 +429,32 @@ window.toggleAlphaSort = () => {
 
 window.openExportModal = () => {
   const m = document.getElementById('exportModal');
-  if (m) { m.style.display = 'flex'; }
+  if (m) { m.classList.add('show'); }
 };
 
 window.closeExportModal = () => {
   const m = document.getElementById('exportModal');
-  if (m) { m.style.display = 'none'; }
+  if (m) { m.classList.remove('show'); }
+};
+
+// ── مودال تصدير الحضور والغياب ──────────────────────────────
+window.openAttModal = () => {
+  const m = document.getElementById('attModal');
+  if (m) { m.classList.add('show'); }
+};
+
+window.closeAttModal = () => {
+  const m = document.getElementById('attModal');
+  if (m) { m.classList.remove('show'); }
+};
+
+window.attSelectAll = (checked) => {
+  document.querySelectorAll('#attStudentList input[type="checkbox"]').forEach(cb => cb.checked = checked);
+};
+
+window.doAttExport = async (type) => {
+  showToast('ميزة تصدير الحضور والغياب قيد التطوير قريباً');
+  window.closeAttModal();
 };
 
 window.doExport = async (type) => {
@@ -814,6 +834,7 @@ window.deleteUserAccount = async (id, name) => {
 window.addEventListener("resize", () => {
   if (allStudents.length) renderStudents(allStudents);
 });
+
 
 
 
