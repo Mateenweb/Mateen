@@ -100,6 +100,29 @@ nav {
   mix-blend-mode: screen;
 }
 
+/* ── شعار شركاء الخير يظهر تلقائياً في كل شريط بسملة عبر الموقع ──
+   حل CSS فقط بدون الحاجة لتعديل كل ملف HTML على حدة            */
+.basmala-bar {
+  position: relative;
+}
+.basmala-bar::after {
+  content: '';
+  position: absolute;
+  inset-inline-end: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--green-dark, #1a4a2e) url('../shuraka-logo.png') center/65% no-repeat;
+  border: 1.5px solid var(--gold);
+  box-shadow: 0 0 0 1px rgba(201,162,39,0.25);
+  pointer-events: none;
+}
+@media (max-width: 480px) {
+  .basmala-bar::after { display: none; }
+}
+
 .nav-brand {
   font-family: Amiri, serif;
   color: var(--gold-light);
@@ -506,6 +529,7 @@ box-shadow: 0 4px 12px rgba(0,0,0,0.3);
   display: block;
   filter: brightness(1.3);   /* يفتح اللون شوية على النافبار الداكن */
 }
+
 
 
 
