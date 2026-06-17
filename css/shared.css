@@ -479,16 +479,14 @@ box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 .nav-shuraka {
   display: flex;
   align-items: center;
-  margin-inline-end: 8px;
-  opacity: 0.92;
+  margin-inline-end: 6px;
 }
 .nav-shuraka-img {
   height: 38px;
   width: 38px;
   object-fit: contain;
-  border-radius: 50%;
-  border: 1.5px solid var(--gold, #c9a227);
-  background: #1a2e24;
-  mix-blend-mode: normal;
   display: block;
+  /* mix-blend-mode: screen يخلي الأسود شفاف تماماً ويظهر الرسم بس */
+  mix-blend-mode: screen;
+  filter: brightness(1.4) contrast(1.1);
 }
