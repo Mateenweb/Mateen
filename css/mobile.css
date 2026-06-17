@@ -676,3 +676,8 @@ html { overflow-x: hidden; }
     }
   }
 }
+
+/* ===== شركاء الخير — مخفي على الموبايل (النافبار ضيق) ===== */
+@media (max-width: 991px) {
+  .nav-shuraka { display: none !important; }
+}
