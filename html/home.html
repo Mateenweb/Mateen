@@ -26,7 +26,9 @@
 <body>
 
 <!-- BASMALA -->
-<div class="basmala-bar"><img src="../shuraka-logo.png" alt="شركاء الخير" class="bsm-shuraka"/><span class="bsm-center"><span class="bsm-ornament">❦</span>بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ<span class="bsm-ornament">❦</span></span><span class="bsm-spacer"></span></div>
+<div class="basmala-bar">
+  <span class="bsm-ornament">❦</span>بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ<span class="bsm-ornament">❦</span>
+</div>
 
 <!-- NAVBAR -->
 <nav class="main-nav">
@@ -46,7 +48,7 @@
       <li><a href="about.html">عن البرنامج</a></li>
       <li><a href="courses.html">المواد العلمية</a></li>
       <li><a href="library.html">المكتبة</a></li>
-      <li><a href="news.html">الأخبار <span class="nav-msg-badge d-none" id="navNewsBadge" style="background:#e65100">0</span></a></li>
+      <li><a href="news.html">الأخبار <span class="nav-msg-badge nav-msg-badge-orange d-none" id="navNewsBadge">0</span></a></li>
       <li><a href="#contact">تواصل معنا</a></li>
     </ul>
 
@@ -84,7 +86,7 @@
       <li><a href="about.html"><i class="ti ti-info-circle"></i> عن البرنامج</a></li>
       <li><a href="courses.html"><i class="ti ti-books"></i> المواد العلمية</a></li>
       <li><a href="library.html"><i class="ti ti-library"></i> المكتبة</a></li>
-      <li><a href="news.html"><i class="ti ti-speakerphone"></i> الأخبار <span class="nav-msg-badge d-none" id="sidebarNewsBadge" style="background:#e65100">0</span></a></li>      <li><a href="#contact"><i class="ti ti-headset"></i> تواصل معنا</a></li>
+      <li><a href="news.html"><i class="ti ti-speakerphone"></i> الأخبار <span class="nav-msg-badge nav-msg-badge-orange d-none" id="sidebarNewsBadge">0</span></a></li>      <li><a href="#contact"><i class="ti ti-headset"></i> تواصل معنا</a></li>
     </ul>
     <div class="mobile-menu-btns" id="mobNavBtns">
       <a class="mob-login-btn" href="login.html"><i class="ti ti-login"></i> تسجيل الدخول</a>
@@ -127,7 +129,7 @@
     </div>
 
     <!-- Logged-in State -->
-    <div id="sidebar-user" style="display:none; flex-direction:column; flex:1;">
+    <div id="sidebar-user" class="sidebar-user-hidden">
       <div class="sidebar-header">
         <div class="sidebar-avatar" id="sidebarAvatar">👩</div>
         <div class="user-info">
@@ -142,16 +144,16 @@
           <span class="nav-msg-badge d-none" id="sidebarMsgBadge">0</span>
         </a>
         <!-- طالبة / بنات متين -->
-        <a href="student.html" id="profileLink" style="display:none"><i class="ti ti-user"></i> ملفي الشخصي</a>
-        <a href="#" id="linkCerts" style="display:none"><i class="ti ti-certificate"></i> شهاداتي</a>
-        <a href="#" id="linkAwards" style="display:none"><i class="ti ti-award"></i> إجازاتي</a>
-        <a href="#" id="linkGrades" style="display:none"><i class="ti ti-chart-bar"></i> درجاتي</a>
-        <a href="schedule.html" id="linkSchedule" style="display:none"><i class="ti ti-calendar"></i> جدولي الدراسي</a>
+        <a href="student.html" id="profileLink" class="d-none"><i class="ti ti-user"></i> ملفي الشخصي</a>
+        <a href="#" id="linkCerts" class="d-none"><i class="ti ti-certificate"></i> شهاداتي</a>
+        <a href="#" id="linkAwards" class="d-none"><i class="ti ti-award"></i> إجازاتي</a>
+        <a href="#" id="linkGrades" class="d-none"><i class="ti ti-chart-bar"></i> درجاتي</a>
+        <a href="schedule.html" id="linkSchedule" class="d-none"><i class="ti ti-calendar"></i> جدولي الدراسي</a>
         <!-- إدارة / مشرفة -->
-        <a href="admin.html" id="linkAdmin" style="display:none"><i class="ti ti-shield"></i> لوحة الإدارة</a>
-        <a href="news.html" id="linkNews" style="display:none"><i class="ti ti-speakerphone"></i> الأخبار</a>
+        <a href="admin.html" id="linkAdmin" class="d-none"><i class="ti ti-shield"></i> لوحة الإدارة</a>
+        <a href="news.html" id="linkNews" class="d-none"><i class="ti ti-speakerphone"></i> الأخبار</a>
         <!-- معلمة -->
-        <a href="#" id="linkTeacher" style="display:none"><i class="ti ti-users"></i> طالباتي</a>
+        <a href="#" id="linkTeacher" class="d-none"><i class="ti ti-users"></i> طالباتي</a>
       </nav>
       <div class="sidebar-divider"></div>
       <div class="sidebar-actions">
@@ -296,7 +298,6 @@
   </main>
 </div>
 
-
 <!-- CONTACT SECTION -->
 <section class="contact-section" id="contact">
   <div class="container-xl px-4">
@@ -340,7 +341,7 @@
           <div class="row g-3">
             <div class="col-12 col-sm-6">
               <label class="form-label-custom">اسمك الكريم</label>
-              <input class="form-input" id="ctName" placeholder="اسمك الكريم" type="text" readonly style="background:#f5f5f5;cursor:not-allowed"/>
+              <input class="form-input form-input-readonly" id="ctName" placeholder="اسمك الكريم" type="text" readonly/>
             </div>
             <div class="col-12 col-sm-6">
               <label class="form-label-custom">إلى من تودّين الإرسال؟</label>
@@ -366,7 +367,7 @@
               <textarea class="form-input form-textarea" id="ctBody" placeholder="اكتبي رسالتك هنا..."></textarea>
             </div>
           </div>
-          <div id="ctSuccess" style="display:none" class="success-msg mt-3">
+          <div id="ctSuccess" class="success-msg mt-3 d-none">
             ✅ تم إرسال رسالتك بنجاح!
           </div>
           <button class="contact-submit mt-3" id="ctBtn" onclick="submitContactNew()">
@@ -388,7 +389,7 @@
 <!-- FOOTER -->
 <footer>
   <div class="footer-logo">
-    <img alt="متين" src="../logo.png" style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:1.5px solid var(--gold);background:#1a4a2e;"/>
+    <img alt="متين" src="../logo.png" class="footer-logo-img-dark"/>
     <span>متين العلمي</span>
   </div>
   <div class="footer-dua">اللهم علمنا ما ينفعنا وانفعنا بما علمتنا وزدنا علماً</div>
@@ -405,7 +406,7 @@
   <div class="reg-modal-box">
     <div class="reg-modal-header">
       <div>
-        <div class="hero-badge" style="display:inline-block;margin-bottom:6px">📝 طلب تسجيل</div>
+        <div class="hero-badge hero-badge-inline">📝 طلب تسجيل</div>
         <h2>التسجيل في برنامج متين العلمي</h2>
         <p>أدخلي بياناتك وسنتواصل معكِ في أقرب وقت</p>
       </div>
@@ -498,10 +499,6 @@ document.getElementById('mobileMenuToggle').addEventListener('click', function()
 
   <script type="module" src="../js/notifications.js"></script>
   <script src="../js/sw-register.js"></script>
-
-<!-- شركاء الخير Footer -->
-<footer class="shuraka-footer" style="background:#2c1a0e;padding:18px 12px;text-align:center;">
-  <img src="../shuraka-logo.png" alt="شركاء الخير" style="height:72px;width:auto;mix-blend-mode:screen;opacity:0.92;display:inline-block;"/>
-</footer>
 </body>
 </html>
+
