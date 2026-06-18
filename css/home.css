@@ -1098,6 +1098,17 @@ footer {
   }
   .footer-dua { flex: none; }
   .footer-social { justify-content: center; }
+
+  /* الموبايل: إخفاء اسم البرنامج وتكبير شعار شركاء الخير ليبان بوضوح
+     بدلاً من النص — يبقى جنب شعار متين فقط                       */
+  .nav-logo .nav-brand,
+  .nav-logo .nav-tagline {
+    display: none;
+  }
+  .logo-circle-shuraka {
+    width: 52px;
+    height: 52px;
+  }
 }
 
 /* Very small (≤ 420px) */
@@ -1148,5 +1159,6 @@ footer {
 @media (max-width: 480px) {
   
 }
+
 
 
