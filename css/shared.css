@@ -522,10 +522,14 @@ box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 }
 @media (max-width: 991px) {
   .nav-shuraka {
-    padding-inline-start: 8px;
-    margin-inline-start: 6px;
+    flex: 1;                    /* يملأ المساحة الفاضية */
+    justify-content: center;    /* يتوسط */
+    border-inline-start: none;
+    margin-inline-start: 0;
+    padding-inline-start: 0;
   }
   .nav-shuraka-img {
-    height: 34px;   /* أصغر شوية على الموبايل */
+    height: 32px;
+    width: 100px;
   }
 }
