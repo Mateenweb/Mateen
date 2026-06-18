@@ -516,20 +516,24 @@ box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 
   .alert, .notification { padding: 10px 12px !important; font-size: 12px !important; }
 }
-/* ===== شركاء الخير — navbar logo ===== */
+/* يفتح اللون شوية على النافبار الداكن */
+}
+
+/* ===== شركاء الخير — navbar ===== */
 .nav-shuraka {
   display: flex;
   align-items: center;
-  margin-inline-end: 6px;
+  margin-inline-start: 10px;
+  padding-inline-start: 12px;
+  border-inline-start: 1px solid rgba(201,162,39,0.35);  /* فاصل ذهبي خفيف */
 }
 .nav-shuraka-img {
-  height: 38px;
-  width: 38px;
-  object-fit: contain;
+  height: 46px;       /* أكبر من لوجو متين (44px) وواضح */
+  width: auto;
   display: block;
-  filter: brightness(1.3);   /* يفتح اللون شوية على النافبار الداكن */
+  object-fit: contain;
+  filter: brightness(1.35);
 }
-
-
-
-
+@media (max-width: 991px) {
+  .nav-shuraka { display: none !important; }
+}
