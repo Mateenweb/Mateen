@@ -627,8 +627,9 @@ body {
   height: 90px;
   width: auto;
   object-fit: contain;
-  filter: brightness(0.85) contrast(1.1);
   flex-shrink: 0;
+  /* يخلي الرسم يظهر غامق وواضح على الخلفية الفاتحة */
+  filter: brightness(0.25) contrast(2);
 }
 .hero-ornament {
   color: var(--gold);
