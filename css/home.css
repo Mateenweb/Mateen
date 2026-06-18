@@ -1117,9 +1117,11 @@ footer {
   display: none;
   flex-direction: column;
   flex: 1;
+  width: 100%;
 }
 #sidebar-user.show-user {
   display: flex;
+  flex-direction: column;
 }
 
 .form-input-readonly {
