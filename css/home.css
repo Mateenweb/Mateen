@@ -1042,10 +1042,9 @@ footer {
   min-height: clamp(260px, 40vw, 480px);
 }
 
-/* Grid columns — fluid */
-.col-xl-2dot4 {
-  width: clamp(50%, calc(100% / 3), 20%);
-}
+/* Grid columns — تم حذف قاعدة clamp() الخاطئة هنا
+   (كانت min=50% و max=20% وهو تناقض رياضي يكسر العرض)
+   التعريف الأساسي لـ .col-xl-2dot4 موجود فوق + media queries تحت */
 
 /* Tablet (768–1199px) */
 @media (max-width: 1199px) {
@@ -1145,4 +1144,5 @@ footer {
 @media (max-width: 480px) {
   .basmala-bar::after { display: none; }
 }
+
 
