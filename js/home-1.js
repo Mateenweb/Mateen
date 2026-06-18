@@ -36,6 +36,10 @@ onAuthStateChanged(auth, async user => {
   const mobNavBtns = document.getElementById('mobNavBtns');
   if (mobNavBtns) { mobNavBtns.classList.remove('d-flex','d-lg-flex'); mobNavBtns.classList.add('d-none'); }
 
+  // إظهار navUserActions (أيقونة البروفايل + رسائلي)
+  const navUserActions = document.getElementById('navUserActions');
+  if (navUserActions) { navUserActions.classList.remove('d-none'); navUserActions.classList.add('d-flex'); }
+
   // إظهار زرار "رسائلي" في النافبار
   const navMsgBtn = document.getElementById('navMsgBtn');
   if (navMsgBtn) navMsgBtn.classList.remove('d-none');
@@ -80,16 +84,31 @@ onAuthStateChanged(auth, async user => {
   const profileLink   = document.getElementById('profileLink');
   const navProfileBtn = document.getElementById('navProfileBtn');
 
+  // أيقونة البروفايل — تظهر لكل الأدوار
+  const navAvatar = document.getElementById('navProfileAvatar');
+  const avatarEmoji =
+    role === 'admin'      ? '👑' :
+    role === 'supervisor' ? '🎓' :
+    role === 'teacher'    ? '📚' :
+    role === 'mateen'     ? '👩' : '🌸';
+  if (navAvatar) navAvatar.textContent = avatarEmoji;
+
   if (role === 'mateen') {
     const linkedId = snap.data().linkedStudentId;
     if (linkedId) {
       if (profileLink)   { profileLink.href = `student.html?id=${linkedId}`; profileLink.classList.remove('d-none'); }
       if (navProfileBtn) { navProfileBtn.href = `student.html?id=${linkedId}`; navProfileBtn.classList.remove('d-none'); }
     } else {
-      if (navProfileBtn) navProfileBtn.classList.add('d-none');
+      if (navProfileBtn) navProfileBtn.classList.remove('d-none');
     }
+  } else if (role === 'admin') {
+    if (navProfileBtn) { navProfileBtn.href = 'admin.html'; navProfileBtn.classList.remove('d-none'); }
+  } else if (role === 'supervisor') {
+    if (navProfileBtn) { navProfileBtn.href = 'supervisor.html'; navProfileBtn.classList.remove('d-none'); }
+  } else if (role === 'teacher') {
+    if (navProfileBtn) { navProfileBtn.href = 'teacher-aqeedah.html'; navProfileBtn.classList.remove('d-none'); }
   } else {
-    if (navProfileBtn) navProfileBtn.classList.add('d-none');
+    if (navProfileBtn) navProfileBtn.classList.remove('d-none');
   }
 });
 
