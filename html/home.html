@@ -71,9 +71,9 @@
       </a>
     </div>
 
-    <button class="sidebar-fab d-lg-none" id="sidebarFab" aria-label="ملفي وحسابي" data-bs-toggle="offcanvas" data-bs-target="#mainSidebar" aria-controls="mainSidebar">
+    <button class="sidebar-fab" id="sidebarFab" aria-label="ملفي وحسابي" data-bs-toggle="offcanvas" data-bs-target="#mainSidebar" aria-controls="mainSidebar">
       <i class="ti ti-user-circle"></i>
-      <span>حسابي</span>
+      <span class="d-none d-lg-inline">حسابي</span>
     </button>
 
     <button class="nav-toggle d-lg-none" id="mobileMenuToggle" aria-label="القائمة">
@@ -103,8 +103,8 @@
 <div class="page-layout guest-layout">
 
   <!-- SIDEBAR -->
-  <aside class="sidebar offcanvas offcanvas-end offcanvas-lg" tabindex="-1" id="mainSidebar" aria-labelledby="mainSidebarLabel">
-    <button type="button" class="btn-close btn-close-white d-lg-none" data-bs-dismiss="offcanvas" aria-label="إغلاق"></button>
+  <aside class="sidebar offcanvas offcanvas-end" tabindex="-1" id="mainSidebar" aria-labelledby="mainSidebarLabel">
+    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="إغلاق"></button>
     <!-- Guest State -->
     <div id="sidebar-guest">
       <div class="sidebar-guest-logo">
@@ -503,5 +503,6 @@ document.getElementById('mobileMenuToggle').addEventListener('click', function()
   <script src="../js/sw-register.js"></script>
 </body>
 </html>
+
 
 
