@@ -1,53 +1,27 @@
 import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
-import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
+import { getAuth } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
 import { getFirestore, doc, getDoc, getDocs, addDoc, setDoc,
          collection, query, where, orderBy, serverTimestamp }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 import { FIREBASE_CONFIG } from "./config.js";
 
+// ملاحظة: منطق السايدبار (auth state, روابط الأدمن، الخروج) بالكامل
+// أصبح في home-1.js فقط — هذا الملف مسؤول عن نموذج التواصل فقط
+// لمنع التكرار وتعارض عرض السايدبار.
+
 const app  = getApps().length ? getApp() : initializeApp(FIREBASE_CONFIG);
 const auth = getAuth(app);
 const db   = getFirestore(app);
 
-// ── Sidebar auth state ────────────────────────
-onAuthStateChanged(auth, async user => {
-  const guest   = document.getElementById('sidebar-guest');
-  const userDiv = document.getElementById('sidebar-user');
-  if (!user) { guest.style.display='block'; userDiv.style.display='none'; return; }
-  guest.style.display='none'; userDiv.style.display='flex'; userDiv.classList.add('show-user');
-
-  ['heroBtns','navBtns','mobNavBtns'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) { el.classList.remove('d-flex','d-lg-flex'); el.classList.add('d-none'); }
-  });
-  const navUserActions = document.getElementById('navUserActions');
-  if (navUserActions) navUserActions.classList.remove('d-none');
-
-  const snap = await getDoc(doc(db, 'users', user.uid));
-  const role = snap.exists() ? snap.data().role : 'student';
-  const name = user.displayName || user.email.split('@')[0];
-  document.getElementById('sidebarName').textContent = 'مرحباً، ' + name;
-  document.getElementById('sidebarRole').textContent = role === 'admin' ? 'مشرفة / معلمة' : 'الطالبة';
-
-  // مزامنة أيقونة البروفايل في الناف بار
-  const navAvatar = document.getElementById('navProfileAvatar');
-  if (navAvatar) navAvatar.textContent = role === 'admin' ? '👑' : role === 'teacher' ? '👩‍🏫' : role === 'supervisor' ? '🛡️' : '👩';
-
-  // ملء الاسم تلقائياً في نموذج التواصل
+// ملء اسم المستخدمة تلقائياً في نموذج التواصل (لو مسجلة دخول)
+auth.onAuthStateChanged(async user => {
+  if (!user) return;
   const ctName = document.getElementById('ctName');
-  if (ctName) ctName.value = (snap.exists() && snap.data().name) ? snap.data().name : name;
-
-  if (role === 'admin') {
-    const nav = userDiv.querySelector('.sidebar-nav');
-    if (nav && !nav.querySelector('.admin-link')) {
-      const d = document.createElement('div'); d.className='sidebar-divider'; nav.appendChild(d);
-      const a = document.createElement('a'); a.href='admin.html'; a.className='admin-link';
-      a.innerHTML='<i class="ti ti-shield"></i> لوحة الإداريات'; nav.appendChild(a);
-    }
-  }
+  if (!ctName) return;
+  const snap = await getDoc(doc(db, 'users', user.uid));
+  const name = user.displayName || user.email.split('@')[0];
+  ctName.value = (snap.exists() && snap.data().name) ? snap.data().name : name;
 });
-
-window.doLogout = () => signOut(auth).then(() => window.location.href='../html/login.html');
 
 // ── تحميل المستلمين من Firebase ──────────────
 async function loadRecipients() {
@@ -181,3 +155,4 @@ window.submitContactNew = async () => {
     alert('حدث خطأ أثناء الإرسال: ' + e.message);
   }
 };
+
