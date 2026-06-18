@@ -535,5 +535,11 @@ box-shadow: 0 4px 12px rgba(0,0,0,0.3);
   filter: brightness(1.35);
 }
 @media (max-width: 991px) {
-  .nav-shuraka { display: none !important; }
+  .nav-shuraka {
+    padding-inline-start: 8px;
+    margin-inline-start: 6px;
+  }
+  .nav-shuraka-img {
+    height: 34px;   /* أصغر شوية على الموبايل */
+  }
 }
