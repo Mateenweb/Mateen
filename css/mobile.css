@@ -129,7 +129,12 @@ html { overflow-x: hidden; }
   }
 
   /* الـ nav يأخذ المساحة المتبقية فيتدفع logout للأسفل */
-  #sidebar-user .sidebar-nav { flex: 1 !important; overflow-y: auto !important; }
+  #sidebar-user .sidebar-nav {
+    flex: 1 !important;
+    overflow-y: auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
   #sidebar-user .sidebar-actions { margin-top: auto !important; padding: 12px 16px !important; flex-shrink: 0 !important; }
   #sidebar-user .sidebar-footer  { flex-shrink: 0 !important; }
 
