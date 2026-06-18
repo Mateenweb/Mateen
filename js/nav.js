@@ -19,7 +19,6 @@ function renderNav(activePage) {
       <div class="nav-tagline">نحو بناء علميٍّ متين</div>
     </div>
   </a>
-  <div class="nav-shuraka"><img src="shuraka-logo.png" alt="شركاء الخير" class="nav-shuraka-img"/></div>
   <ul class="nav-links">
     ${links.map(l => `<li><a href="${l.href}"${activePage === l.href ? ' class="active"' : ''}>${l.label}</a></li>`).join('\n    ')}
   </ul>
