@@ -212,7 +212,7 @@ html { overflow-x: hidden; }
   .user-name      { font-size: 16px !important; }
   .user-role      { font-size: 13px !important; }
   .sidebar-nav a  {
-    padding: 13px var(--mob-pad) !important;
+    padding: 9px var(--mob-pad) !important;
     font-size: 15px !important;
     display: flex !important;
     align-items: center !important;
@@ -542,7 +542,7 @@ html { overflow-x: hidden; }
   #studentsTableWrap th,
   #studentsTableWrap td { font-size: 13px !important; padding: 10px !important; }
 
-  .msg-item     { padding: 13px var(--mob-pad) !important; }
+  .msg-item     { padding: 9px var(--mob-pad) !important; }
   .msg-sender   { font-size: 14px !important; }
   .msg-preview  { font-size: 13px !important; }
 
