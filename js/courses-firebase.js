@@ -2,7 +2,7 @@ import { initializeApp, getApps, getApp }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
 import { getAuth, onAuthStateChanged }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
-import { getFirestore, collection, query, orderBy, onSnapshot, addDoc, getDoc, doc }
+import { getFirestore, collection, query, orderBy, onSnapshot, addDoc, getDoc, doc, updateDoc, arrayUnion }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 import { FIREBASE_CONFIG } from "./config.js";
 
@@ -11,6 +11,9 @@ const auth = getAuth(app);
 const db   = getFirestore(app);
 
 let allMats = [];
+let currentUserRole = null;        // null = زائر
+let currentUserSubjects = [];      // المواد اللي الطالبة العادية ملتحقة بيها
+const MAIN_SUBJECTS = ['التفسير', 'الفقه', 'العقيدة', 'الحديث', 'القرآن الكريم'];
 
 const TYPE_ICONS = {
   محاضرة: '🎙️', ملخص: '📄', واجب: '📝', اختبار: '✅',
@@ -59,19 +62,73 @@ function renderMats(mats) {
 
 window.filterMats = () => {
   const val = document.getElementById('filterCourse').value;
-  renderMats(val ? allMats.filter(m => m.course === val) : allMats);
+  let mats = allMats;
+
+  // الطالبة العادية تشوف بس مواد هي ملتحقة بيها
+  if (currentUserRole === 'student') {
+    mats = mats.filter(m => currentUserSubjects.includes(m.course));
+  }
+
+  renderMats(val ? mats.filter(m => m.course === val) : mats);
 };
 
-// Show admin button if user is admin
+// تحديد دور المستخدمة + موادها الملتحقة بيها
 onAuthStateChanged(auth, async user => {
-  if (!user) return;
+  if (!user) {
+    currentUserRole = null;
+    currentUserSubjects = [];
+    renderEnrollBar();
+    window.filterMats();
+    return;
+  }
   const snap = await getDoc(doc(db, 'users', user.uid));
-  const role = snap.exists() ? snap.data().role : '';
+  const data = snap.exists() ? snap.data() : {};
+  const role = data.role || '';
+  currentUserRole = role;
+  currentUserSubjects = Array.isArray(data.enrolledSubjects) ? data.enrolledSubjects : [];
+
   if (role === 'admin') {
     const btn = document.getElementById('adminAddBtn');
     if (btn) btn.style.display = 'flex';
   }
+
+  renderEnrollBar();
+  window.filterMats();
 });
+
+// شريط الالتحاق بالمواد — يظهر للطالبة العادية فقط (role: student)
+function renderEnrollBar() {
+  const bar = document.getElementById('enrollBar');
+  if (!bar) return;
+
+  if (currentUserRole !== 'student') {
+    bar.style.display = 'none';
+    return;
+  }
+
+  bar.style.display = 'flex';
+  bar.innerHTML = MAIN_SUBJECTS.map(subj => {
+    const joined = currentUserSubjects.includes(subj);
+    return `<button type="button" onclick="${joined ? '' : `joinSubject('${subj}')`}"
+      style="padding:6px 14px;border-radius:20px;font-size:12px;cursor:${joined ? 'default' : 'pointer'};
+             border:1px solid ${joined ? 'var(--green-dark)' : 'var(--border)'};
+             background:${joined ? 'var(--green-dark)' : 'var(--white)'};
+             color:${joined ? '#fff' : 'var(--text-dark)'};">
+      ${joined ? '✓ ' + subj : 'التحقي بـ ' + subj}
+    </button>`;
+  }).join('');
+}
+
+// التحاق الطالبة العادية بمادة بنفسها
+window.joinSubject = async (subj) => {
+  if (!auth.currentUser) return;
+  await updateDoc(doc(db, 'users', auth.currentUser.uid), {
+    enrolledSubjects: arrayUnion(subj)
+  });
+  if (!currentUserSubjects.includes(subj)) currentUserSubjects.push(subj);
+  renderEnrollBar();
+  window.filterMats();
+};
 
 // Submit new course
 window.submitNewCourse = async () => {
