@@ -803,3 +803,8 @@ body { background: var(--beige); min-height: 100vh; display: flex; flex-directio
   }
   .admin-nav-links .nav-link { padding: 8px 16px; }
 }
+
+/* ══ تثبيت خلفية الـ collapse على الموبايل ══ */
+#adminNavMenu.show {
+  background: var(--green-dark, #1a4a2e) !important;
+}
