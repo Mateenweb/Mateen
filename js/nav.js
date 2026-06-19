@@ -13,13 +13,13 @@ function renderNav(activePage) {
   const navHTML = `
 <nav>
   <a href="home.html" class="nav-logo" style="text-decoration:none">
-    <img src="logo.png" alt="متين" style="width:38px;height:38px;border-radius:50%;object-fit:cover;border:1.5px solid var(--gold);background:#fff;">
+    <img src="../logo.png" alt="متين" style="width:38px;height:38px;border-radius:50%;object-fit:cover;border:1.5px solid var(--gold);background:#fff;">
     <div>
       <div class="nav-brand">برنامج متين العلمي</div>
       <div class="nav-tagline">نحو بناء علميٍّ متين</div>
     </div>
   </a>
-  <div class="nav-shuraka"><img src="shuraka-logo.png" alt="شركاء الخير" class="nav-shuraka-img"/></div>
+  <div class="nav-shuraka"><img src="../shuraka-logo.png" alt="شركاء الخير" class="nav-shuraka-img"/></div>
   <ul class="nav-links">
     ${links.map(l => `<li><a href="${l.href}"${activePage === l.href ? ' class="active"' : ''}>${l.label}</a></li>`).join('\n    ')}
   </ul>
