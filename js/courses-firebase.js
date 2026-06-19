@@ -94,10 +94,23 @@ function renderModalMats() {
     const el = document.getElementById('modal-mats-' + modalId);
     if (!el) return;
     const subjMats = allMats.filter(m => m.course === subj);
-    if (subjMats.length === 0) { el.innerHTML = ''; return; }
+
+    const addBtnHTML = isAdmin() ? `
+      <button onclick="document.getElementById('newCourseCat').value='${subj}';document.getElementById('addCourseModal').style.display='flex'"
+        style="display:flex;align-items:center;gap:6px;background:var(--green-dark);color:white;border:none;padding:8px 14px;border-radius:8px;font-family:inherit;font-size:13px;cursor:pointer;margin-bottom:10px;margin-top:12px;">
+        <i class="ti ti-plus"></i> إضافة مادة لـ${subj}
+      </button>` : '';
+
+    if (subjMats.length === 0) {
+      el.innerHTML = addBtnHTML;
+      return;
+    }
     el.innerHTML = `
-      <div style="margin:14px 0 6px;font-size:13px;font-weight:700;color:var(--green-dark);">
-        <i class="ti ti-files" style="margin-left:4px;"></i> المواد المضافة (${subjMats.length})
+      <div style="margin:14px 0 6px;">
+        <div style="font-size:13px;font-weight:700;color:var(--green-dark);margin-bottom:8px;">
+          <i class="ti ti-files" style="margin-left:4px;"></i> المواد المضافة (${subjMats.length})
+        </div>
+        ${addBtnHTML}
       </div>
       <div style="display:flex;flex-direction:column;gap:8px;">
         ${subjMats.map(matCardHTML).join('')}
