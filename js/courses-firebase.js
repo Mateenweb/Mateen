@@ -216,8 +216,8 @@ onAuthStateChanged(auth, async user => {
   currentUserSubjects = Array.isArray(data.enrolledSubjects) ? data.enrolledSubjects : [];
 
   if (isAdmin()) {
-    const btn = document.getElementById('adminAddBtn');
-    if (btn) btn.style.display = 'flex';
+    const btns = document.getElementById('adminBtns');
+    if (btns) btns.style.display = 'flex';
   }
 
   updateEnrollButtons();
@@ -309,3 +309,233 @@ onSnapshot(query(collection(db, 'materials'), orderBy('addedAt', 'desc')), snap 
   window.filterMats();
   renderModalMats();
 });
+
+// =============================================
+// إدارة المواد الرئيسية (subjects collection)
+// =============================================
+
+let allSubjects = [];
+
+function subjectCardHTML(s) {
+  const adminActions = isAdmin() ? `
+    <div style="display:flex;gap:8px;padding:10px 16px;border-top:1px solid var(--border);" onclick="event.stopPropagation()">
+      <button onclick="openEditSubjectModal('${s.id}')"
+        style="flex:1;padding:7px;border:1px solid var(--green-dark);background:transparent;color:var(--green-dark);border-radius:8px;font-family:inherit;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;">
+        <i class="ti ti-pencil"></i> تعديل
+      </button>
+      <button onclick="confirmDeleteSubject('${s.id}','${s.name.replace(/'/g,"\\'")}' )"
+        style="flex:1;padding:7px;border:1px solid #c0392b;background:transparent;color:#c0392b;border-radius:8px;font-family:inherit;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;">
+        <i class="ti ti-trash"></i> حذف
+      </button>
+    </div>` : '';
+
+  const safeId = 'dyn-' + s.id;
+  return `
+    <div class="course-card" onclick="openDynModal('${s.id}')">
+      <div class="card-banner" style="background:${s.color || 'linear-gradient(135deg,#5c3d2e,#8a5e3c)'}">
+        <div class="card-badge">أساسية</div>
+        <div class="card-icon">${s.icon || '📚'}</div>
+      </div>
+      <div class="card-body">
+        <div class="card-title">${s.name}</div>
+        <div class="card-desc">${s.desc || ''}</div>
+        <div class="card-meta">
+          ${s.meetings ? `<div class="meta-item"><i class="ti ti-clock"></i> ${s.meetings}</div>` : ''}
+          ${s.weeks ? `<div class="meta-item"><i class="ti ti-calendar"></i> ${s.weeks}</div>` : ''}
+        </div>
+        <div class="card-footer">
+          <div class="card-level"><i class="ti ti-award" style="color:var(--gold)"></i> ${s.level || ''}</div>
+          <button class="btn-details">عرض التفاصيل</button>
+        </div>
+      </div>
+      ${adminActions}
+    </div>`;
+}
+
+function renderSubjects() {
+  const grid = document.getElementById('dynamicSubjectsGrid');
+  if (!grid) return;
+  if (allSubjects.length === 0) { grid.innerHTML = ''; return; }
+  grid.innerHTML = allSubjects.map(subjectCardHTML).join('');
+}
+
+// فتح مودال ديناميكي للمادة الرئيسية
+window.openDynModal = (id) => {
+  const s = allSubjects.find(x => x.id === id);
+  if (!s) return;
+
+  // احذف أي مودال قديم
+  const old = document.getElementById('dynModal-' + id);
+  if (old) old.remove();
+
+  const topics = Array.isArray(s.topics) ? s.topics : (s.topics || '').split('\n').filter(Boolean);
+  const mats = allMats.filter(m => m.course === s.name);
+
+  const addBtnHTML = isAdmin() ? `
+    <button onclick="document.getElementById('newCourseCat').value='${s.name}';document.getElementById('addCourseModal').style.display='flex'"
+      style="display:flex;align-items:center;gap:6px;background:var(--green-dark);color:white;border:none;padding:8px 14px;border-radius:8px;font-family:inherit;font-size:13px;cursor:pointer;margin-bottom:10px;margin-top:12px;">
+      <i class="ti ti-plus"></i> إضافة محتوى لـ${s.name}
+    </button>` : '';
+
+  const matsHTML = mats.length > 0 ? `
+    <div style="margin-top:14px;">
+      <div style="font-size:13px;font-weight:700;color:var(--green-dark);margin-bottom:8px;">
+        <i class="ti ti-files" style="margin-left:4px;"></i> المواد المضافة (${mats.length})
+      </div>
+      ${addBtnHTML}
+      <div style="display:flex;flex-direction:column;gap:8px;">${mats.map(matCardHTML).join('')}</div>
+    </div>` : addBtnHTML ? `<div style="margin-top:8px">${addBtnHTML}</div>` : '';
+
+  const modal = document.createElement('div');
+  modal.id = 'dynModal-' + id;
+  modal.className = 'modal-overlay';
+  modal.style.cssText = 'display:flex;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:1000;align-items:center;justify-content:center;padding:20px;';
+  modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
+  modal.innerHTML = `
+    <div class="modal-box">
+      <div class="modal-banner" style="background:${s.color || 'linear-gradient(135deg,#5c3d2e,#8a5e3c)'}">
+        <button class="modal-close" onclick="document.getElementById('dynModal-${id}').remove()">✕</button>
+        <div class="modal-icon">${s.icon || '📚'}</div>
+      </div>
+      <div class="modal-content">
+        <div class="modal-title">${s.name}</div>
+        <div class="modal-subtitle">مادة أساسية — ${s.level || ''}</div>
+        <div class="modal-desc">${s.desc || ''}</div>
+        ${topics.length > 0 ? `
+          <div class="modal-topics-title">📌 المحاور الرئيسية:</div>
+          <ul class="topics-list">${topics.map(t => `<li>${t}</li>`).join('')}</ul>` : ''}
+        ${matsHTML}
+        <div class="modal-actions">
+          <button class="btn-close-modal" onclick="document.getElementById('dynModal-${id}').remove()">إغلاق</button>
+        </div>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+};
+
+// إضافة مادة رئيسية
+window.submitNewSubject = async () => {
+  const name  = document.getElementById('sbjName').value.trim();
+  const icon  = document.getElementById('sbjIcon').value.trim();
+  const color = document.getElementById('sbjColor').value;
+  const desc  = document.getElementById('sbjDesc').value.trim();
+  const meetings = document.getElementById('sbjMeetings').value.trim();
+  const weeks    = document.getElementById('sbjWeeks').value.trim();
+  const level    = document.getElementById('sbjLevel').value.trim();
+  const topics   = document.getElementById('sbjTopics').value.trim();
+  const err = document.getElementById('addSubjectErr');
+
+  if (!name || !desc) {
+    err.style.display = 'block';
+    err.textContent = 'يرجى تعبئة اسم المادة والوصف على الأقل';
+    return;
+  }
+  err.style.display = 'none';
+
+  const btn = document.getElementById('addSubjectSubmit');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="ti ti-loader"></i> جاري الإضافة...';
+
+  try {
+    await addDoc(collection(db, 'subjects'), {
+      name, icon, color, desc, meetings, weeks, level,
+      topics: topics.split('\n').filter(Boolean),
+      addedAt: Date.now(),
+      addedBy: auth.currentUser.email,
+    });
+    ['sbjName','sbjIcon','sbjDesc','sbjMeetings','sbjWeeks','sbjLevel','sbjTopics'].forEach(id => {
+      document.getElementById(id).value = '';
+    });
+    document.getElementById('addSubjectModal').style.display = 'none';
+  } catch(e) {
+    err.style.display = 'block';
+    err.textContent = 'حدث خطأ، حاولي مرة أخرى';
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = '<i class="ti ti-circle-plus"></i> إضافة المادة';
+};
+
+// تعديل مادة رئيسية
+window.openEditSubjectModal = (id) => {
+  const s = allSubjects.find(x => x.id === id);
+  if (!s) return;
+  document.getElementById('editSbjId').value = id;
+  document.getElementById('editSbjName').value = s.name;
+  document.getElementById('editSbjIcon').value = s.icon || '';
+  document.getElementById('editSbjColor').value = s.color || '';
+  document.getElementById('editSbjDesc').value = s.desc || '';
+  document.getElementById('editSbjMeetings').value = s.meetings || '';
+  document.getElementById('editSbjWeeks').value = s.weeks || '';
+  document.getElementById('editSbjLevel').value = s.level || '';
+  const topics = Array.isArray(s.topics) ? s.topics.join('\n') : (s.topics || '');
+  document.getElementById('editSbjTopics').value = topics;
+  document.getElementById('editSubjectErr').style.display = 'none';
+  document.getElementById('editSubjectModal').style.display = 'flex';
+};
+
+window.submitEditSubject = async () => {
+  const id    = document.getElementById('editSbjId').value;
+  const name  = document.getElementById('editSbjName').value.trim();
+  const icon  = document.getElementById('editSbjIcon').value.trim();
+  const color = document.getElementById('editSbjColor').value;
+  const desc  = document.getElementById('editSbjDesc').value.trim();
+  const meetings = document.getElementById('editSbjMeetings').value.trim();
+  const weeks    = document.getElementById('editSbjWeeks').value.trim();
+  const level    = document.getElementById('editSbjLevel').value.trim();
+  const topics   = document.getElementById('editSbjTopics').value.trim();
+  const err = document.getElementById('editSubjectErr');
+
+  if (!name) { err.style.display='block'; err.textContent='اسم المادة مطلوب'; return; }
+  err.style.display = 'none';
+
+  const btn = document.getElementById('editSubjectSubmit');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="ti ti-loader"></i> جاري الحفظ...';
+
+  try {
+    await updateDoc(doc(db, 'subjects', id), {
+      name, icon, color, desc, meetings, weeks, level,
+      topics: topics.split('\n').filter(Boolean),
+    });
+    document.getElementById('editSubjectModal').style.display = 'none';
+  } catch(e) {
+    err.style.display='block'; err.textContent='حدث خطأ، حاولي مرة أخرى';
+  }
+  btn.disabled = false;
+  btn.innerHTML = '<i class="ti ti-device-floppy"></i> حفظ التعديلات';
+};
+
+// حذف مادة رئيسية
+window.confirmDeleteSubject = (id, name) => {
+  document.getElementById('deleteSbjId').value = id;
+  document.getElementById('deleteSbjTitle').textContent = name;
+  document.getElementById('deleteSubjectModal').style.display = 'flex';
+};
+
+window.executeDeleteSubject = async () => {
+  const id  = document.getElementById('deleteSbjId').value;
+  const btn = document.getElementById('deleteSbjConfirmBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="ti ti-loader"></i> جاري الحذف...';
+  try {
+    await deleteDoc(doc(db, 'subjects', id));
+    document.getElementById('deleteSubjectModal').style.display = 'none';
+  } catch(e) {
+    alert('حدث خطأ أثناء الحذف');
+  }
+  btn.disabled = false;
+  btn.innerHTML = '<i class="ti ti-trash"></i> تأكيد الحذف';
+};
+
+// تحميل المواد الرئيسية من Firebase
+onSnapshot(query(collection(db, 'subjects'), orderBy('addedAt', 'asc')), snap => {
+  allSubjects = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  renderSubjects();
+});
+
+// إظهار أزرار الأدمن
+function showAdminBtns() {
+  const btns = document.getElementById('adminBtns');
+  if (btns && isAdmin()) btns.style.display = 'flex';
+}
