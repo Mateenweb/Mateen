@@ -3,6 +3,7 @@ import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebase
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
 import { getFirestore, collection, doc, getDoc, onSnapshot, query, where, orderBy, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 import { FIREBASE_CONFIG } from "./config.js";
+import { fullDeleteUser } from "./delete-account.js";
 
 const app  = getApps().length ? getApp() : initializeApp(FIREBASE_CONFIG);
 const auth = getAuth(app);
@@ -72,7 +73,7 @@ function renderAll(list) {
 }
 
 window.approveUser = async id => { await updateDoc(doc(db,'users',id),{status:'active'}); showToast('✓ تم قبول الحساب'); };
-window.rejectUser  = async id => { if(!confirm('رفض الحساب وحذفه؟')) return; await deleteDoc(doc(db,'users',id)); showToast('تم الرفض'); };
+window.rejectUser  = async id => { if(!confirm('رفض الحساب وحذفه؟')) return; await fullDeleteUser(id); showToast('تم الرفض'); };
 window.suspendUser = async (id,cur) => {
   const ns = cur==='suspended' ? 'active' : 'suspended';
   await updateDoc(doc(db,'users',id),{status:ns});
