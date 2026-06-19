@@ -92,41 +92,51 @@ onAuthStateChanged(auth, async user => {
     if (btn) btn.style.display = 'flex';
   }
 
-  renderEnrollBar();
+  updateEnrollButtons();
   window.filterMats();
 });
 
-// شريط الالتحاق بالمواد — يظهر للطالبة العادية فقط (role: student)
-function renderEnrollBar() {
-  const bar = document.getElementById('enrollBar');
-  if (!bar) return;
+// تحديث أزرار "التسجيل في المادة" داخل المودالات حسب حالة الالتحاق
+const SUBJ_MODAL_IDS = {
+  'التفسير': 'tafseer', 'الفقه': 'fiqh', 'العقيدة': 'aqeedah',
+  'الحديث': 'hadith', 'القرآن الكريم': 'quran'
+};
 
-  if (currentUserRole !== 'student') {
-    bar.style.display = 'none';
-    return;
-  }
+function updateEnrollButtons() {
+  MAIN_SUBJECTS.forEach(subj => {
+    const modalId = SUBJ_MODAL_IDS[subj];
+    const btn = document.getElementById('enrollBtn-' + modalId);
+    if (!btn) return;
 
-  bar.style.display = 'flex';
-  bar.innerHTML = MAIN_SUBJECTS.map(subj => {
     const joined = currentUserSubjects.includes(subj);
-    return `<button type="button" onclick="${joined ? '' : `joinSubject('${subj}')`}"
-      style="padding:6px 14px;border-radius:20px;font-size:12px;cursor:${joined ? 'default' : 'pointer'};
-             border:1px solid ${joined ? 'var(--green-dark)' : 'var(--border)'};
-             background:${joined ? 'var(--green-dark)' : 'var(--white)'};
-             color:${joined ? '#fff' : 'var(--text-dark)'};">
-      ${joined ? '✓ ' + subj : 'التحقي بـ ' + subj}
-    </button>`;
-  }).join('');
+
+    if (!auth.currentUser) {
+      btn.textContent = 'سجّلي / اشتركي للالتحاق بالمادة';
+      btn.disabled = false;
+      btn.onclick = () => location.href = 'login.html';
+    } else if (currentUserRole === 'mateen') {
+      // بنات متين ملتحقات أوتوماتيك بكل المواد بعد القبول
+      btn.textContent = joined ? '✓ ملتحقة بالفعل' : 'بانتظار قبول حسابك';
+      btn.disabled = true;
+    } else if (joined) {
+      btn.textContent = '✓ ملتحقة بهذه المادة';
+      btn.disabled = true;
+    } else {
+      btn.textContent = 'التسجيل في المادة';
+      btn.disabled = false;
+      btn.onclick = () => joinSubject(subj);
+    }
+  });
 }
 
 // التحاق الطالبة العادية بمادة بنفسها
 window.joinSubject = async (subj) => {
-  if (!auth.currentUser) return;
+  if (!auth.currentUser) { location.href = 'login.html'; return; }
   await updateDoc(doc(db, 'users', auth.currentUser.uid), {
     enrolledSubjects: arrayUnion(subj)
   });
   if (!currentUserSubjects.includes(subj)) currentUserSubjects.push(subj);
-  renderEnrollBar();
+  updateEnrollButtons();
   window.filterMats();
 };
 
