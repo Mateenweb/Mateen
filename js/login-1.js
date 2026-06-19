@@ -260,22 +260,8 @@ window.doRegister = async () => {
       createdAt: serverTimestamp(),
     });
 
-    /* ── طالبة متين: تسجيل تلقائي في كل المواد ── */
-    if (regRole === 'mateen') {
-      const SUBJECTS = ['quran1', 'quran2', 'hadeeth', 'fiqh', 'aqeedah', 'tafseer'];
-      const enrollPromises = SUBJECTS.map(subj =>
-        addDoc(collection(db, 'subjects', subj, 'enrollments'), {
-          uid,
-          name,
-          email,
-          phone,
-          year:      year || '',
-          enrolledAt: serverTimestamp(),
-          status:    'pending',   // تنتظر موافقة المشرفة
-        })
-      );
-      await Promise.all(enrollPromises);
-    }
+    /* ملحوظة: الالتحاق بالمواد لبنات متين بيحصل أوتوماتيك
+       لما المشرفة توافق على الحساب وتربطها بسجل الطالبة (admin-1.js) */
 
     /* تسجيل خروج تلقائي للحسابات المعلقة */
     if (cfg.needsApproval) {
