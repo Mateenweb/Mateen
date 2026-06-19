@@ -286,11 +286,19 @@ window.openConv = async (cid, otherId, otherName, otherRole) => {
 
   // Listen to messages
   const q = query(collection(db, 'conversations', cid, 'messages'));
+
+  // جيبي وقت الحذف من Firestore عشان نفلتر الرسائل القديمة
+  const convForDelete = await getDoc(doc(db, 'conversations', cid));
+  const deletedAtSec  = convForDelete.exists()
+    ? (convForDelete.data().deletedAt?.[currentUser.uid]?.seconds || 0)
+    : 0;
+
   msgUnsub = onSnapshot(q, snap => {
     // ترتيب الرسائل بالوقت في الـ client
     const sorted = snap.docs
       .map(d => ({ id: d.id, ...d.data() }))
-      .filter(m => !m.deletedBy?.[currentUser.uid])   // اخفِ الرسائل المحذوفة منك
+      .filter(m => !m.deletedBy?.[currentUser.uid])          // اخفِ الرسائل المحذوفة منك
+      .filter(m => (m.sentAt?.seconds || 0) > deletedAtSec)  // اخفِ الرسائل قبل وقت الحذف
       .sort((a, b) => (a.sentAt?.seconds || 0) - (b.sentAt?.seconds || 0));
     const bubbles = document.getElementById('msgBubbles');
 
@@ -482,7 +490,8 @@ window.deleteConv = async (cid) => {
   if (!confirm('هل تريدين حذف هذه المحادثة؟\nستختفي منك فقط والطرف الآخر لن يتأثر.')) return;
 
   await updateDoc(doc(db, 'conversations', cid), {
-    [`hiddenBy.${currentUser.uid}`]: true
+    [`hiddenBy.${currentUser.uid}`]: true,
+    [`deletedAt.${currentUser.uid}`]: serverTimestamp(),
   });
 
   allConvs = allConvs.filter(c => c.id !== cid);
