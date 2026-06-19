@@ -562,18 +562,23 @@ body {
 
 /* ===== HERO ===== */
 .hero {
-  background: url('../hero-bg.png') left center/cover no-repeat;
   display: flex;
   align-items: center;
-  aspect-ratio: 1376 / 768;
+  /* نسبة الصورة الأصلية 1376×768 على الشاشات الكبيرة */
+  aspect-ratio: 16 / 9;
   min-height: 320px;
-  position: relative;
+  /* حد أقصى للارتفاع على الشاشات العملاقة */
+  max-height: 640px;
 }
-.hero::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 0;
+
+/* الصورة نفسها — Bootstrap object-fit-cover يغطي الكامل */
+.hero-bg-img {
+  object-position: left center;
+}
+
+/* طبقة التعتيم بدل ::before */
+.hero-overlay {
+  z-index: 1;
   background: linear-gradient(
     to right,
     rgba(247,239,227,0.0)  0%,
@@ -584,7 +589,7 @@ body {
 }
 .hero-text {
   position: relative;
-  z-index: 1;
+  z-index: 2;
   max-width: 480px;
   padding: clamp(24px, 5vw, 80px) clamp(16px, 4vw, 60px);
 }
@@ -1088,7 +1093,7 @@ footer {
     text-align: center;
     justify-content: center;
   }
-  .hero::before { background: rgba(247,239,227,0.65); }
+  .hero-overlay { background: rgba(247,239,227,0.65); }
   .hero-text { max-width: 100%; }
   .hero-btns { justify-content: center; }
   .hero-btn-primary, .hero-btn-secondary { padding: 9px 18px; font-size: 13px; }
