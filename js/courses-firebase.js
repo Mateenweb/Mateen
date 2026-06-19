@@ -2,7 +2,7 @@ import { initializeApp, getApps, getApp }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
 import { getAuth, onAuthStateChanged }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
-import { getFirestore, collection, query, orderBy, onSnapshot, addDoc, getDoc, doc, updateDoc, arrayUnion }
+import { getFirestore, collection, query, orderBy, onSnapshot, addDoc, getDoc, doc, updateDoc, deleteDoc, arrayUnion }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 import { FIREBASE_CONFIG } from "./config.js";
 
@@ -11,8 +11,8 @@ const auth = getAuth(app);
 const db   = getFirestore(app);
 
 let allMats = [];
-let currentUserRole = null;        // null = زائر
-let currentUserSubjects = [];      // المواد اللي الطالبة العادية ملتحقة بيها
+let currentUserRole = null;
+let currentUserSubjects = [];
 const MAIN_SUBJECTS = ['التفسير', 'الفقه', 'العقيدة', 'الحديث', 'القرآن الكريم'];
 
 const TYPE_ICONS = {
@@ -30,21 +30,38 @@ function detectLinkType(url) {
 
 const LINK_LABELS = { youtube: '▶️ يوتيوب', drive: '📁 درايف', dropbox: '☁️ دروبوكس', default: '🔗 فتح الرابط' };
 
+const isAdmin = () => currentUserRole === 'admin' || currentUserRole === 'supervisor';
+
 function matCardHTML(m) {
+  const adminBtns = isAdmin() ? `
+    <div style="display:flex;gap:8px;margin-top:10px;border-top:1px solid var(--border);padding-top:10px;">
+      <button onclick="event.preventDefault();event.stopPropagation();openEditModal('${m.id}')"
+        style="flex:1;padding:6px;border:1px solid var(--green-dark);background:transparent;color:var(--green-dark);border-radius:8px;font-family:inherit;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;">
+        <i class="ti ti-pencil"></i> تعديل
+      </button>
+      <button onclick="event.preventDefault();event.stopPropagation();confirmDeleteMat('${m.id}','${m.title.replace(/'/g,"\\'")}' )"
+        style="flex:1;padding:6px;border:1px solid #c0392b;background:transparent;color:#c0392b;border-radius:8px;font-family:inherit;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;">
+        <i class="ti ti-trash"></i> حذف
+      </button>
+    </div>` : '';
+
   return `
-    <a href="${m.url}" target="_blank" rel="noopener" style="text-decoration:none;">
+    <div style="text-decoration:none;">
       <div class="mat-card-item">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
-          <span style="font-size:20px">${TYPE_ICONS[m.type] || '📎'}</span>
-          <div>
-            <div style="font-size:13px;font-weight:700;color:var(--green-dark)">${m.title}</div>
-            <div style="font-size:11px;color:var(--text-mid);margin-top:2px">${m.type || ''}</div>
+        <a href="${m.url}" target="_blank" rel="noopener" style="text-decoration:none;display:block;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+            <span style="font-size:20px">${TYPE_ICONS[m.type] || '📎'}</span>
+            <div>
+              <div style="font-size:13px;font-weight:700;color:var(--green-dark)">${m.title}</div>
+              <div style="font-size:11px;color:var(--text-mid);margin-top:2px">${m.type || ''}</div>
+            </div>
           </div>
-        </div>
-        ${m.notes ? `<div style="font-size:12px;color:var(--text-mid);background:var(--beige);padding:7px 10px;border-radius:8px;margin-bottom:8px">${m.notes}</div>` : ''}
-        <div style="font-size:12px;color:var(--gold-dark)">${LINK_LABELS[detectLinkType(m.url)]}</div>
+          ${m.notes ? `<div style="font-size:12px;color:var(--text-mid);background:var(--beige);padding:7px 10px;border-radius:8px;margin-bottom:8px">${m.notes}</div>` : ''}
+          <div style="font-size:12px;color:var(--gold-dark)">${LINK_LABELS[detectLinkType(m.url)]}</div>
+        </a>
+        ${adminBtns}
       </div>
-    </a>`;
+    </div>`;
 }
 
 function renderMats(mats) {
@@ -53,7 +70,15 @@ function renderMats(mats) {
   if (!container) return;
 
   if (mats.length === 0) {
-    section.style.display = 'none';
+    if (isAdmin()) {
+      section.style.display = 'block';
+      container.innerHTML = `<div style="text-align:center;color:var(--text-mid);padding:40px;grid-column:1/-1;">
+        <i class="ti ti-files-off" style="font-size:28px;"></i>
+        <div style="margin-top:8px">لا توجد مواد مضافة بعد</div>
+      </div>`;
+    } else {
+      section.style.display = 'none';
+    }
   } else {
     section.style.display = 'block';
     container.innerHTML = mats.map(matCardHTML).join('');
@@ -84,7 +109,6 @@ window.filterMats = () => {
   const val = document.getElementById('filterCourse').value;
   let mats = allMats;
 
-  // الطالبة العادية تشوف بس مواد هي ملتحقة بيها
   if (currentUserRole === 'student') {
     mats = mats.filter(m => currentUserSubjects.includes(m.course));
   }
@@ -92,7 +116,78 @@ window.filterMats = () => {
   renderMats(val ? mats.filter(m => m.course === val) : mats);
 };
 
-// تحديد دور المستخدمة + موادها الملتحقة بيها
+// ===== تعديل المادة =====
+window.openEditModal = (id) => {
+  const m = allMats.find(x => x.id === id);
+  if (!m) return;
+
+  document.getElementById('editMatId').value    = id;
+  document.getElementById('editCourseTitle').value = m.title;
+  document.getElementById('editCourseCat').value   = m.course;
+  document.getElementById('editCourseType').value  = m.type || 'محاضرة';
+  document.getElementById('editCourseUrl').value   = m.url;
+  document.getElementById('editCourseNotes').value = m.notes || '';
+  document.getElementById('editCourseErr').style.display = 'none';
+  document.getElementById('editCourseModal').style.display = 'flex';
+};
+
+window.submitEditCourse = async () => {
+  const id    = document.getElementById('editMatId').value;
+  const title = document.getElementById('editCourseTitle').value.trim();
+  const course= document.getElementById('editCourseCat').value;
+  const type  = document.getElementById('editCourseType').value;
+  const url   = document.getElementById('editCourseUrl').value.trim();
+  const notes = document.getElementById('editCourseNotes').value.trim();
+  const err   = document.getElementById('editCourseErr');
+
+  if (!title || !course || !url) {
+    err.style.display = 'block';
+    err.textContent = 'يرجى تعبئة الحقول المطلوبة (الاسم، المادة، الرابط)';
+    return;
+  }
+  err.style.display = 'none';
+
+  const btn = document.getElementById('editCourseSubmit');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="ti ti-loader"></i> جاري الحفظ...';
+
+  try {
+    await updateDoc(doc(db, 'materials', id), { title, course, type, url, notes });
+    document.getElementById('editCourseModal').style.display = 'none';
+  } catch(e) {
+    err.style.display = 'block';
+    err.textContent = 'حدث خطأ، حاولي مرة أخرى';
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = '<i class="ti ti-device-floppy"></i> حفظ التعديلات';
+};
+
+// ===== حذف المادة =====
+window.confirmDeleteMat = (id, title) => {
+  document.getElementById('deleteMatId').value = id;
+  document.getElementById('deleteMatTitle').textContent = title;
+  document.getElementById('deleteConfirmModal').style.display = 'flex';
+};
+
+window.executeDeleteMat = async () => {
+  const id  = document.getElementById('deleteMatId').value;
+  const btn = document.getElementById('deleteConfirmBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="ti ti-loader"></i> جاري الحذف...';
+
+  try {
+    await deleteDoc(doc(db, 'materials', id));
+    document.getElementById('deleteConfirmModal').style.display = 'none';
+  } catch(e) {
+    alert('حدث خطأ أثناء الحذف، حاولي مرة أخرى');
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = '<i class="ti ti-trash"></i> تأكيد الحذف';
+};
+
+// تحديد دور المستخدمة
 onAuthStateChanged(auth, async user => {
   if (!user) {
     currentUserRole = null;
@@ -106,7 +201,7 @@ onAuthStateChanged(auth, async user => {
   currentUserRole = role;
   currentUserSubjects = Array.isArray(data.enrolledSubjects) ? data.enrolledSubjects : [];
 
-  if (role === 'admin') {
+  if (isAdmin()) {
     const btn = document.getElementById('adminAddBtn');
     if (btn) btn.style.display = 'flex';
   }
@@ -115,7 +210,6 @@ onAuthStateChanged(auth, async user => {
   window.filterMats();
 });
 
-// تحديث أزرار "التسجيل في المادة" داخل المودالات حسب حالة الالتحاق
 const SUBJ_MODAL_IDS = {
   'التفسير': 'tafseer', 'الفقه': 'fiqh', 'العقيدة': 'aqeedah',
   'الحديث': 'hadith', 'القرآن الكريم': 'quran'
@@ -134,7 +228,6 @@ function updateEnrollButtons() {
       btn.disabled = false;
       btn.onclick = () => location.href = 'login.html';
     } else if (currentUserRole === 'mateen') {
-      // بنات متين ملتحقات أوتوماتيك بكل المواد بعد القبول
       btn.textContent = joined ? '✓ ملتحقة بالفعل' : 'بانتظار قبول حسابك';
       btn.disabled = true;
     } else if (joined) {
@@ -148,7 +241,6 @@ function updateEnrollButtons() {
   });
 }
 
-// التحاق الطالبة العادية بمادة بنفسها
 window.joinSubject = async (subj) => {
   if (!auth.currentUser) { location.href = 'login.html'; return; }
   await updateDoc(doc(db, 'users', auth.currentUser.uid), {
@@ -159,7 +251,6 @@ window.joinSubject = async (subj) => {
   window.filterMats();
 };
 
-// Submit new course
 window.submitNewCourse = async () => {
   const title = document.getElementById('newCourseTitle').value.trim();
   const course = document.getElementById('newCourseCat').value;
@@ -185,7 +276,6 @@ window.submitNewCourse = async () => {
       addedAt: Date.now(),
       addedBy: auth.currentUser.email,
     });
-    // Reset form
     ['newCourseTitle','newCourseCat','newCourseUrl','newCourseNotes'].forEach(id => {
       document.getElementById(id).value = '';
     });
@@ -199,7 +289,6 @@ window.submitNewCourse = async () => {
   btn.innerHTML = '<i class="ti ti-circle-plus"></i> إضافة المادة';
 };
 
-// Load materials from Firestore
 onSnapshot(query(collection(db, 'materials'), orderBy('addedAt', 'desc')), snap => {
   allMats = snap.docs.map(d => ({ id: d.id, ...d.data() }));
   window.filterMats();

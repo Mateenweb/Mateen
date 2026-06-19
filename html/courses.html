@@ -407,6 +407,77 @@
   </div>
   <div class="footer-dua">اللهم علمنا ما ينفعنا وانفعنا بما علمتنا</div>
 </footer>
+  <!-- EDIT MATERIAL MODAL (admin only) -->
+  <div id="editCourseModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;">
+    <div style="background:var(--white);border-radius:16px;padding:28px;width:90%;max-width:480px;direction:rtl;max-height:90vh;overflow-y:auto;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+        <div style="font-family:Amiri,serif;font-size:18px;color:var(--green-dark);font-weight:700"><i class="ti ti-pencil"></i> تعديل المادة</div>
+        <button onclick="document.getElementById('editCourseModal').style.display='none'" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-mid)">✕</button>
+      </div>
+      <input type="hidden" id="editMatId">
+      <div style="display:flex;flex-direction:column;gap:14px;">
+        <div>
+          <label style="font-size:13px;color:var(--text-dark);display:block;margin-bottom:6px">اسم المادة <span style="color:#c0392b">*</span></label>
+          <input id="editCourseTitle" type="text" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:14px;box-sizing:border-box;">
+        </div>
+        <div>
+          <label style="font-size:13px;color:var(--text-dark);display:block;margin-bottom:6px">المادة <span style="color:#c0392b">*</span></label>
+          <select id="editCourseCat" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:14px;box-sizing:border-box;">
+            <option value="">اختاري المادة</option>
+            <option>التفسير</option><option>الفقه</option><option>العقيدة</option>
+            <option>الحديث</option><option>القرآن الكريم</option><option>السيرة النبوية</option>
+            <option>التجويد والتلاوة</option><option>النحو</option><option>أخرى</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:13px;color:var(--text-dark);display:block;margin-bottom:6px">نوع المحتوى</label>
+          <select id="editCourseType" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:14px;box-sizing:border-box;">
+            <option value="محاضرة">محاضرة</option>
+            <option value="ملخص">ملخص</option>
+            <option value="واجب">واجب</option>
+            <option value="اختبار">اختبار</option>
+            <option value="مرجع">مرجع علمي</option>
+            <option value="فيديو">فيديو</option>
+            <option value="أخرى">أخرى</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:13px;color:var(--text-dark);display:block;margin-bottom:6px">رابط الملف <span style="color:#c0392b">*</span></label>
+          <input id="editCourseUrl" type="url" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:14px;box-sizing:border-box;">
+          <div style="font-size:11px;color:var(--text-mid);margin-top:4px">Google Drive · Dropbox · OneDrive · YouTube</div>
+        </div>
+        <div>
+          <label style="font-size:13px;color:var(--text-dark);display:block;margin-bottom:6px">ملاحظات (اختياري)</label>
+          <textarea id="editCourseNotes" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:14px;box-sizing:border-box;resize:vertical;height:80px;"></textarea>
+        </div>
+        <div id="editCourseErr" style="display:none;color:#c0392b;font-size:13px;"></div>
+        <button id="editCourseSubmit" onclick="window.submitEditCourse()" style="background:var(--green-dark);color:white;border:none;padding:12px;border-radius:10px;font-family:inherit;font-size:15px;cursor:pointer;font-weight:700;">
+          <i class="ti ti-device-floppy"></i> حفظ التعديلات
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DELETE CONFIRM MODAL (admin only) -->
+  <div id="deleteConfirmModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;">
+    <div style="background:var(--white);border-radius:16px;padding:28px;width:90%;max-width:380px;direction:rtl;text-align:center;">
+      <div style="font-size:40px;margin-bottom:12px;">🗑️</div>
+      <div style="font-family:Amiri,serif;font-size:18px;color:#c0392b;font-weight:700;margin-bottom:10px">تأكيد الحذف</div>
+      <div style="font-size:14px;color:var(--text-dark);margin-bottom:6px">هل أنتِ متأكدة من حذف:</div>
+      <div id="deleteMatTitle" style="font-size:14px;font-weight:700;color:var(--green-dark);background:var(--beige);padding:8px 14px;border-radius:8px;margin-bottom:18px;"></div>
+      <div style="font-size:12px;color:var(--text-mid);margin-bottom:20px">لا يمكن التراجع عن هذا الإجراء</div>
+      <input type="hidden" id="deleteMatId">
+      <div style="display:flex;gap:10px;justify-content:center;">
+        <button id="deleteConfirmBtn" onclick="window.executeDeleteMat()" style="flex:1;padding:11px;background:#c0392b;color:white;border:none;border-radius:10px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;">
+          <i class="ti ti-trash"></i> تأكيد الحذف
+        </button>
+        <button onclick="document.getElementById('deleteConfirmModal').style.display='none'" style="flex:1;padding:11px;background:var(--beige);color:var(--text-dark);border:none;border-radius:10px;font-family:inherit;font-size:14px;cursor:pointer;">
+          إلغاء
+        </button>
+      </div>
+    </div>
+  </div>
+
   <script src="../js/courses.js"></script>
   <script src="../js/courses-firebase.js" type="module"></script>
   <script type="module" src="../js/notifications.js"></script>
