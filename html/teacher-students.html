@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar">
+<head>
+<meta charset="utf-8"/>
+<link rel="icon" type="image/x-icon" href="../favicon.ico"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>طالباتي — متين العلمي</title>
+<link href="../libs/fonts/arabic-fonts.css" rel="stylesheet"/>
+<link href="../libs/tabler-icons/tabler-icons.min.css" rel="stylesheet"/>
+<link href="../css/shared.css" rel="stylesheet"/>
+<link href="../css/student-general.css" rel="stylesheet"/>
+<link href="../css/islamic.css" rel="stylesheet"/>
+<link href="../css/mobile.css" rel="stylesheet"/>
+  <link href="../css/responsive-fix.css" rel="stylesheet"/>
+</head>
+<body>
+<div class="basmala-bar"><span class="bsm-ornament">❦</span>بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ<span class="bsm-ornament">❦</span></div>
+<nav>
+<a class="nav-logo" href="#">
+<div class="logo-circle"><img alt="متين" src="../logo.png" style="width:100%;height:100%;border-radius:50%;object-fit:cover;"/></div>
+<div><div class="nav-brand">برنامج متين العلمي</div><div class="nav-tagline">نحو بناء علميٍّ متين</div></div>
+</a>
+    <div class="nav-shuraka" style="display:flex;align-items:center;margin-inline-start:10px;padding-inline-start:12px;border-inline-start:1px solid rgba(201,162,39,0.35);"><img src="../shuraka-logo.png" alt="شركاء الخير" class="nav-shuraka-img" style="height:48px;width:120px;display:block;object-fit:contain;filter:brightness(1.7) contrast(1.4);"/></div>
+<div class="nav-btns">
+<div class="nav-user"><i class="ti ti-user"></i><span class="nav-user-name" id="navUserName">معلمة</span></div>
+<a class="btn-outline" href="home.html"><i class="ti ti-home"></i> الرئيسية</a>
+<button class="btn-logout" onclick="doLogout()"><i class="ti ti-logout"></i> خروج</button>
+</div>
+</nav>
+<div id="authGate"><i class="ti ti-loader spin" style="font-size:40px;color:var(--border)"></i><p>جارٍ التحميل...</p></div>
+<div id="mainContent" style="display:none; flex-direction:column; flex:1;">
+<div class="hero">
+<div class="hero-avatar">👩‍🏫</div>
+<h1 id="heroName">طالباتي</h1>
+<p id="heroSubj">المادة: —</p>
+</div>
+<div class="container">
+<div class="welcome-card" style="margin-bottom:18px;">
+<p>
+        هذه قائمة الطالبات الملتحقات بمادتك. بنات متين يلتحقن تلقائياً بعد قبول حسابهن،
+        والطالبات العاديات يلتحقن بأنفسهن من صفحة المواد العلمية.
+      </p>
+</div>
+<div id="studentsList"></div>
+</div>
+</div>
+<script src="../js/teacher-students-1.js" type="module"></script>
+  <script type="module" src="../js/notifications.js"></script>
+  <script src="../js/sw-register.js"></script>
+</body>
+</html>
