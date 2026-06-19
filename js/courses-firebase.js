@@ -206,6 +206,7 @@ onAuthStateChanged(auth, async user => {
     currentUserRole = null;
     currentUserSubjects = [];
     window.filterMats();
+    renderModalMats();
     return;
   }
   const snap = await getDoc(doc(db, 'users', user.uid));
@@ -221,6 +222,7 @@ onAuthStateChanged(auth, async user => {
 
   updateEnrollButtons();
   window.filterMats();
+  renderModalMats();
 });
 
 const SUBJ_MODAL_IDS = {
