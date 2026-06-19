@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html dir="rtl" lang="ar">
 <head>
 <meta charset="utf-8"/>
@@ -8,45 +7,93 @@
 <title>لوحة الإداريات — متين العلمي</title>
 <link href="../libs/fonts/arabic-fonts.css" rel="stylesheet"/>
 <link href="../libs/tabler-icons/tabler-icons.min.css" rel="stylesheet"/>
+<!-- Bootstrap CSS -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet"/>
 <link rel="stylesheet" href="../css/common.css"/>
 <link href="../css/admin.css" rel="stylesheet"/>
 <link href="../css/shared.css" rel="stylesheet"/>
 <link href="../css/mobile.css" rel="stylesheet"/>
-  <link href="../css/responsive-fix.css" rel="stylesheet"/>
-  <link href="../css/modals.css" rel="stylesheet"/>
+<link href="../css/responsive-fix.css" rel="stylesheet"/>
+<link href="../css/modals.css" rel="stylesheet"/>
 <link href="../css/notifications.css" rel="stylesheet"/>
-  <link rel="manifest" href="/Mateen/manifest.json">
+<link rel="manifest" href="/Mateen/manifest.json">
 <meta name="theme-color" content="#1a4a2e">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="متين">
 </head>
 <body>
+
 <!-- BASMALA -->
-<div class="basmala-bar"><span class="bsm-ornament">❦</span>بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ<span class="bsm-ornament">❦</span></div>
-<!-- NAV -->
-<nav>
-<a class="nav-logo" href="home.html">
-<div class="logo-circle"><img alt="متين" src="../logo.png" class="logo-circle-img"/></div>
-<div>
-<div class="nav-brand">برنامج متين العلمي</div>
-<div class="nav-tagline">نحو بناء علميٍّ متين</div>
+<div class="basmala-bar">
+  <span class="bsm-ornament">❦</span>بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ<span class="bsm-ornament">❦</span>
 </div>
-</a>
-    <div class="nav-shuraka" style="display:flex;align-items:center;margin-inline-start:10px;padding-inline-start:12px;border-inline-start:1px solid rgba(201,162,39,0.35);"><img src="../shuraka-logo.png" alt="شركاء الخير" class="nav-shuraka-img" style="height:48px;width:120px;display:block;object-fit:contain;filter:brightness(1.7) contrast(1.4);"/></div>
-<div class="nav-btns">
-<a href="news.html" class="nav-pill-btn">
-  <i class="ti ti-speakerphone"></i> الأخبار
-</a>
-<a href="messages.html" class="nav-pill-btn">
-  <i class="ti ti-message-2"></i> الرسائل
-</a>
-<div class="nav-user">
-<i class="ti ti-shield"></i>
-<span class="nav-user-name" id="navUserName">إدارية</span>
-</div>
-<button class="btn-logout" onclick="doLogout()"><i class="ti ti-logout"></i> خروج</button>
-</div>
+
+<!-- NAV — Bootstrap navbar -->
+<nav class="navbar navbar-expand-lg sticky-top" style="background:var(--green-dark);padding:0 20px;height:56px;box-shadow:0 2px 12px rgba(0,0,0,0.3);">
+
+  <!-- اللوجو -->
+  <a class="nav-logo navbar-brand p-0 me-0" href="home.html">
+    <div class="logo-circle">
+      <img alt="متين" src="../logo.png" class="logo-circle-img"/>
+    </div>
+    <div class="ms-2">
+      <div class="nav-brand">برنامج متين العلمي</div>
+      <div class="nav-tagline">نحو بناء علميٍّ متين</div>
+    </div>
+  </a>
+
+  <!-- شركاء الخير -->
+  <div class="nav-shuraka d-none d-lg-flex align-items-center ms-3 ps-3" style="border-inline-start:1px solid rgba(201,162,39,0.35);">
+    <img src="../shuraka-logo.png" alt="شركاء الخير" class="nav-shuraka-img" style="height:40px;width:100px;object-fit:contain;filter:brightness(1.7) contrast(1.4);"/>
+  </div>
+
+  <!-- زرار الهامبرغر للموبايل -->
+  <button class="navbar-toggler border-0 ms-auto me-2 d-lg-none" type="button"
+          data-bs-toggle="collapse" data-bs-target="#adminNavMenu"
+          aria-controls="adminNavMenu" aria-expanded="false" aria-label="القائمة"
+          style="color:white;font-size:22px;">
+    <i class="ti ti-menu-2"></i>
+  </button>
+
+  <!-- روابط + أزرار -->
+  <div class="collapse navbar-collapse" id="adminNavMenu">
+    <!-- روابط التنقل — وسط -->
+    <ul class="navbar-nav mx-auto d-flex gap-1">
+      <li class="nav-item">
+        <a class="nav-link active" href="home.html" style="color:rgba(255,255,255,0.82);font-size:13px;">
+          <i class="ti ti-home"></i> الرئيسية
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="courses.html" style="color:rgba(255,255,255,0.82);font-size:13px;">
+          <i class="ti ti-books"></i> المواد
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="news.html" style="color:rgba(255,255,255,0.82);font-size:13px;">
+          <i class="ti ti-speakerphone"></i> الأخبار
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="messages.html" style="color:rgba(255,255,255,0.82);font-size:13px;">
+          <i class="ti ti-message-2"></i> الرسائل
+        </a>
+      </li>
+    </ul>
+
+    <!-- اسم المستخدم + خروج — يمين -->
+    <div class="d-flex align-items-center gap-2 flex-shrink-0">
+      <div class="nav-user">
+        <i class="ti ti-shield" style="color:var(--gold);"></i>
+        <span class="nav-user-name" id="navUserName">إدارية</span>
+      </div>
+      <button class="btn-logout" onclick="doLogout()">
+        <i class="ti ti-logout"></i> خروج
+      </button>
+    </div>
+  </div>
+
 </nav>
 <!-- AUTH GATE -->
 <div id="authGate">
@@ -463,10 +510,10 @@
   </div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
 <script src="../js/admin-1.js" type="module"></script>
-
-  <script type="module" src="../js/notifications.js"></script>
-  <script src="../js/sw-register.js"></script>
+<script type="module" src="../js/notifications.js"></script>
+<script src="../js/sw-register.js"></script>
 </body>
 </html>
 
