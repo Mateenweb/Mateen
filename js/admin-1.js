@@ -827,7 +827,7 @@ window.deleteUserAccount = async (id, name) => {
   const label = name || 'هذا المستخدم';
   if (!confirm(`هل أنتِ متأكدة من حذف حساب "${label}" نهائياً؟\nلا يمكن التراجع عن هذا الإجراء.`)) return;
   if (!confirm(`تأكيد أخير: سيُحذف حساب "${label}" بشكل دائم.`)) return;
-  await deleteDoc(doc(db, 'users', id));
+  await fullDeleteUser(id);
   showToast('تم حذف الحساب نهائياً');
 };
 
