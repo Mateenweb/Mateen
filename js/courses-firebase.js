@@ -95,7 +95,6 @@ onAuthStateChanged(auth, async user => {
   if (!user) {
     currentUserRole = null;
     currentUserSubjects = [];
-    renderEnrollBar();
     window.filterMats();
     return;
   }
