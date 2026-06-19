@@ -102,73 +102,100 @@
 <!-- PAGE LAYOUT -->
 <div class="page-layout guest-layout">
 
-  <!-- SIDEBAR -->
-  <aside class="sidebar offcanvas offcanvas-end" tabindex="-1" id="mainSidebar" aria-labelledby="mainSidebarLabel">
-    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="إغلاق"></button>
-    <!-- Guest State -->
-    <div id="sidebar-guest">
-      <div class="sidebar-guest-logo">
-        <img alt="متين" src="../logo.png" class="sidebar-logo-img"/>
-        <div class="sidebar-brand">برنامج متين العلمي</div>
-        <div class="sidebar-sub">نحو بناء علميٍّ متين</div>
-      </div>
-      <div class="sidebar-divider"></div>
-      <div class="sidebar-actions">
-        <a class="sidebar-login-btn" href="login.html"><i class="ti ti-login"></i> تسجيل الدخول</a>
-        <button class="sidebar-reg-btn" onclick="document.getElementById('reg-modal').classList.add('open')">
-          <i class="ti ti-user-plus"></i> التسجيل في البرنامج
-        </button>
-      </div>
-      <div class="sidebar-divider"></div>
-      <nav class="sidebar-nav">
-        <a class="active" href="home.html"><i class="ti ti-home"></i> الرئيسية</a>
-        <a href="about.html"><i class="ti ti-info-circle"></i> عن البرنامج</a>
-        <a href="courses.html"><i class="ti ti-books"></i> المواد العلمية</a>
-        <a href="library.html"><i class="ti ti-library"></i> المكتبة</a>
-        <a href="news.html"><i class="ti ti-speakerphone"></i> الأخبار</a>
-        <a href="#contact"><i class="ti ti-headset"></i> تواصل معنا</a>
-      </nav>
+  <!-- SIDEBAR — Bootstrap Offcanvas -->
+  <aside class="offcanvas offcanvas-end sidebar-offcanvas" tabindex="-1" id="mainSidebar" aria-labelledby="mainSidebarLabel">
+
+    <!-- زرار الإغلاق -->
+    <div class="offcanvas-header border-bottom px-3 py-2">
+      <h6 class="offcanvas-title text-gold mb-0" id="mainSidebarLabel" style="font-family:Amiri,serif;">متين العلمي</h6>
+      <button type="button" class="btn-close btn-close-white ms-auto" data-bs-dismiss="offcanvas" aria-label="إغلاق"></button>
     </div>
 
-    <!-- Logged-in State -->
-    <div id="sidebar-user" class="sidebar-user-hidden">
-      <div class="sidebar-header">
-        <div class="sidebar-avatar" id="sidebarAvatar">👩</div>
-        <div class="user-info">
-          <div class="user-name" id="sidebarName">...</div>
-          <div class="user-role" id="sidebarRole">الطالبة</div>
+    <div class="offcanvas-body d-flex flex-column p-0">
+
+      <!-- ══ حالة الزائر ══ -->
+      <div id="sidebar-guest">
+
+        <!-- اللوجو -->
+        <div class="text-center py-3 px-3">
+          <img alt="متين" src="../logo.png" class="sidebar-logo-img mb-2"/>
+          <div class="sidebar-brand">برنامج متين العلمي</div>
+          <div class="sidebar-sub">نحو بناء علميٍّ متين</div>
+        </div>
+
+        <hr class="sidebar-divider mx-3 my-1"/>
+
+        <!-- أزرار الدخول والتسجيل -->
+        <div class="d-flex flex-column gap-2 px-3 pb-2">
+          <a class="sidebar-login-btn" href="login.html">
+            <i class="ti ti-login"></i> تسجيل الدخول
+          </a>
+          <button class="sidebar-reg-btn" onclick="document.getElementById('reg-modal').classList.add('open')">
+            <i class="ti ti-user-plus"></i> التسجيل في البرنامج
+          </button>
+        </div>
+
+        <hr class="sidebar-divider mx-3 my-1"/>
+
+        <!-- روابط التنقل -->
+        <nav class="sidebar-nav flex-grow-1">
+          <a class="active" href="home.html"><i class="ti ti-home"></i> الرئيسية</a>
+          <a href="about.html"><i class="ti ti-info-circle"></i> عن البرنامج</a>
+          <a href="courses.html"><i class="ti ti-books"></i> المواد العلمية</a>
+          <a href="library.html"><i class="ti ti-library"></i> المكتبة</a>
+          <a href="news.html"><i class="ti ti-speakerphone"></i> الأخبار</a>
+          <a href="#contact"><i class="ti ti-headset"></i> تواصل معنا</a>
+        </nav>
+      </div>
+
+      <!-- ══ حالة المسجّل ══ -->
+      <div id="sidebar-user" class="sidebar-user-hidden d-flex flex-column h-100">
+
+        <!-- هيدر المستخدم -->
+        <div class="sidebar-header">
+          <div class="sidebar-avatar" id="sidebarAvatar">👩</div>
+          <div class="user-info">
+            <div class="user-name" id="sidebarName">...</div>
+            <div class="user-role" id="sidebarRole">الطالبة</div>
+          </div>
+        </div>
+
+        <hr class="sidebar-divider mx-3 my-1"/>
+
+        <!-- روابط التنقل -->
+        <nav class="sidebar-nav flex-grow-1" id="sidebarNav">
+          <a class="active" href="home.html"><i class="ti ti-home"></i> الرئيسية</a>
+          <a href="messages.html" id="sidebarMsgLink">
+            <i class="ti ti-message-2"></i> رسائلي
+            <span class="nav-msg-badge d-none ms-auto" id="sidebarMsgBadge">0</span>
+          </a>
+          <a href="student.html" id="profileLink" class="d-none"><i class="ti ti-user"></i> ملفي الشخصي</a>
+          <a href="#" id="linkCerts" class="d-none"><i class="ti ti-certificate"></i> شهاداتي</a>
+          <a href="#" id="linkAwards" class="d-none"><i class="ti ti-award"></i> إجازاتي</a>
+          <a href="#" id="linkGrades" class="d-none"><i class="ti ti-chart-bar"></i> درجاتي</a>
+          <a href="schedule.html" id="linkSchedule" class="d-none"><i class="ti ti-calendar"></i> جدولي الدراسي</a>
+          <a href="admin.html" id="linkAdmin" class="d-none"><i class="ti ti-shield"></i> لوحة الإدارة</a>
+          <a href="news.html" id="linkNews" class="d-none"><i class="ti ti-speakerphone"></i> الأخبار</a>
+          <a href="#" id="linkTeacher" class="d-none"><i class="ti ti-users"></i> طالباتي</a>
+        </nav>
+
+        <hr class="sidebar-divider mx-3 my-1"/>
+
+        <!-- زرار الخروج -->
+        <div class="px-3 pb-3">
+          <button class="sidebar-logout-btn w-100" onclick="doLogout()">
+            <i class="ti ti-logout"></i> تسجيل الخروج
+          </button>
         </div>
       </div>
-      <div class="sidebar-divider"></div>
-      <nav class="sidebar-nav" id="sidebarNav">
-        <a class="active" href="home.html"><i class="ti ti-home"></i> الرئيسية</a>
-        <a href="messages.html" id="sidebarMsgLink"><i class="ti ti-message-2"></i> رسائلي
-          <span class="nav-msg-badge d-none" id="sidebarMsgBadge">0</span>
-        </a>
-        <!-- طالبة / بنات متين -->
-        <a href="student.html" id="profileLink" class="d-none"><i class="ti ti-user"></i> ملفي الشخصي</a>
-        <a href="#" id="linkCerts" class="d-none"><i class="ti ti-certificate"></i> شهاداتي</a>
-        <a href="#" id="linkAwards" class="d-none"><i class="ti ti-award"></i> إجازاتي</a>
-        <a href="#" id="linkGrades" class="d-none"><i class="ti ti-chart-bar"></i> درجاتي</a>
-        <a href="schedule.html" id="linkSchedule" class="d-none"><i class="ti ti-calendar"></i> جدولي الدراسي</a>
-        <!-- إدارة / مشرفة -->
-        <a href="admin.html" id="linkAdmin" class="d-none"><i class="ti ti-shield"></i> لوحة الإدارة</a>
-        <a href="news.html" id="linkNews" class="d-none"><i class="ti ti-speakerphone"></i> الأخبار</a>
-        <!-- معلمة -->
-        <a href="#" id="linkTeacher" class="d-none"><i class="ti ti-users"></i> طالباتي</a>
-      </nav>
-      <div class="sidebar-divider"></div>
-      <div class="sidebar-actions">
-        <button class="sidebar-logout-btn" onclick="doLogout()">
-          <i class="ti ti-logout"></i> تسجيل الخروج
-        </button>
-      </div>
-    </div>
 
-    <div class="sidebar-footer">
-      <img alt="متين" src="../logo.png" class="sidebar-foot-img"/>
-      <span>متين العلمي</span>
-    </div>
+      <!-- فوتر السايدبار -->
+      <div class="sidebar-footer mt-auto">
+        <img alt="متين" src="../logo.png" class="sidebar-foot-img"/>
+        <span>متين العلمي</span>
+      </div>
+
+    </div><!-- /offcanvas-body -->
   </aside>
 
   <!-- MAIN CONTENT -->
@@ -519,7 +546,3 @@ document.getElementById('mobileMenuToggle').addEventListener('click', function()
   <script src="../js/sw-register.js"></script>
 </body>
 </html>
-
-
-
-
