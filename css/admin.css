@@ -783,3 +783,23 @@ body { background: var(--beige); min-height: 100vh; display: flex; flex-directio
     justify-content: flex-end;
   }
 }
+
+/* ══ Bootstrap navbar override — ألوان الروابط ══ */
+.admin-nav-links .nav-link {
+  color: rgba(255,255,255,0.82) !important;
+  font-size: 13px;
+  font-family: "Noto Naskh Arabic", serif;
+  transition: color 0.2s;
+}
+.admin-nav-links .nav-link:hover,
+.admin-nav-links .nav-link.active {
+  color: var(--gold-light, #e8c84a) !important;
+}
+.navbar-toggler:focus { box-shadow: none !important; }
+@media (max-width: 991px) {
+  #adminNavMenu {
+    background: var(--green-dark, #1a4a2e);
+    padding: 10px 0;
+  }
+  .admin-nav-links .nav-link { padding: 8px 16px; }
+}
