@@ -796,7 +796,7 @@ body { background: var(--beige); min-height: 100vh; display: flex; flex-directio
   color: var(--gold-light, #e8c84a) !important;
 }
 .navbar-toggler:focus { box-shadow: none !important; }
-@media (max-width: 991px) {
+@media (max-width: 767px) {
   #adminNavMenu {
     background: var(--green-dark, #1a4a2e);
     padding: 10px 0;
