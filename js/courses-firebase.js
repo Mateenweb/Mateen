@@ -58,18 +58,20 @@ function renderMats(mats) {
     section.style.display = 'block';
     container.innerHTML = mats.map(matCardHTML).join('');
   }
+}
 
-  // حشو المودالات بمواد كل مادة
-  Object.entries(SUBJ_MODAL_IDS).forEach(([subj, modalId]) => {
+function renderModalMats() {
+  const modalMap = {
+    'التفسير': 'tafseer', 'الفقه': 'fiqh', 'العقيدة': 'aqeedah',
+    'الحديث': 'hadith', 'القرآن الكريم': 'quran'
+  };
+  Object.entries(modalMap).forEach(([subj, modalId]) => {
     const el = document.getElementById('modal-mats-' + modalId);
     if (!el) return;
     const subjMats = allMats.filter(m => m.course === subj);
-    if (subjMats.length === 0) {
-      el.innerHTML = '';
-      return;
-    }
+    if (subjMats.length === 0) { el.innerHTML = ''; return; }
     el.innerHTML = `
-      <div style="margin:14px 0 4px;font-size:13px;font-weight:700;color:var(--green-dark);">
+      <div style="margin:14px 0 6px;font-size:13px;font-weight:700;color:var(--green-dark);">
         <i class="ti ti-files" style="margin-left:4px;"></i> المواد المضافة (${subjMats.length})
       </div>
       <div style="display:flex;flex-direction:column;gap:8px;">
@@ -201,4 +203,5 @@ window.submitNewCourse = async () => {
 onSnapshot(query(collection(db, 'materials'), orderBy('addedAt', 'desc')), snap => {
   allMats = snap.docs.map(d => ({ id: d.id, ...d.data() }));
   window.filterMats();
+  renderModalMats();
 });
