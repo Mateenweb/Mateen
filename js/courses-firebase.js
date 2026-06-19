@@ -30,6 +30,23 @@ function detectLinkType(url) {
 
 const LINK_LABELS = { youtube: '▶️ يوتيوب', drive: '📁 درايف', dropbox: '☁️ دروبوكس', default: '🔗 فتح الرابط' };
 
+function matCardHTML(m) {
+  return `
+    <a href="${m.url}" target="_blank" rel="noopener" style="text-decoration:none;">
+      <div class="mat-card-item">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+          <span style="font-size:20px">${TYPE_ICONS[m.type] || '📎'}</span>
+          <div>
+            <div style="font-size:13px;font-weight:700;color:var(--green-dark)">${m.title}</div>
+            <div style="font-size:11px;color:var(--text-mid);margin-top:2px">${m.type || ''}</div>
+          </div>
+        </div>
+        ${m.notes ? `<div style="font-size:12px;color:var(--text-mid);background:var(--beige);padding:7px 10px;border-radius:8px;margin-bottom:8px">${m.notes}</div>` : ''}
+        <div style="font-size:12px;color:var(--gold-dark)">${LINK_LABELS[detectLinkType(m.url)]}</div>
+      </div>
+    </a>`;
+}
+
 function renderMats(mats) {
   const container = document.getElementById('matsContainer');
   const section   = document.getElementById('dynamicMatsSection');
@@ -37,27 +54,28 @@ function renderMats(mats) {
 
   if (mats.length === 0) {
     section.style.display = 'none';
-    return;
+  } else {
+    section.style.display = 'block';
+    container.innerHTML = mats.map(matCardHTML).join('');
   }
 
-  section.style.display = 'block';
-  container.innerHTML = mats.map(m => `
-    <a href="${m.url}" target="_blank" rel="noopener" style="text-decoration:none;">
-      <div style="background:var(--white);border:1px solid var(--border);border-radius:12px;padding:16px;transition:all 0.2s;cursor:pointer;"
-           onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 20px rgba(92,61,46,0.12)'"
-           onmouseout="this.style.transform='none';this.style.boxShadow='none'">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
-          <span style="font-size:22px">${TYPE_ICONS[m.type] || '📎'}</span>
-          <div>
-            <div style="font-size:13px;font-weight:700;color:var(--green-dark)">${m.title}</div>
-            <div style="font-size:11px;color:var(--text-mid);margin-top:2px">${m.course} • ${m.type || ''}</div>
-          </div>
-        </div>
-        ${m.notes ? `<div style="font-size:12px;color:var(--text-mid);background:var(--beige);padding:8px 10px;border-radius:8px;margin-bottom:10px">${m.notes}</div>` : ''}
-        <div style="font-size:12px;color:var(--gold-dark)">${LINK_LABELS[detectLinkType(m.url)]}</div>
+  // حشو المودالات بمواد كل مادة
+  Object.entries(SUBJ_MODAL_IDS).forEach(([subj, modalId]) => {
+    const el = document.getElementById('modal-mats-' + modalId);
+    if (!el) return;
+    const subjMats = allMats.filter(m => m.course === subj);
+    if (subjMats.length === 0) {
+      el.innerHTML = '';
+      return;
+    }
+    el.innerHTML = `
+      <div style="margin:14px 0 4px;font-size:13px;font-weight:700;color:var(--green-dark);">
+        <i class="ti ti-files" style="margin-left:4px;"></i> المواد المضافة (${subjMats.length})
       </div>
-    </a>
-  `).join('');
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        ${subjMats.map(matCardHTML).join('')}
+      </div>`;
+  });
 }
 
 window.filterMats = () => {

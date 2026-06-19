@@ -430,3 +430,17 @@ footer {
   .courses-grid { grid-template-columns: 1fr; }
   .page-hero h1 { font-size: 24px; }
 }
+/* ══ مواد جوه المودال ══ */
+.modal-mats-section { margin: 8px 0; }
+.mat-card-item {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+.mat-card-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(92,61,46,0.1);
+}
