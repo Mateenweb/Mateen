@@ -314,6 +314,9 @@ window.selectLinkStudent = id => {
   btn.style.opacity = '1';
 };
 
+// كل المواد العلمية — تتسجل فيها بنت متين أوتوماتيك بعد القبول
+const ALL_SUBJECTS = ['التفسير', 'الفقه', 'العقيدة', 'الحديث', 'القرآن الكريم'];
+
 window.confirmLinkModal = async (studentId) => {
   if (!_pendingApproveId) return;
   const uid = _pendingApproveId;
@@ -323,18 +326,19 @@ window.confirmLinkModal = async (studentId) => {
   _pendingApproveId = null;
   window._selectedLinkId = null;
 
-  // فعّل الحساب
+  // فعّل الحساب + التحاق تلقائي بكل المواد العلمية
   await updateDoc(doc(db, 'users', uid), {
     status: 'active',
+    enrolledSubjects: ALL_SUBJECTS,
     ...(studentId ? { linkedStudentId: studentId } : {})
   });
 
   // لو في ربط، حفظ uid في سجل الطالبة في الجدول
   if (studentId) {
     await updateDoc(doc(db, 'students', studentId), { uid });
-    showToast('✓ تم قبول الحساب وربطه بالطالبة');
+    showToast('✓ تم قبول الحساب، وربطه بالطالبة، والتحاقها بكل المواد');
   } else {
-    showToast('✓ تم قبول الحساب بدون ربط');
+    showToast('✓ تم قبول الحساب والتحاقها بكل المواد');
   }
 };
 
