@@ -1,16 +1,21 @@
 /**
  * delete-account.js
- * حذف حساب كامل من Firestore + Auth
- * يشمل: users doc, students doc + subcollections, conversations
+ * حذف حساب كامل من Firestore + Firebase Authentication
+ * يشمل: users doc, students doc + subcollections, conversations,
+ * وكمان حساب Authentication نفسه (عشان الإيميل يترفع/يتحرر)
  */
 
 import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
 import { getFirestore, doc, getDoc, getDocs, deleteDoc, collection, query, where }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
+import { getFunctions, httpsCallable }
+  from "https://www.gstatic.com/firebasejs/12.13.0/firebase-functions.js";
 import { FIREBASE_CONFIG } from "./config.js";
 
-const app = getApps().length ? getApp() : initializeApp(FIREBASE_CONFIG);
-const db  = getFirestore(app);
+const app  = getApps().length ? getApp() : initializeApp(FIREBASE_CONFIG);
+const db   = getFirestore(app);
+const fns  = getFunctions(app);
+const deleteAuthUserFn = httpsCallable(fns, "deleteAuthUser");
 
 // مسح subcollection كاملة
 async function deleteSubcollection(parentRef, subcollName) {
@@ -20,8 +25,7 @@ async function deleteSubcollection(parentRef, subcollName) {
 
 /**
  * fullDeleteUser(uid)
- * يمسح كل بيانات المستخدم من Firestore
- * (Auth يتمسح منفصلاً لأنه يحتاج credentials)
+ * يمسح كل بيانات المستخدم من Firestore + حساب Authentication
  */
 export async function fullDeleteUser(uid) {
   const errors = [];
@@ -51,6 +55,13 @@ export async function fullDeleteUser(uid) {
       await deleteDoc(convDoc.ref);
     }));
   } catch(e) { errors.push('conversations: ' + e.message); }
+
+  // 4. حذف الحساب من Firebase Authentication (يحرر الإيميل لإعادة الاستخدام)
+  //    لازم يتم عن طريق Cloud Function لأن الـ client SDK مينفعش
+  //    يحذف Auth account لمستخدمة تانية غير اللي مسجلة دخولها حالياً.
+  try {
+    await deleteAuthUserFn({ uid });
+  } catch(e) { errors.push('auth: ' + e.message); }
 
   if (errors.length) console.warn('fullDeleteUser partial errors:', errors);
 }
