@@ -222,15 +222,12 @@ onAuthStateChanged(auth, user => {
       });
     }
     startListening(user.uid);
-    saveFCMToken(user.uid);
     showMissedNotifications(user.uid);
-    if ('Notification' in window && Notification.permission === 'default') {
-      setTimeout(() => Notification.requestPermission().then(p => {
-        console.log('[Notif] permission:', p);
-      }), 3000);
-    } else {
-      console.log('[Notif] notification permission:', Notification.permission);
-    }
+    // ملاحظة: saveFCMToken() وطلب إذن الإشعارات التلقائي عُطّلا مؤقتاً.
+    // السبب: VAPID key الحالية placeholder وبتفشل بـ 401 من Firebase،
+    // وطلب الإذن تلقائياً عند تحميل الصفحة مخالف لمعايير الأداء وتجربة المستخدم.
+    // لتفعيلهم مجدداً: ضعي VAPID key حقيقية من Firebase Console، وفعّلي
+    // الإذن فقط عند ضغط المستخدم على زرار صريح (مثلاً "فعّلي الإشعارات").
   } else {
     console.log('[Notif] no user');
     if (notifUnsub) { notifUnsub(); notifUnsub = null; }
@@ -295,4 +292,5 @@ async function showMissedNotifications(userId) {
 // ── export للاستخدام الخارجي لو محتاج ───────────────────────────────────
 export function initNotifications() {}
 export { showNotifToast as showToast };
+
 
