@@ -562,42 +562,31 @@ body {
 
 /* ===== HERO ===== */
 .hero {
-  background: url('../hero-bg.png') left center/cover no-repeat;
+  background: url('../hero-bg.png') center/cover no-repeat;
+  padding: clamp(32px, 6vw, 80px) clamp(16px, 5vw, 60px);
   display: flex;
   align-items: center;
-  aspect-ratio: 1376 / 768;     /* الصورة كاملة بدون قص */
-  min-height: 320px;
+  min-height: clamp(200px, 35vw, 420px);
   position: relative;
+  width: 100%;
+  box-sizing: border-box;
 }
 .hero::before {
   content: "";
   position: absolute;
   inset: 0;
-  z-index: 0;
   background: linear-gradient(
     to right,
-    rgba(247,239,227,0.0)  0%,
-    rgba(247,239,227,0.0) 55%,
-    rgba(247,239,227,0.55) 72%,
-    rgba(247,239,227,0.85) 100%
+    rgba(247,239,227,0.0) 0%,
+    rgba(247,239,227,0.55) 35%,
+    rgba(247,239,227,0.92) 65%,
+    rgba(247,239,227,0.97) 100%
   );
 }
 .hero-text {
   position: relative;
   z-index: 1;
-  max-width: 480px;
-  padding: clamp(24px, 5vw, 80px) clamp(16px, 4vw, 60px);
-}
-
-/* لوجو كبير للديسكتوب */
-.hero-logo-desktop {
-  width: 100px; height: 100px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 3px solid var(--gold);
-  background: #1a4a2e;
-  margin-bottom: 16px;
-  display: block;
+  max-width: 500px;
 }
 .hero-logo-mobile {
   width: 72px; height: 72px;
@@ -607,30 +596,6 @@ body {
   margin-bottom: 14px;
   display: block;
 }
-
-/* اللوجوهات جنب بعض في الهيرو */
-.hero-logos {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  margin-bottom: 16px;
-}
-.hero-logos .hero-logo-desktop {
-  width: 100px; height: 100px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 3px solid var(--gold);
-  background: #1a4a2e;
-  flex-shrink: 0;
-}
-.hero-shuraka-logo {
-  height: 90px;
-  width: auto;
-  object-fit: contain;
-  flex-shrink: 0;
-  /* يخلي الرسم يظهر غامق وواضح على الخلفية الفاتحة */
-  filter: brightness(0.25) contrast(2);
-}
 .hero-ornament {
   color: var(--gold);
   font-size: 16px;
@@ -638,6 +603,19 @@ body {
   margin-bottom: 14px;
   opacity: 0.8;
 }
+/* .hero-text h1 {
+  font-family: Amiri, serif;
+  font-size: 52px;
+  color: var(--green-dark);
+  line-height: 1.2;
+  margin-bottom: 16px;
+}
+.hero-text p {
+  color: var(--text-mid);
+  font-size: 14px;
+  margin-bottom: 22px;
+  line-height: 1.7;
+} */
 .hero-btns { display: flex; gap: 10px; flex-wrap: wrap; }
 
 .hero-btn-primary {
@@ -1056,7 +1034,10 @@ footer {
 .page-section {
   padding: clamp(16px, 3vw, 32px) clamp(16px, 4vw, 40px);
 }
-
+.hero {
+  padding: clamp(20px, 5vw, 80px) clamp(16px, 5vw, 60px);
+  min-height: clamp(260px, 40vw, 480px);
+}
 
 /* Grid columns — تم حذف قاعدة clamp() الخاطئة هنا
    (كانت min=50% و max=20% وهو تناقض رياضي يكسر العرض)
@@ -1070,7 +1051,6 @@ footer {
 /* Small tablet (≤ 991px) */
 @media (max-width: 991px) {
   .page-layout { flex-direction: column; }
-  .content-area { width: 100% !important; }   /* يمنع width:0 لما الـ layout يتحول column */
   .col-xl-2dot4 { width: 33.333%; }
   footer { padding: 14px 20px; }
 }
@@ -1081,7 +1061,7 @@ footer {
     text-align: center;
     justify-content: center;
   }
-  .hero::before { background: rgba(247,239,227,0.65); }  /* خفيف — الصورة تبان */
+  .hero::before { background: rgba(247,239,227,0.88); }
   .hero-text { max-width: 100%; }
   .hero-btns { justify-content: center; }
   .hero-btn-primary, .hero-btn-secondary { padding: 9px 18px; font-size: 13px; }
