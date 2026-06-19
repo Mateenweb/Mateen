@@ -334,7 +334,11 @@ function subjectCardHTML(s) {
     <div class="course-card" onclick="openDynModal('${s.id}')">
       <div class="card-banner" style="background:${s.color || 'linear-gradient(135deg,#5c3d2e,#8a5e3c)'}">
         <div class="card-badge">أساسية</div>
-        <div class="card-icon">${s.icon || '📚'}</div>
+        <div class="card-icon" style="display:flex;align-items:center;justify-content:center;width:64px;height:64px;">
+          ${s.iconData || s.iconUrl
+            ? `<img src="${s.iconData || s.iconUrl}" style="width:56px;height:56px;object-fit:contain;border-radius:8px;">`
+            : `<span style="font-size:40px">${s.icon || '📚'}</span>`}
+        </div>
       </div>
       <div class="card-body">
         <div class="card-title">${s.name}</div>
@@ -395,7 +399,11 @@ window.openDynModal = (id) => {
     <div class="modal-box">
       <div class="modal-banner" style="background:${s.color || 'linear-gradient(135deg,#5c3d2e,#8a5e3c)'}">
         <button class="modal-close" onclick="document.getElementById('dynModal-${id}').remove()">✕</button>
-        <div class="modal-icon">${s.icon || '📚'}</div>
+        <div class="modal-icon" style="display:flex;align-items:center;justify-content:center;width:72px;height:72px;">
+          ${s.iconData || s.iconUrl
+            ? `<img src="${s.iconData || s.iconUrl}" style="width:64px;height:64px;object-fit:contain;border-radius:10px;">`
+            : `<span style="font-size:48px">${s.icon || '📚'}</span>`}
+        </div>
       </div>
       <div class="modal-content">
         <div class="modal-title">${s.name}</div>
@@ -416,8 +424,6 @@ window.openDynModal = (id) => {
 // إضافة مادة رئيسية
 window.submitNewSubject = async () => {
   const name  = document.getElementById('sbjName').value.trim();
-  const icon  = document.getElementById('sbjIcon').value.trim();
-  const color = document.getElementById('sbjColor').value;
   const desc  = document.getElementById('sbjDesc').value.trim();
   const meetings = document.getElementById('sbjMeetings').value.trim();
   const weeks    = document.getElementById('sbjWeeks').value.trim();
@@ -437,15 +443,19 @@ window.submitNewSubject = async () => {
   btn.innerHTML = '<i class="ti ti-loader"></i> جاري الإضافة...';
 
   try {
+    const iconData = document.getElementById('sbjIconData').value || '';
+    const iconUrl  = document.getElementById('sbjIconUrl').value.trim() || '';
+    const colorVal = document.getElementById('sbjColorVal').value;
     await addDoc(collection(db, 'subjects'), {
-      name, icon, color, desc, meetings, weeks, level,
+      name, iconData, iconUrl, color: colorVal, desc, meetings, weeks, level,
       topics: topics.split('\n').filter(Boolean),
       addedAt: Date.now(),
       addedBy: auth.currentUser.email,
     });
-    ['sbjName','sbjIcon','sbjDesc','sbjMeetings','sbjWeeks','sbjLevel','sbjTopics'].forEach(id => {
+    ['sbjName','sbjIconData','sbjIconUrl','sbjDesc','sbjMeetings','sbjWeeks','sbjLevel','sbjTopics'].forEach(id => {
       document.getElementById(id).value = '';
     });
+    document.getElementById('sbjIconPreview').innerHTML = '<i class="ti ti-photo" style="font-size:24px;color:var(--text-mid);"></i>';
     document.getElementById('addSubjectModal').style.display = 'none';
   } catch(e) {
     err.style.display = 'block';
@@ -462,8 +472,22 @@ window.openEditSubjectModal = (id) => {
   if (!s) return;
   document.getElementById('editSbjId').value = id;
   document.getElementById('editSbjName').value = s.name;
-  document.getElementById('editSbjIcon').value = s.icon || '';
-  document.getElementById('editSbjColor').value = s.color || '';
+  document.getElementById('editSbjIconUrl').value = s.iconUrl || '';
+  document.getElementById('editSbjIconData').value = s.iconData || '';
+  // عرض الصورة الحالية
+  const editPrev = document.getElementById('editSbjIconPreview');
+  const imgSrc = s.iconData || s.iconUrl;
+  editPrev.innerHTML = imgSrc
+    ? `<img src="${imgSrc}" style="width:100%;height:100%;object-fit:cover;">`
+    : '<i class="ti ti-photo" style="font-size:24px;color:var(--text-mid);"></i>';
+  // ضبط الألوان
+  const colorMatch = (s.color || '').match(/#[0-9a-fA-F]{6}/g);
+  if (colorMatch && colorMatch.length >= 2) {
+    document.getElementById('editSbjColor1').value = colorMatch[0];
+    document.getElementById('editSbjColor2').value = colorMatch[1];
+  }
+  document.getElementById('editSbjColorVal').value = s.color || 'linear-gradient(135deg,#5c3d2e,#8a5e3c)';
+  document.getElementById('editSbjColorPreview').style.background = s.color || 'linear-gradient(135deg,#5c3d2e,#8a5e3c)';
   document.getElementById('editSbjDesc').value = s.desc || '';
   document.getElementById('editSbjMeetings').value = s.meetings || '';
   document.getElementById('editSbjWeeks').value = s.weeks || '';
@@ -477,8 +501,6 @@ window.openEditSubjectModal = (id) => {
 window.submitEditSubject = async () => {
   const id    = document.getElementById('editSbjId').value;
   const name  = document.getElementById('editSbjName').value.trim();
-  const icon  = document.getElementById('editSbjIcon').value.trim();
-  const color = document.getElementById('editSbjColor').value;
   const desc  = document.getElementById('editSbjDesc').value.trim();
   const meetings = document.getElementById('editSbjMeetings').value.trim();
   const weeks    = document.getElementById('editSbjWeeks').value.trim();
@@ -494,8 +516,11 @@ window.submitEditSubject = async () => {
   btn.innerHTML = '<i class="ti ti-loader"></i> جاري الحفظ...';
 
   try {
+    const iconData = document.getElementById('editSbjIconData').value || '';
+    const iconUrl  = document.getElementById('editSbjIconUrl').value.trim() || '';
+    const colorVal = document.getElementById('editSbjColorVal').value;
     await updateDoc(doc(db, 'subjects', id), {
-      name, icon, color, desc, meetings, weeks, level,
+      name, iconData, iconUrl, color: colorVal, desc, meetings, weeks, level,
       topics: topics.split('\n').filter(Boolean),
     });
     document.getElementById('editSubjectModal').style.display = 'none';

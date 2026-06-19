@@ -247,19 +247,53 @@
         <input id="sbjName" type="text" placeholder="مثال: السيرة النبوية" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:14px;box-sizing:border-box;">
       </div>
       <div>
-        <label style="font-size:13px;color:var(--text-dark);display:block;margin-bottom:6px">الأيقونة (emoji) <span style="color:#c0392b">*</span></label>
-        <input id="sbjIcon" type="text" placeholder="مثال: 📗" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:14px;box-sizing:border-box;">
+        <label style="font-size:13px;color:var(--text-dark);display:block;margin-bottom:6px">صورة الأيقونة</label>
+        <div style="display:flex;gap:10px;align-items:center;">
+          <div id="sbjIconPreview" style="width:64px;height:64px;border-radius:12px;background:var(--beige);border:2px dashed var(--border);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;">
+            <i class="ti ti-photo" style="font-size:24px;color:var(--text-mid);"></i>
+          </div>
+          <div style="flex:1;">
+            <input id="sbjIconFile" type="file" accept="image/*" onchange="previewIcon(this,'sbjIconPreview','sbjIconData')" style="display:none;">
+            <button type="button" onclick="document.getElementById('sbjIconFile').click()"
+              style="width:100%;padding:9px;border:1px solid var(--border);border-radius:8px;background:var(--beige);font-family:inherit;font-size:13px;cursor:pointer;color:var(--text-dark);margin-bottom:6px;">
+              <i class="ti ti-upload"></i> رفع صورة
+            </button>
+            <input id="sbjIconUrl" type="url" placeholder="أو الصق رابط صورة..." onchange="previewIconUrl(this,'sbjIconPreview')"
+              style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:12px;box-sizing:border-box;">
+          </div>
+        </div>
+        <input type="hidden" id="sbjIconData">
       </div>
       <div>
         <label style="font-size:13px;color:var(--text-dark);display:block;margin-bottom:6px">لون البانر <span style="color:#c0392b">*</span></label>
-        <select id="sbjColor" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:14px;box-sizing:border-box;">
-          <option value="linear-gradient(135deg,#5c3d2e,#8a5e3c)">بني دافئ</option>
-          <option value="linear-gradient(135deg,#1a3a5c,#2a5298)">أزرق</option>
-          <option value="linear-gradient(135deg,#2e1a4a,#5e3c8b)">بنفسجي</option>
-          <option value="linear-gradient(135deg,#1a4a2e,#2e7d4a)">أخضر</option>
-          <option value="linear-gradient(135deg,#4a1a1a,#8b3c3c)">أحمر داكن</option>
-          <option value="linear-gradient(135deg,#2e2e1a,#6b6b2e)">زيتوني</option>
-        </select>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+          <div id="sbjColorPreview" style="width:48px;height:48px;border-radius:10px;border:2px solid var(--border);background:linear-gradient(135deg,#5c3d2e,#8a5e3c);flex-shrink:0;"></div>
+          <div style="flex:1;min-width:200px;">
+            <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
+              <div>
+                <div style="font-size:11px;color:var(--text-mid);margin-bottom:3px;">اللون الأول</div>
+                <input type="color" id="sbjColor1" value="#5c3d2e" oninput="updateColorPreview('sbjColor1','sbjColor2','sbjColorPreview','sbjColorVal')"
+                  style="width:48px;height:36px;border:none;border-radius:6px;cursor:pointer;padding:2px;">
+              </div>
+              <div>
+                <div style="font-size:11px;color:var(--text-mid);margin-bottom:3px;">اللون الثاني</div>
+                <input type="color" id="sbjColor2" value="#8a5e3c" oninput="updateColorPreview('sbjColor1','sbjColor2','sbjColorPreview','sbjColorVal')"
+                  style="width:48px;height:36px;border:none;border-radius:6px;cursor:pointer;padding:2px;">
+              </div>
+            </div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+              <div onclick="setPresetColor('#5c3d2e','#8a5e3c','sbjColor1','sbjColor2','sbjColorPreview','sbjColorVal')" style="width:28px;height:28px;border-radius:6px;cursor:pointer;background:linear-gradient(135deg,#5c3d2e,#8a5e3c);border:2px solid transparent;" title="بني دافئ"></div>
+              <div onclick="setPresetColor('#1a3a5c','#2a5298','sbjColor1','sbjColor2','sbjColorPreview','sbjColorVal')" style="width:28px;height:28px;border-radius:6px;cursor:pointer;background:linear-gradient(135deg,#1a3a5c,#2a5298);border:2px solid transparent;" title="أزرق"></div>
+              <div onclick="setPresetColor('#2e1a4a','#5e3c8b','sbjColor1','sbjColor2','sbjColorPreview','sbjColorVal')" style="width:28px;height:28px;border-radius:6px;cursor:pointer;background:linear-gradient(135deg,#2e1a4a,#5e3c8b);border:2px solid transparent;" title="بنفسجي"></div>
+              <div onclick="setPresetColor('#1a4a2e','#2e7d4a','sbjColor1','sbjColor2','sbjColorPreview','sbjColorVal')" style="width:28px;height:28px;border-radius:6px;cursor:pointer;background:linear-gradient(135deg,#1a4a2e,#2e7d4a);border:2px solid transparent;" title="أخضر"></div>
+              <div onclick="setPresetColor('#4a1a1a','#8b3c3c','sbjColor1','sbjColor2','sbjColorPreview','sbjColorVal')" style="width:28px;height:28px;border-radius:6px;cursor:pointer;background:linear-gradient(135deg,#4a1a1a,#8b3c3c);border:2px solid transparent;" title="أحمر"></div>
+              <div onclick="setPresetColor('#1a3a4a','#1a6a6a','sbjColor1','sbjColor2','sbjColorPreview','sbjColorVal')" style="width:28px;height:28px;border-radius:6px;cursor:pointer;background:linear-gradient(135deg,#1a3a4a,#1a6a6a);border:2px solid transparent;" title="فيروزي"></div>
+              <div onclick="setPresetColor('#2e2e1a','#6b6b2e','sbjColor1','sbjColor2','sbjColorPreview','sbjColorVal')" style="width:28px;height:28px;border-radius:6px;cursor:pointer;background:linear-gradient(135deg,#2e2e1a,#6b6b2e);border:2px solid transparent;" title="زيتوني"></div>
+              <div onclick="setPresetColor('#4a2e1a','#9a6a3c','sbjColor1','sbjColor2','sbjColorPreview','sbjColorVal')" style="width:28px;height:28px;border-radius:6px;cursor:pointer;background:linear-gradient(135deg,#4a2e1a,#9a6a3c);border:2px solid transparent;" title="ذهبي"></div>
+            </div>
+          </div>
+        </div>
+        <input type="hidden" id="sbjColorVal" value="linear-gradient(135deg,#5c3d2e,#8a5e3c)">
       </div>
       <div>
         <label style="font-size:13px;color:var(--text-dark);display:block;margin-bottom:6px">وصف المادة <span style="color:#c0392b">*</span></label>
@@ -305,19 +339,53 @@
         <input id="editSbjName" type="text" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:14px;box-sizing:border-box;">
       </div>
       <div>
-        <label style="font-size:13px;color:var(--text-dark);display:block;margin-bottom:6px">الأيقونة (emoji)</label>
-        <input id="editSbjIcon" type="text" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:14px;box-sizing:border-box;">
+        <label style="font-size:13px;color:var(--text-dark);display:block;margin-bottom:6px">صورة الأيقونة</label>
+        <div style="display:flex;gap:10px;align-items:center;">
+          <div id="editSbjIconPreview" style="width:64px;height:64px;border-radius:12px;background:var(--beige);border:2px dashed var(--border);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;">
+            <i class="ti ti-photo" style="font-size:24px;color:var(--text-mid);"></i>
+          </div>
+          <div style="flex:1;">
+            <input id="editSbjIconFile" type="file" accept="image/*" onchange="previewIcon(this,'editSbjIconPreview','editSbjIconData')" style="display:none;">
+            <button type="button" onclick="document.getElementById('editSbjIconFile').click()"
+              style="width:100%;padding:9px;border:1px solid var(--border);border-radius:8px;background:var(--beige);font-family:inherit;font-size:13px;cursor:pointer;color:var(--text-dark);margin-bottom:6px;">
+              <i class="ti ti-upload"></i> رفع صورة
+            </button>
+            <input id="editSbjIconUrl" type="url" placeholder="أو الصق رابط صورة..." onchange="previewIconUrl(this,'editSbjIconPreview')"
+              style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:12px;box-sizing:border-box;">
+          </div>
+        </div>
+        <input type="hidden" id="editSbjIconData">
       </div>
       <div>
         <label style="font-size:13px;color:var(--text-dark);display:block;margin-bottom:6px">لون البانر</label>
-        <select id="editSbjColor" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:14px;box-sizing:border-box;">
-          <option value="linear-gradient(135deg,#5c3d2e,#8a5e3c)">بني دافئ</option>
-          <option value="linear-gradient(135deg,#1a3a5c,#2a5298)">أزرق</option>
-          <option value="linear-gradient(135deg,#2e1a4a,#5e3c8b)">بنفسجي</option>
-          <option value="linear-gradient(135deg,#1a4a2e,#2e7d4a)">أخضر</option>
-          <option value="linear-gradient(135deg,#4a1a1a,#8b3c3c)">أحمر داكن</option>
-          <option value="linear-gradient(135deg,#2e2e1a,#6b6b2e)">زيتوني</option>
-        </select>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+          <div id="editSbjColorPreview" style="width:48px;height:48px;border-radius:10px;border:2px solid var(--border);background:linear-gradient(135deg,#5c3d2e,#8a5e3c);flex-shrink:0;"></div>
+          <div style="flex:1;min-width:200px;">
+            <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
+              <div>
+                <div style="font-size:11px;color:var(--text-mid);margin-bottom:3px;">اللون الأول</div>
+                <input type="color" id="editSbjColor1" value="#5c3d2e" oninput="updateColorPreview('editSbjColor1','editSbjColor2','editSbjColorPreview','editSbjColorVal')"
+                  style="width:48px;height:36px;border:none;border-radius:6px;cursor:pointer;padding:2px;">
+              </div>
+              <div>
+                <div style="font-size:11px;color:var(--text-mid);margin-bottom:3px;">اللون الثاني</div>
+                <input type="color" id="editSbjColor2" value="#8a5e3c" oninput="updateColorPreview('editSbjColor1','editSbjColor2','editSbjColorPreview','editSbjColorVal')"
+                  style="width:48px;height:36px;border:none;border-radius:6px;cursor:pointer;padding:2px;">
+              </div>
+            </div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+              <div onclick="setPresetColor('#5c3d2e','#8a5e3c','editSbjColor1','editSbjColor2','editSbjColorPreview','editSbjColorVal')" style="width:28px;height:28px;border-radius:6px;cursor:pointer;background:linear-gradient(135deg,#5c3d2e,#8a5e3c);border:2px solid transparent;"></div>
+              <div onclick="setPresetColor('#1a3a5c','#2a5298','editSbjColor1','editSbjColor2','editSbjColorPreview','editSbjColorVal')" style="width:28px;height:28px;border-radius:6px;cursor:pointer;background:linear-gradient(135deg,#1a3a5c,#2a5298);border:2px solid transparent;"></div>
+              <div onclick="setPresetColor('#2e1a4a','#5e3c8b','editSbjColor1','editSbjColor2','editSbjColorPreview','editSbjColorVal')" style="width:28px;height:28px;border-radius:6px;cursor:pointer;background:linear-gradient(135deg,#2e1a4a,#5e3c8b);border:2px solid transparent;"></div>
+              <div onclick="setPresetColor('#1a4a2e','#2e7d4a','editSbjColor1','editSbjColor2','editSbjColorPreview','editSbjColorVal')" style="width:28px;height:28px;border-radius:6px;cursor:pointer;background:linear-gradient(135deg,#1a4a2e,#2e7d4a);border:2px solid transparent;"></div>
+              <div onclick="setPresetColor('#4a1a1a','#8b3c3c','editSbjColor1','editSbjColor2','editSbjColorPreview','editSbjColorVal')" style="width:28px;height:28px;border-radius:6px;cursor:pointer;background:linear-gradient(135deg,#4a1a1a,#8b3c3c);border:2px solid transparent;"></div>
+              <div onclick="setPresetColor('#1a3a4a','#1a6a6a','editSbjColor1','editSbjColor2','editSbjColorPreview','editSbjColorVal')" style="width:28px;height:28px;border-radius:6px;cursor:pointer;background:linear-gradient(135deg,#1a3a4a,#1a6a6a);border:2px solid transparent;"></div>
+              <div onclick="setPresetColor('#2e2e1a','#6b6b2e','editSbjColor1','editSbjColor2','editSbjColorPreview','editSbjColorVal')" style="width:28px;height:28px;border-radius:6px;cursor:pointer;background:linear-gradient(135deg,#2e2e1a,#6b6b2e);border:2px solid transparent;"></div>
+              <div onclick="setPresetColor('#4a2e1a','#9a6a3c','editSbjColor1','editSbjColor2','editSbjColorPreview','editSbjColorVal')" style="width:28px;height:28px;border-radius:6px;cursor:pointer;background:linear-gradient(135deg,#4a2e1a,#9a6a3c);border:2px solid transparent;"></div>
+            </div>
+          </div>
+        </div>
+        <input type="hidden" id="editSbjColorVal" value="linear-gradient(135deg,#5c3d2e,#8a5e3c)">
       </div>
       <div>
         <label style="font-size:13px;color:var(--text-dark);display:block;margin-bottom:6px">وصف المادة</label>
@@ -624,6 +692,39 @@
     </div>
   </div>
 
+  <script>
+    // Color picker helpers
+    function updateColorPreview(c1Id, c2Id, previewId, valId) {
+      const c1 = document.getElementById(c1Id).value;
+      const c2 = document.getElementById(c2Id).value;
+      const grad = `linear-gradient(135deg,${c1},${c2})`;
+      document.getElementById(previewId).style.background = grad;
+      document.getElementById(valId).value = grad;
+    }
+    function setPresetColor(c1, c2, c1Id, c2Id, previewId, valId) {
+      document.getElementById(c1Id).value = c1;
+      document.getElementById(c2Id).value = c2;
+      updateColorPreview(c1Id, c2Id, previewId, valId);
+    }
+    // Image preview helpers
+    function previewIcon(input, previewId, dataId) {
+      const file = input.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const prev = document.getElementById(previewId);
+        prev.innerHTML = `<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover;">`;
+        if (dataId) document.getElementById(dataId).value = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+    function previewIconUrl(input, previewId) {
+      const url = input.value.trim();
+      if (!url) return;
+      const prev = document.getElementById(previewId);
+      prev.innerHTML = `<img src="${url}" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.innerHTML='<i class=ti ti-photo-off style=font-size:24px;color:red;></i>'">`;
+    }
+  </script>
   <script src="../js/courses.js"></script>
   <script src="../js/courses-firebase.js" type="module"></script>
   <script type="module" src="../js/notifications.js"></script>
