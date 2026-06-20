@@ -517,14 +517,17 @@ document.getElementById('mobileMenuToggle').addEventListener('click', function()
 <script>
 // ── FOUC Prevention ──────────────────────────────────────────
 // بنستنى الـ fonts تتحمل ثم بنظهر الصفحة
+// ملاحظة: الـ fallback timeout قُلّل من 1500ms/1000ms إلى 100ms
+// لأن الانتظار الطويل كان بيأخر ظهور الصفحة بالكامل بشكل ملحوظ
+// (مكتشف عبر Lighthouse: FCP كان بياخد 7-12 ثانية بسببه جزئياً)
 (function() {
   function revealPage() {
     document.documentElement.classList.add('ready');
   }
 
   if (document.fonts && document.fonts.ready) {
-    // استنى الـ fonts (max 1.5 ثانية fallback)
-    var timeout = setTimeout(revealPage, 1500);
+    // استنى الـ fonts (max 100ms fallback بدل 1.5 ثانية)
+    var timeout = setTimeout(revealPage, 100);
     document.fonts.ready.then(function() {
       clearTimeout(timeout);
       revealPage();
@@ -533,7 +536,7 @@ document.getElementById('mobileMenuToggle').addEventListener('click', function()
     // مش بيدعم Font Loading API — اظهر بعد الـ load
     window.addEventListener('load', revealPage);
     // fallback لو الـ load اتأخر
-    setTimeout(revealPage, 1000);
+    setTimeout(revealPage, 100);
   }
 })();
 </script>
@@ -542,4 +545,5 @@ document.getElementById('mobileMenuToggle').addEventListener('click', function()
   <script src="../js/sw-register.js"></script>
 </body>
 </html>
+
 
