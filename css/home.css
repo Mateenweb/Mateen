@@ -398,18 +398,28 @@ body {
 
 /* عرض السايدبار — كل الشاشات (Bootstrap الافتراضي 400px عريض جداً) */
 #mainSidebar {
-  width: 300px;
-  /* ترتيب رأسي ثابت على كل الأحجام — مش محصور على الموبايل بس،
-     عشان مينفعش يحصل تزاحم لو الشاشة بين 991px و الديسكتوب الكامل */
+  width: 300px !important;
+  max-width: 300px !important;
+  /* تغطية كاملة إجبارية — تمنع أي جزء من الصفحة إنه يبين من تحتها */
+  position: fixed !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  height: 100vh !important;
+  z-index: 1055 !important;
   display: flex !important;
   flex-direction: column !important;
-  height: 100% !important;
+  overflow: hidden !important;
 }
 #mainSidebar .sidebar-nav {
   overflow-y: auto;
+  flex: 1 1 auto;
+  min-height: 0;
 }
 #mainSidebar .sidebar-footer {
   flex-shrink: 0;
+}
+#mainSidebar > * {
+  width: 100%;
 }
 
 /* Mobile offcanvas — يملأ الـ panel كاملاً */
@@ -606,7 +616,7 @@ body {
   justify-content: flex-end;
   aspect-ratio: 16 / 9;     /* قريبة جداً من أبعاد الصورة الأصلية (1376×768) — قص شبه معدوم */
   min-height: 320px;
-  max-height: 700px;        /* رفعتها من 560 لـ 700 عشان القص يقل على الشاشات العريضة */
+  max-height: 460px;        /* اتقللت تاني — كانت ضخمة أوي على الديسكتوب */
   overflow: hidden;
 }
 
