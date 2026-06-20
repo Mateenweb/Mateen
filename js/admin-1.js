@@ -20,19 +20,21 @@ onAuthStateChanged(auth, async user => {
   if (!user) { window.location.href = '../html/login.html'; return; }
   const snap = await getDoc(doc(db, 'users', user.uid));
   const role = snap.exists() ? snap.data().role : 'student';
-  if (role === 'student' || role === 'mateen' || role === 'supervisor') {
+  if (role === 'student' || role === 'mateen') {
     window.location.href = '../html/login.html'; return;
   }
   document.getElementById('navUserName').textContent  = user.displayName || user.email.split('@')[0];
   document.getElementById('authGate').style.display   = 'none';
   document.getElementById('mainContent').style.display = 'flex';
-  if (role !== 'admin') {
-    document.getElementById('studentsSection').style.display = 'none';
-  } else {
+
+  if (role === 'admin' || role === 'supervisor') {
     document.getElementById('pendingSection').style.display = 'block';
     loadPendingAccounts();
     loadAllUsers();
     document.getElementById('allUsersSection').style.display = 'block';
+  }
+  if (role !== 'admin') {
+    document.getElementById('studentsSection').style.display = 'none';
   }
   loadMats();
 });
