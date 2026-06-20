@@ -67,7 +67,16 @@ onAuthStateChanged(auth, async user => {
   // ── إظهار الـ links حسب الـ role ──────────────────────────
   function show(id) { const el = document.getElementById(id); if(el) el.classList.remove('d-none'); }
 
-  if (role === 'admin' || role === 'supervisor') {
+  if (role === 'admin') {
+    show('linkAdmin');
+    show('linkNews');
+  } else if (role === 'supervisor') {
+    // المشرفة توديها لصفحتها المخصصة، مش لوحة الأدمن
+    const linkAdminEl = document.getElementById('linkAdmin');
+    if (linkAdminEl) {
+      linkAdminEl.href = 'supervisor.html';
+      linkAdminEl.innerHTML = '<i class="ti ti-shield"></i> لوحة المشرفة';
+    }
     show('linkAdmin');
     show('linkNews');
   } else if (role === 'teacher') {
