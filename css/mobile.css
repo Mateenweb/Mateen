@@ -155,9 +155,7 @@ html { overflow-x: hidden; }
   .sidebar-fab i { font-size: 18px !important; }
 }
 
-@media (min-width: 992px) {
-  .sidebar-fab { display: none !important; }
-}
+/* sidebar-fab ظاهر في كل الأحجام كجزء من الناف بار */
 
 
 /* ════════════════════════════════════════

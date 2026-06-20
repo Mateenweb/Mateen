@@ -124,6 +124,30 @@ body {
 }
 .nav-tagline { color: rgba(255,255,255,0.5); font-size: 11px; }
 
+/* زرار حسابي — جزء من الناف بار */
+.sidebar-fab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: 1.5px solid rgba(201,162,39,0.5);
+  color: rgba(255,255,255,0.85);
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: 0.2s;
+  flex-shrink: 0;
+}
+.sidebar-fab:hover {
+  background: rgba(201,162,39,0.15);
+  border-color: var(--gold);
+  color: var(--gold-light);
+}
+.sidebar-fab i { font-size: 16px; }
+
 .nav-links {
   list-style: none;
   display: flex;
