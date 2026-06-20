@@ -53,9 +53,10 @@ onAuthStateChanged(auth, async user => {
   // تفعيل إشعارات الموقع
   initNotifications(user.uid);
 
-  const snap = await getDoc(doc(db, 'users', user.uid));
-  const role = snap.exists() ? snap.data().role : 'student';
-  const name = user.displayName || user.email.split('@')[0];
+  const snap   = await getDoc(doc(db, 'users', user.uid));
+  const role   = snap.exists() ? snap.data().role   : 'student';
+  const status = snap.exists() ? snap.data().status : 'pending';
+  const name   = user.displayName || user.email.split('@')[0];
 
   document.getElementById('sidebarName').textContent = 'مرحباً، ' + name;
   document.getElementById('sidebarRole').textContent =
@@ -89,35 +90,41 @@ onAuthStateChanged(auth, async user => {
   }
   // student: مش بيظهرله روابط إضافية
 
-  // ── أيقونة البروفايل وملفي الشخصي — بنات متين فقط ──────
+  // ── أيقونة البروفايل وملفي الشخصي — تظهر فقط بعد تفعيل الحساب ──
   const profileLink   = document.getElementById('profileLink');
   const navProfileBtn = document.getElementById('navProfileBtn');
 
-  // أيقونة البروفايل — تظهر لكل الأدوار
-  const navAvatar = document.getElementById('navProfileAvatar');
-  const avatarEmoji =
-    role === 'admin'      ? '👑' :
-    role === 'supervisor' ? '🎓' :
-    role === 'teacher'    ? '📚' :
-    role === 'mateen'     ? '👩' : '🌸';
-  if (navAvatar) navAvatar.textContent = avatarEmoji;
+  if (status !== 'active') {
+    // الحساب لسه pending أو suspended — اخفِ الأيقونة تماماً
+    if (profileLink)   profileLink.classList.add('d-none');
+    if (navProfileBtn) navProfileBtn.classList.add('d-none');
+  } else {
+    // أيقونة البروفايل — تظهر لكل الأدوار المفعّلة
+    const navAvatar = document.getElementById('navProfileAvatar');
+    const avatarEmoji =
+      role === 'admin'      ? '👑' :
+      role === 'supervisor' ? '🎓' :
+      role === 'teacher'    ? '📚' :
+      role === 'mateen'     ? '👩' : '🌸';
+    if (navAvatar) navAvatar.textContent = avatarEmoji;
 
-  if (role === 'mateen') {
-    const linkedId = snap.data().linkedStudentId;
-    if (linkedId) {
-      if (profileLink)   { profileLink.href = `student.html?id=${linkedId}`; profileLink.classList.remove('d-none'); }
-      if (navProfileBtn) { navProfileBtn.href = `student.html?id=${linkedId}`; navProfileBtn.classList.remove('d-none'); }
+    if (role === 'mateen') {
+      const linkedId = snap.data().linkedStudentId;
+      if (linkedId) {
+        if (profileLink)   { profileLink.href = `student.html?id=${linkedId}`; profileLink.classList.remove('d-none'); }
+        if (navProfileBtn) { navProfileBtn.href = `student.html?id=${linkedId}`; navProfileBtn.classList.remove('d-none'); }
+      } else {
+        if (navProfileBtn) navProfileBtn.classList.remove('d-none');
+      }
+    } else if (role === 'admin') {
+      if (navProfileBtn) { navProfileBtn.href = 'admin.html'; navProfileBtn.classList.remove('d-none'); }
+    } else if (role === 'supervisor') {
+      if (navProfileBtn) { navProfileBtn.href = 'supervisor.html'; navProfileBtn.classList.remove('d-none'); }
+    } else if (role === 'teacher') {
+      if (navProfileBtn) { navProfileBtn.href = 'teacher-aqeedah.html'; navProfileBtn.classList.remove('d-none'); }
     } else {
       if (navProfileBtn) navProfileBtn.classList.remove('d-none');
     }
-  } else if (role === 'admin') {
-    if (navProfileBtn) { navProfileBtn.href = 'admin.html'; navProfileBtn.classList.remove('d-none'); }
-  } else if (role === 'supervisor') {
-    if (navProfileBtn) { navProfileBtn.href = 'supervisor.html'; navProfileBtn.classList.remove('d-none'); }
-  } else if (role === 'teacher') {
-    if (navProfileBtn) { navProfileBtn.href = 'teacher-aqeedah.html'; navProfileBtn.classList.remove('d-none'); }
-  } else {
-    if (navProfileBtn) navProfileBtn.classList.remove('d-none');
   }
 });
 
