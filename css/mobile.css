@@ -128,10 +128,10 @@ html { overflow-x: hidden; }
     flex-direction: column !important;
   }
 
-  /* الـ nav يأخذ المساحة المتبقية فيتدفع logout للأسفل */
+  /* الـ nav يتمدد بس بقدر محتواه — logout يظهر تحته مباشرة */
   #sidebar-user .sidebar-nav {
-    flex: 1 !important;
-    overflow-y: auto !important;
+    flex: 0 0 auto !important;
+    overflow-y: visible !important;
     display: flex !important;
     flex-direction: column !important;
   }
