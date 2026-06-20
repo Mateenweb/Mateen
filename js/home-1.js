@@ -16,9 +16,13 @@ onAuthStateChanged(auth, async user => {
   const guest   = document.getElementById('sidebar-guest');
   const userDiv = document.getElementById('sidebar-user');
   const layout  = document.querySelector('.page-layout');
+  const loading = document.getElementById('sidebar-loading');
+
+  // أخفي loading
+  if (loading) loading.style.display = 'none';
 
   if (!user) {
-    guest.classList.remove('d-none');
+    guest.style.display = 'block';
     userDiv.classList.add('sidebar-user-hidden');
     if (layout) layout.classList.add('guest-layout');
     return;

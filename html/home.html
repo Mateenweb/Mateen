@@ -113,8 +113,14 @@
 
     <div class="offcanvas-body d-flex flex-column p-0">
 
+      <!-- Loading state -->
+      <div id="sidebar-loading" style="display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;padding:40px 20px;gap:12px;">
+        <div style="width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin 0.8s linear infinite;"></div>
+        <div style="font-size:12px;color:var(--text-mid);">جاري التحقق...</div>
+      </div>
+
       <!-- ══ حالة الزائر ══ -->
-      <div id="sidebar-guest">
+      <div id="sidebar-guest" style="display:none;">
 
         <!-- اللوجو -->
         <div class="text-center py-3 px-3">
