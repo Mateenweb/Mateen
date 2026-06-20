@@ -617,16 +617,16 @@ body {
   width: 100%;
   align-items: center;
   justify-content: flex-end;
-  background: var(--beige, #f7efe3);  /* الخلفية خلف الصورة لو فيه مساحات فاضية */
-  min-height: 320px;
-  max-height: 640px;
+  background: var(--beige, #f7efe3);
+  height: clamp(320px, 48vw, 560px);
   overflow: hidden;
+  position: relative;
 }
 
-/* الصورة كاملة بدون أي قص */
+/* الصورة تغطي الكامل بدون تمدد */
 .hero-bg-img {
-  object-position: center;
-  object-fit: contain;
+  object-position: center center;
+  object-fit: cover;
 }
 
 /* طبقة التعتيم بدل ::before */
