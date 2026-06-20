@@ -436,13 +436,9 @@ body {
     margin-top: 0;
     flex-shrink: 0;
   }
-  /* زرار الإغلاق — يسار لأن RTL */
-  #mainSidebar .btn-close {
-    position: absolute;
-    left: 14px !important;
-    right: auto !important;
-    top: 14px;
-  }
+  /* ملاحظة: زرار الإغلاق موجود فعلياً داخل .offcanvas-header
+     بتنسيق flex طبيعي (ms-auto) — لا حاجة لفرض position يدوياً
+     هنا، كان هذا يتعارض مع اتجاه فتح السايدبار من اليمين */
 }
 
 .sidebar-guest-logo {
@@ -1227,4 +1223,5 @@ footer {
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
+
 
