@@ -4,12 +4,26 @@
 
 import { initializeApp, getApps, getApp }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
-import { getFirestore, collection, getDocs, query, orderBy }
+import { getFirestore, collection, getDocs, query, orderBy, doc, getDoc }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
+import { getAuth, onAuthStateChanged }
+  from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
 import { FIREBASE_CONFIG } from './config.js';
 
-const app = getApps().length ? getApp() : initializeApp(FIREBASE_CONFIG);
-const db  = getFirestore(app);
+const app  = getApps().length ? getApp() : initializeApp(FIREBASE_CONFIG);
+const db   = getFirestore(app);
+const auth = getAuth(app);
+
+// ── AUTH GUARD — للإدارة/المشرفة/المعلمة فقط ───────────────
+onAuthStateChanged(auth, async user => {
+  if (!user) { window.location.href = '../html/login.html'; return; }
+  const snap = await getDoc(doc(db, 'users', user.uid));
+  const role = snap.exists() ? snap.data().role : '';
+  if (!['admin', 'supervisor', 'teacher'].includes(role)) {
+    window.location.href = '../html/home.html'; return;
+  }
+  loadAll();
+});
 
 // ── Global Data ──────────────────────────────
 let allStudents = [];   // [{ id, name, sessions:[], grades:[] }]
@@ -269,4 +283,4 @@ window.switchTab = function (name) {
 };
 
 // ── Start ─────────────────────────────────────
-loadAll();
+// (loadAll() بيتنادي من جوه onAuthStateChanged فوق بعد التحقق من الصلاحية)
