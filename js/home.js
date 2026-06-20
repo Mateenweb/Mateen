@@ -33,6 +33,10 @@ onAuthStateChanged(auth, async user => {
   const userDiv = document.getElementById('sidebar-user');
   const layout  = document.querySelector('.page-layout');
 
+  // إخفاء شاشة "جاري التحقق..." فوراً بعد ما Firebase يحدد حالة المستخدم
+  const sidebarLoading = document.getElementById('sidebar-loading');
+  if (sidebarLoading) sidebarLoading.style.display = 'none';
+
   if (!user) {
     if (guest)   guest.classList.remove('d-none');
     if (userDiv) userDiv.classList.add('sidebar-user-hidden');
@@ -414,3 +418,4 @@ document.addEventListener("click",function(e){
   var nav=document.querySelector("nav");
   if(nav && !nav.contains(e.target)){ var nl=document.querySelector(".nav-links"); if(nl) nl.classList.remove("open"); }
 });
+
