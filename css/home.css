@@ -617,18 +617,12 @@ body {
   width: 100%;
   align-items: center;
   justify-content: flex-end;
-  background: var(--beige, #f7efe3);
-  /* نفس نسبة أبعاد الصورة الأصلية 1376×768 */
+  /* الصورة كـ background — بتحافظ على نسبها بدون قص */
+  background: url('../hero-bg.png') center center / contain no-repeat;
+  background-color: var(--beige, #f7efe3);
   aspect-ratio: 1376 / 768;
   max-height: 620px;
-  overflow: hidden;
   position: relative;
-}
-
-/* الصورة تملأ بدون قص ولا تمدد */
-.hero-bg-img {
-  object-fit: contain;
-  object-position: center center;
 }
 
 /* طبقة التعتيم بدل ::before */
