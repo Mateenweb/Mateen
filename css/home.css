@@ -364,6 +364,16 @@ body {
 /* السايدبار overlay على كل الشاشات — بيتفتح فوق المحتوى لا بجانبه */
 /* (لا يوجد sticky desktop sidebar — المحتوى يملأ العرض كامل دايماً) */
 
+/* الـ sidebar دايماً position:fixed خارج الـ layout flow */
+.page-layout > aside {
+  position: fixed !important;
+  top: 0;
+  left: 0;
+  width: 0 !important;
+  overflow: hidden;
+  z-index: 1045;
+}
+
 /* لو guest — أخفي الـ sidebar خالص في كل الأحجام */
 .page-layout.guest-layout > aside {
   display: none !important;
@@ -555,10 +565,9 @@ body {
 
 /* ===== CONTENT AREA ===== */
 .content-area {
-  flex: 1 1 0;
+  width: 100%;
   min-width: 0;
   overflow: hidden;
-  width: 0; /* يجبره يملأ الـ flex space */
 }
 
 /* ===== HERO ===== */
