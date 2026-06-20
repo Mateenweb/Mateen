@@ -86,10 +86,12 @@ onAuthStateChanged(auth, async user => {
   }
 
   if (role === 'admin') {
+    // الإدارة: الرئيسية + رسائلي + لوحة الإدارة + الأخبار + طالباتي
     show('linkAdmin');
     show('linkNews');
+    show('linkTeacher');
   } else if (role === 'supervisor') {
-    // المشرفة توديها لصفحتها المخصصة، مش لوحة الأدمن
+    // المشرفة: الرئيسية + رسائلي + لوحة المشرفة + الأخبار + طالباتي
     const linkAdminEl = document.getElementById('linkAdmin');
     if (linkAdminEl) {
       linkAdminEl.href = 'supervisor.html';
@@ -97,15 +99,20 @@ onAuthStateChanged(auth, async user => {
     }
     show('linkAdmin');
     show('linkNews');
+    show('linkTeacher');
   } else if (role === 'teacher') {
+    // المعلمة: الرئيسية + رسائلي + الأخبار + طالباتي
+    show('linkNews');
     show('linkTeacher');
   } else if (role === 'mateen') {
+    // الطالبة: الرئيسية + رسائلي + ملفي الشخصي + شهاداتي/إجازاتي/درجاتي + جدولي + الأخبار
     show('linkCerts');
     show('linkAwards');
     show('linkGrades');
     show('linkSchedule');
+    show('linkNews');
   }
-  // student: مش بيظهرله روابط إضافية
+  // student: الرئيسية ورسائلي بس
 
   // ── أيقونة البروفايل وملفي الشخصي — تظهر فقط بعد تفعيل الحساب ──
   const profileLink   = document.getElementById('profileLink');
