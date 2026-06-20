@@ -42,11 +42,12 @@ onAuthStateChanged(auth, async user => {
 });
 
 let loginRole = 'student';
-let regRole   = 'student';
+let regRole   = 'mateen';
 
 /* ── إعدادات كل Role ── */
 const ROLE_CONFIG = {
-  student:    { redirect: 'home.html', status: 'active',  needsApproval: false },
+  // معطّل مؤقتاً: حساب "أصدقاء متين" (student) — لا يُسمح بالتسجيل بهذا الدور حالياً
+  // student:    { redirect: 'home.html', status: 'active',  needsApproval: false },
   mateen:     { redirect: 'home.html', status: 'pending', needsApproval: true,  approvedBy: 'supervisor' },
   teacher:    { redirect: 'home.html', status: 'pending', needsApproval: true,  approvedBy: 'admin' },
   supervisor: { redirect: 'home.html', status: 'pending', needsApproval: true,  approvedBy: 'admin' },
@@ -233,6 +234,8 @@ window.doRegister = async () => {
 
   if (!name)            { showError('يرجى إدخال الاسم الكامل'); return; }
   if (!phone)           { showError('يرجى إدخال رقم الجوال'); return; }
+  // معطّل مؤقتاً: حساب "أصدقاء متين" (student)
+  if (regRole === 'student') { showError('هذا النوع من الحسابات غير متاح حالياً'); return; }
   if (regRole === 'teacher') {
     const subj = document.getElementById('regSubject').value;
     if (!subj) { showError('يرجى اختيار المادة التي تدرّسينها'); return; }

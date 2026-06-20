@@ -116,12 +116,20 @@
 <div class="form-group">
 <label>نوع الحساب</label>
 <div class="reg-role-grid">
-<button class="reg-role-btn active" onclick="selectRegRole('student',this)">
+<!--
+  معطّل مؤقتاً: حساب "أصدقاء متين" (student) — الأيقونة تظهر بس لا تعمل ولا تتيح التسجيل
+  <button class="reg-role-btn active" onclick="selectRegRole('student',this)">
+  <div class="reg-role-icon">🌺</div>
+  <div class="reg-role-label">أصدقاء متين</div>
+  <div class="reg-role-desc">متابِعة للبرنامج</div>
+  </button>
+-->
+<button class="reg-role-btn" style="opacity:0.45;cursor:not-allowed;pointer-events:none" disabled title="غير متاح حالياً">
 <div class="reg-role-icon">🌺</div>
 <div class="reg-role-label">أصدقاء متين</div>
-<div class="reg-role-desc">متابِعة للبرنامج</div>
+<div class="reg-role-desc">غير متاح حالياً</div>
 </button>
-<button class="reg-role-btn" onclick="selectRegRole('mateen',this)">
+<button class="reg-role-btn active" onclick="selectRegRole('mateen',this)">
 <div class="reg-role-icon">📖</div>
 <div class="reg-role-label">طالبات متين</div>
 <div class="reg-role-desc">مسجّلة في البرنامج الدراسي</div>
