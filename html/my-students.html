@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+<meta charset="utf-8"/>
+<link href="../favicon.ico" rel="icon" type="image/x-icon"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>طالباتي — برنامج متين العلمي</title>
+<link href="../libs/fonts/arabic-fonts.css" rel="stylesheet"/>
+<link rel="preload" as="font" type="font/woff2" href="../libs/tabler-icons/fonts/tabler-icons.woff2?v3.42.0" crossorigin/>
+<link href="../libs/tabler-icons/tabler-icons.min.css" rel="stylesheet"/>
+<link href="../css/shared.css" rel="stylesheet"/>
+<link href="../css/home.css" rel="stylesheet"/>
+<link href="../css/islamic.css" rel="stylesheet"/>
+<link href="../css/mobile.css" rel="stylesheet"/>
+<link href="../css/responsive-fix.css" rel="stylesheet"/>
+<style>
+  .students-wrap {
+    max-width: 900px;
+    margin: 32px auto;
+    padding: 0 20px;
+  }
+  .page-title {
+    font-family: Amiri, serif;
+    font-size: 26px;
+    color: var(--green-dark);
+    margin-bottom: 6px;
+  }
+  .page-sub {
+    font-size: 13px;
+    color: var(--text-mid);
+    margin-bottom: 28px;
+  }
+  .subject-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--beige);
+    border: 1px solid var(--gold);
+    color: var(--green-dark);
+    padding: 5px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 24px;
+  }
+  .search-box {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 14px;
+    margin-bottom: 20px;
+    box-sizing: border-box;
+    background: var(--white);
+  }
+  .search-box:focus { outline: none; border-color: var(--gold); }
+  .students-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+  }
+  .student-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    transition: box-shadow 0.2s;
+  }
+  .student-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+  .student-avatar {
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    background: var(--beige);
+    border: 2px solid var(--gold);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+  }
+  .student-info { flex: 1; min-width: 0; }
+  .student-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-dark);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .student-year {
+    font-size: 12px;
+    color: var(--text-mid);
+    margin-top: 3px;
+  }
+  .student-status {
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 10px;
+    margin-top: 5px;
+    display: inline-block;
+  }
+  .status-active { background: #e8f5e9; color: #2e7d32; }
+  .status-pending { background: #fff8e1; color: #f57f17; }
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-mid);
+    grid-column: 1/-1;
+  }
+  .empty-state i { font-size: 40px; margin-bottom: 12px; display: block; }
+  .loading-state {
+    text-align: center;
+    padding: 60px;
+    color: var(--text-mid);
+  }
+  .spinner {
+    width: 36px; height: 36px;
+    border: 3px solid var(--border);
+    border-top-color: var(--gold);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 12px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .count-badge {
+    background: var(--gold);
+    color: white;
+    font-size: 12px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    margin-right: 8px;
+    font-weight: 600;
+  }
+</style>
+</head>
+<body>
+
+<div class="basmala-bar">
+  <span class="bsm-ornament">❦</span>بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ<span class="bsm-ornament">❦</span>
+</div>
+
+<nav>
+  <a class="nav-logo" href="home.html">
+    <div class="logo-circle"><img alt="متين" src="../logo.png" style="width:100%;height:100%;border-radius:50%;object-fit:cover;"/></div>
+    <div>
+      <div class="nav-brand">برنامج متين العلمي</div>
+      <div class="nav-tagline">نحو بناء علميٍّ متين</div>
+    </div>
+  </a>
+  <ul class="nav-links">
+    <li><a href="home.html">الرئيسية</a></li>
+    <li><a href="messages.html">رسائلي</a></li>
+    <li><a href="news.html">الأخبار</a></li>
+    <li><a class="active" href="my-students.html">طالباتي</a></li>
+  </ul>
+  <button class="nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')">
+    <i class="ti ti-menu-2"></i>
+  </button>
+</nav>
+
+<div class="students-wrap">
+  <div class="page-title"><i class="ti ti-users" style="margin-left:8px;"></i>طالباتي</div>
+  <div class="page-sub">الطالبات المسجلات في مادتك</div>
+
+  <div id="subjectBadge" class="subject-badge" style="display:none;">
+    <i class="ti ti-book"></i>
+    <span id="subjectName">...</span>
+  </div>
+
+  <input class="search-box" id="searchInput" placeholder="🔍 ابحثي باسم الطالبة..." type="text" oninput="filterStudents()" style="display:none;">
+
+  <div id="loadingState" class="loading-state">
+    <div class="spinner"></div>
+    <div>جاري التحميل...</div>
+  </div>
+
+  <div class="students-grid" id="studentsGrid" style="display:none;"></div>
+</div>
+
+<script type="module">
+import { initializeApp, getApps, getApp }
+  from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
+import { getAuth, onAuthStateChanged }
+  from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, collection, query, where, getDocs }
+  from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
+import { FIREBASE_CONFIG } from "../js/config.js";
+
+const app  = getApps().length ? getApp() : initializeApp(FIREBASE_CONFIG);
+const auth = getAuth(app);
+const db   = getFirestore(app);
+
+let allStudents = [];
+
+function studentCardHTML(s) {
+  const statusClass = s.status === 'active' ? 'status-active' : 'status-pending';
+  const statusText  = s.status === 'active' ? 'مفعّلة' : 'بانتظار التفعيل';
+  return `
+    <div class="student-card">
+      <div class="student-avatar">👩</div>
+      <div class="student-info">
+        <div class="student-name">${s.name || s.email || '—'}</div>
+        <div class="student-year">${s.year ? 'السنة: ' + s.year : ''}</div>
+        <span class="student-status ${statusClass}">${statusText}</span>
+      </div>
+    </div>`;
+}
+
+window.filterStudents = () => {
+  const q = document.getElementById('searchInput').value.trim().toLowerCase();
+  const filtered = q ? allStudents.filter(s => (s.name || '').toLowerCase().includes(q)) : allStudents;
+  const grid = document.getElementById('studentsGrid');
+  if (filtered.length === 0) {
+    grid.innerHTML = `<div class="empty-state"><i class="ti ti-user-off"></i>لا توجد طالبات مطابقة للبحث</div>`;
+  } else {
+    grid.innerHTML = filtered.map(studentCardHTML).join('');
+  }
+};
+
+onAuthStateChanged(auth, async user => {
+  if (!user) { location.href = 'login.html'; return; }
+
+  const userSnap = await getDoc(doc(db, 'users', user.uid));
+  const userData = userSnap.exists() ? userSnap.data() : {};
+  const role     = userData.role || '';
+  const subject  = userData.subject || '';
+
+  // صلاحية الدخول: معلمة أو أدمن أو مشرفة
+  if (!['teacher','admin','supervisor'].includes(role)) {
+    location.href = 'home.html';
+    return;
+  }
+
+  // أظهر اسم المادة لو معلمة
+  if (subject) {
+    document.getElementById('subjectBadge').style.display = 'inline-flex';
+    document.getElementById('subjectName').textContent = subject;
+  }
+
+  // جلب الطالبات المسجلات في المادة
+  try {
+    let q;
+    if (role === 'teacher' && subject) {
+      // المعلمة: طالبات مسجلات في مادتها
+      q = query(
+        collection(db, 'users'),
+        where('role', '==', 'mateen'),
+        where('enrolledSubjects', 'array-contains', subject)
+      );
+    } else {
+      // الأدمن/المشرفة: كل بنات متين
+      q = query(collection(db, 'users'), where('role', '==', 'mateen'));
+    }
+
+    const snap = await getDocs(q);
+    allStudents = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+    document.getElementById('loadingState').style.display  = 'none';
+    document.getElementById('studentsGrid').style.display  = 'grid';
+    document.getElementById('searchInput').style.display   = 'block';
+
+    // عنوان مع عدد الطالبات
+    document.querySelector('.page-sub').innerHTML =
+      `الطالبات المسجلات في مادتك <span class="count-badge">${allStudents.length}</span>`;
+
+    if (allStudents.length === 0) {
+      document.getElementById('studentsGrid').innerHTML =
+        `<div class="empty-state"><i class="ti ti-user-off"></i>لا توجد طالبات مسجلات في هذه المادة بعد</div>`;
+    } else {
+      window.filterStudents();
+    }
+  } catch(e) {
+    document.getElementById('loadingState').innerHTML =
+      `<div class="empty-state"><i class="ti ti-alert-circle"></i>حدث خطأ في التحميل، حاولي مرة أخرى</div>`;
+    console.error(e);
+  }
+});
+</script>
+</body>
+</html>
