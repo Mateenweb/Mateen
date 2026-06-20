@@ -617,16 +617,16 @@ body {
   width: 100%;
   align-items: center;
   justify-content: flex-end;
-  aspect-ratio: 16 / 9;     /* قريبة جداً من أبعاد الصورة الأصلية (1376×768) — قص شبه معدوم */
+  background: var(--beige, #f7efe3);  /* الخلفية خلف الصورة لو فيه مساحات فاضية */
   min-height: 320px;
-  max-height: 460px;        /* اتقللت تاني — كانت ضخمة أوي على الديسكتوب */
+  max-height: 640px;
   overflow: hidden;
 }
 
-/* الصورة نفسها — الفانوس والقوس على الشمال، فخليها هي اللي تتحفظ لو حصل قص */
+/* الصورة كاملة بدون أي قص */
 .hero-bg-img {
-  object-position: 30% center;
-  object-fit: cover;
+  object-position: center;
+  object-fit: contain;
 }
 
 /* طبقة التعتيم بدل ::before */
@@ -1153,7 +1153,6 @@ footer {
     justify-content: center;
     text-align: center;
   }
-  .hero-bg-img { object-position: 35% center; }
   .hero-overlay { background: rgba(247,239,227,0.78); }
   .hero-text {
     max-width: 100%;
