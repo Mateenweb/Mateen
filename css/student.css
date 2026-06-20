@@ -148,3 +148,36 @@ body { background: var(--beige); font-family: 'Noto Naskh Arabic', serif; direct
   .info-label { min-width: 110px; }
   .stu-tab span { display: none; }
 }
+
+/* ===== أزرار المشرفة (تسجيل حضور + ملاحظات) ===== */
+.btn-solid {
+  background: var(--green-dark, #1a4a2e);
+  color: #fff;
+  border: 1px solid var(--green-dark, #1a4a2e);
+  border-radius: 10px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: opacity 0.15s;
+}
+.btn-solid:hover { opacity: 0.88; }
+
+.btn-outline {
+  background: #fff;
+  color: var(--text-dark, #2c1a0e);
+  border: 1px solid var(--border, #d6c4a8);
+  border-radius: 10px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: background 0.15s;
+}
+.btn-outline:hover { background: var(--beige2, #ede0cc); }
