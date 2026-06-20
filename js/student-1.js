@@ -120,9 +120,21 @@ async function initPage(studentId, user, role) {
     updateGradeAvg(grades);
   });
 
-  // إخفاء زرار حذف الحساب للأدمن/المعلمة
+  // إخفاء زرار حذف الحساب للأدمن/المعلمة/المشرفة
   if (role !== 'student' && role !== 'mateen') {
     document.getElementById('deleteAccBtn')?.closest('.delete-acc-section')?.remove();
+  }
+
+  // المشرفة: تشوف بس تبويبي "حضوري" و"ملاحظات" — وتقدر تسجل حضور وتكتب ملاحظات
+  if (role === 'supervisor') {
+    document.getElementById('tabBtn-info')?.remove();
+    document.getElementById('tabBtn-grades')?.remove();
+    document.getElementById('newSessionWrap').style.display = 'block';
+    document.getElementById('notesEditWrap').style.display  = 'block';
+    document.getElementById('notesTextarea').value = s.notes || '';
+    setupSupervisorAttendance(studentId);
+    setupSupervisorNotes(studentId);
+    switchTab('attend');
   }
 
   // Logout
@@ -131,6 +143,103 @@ async function initPage(studentId, user, role) {
 
   // Delete account
   setupDeleteAccount(user);
+}
+
+// ── المشرفة: تسجيل حضور جديد ──────────────────
+const SUPERVISOR_SUBJECTS = ['تفسير', 'فقه', 'عقيدة', 'حديث', 'قرآن'];
+
+function setupSupervisorAttendance(studentId) {
+  const toggleBtn = document.getElementById('newSessionBtn');
+  const form       = document.getElementById('newSessionForm');
+  const subjWrap   = document.getElementById('sessSubjects');
+  const dateInput  = document.getElementById('sessDate');
+  const dayInput   = document.getElementById('sessDay');
+
+  // قيم افتراضية: تاريخ اليوم + اسم اليوم بالعربي
+  const todayISO = new Date().toISOString().split('T')[0];
+  dateInput.value = todayISO;
+  const dayNames = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+  dayInput.value = dayNames[new Date().getDay()];
+
+  // حالة كل مادة (present/absent) — افتراضياً غائبة لحد ما تتحدد
+  const subjState = {};
+  SUPERVISOR_SUBJECTS.forEach(s => subjState[s] = null);
+
+  function renderSubjRow() {
+    subjWrap.innerHTML = SUPERVISOR_SUBJECTS.map(s => `
+      <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; padding:6px 0; border-bottom:1px solid var(--border)">
+        <span>${s}</span>
+        <div style="display:flex; gap:6px">
+          <button type="button" class="btn-outline" data-subj="${s}" data-val="present"
+            style="padding:4px 12px; font-size:12px; ${subjState[s]==='present' ? 'background:var(--green-dark);color:#fff' : ''}">حاضرة</button>
+          <button type="button" class="btn-outline" data-subj="${s}" data-val="absent"
+            style="padding:4px 12px; font-size:12px; ${subjState[s]==='absent' ? 'background:#c0392b;color:#fff;border-color:#c0392b' : ''}">غائبة</button>
+        </div>
+      </div>`).join('');
+
+    subjWrap.querySelectorAll('button[data-subj]').forEach(btn => {
+      btn.onclick = () => {
+        subjState[btn.dataset.subj] = btn.dataset.val;
+        renderSubjRow();
+      };
+    });
+  }
+  renderSubjRow();
+
+  toggleBtn.onclick = () => {
+    form.style.display = form.style.display === 'none' ? 'block' : 'none';
+  };
+  document.getElementById('cancelSessionBtn').onclick = () => {
+    form.style.display = 'none';
+  };
+
+  document.getElementById('saveSessionBtn').onclick = async () => {
+    const subjects = {};
+    SUPERVISOR_SUBJECTS.forEach(s => { if (subjState[s]) subjects[s] = subjState[s]; });
+
+    if (!Object.keys(subjects).length) {
+      alert('حددي حضور أو غياب لمادة واحدة على الأقل');
+      return;
+    }
+
+    try {
+      await addDoc(collection(db, 'students', studentId, 'sessions'), {
+        date: dateInput.value,
+        day:  dayInput.value,
+        subjects,
+        createdAt: serverTimestamp(),
+      });
+      form.style.display = 'none';
+      SUPERVISOR_SUBJECTS.forEach(s => subjState[s] = null);
+      renderSubjRow();
+    } catch (e) {
+      alert('حدث خطأ أثناء حفظ الحضور');
+      console.error(e);
+    }
+  };
+}
+
+// ── المشرفة: كتابة/تعديل الملاحظات ────────────
+function setupSupervisorNotes(studentId) {
+  document.getElementById('saveNotesBtn').onclick = async () => {
+    const val = document.getElementById('notesTextarea').value.trim();
+    try {
+      await updateDoc(doc(db, 'students', studentId), { notes: val });
+      document.getElementById('notesContent').textContent = val || 'لا توجد ملاحظات بعد.';
+      showSavedToast();
+    } catch (e) {
+      alert('حدث خطأ أثناء حفظ الملاحظات');
+      console.error(e);
+    }
+  };
+}
+
+function showSavedToast() {
+  const t = document.createElement('div');
+  t.textContent = '✓ تم الحفظ';
+  t.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--green-dark);color:#fff;padding:10px 20px;border-radius:30px;font-size:13px;z-index:9999';
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2000);
 }
 
 // ── Render Sessions ───────────────────────────
