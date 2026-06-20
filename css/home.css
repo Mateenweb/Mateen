@@ -104,12 +104,14 @@ body {
 /* شعار شركاء الخير — خلفية فاتحة لأن الشعار رمادي-أخضر شبه شفاف
    ولا يظهر بوضوح على الخلفية الغامقة المستخدمة لشعار متين */
 .logo-circle-shuraka {
-  background: #f7f1e3;
+  background: #fff;
   border-color: var(--gold);
+  box-shadow: 0 0 0 2px rgba(201,162,39,0.3), 0 2px 8px rgba(0,0,0,0.15);
 }
 .logo-circle-shuraka img {
   object-fit: contain;
-  padding: 6px;
+  padding: 5px;
+  filter: contrast(1.2) saturate(1.1);
 }
 
 .nav-brand {
