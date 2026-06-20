@@ -18,13 +18,11 @@ jobs:
           node-version: '20'
 
       - name: Install dependencies
-        run: |
-          cd functions
-          npm install
+        run: cd functions && npm install
 
-      - name: Deploy to Firebase
+      - name: Deploy Firebase Functions
         uses: w9jds/firebase-action@master
         with:
-          args: deploy --only functions
+          args: deploy --only functions --project mateen-a122d
         env:
           GCP_SA_KEY: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
