@@ -101,8 +101,8 @@ onAuthStateChanged(auth, async user => {
   if (role === 'admin') {
     show('linkAdmin');
     show('linkNews');
+    show('linkTeacher');
   } else if (role === 'supervisor') {
-    // المشرفة توديها لصفحتها المخصصة، مش لوحة الأدمن
     const linkAdminEl = document.getElementById('linkAdmin');
     if (linkAdminEl) {
       linkAdminEl.href = 'supervisor.html';
@@ -110,15 +110,18 @@ onAuthStateChanged(auth, async user => {
     }
     show('linkAdmin');
     show('linkNews');
+    show('linkTeacher');
   } else if (role === 'teacher') {
+    show('linkNews');
     show('linkTeacher');
   } else if (role === 'mateen') {
     show('linkCerts');
     show('linkAwards');
     show('linkGrades');
     show('linkSchedule');
+    show('linkNews');
   }
-  // student: مش بيظهرله روابط إضافية
+  // student: الرئيسية ورسائلي بس
 
   // ── أيقونة البروفايل وملفي الشخصي — بنات متين فقط ──────
   const profileLink   = document.getElementById('profileLink');
