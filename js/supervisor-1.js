@@ -72,7 +72,8 @@ function renderAll(list) {
   </table></div>`;
 }
 
-window.approveUser = async id => { await updateDoc(doc(db,'users',id),{status:'active'}); showToast('✓ تم قبول الحساب'); };
+const ALL_SUBJECTS = ['التفسير', 'الفقه', 'العقيدة', 'الحديث', 'القرآن الكريم'];
+window.approveUser = async id => { await updateDoc(doc(db,'users',id),{status:'active', enrolledSubjects: ALL_SUBJECTS}); showToast('✓ تم قبول الحساب والتحاقها بكل المواد'); };
 window.rejectUser  = async id => { if(!confirm('رفض الحساب وحذفه؟')) return; await fullDeleteUser(id); showToast('تم الرفض'); };
 window.suspendUser = async (id,cur) => {
   const ns = cur==='suspended' ? 'active' : 'suspended';
