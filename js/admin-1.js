@@ -4,9 +4,8 @@ import { initializeApp, getApps, getApp }
 import { getAuth, onAuthStateChanged, signOut }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
 import { getFirestore, collection, addDoc, deleteDoc, doc,
-         onSnapshot, query, orderBy, getDoc, updateDoc, getDocs }
+         onSnapshot, query, orderBy, where, getDoc, updateDoc, getDocs }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
-import { fullDeleteUser } from "./delete-account.js";
 import { FIREBASE_CONFIG } from "./config.js";
 import { exportWord, exportPdf } from "./export.js";
 
@@ -829,8 +828,39 @@ window.deleteUserAccount = async (id, name) => {
   const label = name || 'هذا المستخدم';
   if (!confirm(`هل أنتِ متأكدة من حذف حساب "${label}" نهائياً؟\nلا يمكن التراجع عن هذا الإجراء.`)) return;
   if (!confirm(`تأكيد أخير: سيُحذف حساب "${label}" بشكل دائم.`)) return;
-  await fullDeleteUser(id);
-  showToast('تم حذف الحساب نهائياً');
+
+  try {
+    showToast('جاري الحذف...');
+
+    // مسح students + subcollections
+    const studentRef  = doc(db, 'students', id);
+    const studentSnap = await getDoc(studentRef);
+    if (studentSnap.exists()) {
+      for (const sub of ['sessions', 'grades']) {
+        const snap = await getDocs(collection(db, 'students', id, sub));
+        await Promise.all(snap.docs.map(d => deleteDoc(d.ref)));
+      }
+      await deleteDoc(studentRef);
+    }
+
+    // مسح conversations + messages
+    const convSnap = await getDocs(
+      query(collection(db, 'conversations'), where('participants', 'array-contains', id))
+    );
+    await Promise.all(convSnap.docs.map(async convDoc => {
+      const msgs = await getDocs(collection(db, 'conversations', convDoc.id, 'messages'));
+      await Promise.all(msgs.docs.map(m => deleteDoc(m.ref)));
+      await deleteDoc(convDoc.ref);
+    }));
+
+    // مسح users/{id} — الـ Cloud Function هتمسح Auth تلقائياً
+    await deleteDoc(doc(db, 'users', id));
+
+    showToast(`✅ تم حذف حساب "${label}" نهائياً`);
+  } catch(e) {
+    console.error('خطأ في حذف الحساب:', e);
+    showToast('❌ حدث خطأ: ' + (e.message || e), true);
+  }
 };
 
 
