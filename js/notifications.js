@@ -4,7 +4,7 @@
 import { initializeApp, getApps, getApp }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
 import { getFirestore, collection, query, where, orderBy,
-         onSnapshot, doc, updateDoc, addDoc, serverTimestamp, deleteDoc, getDocs, where }
+         onSnapshot, doc, updateDoc, addDoc, serverTimestamp, deleteDoc, getDocs }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 import { getAuth, onAuthStateChanged }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
