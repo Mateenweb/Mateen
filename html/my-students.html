@@ -243,19 +243,23 @@ onAuthStateChanged(auth, async user => {
   try {
     let q;
     if (role === 'teacher' && subject) {
-      // المعلمة: طالبات مسجلات في مادتها
-      q = query(
-        collection(db, 'users'),
-        where('role', '==', 'mateen'),
-        where('enrolledSubjects', 'array-contains', subject)
-      );
+      // المعلمة: جيب كل mateen وافلتر على الكلاينت (بدون compound index)
+      q = query(collection(db, 'users'), where('role', '==', 'mateen'));
     } else {
       // الأدمن/المشرفة: كل بنات متين
       q = query(collection(db, 'users'), where('role', '==', 'mateen'));
     }
 
     const snap = await getDocs(q);
-    allStudents = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    // فلترة إضافية على الكلاينت عشان نتجنب مشكلة الـ compound index
+    let allDocs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    if (role === 'teacher' && subject) {
+      allDocs = allDocs.filter(s =>
+        Array.isArray(s.enrolledSubjects) && s.enrolledSubjects.includes(subject)
+      );
+    }
+    allStudents = allDocs;
+    console.log('[طالباتي] role:', role, '| subject:', subject, '| total mateen:', snap.docs.length, '| filtered:', allStudents.length);
 
     document.getElementById('loadingState').style.display  = 'none';
     document.getElementById('studentsGrid').style.display  = 'grid';
