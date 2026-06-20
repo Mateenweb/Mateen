@@ -387,20 +387,18 @@ body {
 
 /* السايدبار overlay على كل الشاشات — بيتفتح فوق المحتوى لا بجانبه */
 /* (لا يوجد sticky desktop sidebar — المحتوى يملأ العرض كامل دايماً) */
-
-/* الـ sidebar دايماً position:fixed خارج الـ layout flow */
-.page-layout > aside {
-  position: fixed !important;
-  top: 0;
-  left: 0;
-  width: 0 !important;
-  overflow: hidden;
-  z-index: 1045;
-}
+/* Bootstrap offcanvas بيتحكم في الـ position/transform بنفسه —
+   لا نضع width:0 أو position:fixed يدوياً هنا لأن هذا كان يمنع
+   الـ offcanvas من الظهور أصلاً حتى لو فُتح بـ data-bs-toggle */
 
 /* لو guest — أخفي الـ sidebar خالص في كل الأحجام */
 .page-layout.guest-layout > aside {
   display: none !important;
+}
+
+/* عرض السايدبار — كل الشاشات (Bootstrap الافتراضي 400px عريض جداً) */
+#mainSidebar {
+  width: 300px;
 }
 
 /* Mobile offcanvas — يملأ الـ panel كاملاً */
@@ -1215,3 +1213,4 @@ footer {
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
+
