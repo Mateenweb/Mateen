@@ -372,7 +372,7 @@ body {
 
 /* ===== PAGE LAYOUT ===== */
 .page-layout {
-  display: flex;
+  display: block;
   min-height: calc(100vh - 84px);
 }
 
@@ -590,8 +590,7 @@ body {
 /* ===== CONTENT AREA ===== */
 .content-area {
   width: 100%;
-  min-width: 0;
-  overflow: hidden;
+  display: block;
 }
 
 /* ===== HERO ===== */
