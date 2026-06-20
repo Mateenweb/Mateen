@@ -601,18 +601,18 @@ body {
 /* ===== HERO ===== */
 .hero {
   display: flex;
-  width: 100%;          /* مهم — من غيرها الهيرو ممكن ميملاش عرض content-area كامل */
+  width: 100%;
   align-items: center;
   justify-content: flex-end;
-  aspect-ratio: 16 / 9;
+  aspect-ratio: 16 / 9;     /* قريبة جداً من أبعاد الصورة الأصلية (1376×768) — قص شبه معدوم */
   min-height: 320px;
-  max-height: 560px;
+  max-height: 700px;        /* رفعتها من 560 لـ 700 عشان القص يقل على الشاشات العريضة */
   overflow: hidden;
 }
 
-/* الصورة نفسها — Bootstrap object-fit-cover يغطي الكامل */
+/* الصورة نفسها — الفانوس والقوس على الشمال، فخليها هي اللي تتحفظ لو حصل قص */
 .hero-bg-img {
-  object-position: center center;
+  object-position: 30% center;
   object-fit: cover;
 }
 
