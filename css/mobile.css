@@ -232,18 +232,30 @@ html { overflow-x: hidden; }
    ════════════════════════════════════════ */
 @media (max-width: 768px) {
   .hero {
-    padding: 28px var(--mob-pad) !important;
+    height: 100vw !important;
+    max-height: 500px !important;
+    min-height: 320px !important;
+    padding: 0 !important;
     flex-direction: column !important;
-    align-items: center !important;
-    text-align: center !important;
-    aspect-ratio: auto !important;   /* النص بيتكدّس رأسياً على الموبايل — محتاج ارتفاع حر مش 16/9 ثابت */
-    height: auto !important;
-    min-height: unset !important;
-    max-height: none !important;
-    gap: 0 !important;
+    align-items: flex-end !important;
+    justify-content: center !important;
+    text-align: right !important;
   }
-  /* المحتوى فوق الصورة مباشرة على الموبايل عشان مايتقصش */
-  .hero-text { position: relative !important; z-index: 2 !important; padding-top: 28px !important; }
+  /* الصورة تفضل absolute وتغطي كل الهيرو */
+  .hero-bg-img {
+    object-position: 20% center !important;
+  }
+  /* النص absolute على اليمين والوسط */
+  .hero-text {
+    position: absolute !important;
+    z-index: 2 !important;
+    top: 50% !important;
+    right: 0 !important;
+    transform: translateY(-50%) !important;
+    max-width: 55% !important;
+    padding: 12px 16px !important;
+    text-align: right !important;
+  }
   .hero-img           { display: none !important; }
   .hero-logo-mobile   { display: block !important; width: 76px !important; height: 76px !important; margin: 0 auto 14px !important; }
   .hero-text          { max-width: 100% !important; }
