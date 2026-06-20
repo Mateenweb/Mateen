@@ -4,7 +4,7 @@
 import { initializeApp, getApps, getApp }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
 import { getFirestore, collection, query, where, orderBy,
-         onSnapshot, doc, updateDoc, addDoc, serverTimestamp, deleteDoc, getDocs }
+         onSnapshot, doc, updateDoc, addDoc, serverTimestamp, deleteDoc, getDocs, where }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 import { getAuth, onAuthStateChanged }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
@@ -289,8 +289,42 @@ async function showMissedNotifications(userId) {
   }
 }
 
+// ── إشعارات الأدمن: حسابات جديدة بانتظار الموافقة ──────────────────────
+function listenAdminNotifications(userId) {
+  const q = query(
+    collection(db, 'userNotifications', userId, 'items'),
+    where('read', '==', false),
+    orderBy('createdAt', 'asc')
+  );
+  onSnapshot(q, snap => {
+    snap.docChanges().forEach(change => {
+      if (change.type !== 'added') return;
+      const n = change.doc.data();
+      showNotifToast(n.title || 'إشعار جديد', n.body || '', n.url || '');
+      playSound();
+      // ضع علامة مقروء
+      change.doc.ref.update({ read: true }).catch(() => {});
+    });
+  });
+}
+
 // ── export للاستخدام الخارجي لو محتاج ───────────────────────────────────
-export function initNotifications() {}
+export async function initNotifications(userId) {
+  if (!userId) return;
+  // افحص role المستخدم
+  try {
+    const snap = await getDocs(query(collection(db, 'users')));
+    // نجيب role من Firestore
+  } catch(e) {}
+}
+
+export async function initAdminNotifications(userId, role) {
+  if (!userId) return;
+  if (role === 'admin' || role === 'supervisor') {
+    listenAdminNotifications(userId);
+  }
+}
+
 export { showNotifToast as showToast };
 
 

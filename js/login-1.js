@@ -5,7 +5,7 @@ import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail,
          onAuthStateChanged, deleteUser }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
 import { getFirestore, doc, getDoc, setDoc, addDoc, serverTimestamp,
-         collection, getDocs, query, orderBy, deleteDoc }
+         collection, getDocs, query, orderBy, where, deleteDoc }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 import { FIREBASE_CONFIG } from "./config.js";
 
@@ -262,6 +262,28 @@ window.doRegister = async () => {
       status:    cfg.status,
       createdAt: serverTimestamp(),
     });
+
+    /* إرسال إشعار لكل الأدمن والمشرفات لو الحساب محتاج موافقة */
+    if (cfg.needsApproval) {
+      try {
+        const roleLabelsNotif = { mateen:'بنت متين', teacher:'معلمة', supervisor:'مشرفة' };
+        const adminSnap = await getDocs(query(
+          collection(db, 'users'),
+          where('role', 'in', ['admin', 'supervisor'])
+        ));
+        const notifPromises = adminSnap.docs.map(adminDoc =>
+          addDoc(collection(db, 'userNotifications', adminDoc.id, 'items'), {
+            type:      'new_account',
+            title:     '📋 طلب حساب جديد',
+            body:      `${name} تطلب انضمامها كـ ${roleLabelsNotif[regRole] || regRole} — بانتظار موافقتك`,
+            url:       'admin.html',
+            read:      false,
+            createdAt: serverTimestamp(),
+          })
+        );
+        await Promise.all(notifPromises);
+      } catch(e) { console.warn('إشعار الأدمن فشل:', e); }
+    }
 
     /* ملحوظة: الالتحاق بالمواد لبنات متين بيحصل أوتوماتيك
        لما المشرفة توافق على الحساب وتربطها بسجل الطالبة (admin-1.js) */
