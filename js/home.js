@@ -87,6 +87,16 @@ onAuthStateChanged(auth, async user => {
 
   // ── إظهار الـ links حسب الـ role ──────────────────────────
   function show(id) { const el = document.getElementById(id); if(el) el.classList.remove('d-none'); }
+  function hide(id)  { const el = document.getElementById(id); if(el) el.classList.add('d-none'); }
+
+  // روابط خاصة ببنات متين بس — إخفاء إجباري لأي دور تاني (إجراء احترازي)
+  if (role !== 'mateen') {
+    hide('profileLink');
+    hide('linkCerts');
+    hide('linkAwards');
+    hide('linkGrades');
+    hide('linkSchedule');
+  }
 
   if (role === 'admin') {
     show('linkAdmin');
