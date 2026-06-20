@@ -236,9 +236,14 @@ html { overflow-x: hidden; }
     flex-direction: column !important;
     align-items: center !important;
     text-align: center !important;
+    aspect-ratio: auto !important;   /* النص بيتكدّس رأسياً على الموبايل — محتاج ارتفاع حر مش 16/9 ثابت */
+    height: auto !important;
     min-height: unset !important;
+    max-height: none !important;
     gap: 0 !important;
   }
+  /* المحتوى فوق الصورة مباشرة على الموبايل عشان مايتقصش */
+  .hero-text { position: relative !important; z-index: 2 !important; padding-top: 28px !important; }
   .hero-img           { display: none !important; }
   .hero-logo-mobile   { display: block !important; width: 76px !important; height: 76px !important; margin: 0 auto 14px !important; }
   .hero-text          { max-width: 100% !important; }
