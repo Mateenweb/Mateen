@@ -598,7 +598,8 @@ body {
   justify-content: flex-end;
   aspect-ratio: 16 / 9;
   min-height: 320px;
-  max-height: 640px;
+  max-height: 560px;   /* يمنع الهيرو من إنه يبقى طويل جداً على الشاشات العريضة */
+  overflow: hidden;
 }
 
 /* الصورة نفسها — Bootstrap object-fit-cover يغطي الكامل */
@@ -610,11 +611,12 @@ body {
 /* طبقة التعتيم بدل ::before */
 .hero-overlay {
   z-index: 1;
+  /* النص على اليمين، فلازم التعتيم يبدأ خفيف من الشمال (تبان الصورة) ويزيد لليمين (خلف النص) */
   background: linear-gradient(
-    to left,
+    to right,
     rgba(247,239,227,0.0)  0%,
-    rgba(247,239,227,0.0) 40%,
-    rgba(247,239,227,0.6) 65%,
+    rgba(247,239,227,0.0) 35%,
+    rgba(247,239,227,0.6) 60%,
     rgba(247,239,227,0.92) 100%
   );
 }
