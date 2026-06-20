@@ -618,15 +618,17 @@ body {
   align-items: center;
   justify-content: flex-end;
   background: var(--beige, #f7efe3);
-  height: clamp(320px, 48vw, 560px);
+  /* نفس نسبة أبعاد الصورة الأصلية 1376×768 */
+  aspect-ratio: 1376 / 768;
+  max-height: 620px;
   overflow: hidden;
   position: relative;
 }
 
-/* الصورة تغطي الكامل بدون تمدد */
+/* الصورة تملأ بدون قص ولا تمدد */
 .hero-bg-img {
+  object-fit: contain;
   object-position: center center;
-  object-fit: cover;
 }
 
 /* طبقة التعتيم بدل ::before */
@@ -1140,24 +1142,24 @@ footer {
   .content-area { width: 100% !important; }
   .col-xl-2dot4 { width: 33.333%; }
   footer { padding: 14px 20px; }
-  .hero { height: clamp(300px, 44vw, 480px); }
   .hero-text { max-width: 420px; }
 }
 
 /* Laptop (768px — 1440px) */
 @media (min-width: 768px) and (max-width: 1440px) {
-  .hero { height: clamp(340px, 42vw, 520px); }
+  .hero { max-height: 520px; }
 }
 
 /* Large screens (> 1440px) */
 @media (min-width: 1441px) {
-  .hero { height: 560px; }
+  .hero { max-height: 620px; }
 }
 
 /* Mobile (≤ 767px) */
 @media (max-width: 767px) {
   .hero {
-    height: clamp(260px, 70vw, 380px);
+    aspect-ratio: 4 / 3;
+    max-height: 380px;
     justify-content: center;
     text-align: center;
   }
