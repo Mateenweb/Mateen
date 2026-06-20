@@ -295,6 +295,8 @@ body { background: var(--beige); min-height: 100vh; display: flex; flex-directio
   cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all .2s;
 }
 .btn-add-row:hover { border-color: var(--green-mid); color: var(--green-dark); }
+.btn-export-stats { text-decoration: none; border-color: #6b2737; color: #6b2737; }
+.btn-export-stats:hover { background: #f8d7da; border-color: #6b2737; color: #6b2737; }
 
 .sort-alpha-btn {
   background: var(--beige); border: 1.5px solid var(--border); color: var(--text-mid);
