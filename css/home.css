@@ -1140,16 +1140,24 @@ footer {
   .content-area { width: 100% !important; }
   .col-xl-2dot4 { width: 33.333%; }
   footer { padding: 14px 20px; }
-  .hero { min-height: 360px; }
+  .hero { height: clamp(300px, 44vw, 480px); }
   .hero-text { max-width: 420px; }
+}
+
+/* Laptop (768px — 1440px) */
+@media (min-width: 768px) and (max-width: 1440px) {
+  .hero { height: clamp(340px, 42vw, 520px); }
+}
+
+/* Large screens (> 1440px) */
+@media (min-width: 1441px) {
+  .hero { height: 560px; }
 }
 
 /* Mobile (≤ 767px) */
 @media (max-width: 767px) {
   .hero {
-    aspect-ratio: auto;
-    min-height: unset;
-    max-height: unset;
+    height: clamp(260px, 70vw, 380px);
     justify-content: center;
     text-align: center;
   }
