@@ -594,11 +594,12 @@ body {
 /* ===== HERO ===== */
 .hero {
   display: flex;
+  width: 100%;          /* مهم — من غيرها الهيرو ممكن ميملاش عرض content-area كامل */
   align-items: center;
   justify-content: flex-end;
   aspect-ratio: 16 / 9;
   min-height: 320px;
-  max-height: 560px;   /* يمنع الهيرو من إنه يبقى طويل جداً على الشاشات العريضة */
+  max-height: 560px;
   overflow: hidden;
 }
 
