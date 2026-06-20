@@ -3,9 +3,11 @@
 //  بيبعت إشعار FCM لما تيجي رسالة جديدة
 // =========================================================
 const { onDocumentCreated } = require("firebase-functions/v2/firestore");
+const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const { initializeApp }     = require("firebase-admin/app");
 const { getFirestore }      = require("firebase-admin/firestore");
 const { getMessaging }      = require("firebase-admin/messaging");
+const { getAuth }           = require("firebase-admin/auth");
 
 initializeApp();
 const db = getFirestore();
@@ -85,3 +87,39 @@ exports.sendMessageNotification = onDocumentCreated(
     }
   }
 );
+
+// =========================================================
+//  deleteAuthUser — يحذف حساب Firebase Authentication نهائياً
+//  بيتنادى من delete-account.js بعد ما تتمسح بيانات Firestore
+// =========================================================
+exports.deleteAuthUser = onCall(async (request) => {
+  const callerUid = request.auth?.uid;
+  if (!callerUid) {
+    throw new HttpsError("unauthenticated", "يجب تسجيل الدخول لتنفيذ هذا الإجراء");
+  }
+
+  const targetUid = request.data?.uid;
+  if (!targetUid) {
+    throw new HttpsError("invalid-argument", "uid مفقود");
+  }
+
+  // اسمحي فقط: المستخدمة تحذف حسابها هي، أو الإدارة تحذف أي حساب
+  if (callerUid !== targetUid) {
+    const callerSnap = await db.doc(`users/${callerUid}`).get();
+    const callerRole = callerSnap.exists ? callerSnap.data().role : null;
+    if (callerRole !== "admin" && callerRole !== "supervisor") {
+      throw new HttpsError("permission-denied", "ليس لديك صلاحية حذف هذا الحساب");
+    }
+  }
+
+  try {
+    await getAuth().deleteUser(targetUid);
+    return { success: true };
+  } catch (e) {
+    // لو الحساب أصلاً مش موجود في Auth (اتمسح قبل كده) — اعتبريها نجحت
+    if (e.code === "auth/user-not-found") {
+      return { success: true, note: "already-deleted" };
+    }
+    throw new HttpsError("internal", "فشل حذف حساب Authentication: " + e.message);
+  }
+});
