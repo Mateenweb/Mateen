@@ -105,6 +105,30 @@
 
     <!-- Tab: حضوري -->
     <div class="stu-panel" id="tab-attend">
+      <!-- نموذج تسجيل حضور جديد — يظهر للمشرفة فقط -->
+      <div id="newSessionWrap" style="display:none; margin-bottom:16px;">
+        <button class="btn-solid" id="newSessionBtn" type="button" style="margin-bottom:10px">
+          <i class="ti ti-plus"></i> تسجيل حضور جلسة جديدة
+        </button>
+        <div id="newSessionForm" style="display:none; border:1px solid var(--border); border-radius:12px; padding:14px; background:var(--white);">
+          <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px;">
+            <div>
+              <label style="font-size:12px; color:var(--text-mid)">التاريخ</label><br/>
+              <input type="date" id="sessDate" style="padding:6px 10px; border:1px solid var(--border); border-radius:8px;"/>
+            </div>
+            <div>
+              <label style="font-size:12px; color:var(--text-mid)">اليوم</label><br/>
+              <input type="text" id="sessDay" placeholder="مثال: الثلاثاء" style="padding:6px 10px; border:1px solid var(--border); border-radius:8px;"/>
+            </div>
+          </div>
+          <div id="sessSubjects" style="display:flex; flex-direction:column; gap:8px; margin-bottom:12px;"></div>
+          <div style="display:flex; gap:8px;">
+            <button class="btn-solid" id="saveSessionBtn" type="button"><i class="ti ti-check"></i> حفظ الحضور</button>
+            <button class="btn-outline" id="cancelSessionBtn" type="button">إلغاء</button>
+          </div>
+        </div>
+      </div>
+
       <div id="attendanceList" class="stu-list">
         <div class="stu-empty"><i class="ti ti-calendar-off"></i><span>لا توجد جلسات مسجلة بعد</span></div>
       </div>
@@ -120,8 +144,18 @@
     <!-- Tab: ملاحظات -->
     <div class="stu-panel" id="tab-notes">
       <div class="notes-wrap">
-        <div class="notes-label"><i class="ti ti-notes"></i> ملاحظات المعلمة</div>
+        <div class="notes-label"><i class="ti ti-notes"></i> الملاحظات</div>
         <div class="notes-content" id="notesContent">لا توجد ملاحظات بعد.</div>
+
+        <!-- تعديل الملاحظات — يظهر للمشرفة فقط -->
+        <div id="notesEditWrap" style="display:none; margin-top:12px;">
+          <textarea id="notesTextarea" rows="5"
+            style="width:100%; padding:10px; border:1px solid var(--border); border-radius:10px; font-family:inherit; resize:vertical;"
+            placeholder="اكتبي ملاحظاتك عن الطالبة هنا..."></textarea>
+          <button class="btn-solid" id="saveNotesBtn" type="button" style="margin-top:10px">
+            <i class="ti ti-check"></i> حفظ الملاحظات
+          </button>
+        </div>
       </div>
     </div>
   </div>
