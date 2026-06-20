@@ -316,7 +316,7 @@ window.selectLinkStudent = id => {
 };
 
 // كل المواد العلمية — تتسجل فيها بنت متين أوتوماتيك بعد القبول
-const ALL_SUBJECTS = ['التفسير', 'الفقه', 'العقيدة', 'الحديث', 'القرآن الكريم'];
+const ALL_SUBJECTS = ['التفسير', 'الفقه', 'العقيدة', 'الحديث', 'مقرأة متين'];
 
 window.confirmLinkModal = async (studentId) => {
   if (!_pendingApproveId) return;

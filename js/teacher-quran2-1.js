@@ -10,7 +10,7 @@ const db  = getFirestore(app);
 const auth = getAuth(app);
 
 const TEACHER_ID = "quran2";
-const SUBJECT_AR = "القرآن الكريم";
+const SUBJECT_AR = "مقرأة متين";
 
 // جلب اسم المعلمة من users collection
 async function loadTeacherName() {

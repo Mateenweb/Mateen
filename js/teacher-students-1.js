@@ -13,8 +13,8 @@ const db   = getFirestore(app);
 
 // كود المادة (من حساب المعلمة) → اسم المادة العربي (المستخدم في enrolledSubjects)
 const SUBJ_LABELS = {
-  quran1: 'القرآن الكريم',
-  quran2: 'القرآن الكريم',
+  quran1: 'مقرأة متين',
+  quran2: 'مقرأة متين',
   hadeeth: 'الحديث',
   fiqh: 'الفقه',
   aqeedah: 'العقيدة',

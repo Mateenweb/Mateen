@@ -13,7 +13,7 @@ const db   = getFirestore(app);
 let allMats = [];
 let currentUserRole = null;
 let currentUserSubjects = [];
-const MAIN_SUBJECTS = ['التفسير', 'الفقه', 'العقيدة', 'الحديث', 'القرآن الكريم'];
+const MAIN_SUBJECTS = ['التفسير', 'الفقه', 'العقيدة', 'الحديث', 'مقرأة متين'];
 
 const TYPE_ICONS = {
   محاضرة: '🎙️', ملخص: '📄', واجب: '📝', اختبار: '✅',
@@ -88,7 +88,7 @@ function renderMats(mats) {
 function renderModalMats() {
   const modalMap = {
     'التفسير': 'tafseer', 'الفقه': 'fiqh', 'العقيدة': 'aqeedah',
-    'الحديث': 'hadith', 'القرآن الكريم': 'quran'
+    'الحديث': 'hadith', 'مقرأة متين': 'quran'
   };
   Object.entries(modalMap).forEach(([subj, modalId]) => {
     const el = document.getElementById('modal-mats-' + modalId);
@@ -227,7 +227,7 @@ onAuthStateChanged(auth, async user => {
 
 const SUBJ_MODAL_IDS = {
   'التفسير': 'tafseer', 'الفقه': 'fiqh', 'العقيدة': 'aqeedah',
-  'الحديث': 'hadith', 'القرآن الكريم': 'quran'
+  'الحديث': 'hadith', 'مقرأة متين': 'quran'
 };
 
 function updateEnrollButtons() {
