@@ -73,6 +73,17 @@ onAuthStateChanged(auth, async user => {
 
   // ── إظهار الـ links حسب الـ role ──────────────────────────
   function show(id) { const el = document.getElementById(id); if(el) el.classList.remove('d-none'); }
+  function hide(id)  { const el = document.getElementById(id); if(el) el.classList.add('d-none'); }
+
+  // روابط خاصة ببنات متين بس — اتأكد إنها مخفية تماماً لأي دور تاني
+  // (إجراء احترازي حتى لو حصل تعارض من مكان تاني في الكود)
+  if (role !== 'mateen') {
+    hide('profileLink');
+    hide('linkCerts');
+    hide('linkAwards');
+    hide('linkGrades');
+    hide('linkSchedule');
+  }
 
   if (role === 'admin') {
     show('linkAdmin');
