@@ -399,6 +399,17 @@ body {
 /* عرض السايدبار — كل الشاشات (Bootstrap الافتراضي 400px عريض جداً) */
 #mainSidebar {
   width: 300px;
+  /* ترتيب رأسي ثابت على كل الأحجام — مش محصور على الموبايل بس،
+     عشان مينفعش يحصل تزاحم لو الشاشة بين 991px و الديسكتوب الكامل */
+  display: flex !important;
+  flex-direction: column !important;
+  height: 100% !important;
+}
+#mainSidebar .sidebar-nav {
+  overflow-y: auto;
+}
+#mainSidebar .sidebar-footer {
+  flex-shrink: 0;
 }
 
 /* Mobile offcanvas — يملأ الـ panel كاملاً */
