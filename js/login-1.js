@@ -23,6 +23,9 @@ onAuthStateChanged(auth, async user => {
   try {
     const snap = await getDoc(doc(db, 'users', user.uid));
     const data = snap.exists() ? snap.data() : {};
+    const status = data.status || 'active';
+    // لو الحساب معلق — لا تعمل redirect (بيتم signOut تلقائي في doRegister)
+    if (status === 'pending') return;
     const role = data.role || 'student';
     let redirect = 'home.html';
 
