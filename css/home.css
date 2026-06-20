@@ -656,13 +656,13 @@ body {
   margin-bottom: 16px;
 }
 .hero-logos .hero-logo-desktop {
-  width: 130px; height: 130px;
+  width: 64px; height: 64px;
   border-radius: 50%;
   object-fit: cover;
-  border: 3px solid var(--gold);
+  border: 2px solid var(--gold);
   background: #1a4a2e;
   flex-shrink: 0;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.18);
 }
 
 .hero-ornament {
