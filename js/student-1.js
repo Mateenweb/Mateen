@@ -4,7 +4,7 @@
 import { initializeApp, getApps, getApp }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
 import { getFirestore, doc, getDoc, collection, query,
-         orderBy, onSnapshot }
+         orderBy, onSnapshot, addDoc, updateDoc, serverTimestamp }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 import { getAuth, onAuthStateChanged, signOut,
          EmailAuthProvider, reauthenticateWithCredential, deleteUser }
@@ -51,7 +51,7 @@ onAuthStateChanged(auth, async user => {
       document.getElementById('studentEmail').textContent = user.email || '';
       return;
     }
-  } else if (role === 'admin' || role === 'teacher') {
+  } else if (role === 'admin' || role === 'teacher' || role === 'supervisor') {
     if (!studentId) { window.location.href = '../html/home.html'; return; }
   } else {
     window.location.href = '../html/login.html'; return;
