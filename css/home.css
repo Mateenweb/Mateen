@@ -617,12 +617,15 @@ body {
   width: 100%;
   align-items: center;
   justify-content: flex-end;
-  /* الصورة كـ background — بتحافظ على نسبها بدون قص */
-  background: url('../hero-bg.png') center center / contain no-repeat;
   background-color: var(--beige, #f7efe3);
-  aspect-ratio: 1376 / 768;
-  max-height: 620px;
   position: relative;
+}
+
+/* الصورة عرضها 100% والارتفاع تلقائي — بتحافظ على نسبها */
+.hero-bg-img {
+  width: 100%;
+  height: auto;
+  display: block;
 }
 
 /* طبقة التعتيم بدل ::before */
@@ -638,13 +641,14 @@ body {
   );
 }
 .hero-text {
-  position: relative;
+  position: absolute;
   z-index: 2;
+  top: 50%;
+  right: 0;
+  transform: translateY(-50%);
   max-width: 500px;
   padding: clamp(24px, 4vw, 60px) clamp(20px, 5vw, 70px);
   text-align: right;
-  margin-right: 0;
-  margin-left: auto;
 }
 .hero-logo-mobile {
   width: 56px; height: 56px;
@@ -1151,11 +1155,14 @@ footer {
 
 /* Mobile (≤ 767px) */
 @media (max-width: 767px) {
-  .hero {
-    aspect-ratio: 4 / 3;
-    max-height: 380px;
-    justify-content: center;
+  .hero { justify-content: center; }
+  .hero-text {
+    right: auto;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    max-width: 90%;
     text-align: center;
+    padding: 20px;
   }
   .hero-overlay { background: rgba(247,239,227,0.78); }
   .hero-text {
