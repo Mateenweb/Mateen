@@ -25,6 +25,8 @@ onAuthStateChanged(auth, async user => {
     guest.style.display = 'block';
     userDiv.classList.add('sidebar-user-hidden');
     if (layout) layout.classList.add('guest-layout');
+    const heroBtnsGuest = document.getElementById('heroBtns');
+    if (heroBtnsGuest) { heroBtnsGuest.classList.remove('d-none'); heroBtnsGuest.classList.add('d-flex'); }
     return;
   }
 
