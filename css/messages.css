@@ -730,3 +730,49 @@
   color: #aaa !important;
   font-style: italic;
 }
+
+/* ── Media Buttons (صوت وصورة) ── */
+.msg-media-btn {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border);
+  background: var(--beige);
+  color: var(--green-dark);
+  cursor: pointer;
+  font-size: 15px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  transition: 0.2s;
+}
+.msg-media-btn:hover { background: var(--beige2); border-color: var(--green-mid); }
+.msg-media-btn.recording {
+  background: #fdecea;
+  border-color: #c0392b;
+  color: #c0392b;
+  animation: pulse-rec 1s infinite;
+}
+@keyframes pulse-rec {
+  0%,100% { transform: scale(1); }
+  50%      { transform: scale(1.1); }
+}
+@keyframes blink {
+  0%,100% { opacity: 1; }
+  50%      { opacity: 0; }
+}
+
+/* فقاعة الصورة */
+.msg-bubble img.msg-img {
+  max-width: 220px;
+  max-height: 260px;
+  border-radius: 12px;
+  display: block;
+  cursor: pointer;
+  object-fit: cover;
+}
+
+/* فقاعة الصوت */
+.msg-bubble audio {
+  max-width: 200px;
+  height: 36px;
+  display: block;
+}

@@ -1,10 +1,12 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
 import { getFirestore, collection, doc, getDoc, getDocs, addDoc, deleteDoc, query, where, orderBy, onSnapshot, serverTimestamp, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-storage.js";
 import { FIREBASE_CONFIG } from "./config.js";
 
 const app  = initializeApp(FIREBASE_CONFIG);
-const db   = getFirestore(app);
+const db      = getFirestore(app);
+const storage = getStorage(app);
 const auth = getAuth(app);
 
 const ROLE_LABELS = {
@@ -331,7 +333,11 @@ window.openConv = async (cid, otherId, otherName, otherRole) => {
             <div class="msg-bubble-outer">
               ${mine ? `<button class="msg-delete-btn ${seen ? 'seen' : ''}" title="${seen ? 'لا يمكن الحذف — تمت القراءة' : 'حذف الرسالة'}" onclick="deleteMsg('${activeConvId}','${m.id}',${seen})"><i class="ti ti-trash"></i></button>` : ''}
               <div class="msg-bubble ${mine ? 'mine' : 'theirs'}" title="${fullTime}">
-                <span class="msg-text">${escapeHtml(m.text)}</span>
+                ${m.type === 'image'
+  ? `<img class="msg-img" src="${m.url}" alt="صورة" onclick="window.open('${m.url}','_blank')">`
+  : m.type === 'audio'
+  ? `<audio controls src="${m.url}"></audio>`
+  : `<span class="msg-text">${escapeHtml(m.text || '')}</span>`}
                 <span class="msg-time">${time}${mine ? ` <i class="ti ti-${seen ? 'checks' : 'check'}" style="color:${seen ? '#4fc3f7' : '#aaa'}"></i>` : ''}</span>
               </div>
             </div>
@@ -505,3 +511,114 @@ window.deleteConv = async (cid) => {
   }
 };
 
+
+// ── رفع ملف لـ Firebase Storage ─────────────────────────────────────────
+async function uploadMedia(blob, path) {
+  const storageRef = ref(storage, path);
+  await uploadBytes(storageRef, blob);
+  return await getDownloadURL(storageRef);
+}
+
+// ── إرسال صورة ───────────────────────────────────────────────────────────
+window.sendImage = async (input) => {
+  const file = input.files[0];
+  if (!file || !activeConvId) return;
+  input.value = '';
+
+  const ext  = file.name.split('.').pop();
+  const path = `messages/${activeConvId}/${Date.now()}.${ext}`;
+  const url  = await uploadMedia(file, path);
+
+  const otherId = allConvs.find(c => c.id === activeConvId)?.otherId;
+  await addDoc(collection(db, 'conversations', activeConvId, 'messages'), {
+    type: 'image', url, text: '📷 صورة',
+    senderId: currentUser.uid,
+    senderName: currentUserData?.name || currentUser.email || '',
+    senderRole: currentUserData?.role || '',
+    sentAt: serverTimestamp(),
+  });
+  const convSnap = await getDoc(doc(db, 'conversations', activeConvId));
+  const currentUnread = convSnap.exists() ? (convSnap.data().unread?.[otherId] || 0) : 0;
+  await setDoc(doc(db, 'conversations', activeConvId), {
+    participants: [currentUser.uid, otherId].filter(Boolean),
+    lastMsg: '📷 صورة', lastAt: serverTimestamp(), lastSenderId: currentUser.uid,
+    [`unread.${otherId}`]: currentUnread + 1,
+    [`unread.${currentUser.uid}`]: 0,
+    [`hiddenBy.${otherId}`]: false,
+  }, { merge: true });
+};
+
+// ── تسجيل صوتي ───────────────────────────────────────────────────────────
+let mediaRecorder = null;
+let audioChunks   = [];
+let recordInterval = null;
+let recordSeconds  = 0;
+
+window.toggleRecording = async () => {
+  const btn = document.getElementById('recordBtn');
+  const indicator = document.getElementById('recordingIndicator');
+  const timerEl   = document.getElementById('recordTimer');
+
+  if (mediaRecorder && mediaRecorder.state === 'recording') {
+    // إيقاف التسجيل
+    mediaRecorder.stop();
+    btn.classList.remove('recording');
+    btn.innerHTML = '<i class="ti ti-microphone"></i>';
+    indicator.style.display = 'none';
+    clearInterval(recordInterval);
+    recordSeconds = 0;
+    return;
+  }
+
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    audioChunks = [];
+    mediaRecorder = new MediaRecorder(stream);
+
+    mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+    mediaRecorder.onstop = async () => {
+      stream.getTracks().forEach(t => t.stop());
+      if (!activeConvId || audioChunks.length === 0) return;
+
+      const blob = new Blob(audioChunks, { type: 'audio/webm' });
+      const path = `messages/${activeConvId}/${Date.now()}.webm`;
+      const url  = await uploadMedia(blob, path);
+
+      const otherId = allConvs.find(c => c.id === activeConvId)?.otherId;
+      await addDoc(collection(db, 'conversations', activeConvId, 'messages'), {
+        type: 'audio', url, text: '🎙️ رسالة صوتية',
+        senderId: currentUser.uid,
+        senderName: currentUserData?.name || currentUser.email || '',
+        senderRole: currentUserData?.role || '',
+        sentAt: serverTimestamp(),
+      });
+      const convSnap = await getDoc(doc(db, 'conversations', activeConvId));
+      const currentUnread = convSnap.exists() ? (convSnap.data().unread?.[otherId] || 0) : 0;
+      await setDoc(doc(db, 'conversations', activeConvId), {
+        participants: [currentUser.uid, otherId].filter(Boolean),
+        lastMsg: '🎙️ رسالة صوتية', lastAt: serverTimestamp(), lastSenderId: currentUser.uid,
+        [`unread.${otherId}`]: currentUnread + 1,
+        [`unread.${currentUser.uid}`]: 0,
+        [`hiddenBy.${otherId}`]: false,
+      }, { merge: true });
+    };
+
+    mediaRecorder.start();
+    btn.classList.add('recording');
+    btn.innerHTML = '<i class="ti ti-player-stop"></i>';
+    indicator.style.display = 'flex';
+
+    // مؤقت
+    recordSeconds = 0;
+    recordInterval = setInterval(() => {
+      recordSeconds++;
+      const m = Math.floor(recordSeconds / 60);
+      const s = recordSeconds % 60;
+      timerEl.textContent = `${m}:${s.toString().padStart(2,'0')}`;
+      if (recordSeconds >= 120) window.toggleRecording(); // حد أقصى دقيقتان
+    }, 1000);
+
+  } catch(e) {
+    alert('لم يتم السماح بالوصول للميكروفون');
+  }
+};
