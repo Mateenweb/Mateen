@@ -507,7 +507,7 @@ function renderStudents(list) {
         return `<div class="stu-mob-card">
           <div class="stu-mob-top">
             <div class="stu-mob-name">
-              <a class="btn-stu-link" href="student-view.html?id=${s.id}" target="_blank">👤</a>
+              <a class="btn-stu-link" href="student.html?id=${s.id}" target="_blank">👤</a>
               <input type="text" value="${esc(s.name || '')}"
                 oninput="stuAutoName('${s.id}', this.value)"
                 class="stu-mob-name-input"/>
@@ -607,7 +607,7 @@ function renderStudents(list) {
       <td><input type="checkbox" class="row-check" data-id="${s.id}" onchange="onRowCheck()"></td>
       <td style="color:var(--text-mid);font-size:12px">${i+1}</td>
       <td><div class="stu-name-cell">
-        <a class="btn-stu-link" href="student-view.html?id=${s.id}" target="_blank" title="صفحة الطالبة">👤</a>
+        <a class="btn-stu-link" href="student.html?id=${s.id}" target="_blank" title="صفحة الطالبة">👤</a>
         <input type="text" value="${esc(s.name||'')}" oninput="stuAutoName('${s.id}',this.value)" style="min-width:100px">
         ${statusSel}
       </div></td>
