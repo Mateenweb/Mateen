@@ -1235,8 +1235,9 @@ footer {
   overflow-y: auto;
 }
 #sidebar-user.show-user .px-3.pb-3 {
-  margin-top: auto;
   flex-shrink: 0;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
 }
 
 .form-input-readonly {
