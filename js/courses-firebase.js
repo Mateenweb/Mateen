@@ -725,13 +725,26 @@ window.confirmDeleteSubject = (id, name) => {
 
 window.executeDeleteSubject = async () => {
   const id  = document.getElementById('deleteSbjId').value;
+  const subjectName = document.getElementById('deleteSbjTitle').textContent;
   const btn = document.getElementById('deleteSbjConfirmBtn');
   btn.disabled = true;
   btn.innerHTML = '<i class="ti ti-loader"></i> جاري الحذف...';
   try {
+    // 1. احذف المادة الرئيسية
     await deleteDoc(doc(db, 'subjects', id));
+
+    // 2. احذف كل المحتوى المرتبط بها من materials collection
+    const matsSnap = await getDocs(query(
+      collection(db, 'materials'),
+      where('course', '==', subjectName)
+    ));
+    const deletePromises = matsSnap.docs.map(d => deleteDoc(d.ref));
+    await Promise.all(deletePromises);
+    console.log(`[حذف] تم حذف ${matsSnap.docs.length} ملف مرتبط بـ "${subjectName}"`);
+
     document.getElementById('deleteSubjectModal').style.display = 'none';
   } catch(e) {
+    console.error(e);
     alert('حدث خطأ أثناء الحذف');
   }
   btn.disabled = false;
