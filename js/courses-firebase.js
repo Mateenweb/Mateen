@@ -519,9 +519,9 @@ function subjectCardHTML(s) {
     <div class="course-card" onclick="openDynModal('${s.id}')">
       <div class="card-banner" style="background:${s.color || 'linear-gradient(135deg,#5c3d2e,#8a5e3c)'}">
         <div class="card-badge">أساسية</div>
-        <div class="card-icon" style="display:flex;align-items:center;justify-content:center;width:64px;height:64px;">
+        <div class="card-icon" style="display:flex;align-items:center;justify-content:center;${s.iconData || s.iconUrl ? 'position:absolute;inset:0;width:100%;height:100%;' : 'width:64px;height:64px;'}">
           ${s.iconData || s.iconUrl
-            ? `<img src="${s.iconData || s.iconUrl}" style="width:56px;height:56px;object-fit:contain;border-radius:8px;">`
+            ? `<img src="${s.iconData || s.iconUrl}" style="width:100%;height:100%;object-fit:cover;display:block;">`
             : `<span style="font-size:40px">${s.icon || '📚'}</span>`}
         </div>
       </div>
@@ -584,9 +584,9 @@ window.openDynModal = (id) => {
     <div class="modal-box">
       <div class="modal-banner" style="background:${s.color || 'linear-gradient(135deg,#5c3d2e,#8a5e3c)'}">
         <button class="modal-close" onclick="document.getElementById('dynModal-${id}').remove()">✕</button>
-        <div class="modal-icon" style="display:flex;align-items:center;justify-content:center;width:72px;height:72px;">
+        <div class="modal-icon" style="${s.iconData || s.iconUrl ? 'position:absolute;inset:0;width:100%;height:100%;display:flex;' : 'display:flex;align-items:center;justify-content:center;width:72px;height:72px;'}">
           ${s.iconData || s.iconUrl
-            ? `<img src="${s.iconData || s.iconUrl}" style="width:64px;height:64px;object-fit:contain;border-radius:10px;">`
+            ? `<img src="${s.iconData || s.iconUrl}" style="width:100%;height:100%;object-fit:cover;display:block;">`
             : `<span style="font-size:48px">${s.icon || '📚'}</span>`}
         </div>
       </div>
