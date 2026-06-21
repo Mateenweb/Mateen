@@ -1,13 +1,29 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
 import { getFirestore, collection, doc, getDoc, getDocs, addDoc, deleteDoc, query, where, orderBy, onSnapshot, serverTimestamp, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
-import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-storage.js";
 import { FIREBASE_CONFIG } from "./config.js";
 
 const app  = initializeApp(FIREBASE_CONFIG);
-const db      = getFirestore(app);
-const storage = getStorage(app);
+const db   = getFirestore(app);
 const auth = getAuth(app);
+
+// ── Cloudinary upload بدل Firebase Storage ──
+const CLOUD_NAME    = 'dqqtznoqt';
+const UPLOAD_PRESET = 'mateen_uploads';
+
+async function uploadMedia(blob, mediaType) {
+  const fd = new FormData();
+  fd.append('file', blob);
+  fd.append('upload_preset', UPLOAD_PRESET);
+  const resourceType = mediaType === 'audio' ? 'video' : 'image';
+  const res  = await fetch(
+    `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/${resourceType}/upload`,
+    { method: 'POST', body: fd }
+  );
+  const data = await res.json();
+  if (!data.secure_url) throw new Error(data.error?.message || 'فشل الرفع');
+  return data.secure_url;
+}
 
 const ROLE_LABELS = {
   student:    'طالبة',
@@ -517,22 +533,13 @@ window.deleteConv = async (cid) => {
 };
 
 
-// ── رفع ملف لـ Firebase Storage ─────────────────────────────────────────
-async function uploadMedia(blob, path) {
-  const storageRef = ref(storage, path);
-  await uploadBytes(storageRef, blob);
-  return await getDownloadURL(storageRef);
-}
-
 // ── إرسال صورة ───────────────────────────────────────────────────────────
 window.sendImage = async (input) => {
   const file = input.files[0];
   if (!file || !activeConvId) return;
   input.value = '';
 
-  const ext  = file.name.split('.').pop();
-  const path = `messages/${activeConvId}/${Date.now()}.${ext}`;
-  const url  = await uploadMedia(file, path);
+  const url  = await uploadMedia(file, 'image');
 
   const otherId = allConvs.find(c => c.id === activeConvId)?.otherId;
   await addDoc(collection(db, 'conversations', activeConvId, 'messages'), {
@@ -586,8 +593,7 @@ window.toggleRecording = async () => {
       if (!activeConvId || audioChunks.length === 0) return;
 
       const blob = new Blob(audioChunks, { type: 'audio/webm' });
-      const path = `messages/${activeConvId}/${Date.now()}.webm`;
-      const url  = await uploadMedia(blob, path);
+      const url  = await uploadMedia(blob, 'audio');
 
       const otherId = allConvs.find(c => c.id === activeConvId)?.otherId;
       await addDoc(collection(db, 'conversations', activeConvId, 'messages'), {
