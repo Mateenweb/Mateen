@@ -126,112 +126,13 @@
     </div>
   </div>
 
-  <div class="courses-grid">
-
-    <!-- تفسير -->
-    <div class="course-card" onclick="openModal('tafseer')">
-      <div class="card-banner banner-tafseer">
-        <div class="card-badge">أساسية</div>
-        <div class="card-icon">📖</div>
-      </div>
-      <div class="card-body">
-        <div class="card-title">التفسير</div>
-        <div class="card-desc">دراسة معاني كتاب الله وفهم آياته والاستنباط منها وفق منهج السلف الصالح.</div>
-        <div class="card-meta">
-          <div class="meta-item"><i class="ti ti-clock"></i> ٣ لقاءات أسبوعياً</div>
-          <div class="meta-item"><i class="ti ti-calendar"></i> ٦ أسابيع</div>
-        </div>
-        <div class="card-footer">
-          <div class="card-level"><i class="ti ti-award" style="color:var(--gold)"></i> المستوى الثاني</div>
-          <button class="btn-details">عرض التفاصيل</button>
-        </div>
-      </div>
+  <!-- كل المواد تيجي من Firebase ديناميكياً -->
+  <div id="dynamicSubjectsGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:24px;">
+    <div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text-mid);">
+      <div style="width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 10px;"></div>
+      جاري تحميل المواد...
     </div>
-
-    <!-- فقه -->
-    <div class="course-card" onclick="openModal('fiqh')">
-      <div class="card-banner banner-fiqh">
-        <div class="card-badge">أساسية</div>
-        <div class="card-icon">⚖️</div>
-      </div>
-      <div class="card-body">
-        <div class="card-title">الفقه</div>
-        <div class="card-desc">تعلّم أحكام العبادات والمعاملات وفق المذهب الفقهي مع الأدلة الشرعية والتطبيق العملي.</div>
-        <div class="card-meta">
-          <div class="meta-item"><i class="ti ti-clock"></i> ٣ لقاءات أسبوعياً</div>
-          <div class="meta-item"><i class="ti ti-calendar"></i> ٦ أسابيع</div>
-        </div>
-        <div class="card-footer">
-          <div class="card-level"><i class="ti ti-award" style="color:var(--gold)"></i> المستوى الثاني</div>
-          <button class="btn-details">عرض التفاصيل</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- عقيدة -->
-    <div class="course-card" onclick="openModal('aqeedah')">
-      <div class="card-banner banner-aqeedah">
-        <div class="card-badge">أساسية</div>
-        <div class="card-icon">🕌</div>
-      </div>
-      <div class="card-body">
-        <div class="card-title">العقيدة</div>
-        <div class="card-desc">تأصيل عقيدة أهل السنة والجماعة في أسماء الله وصفاته والإيمان بالغيب وأصول الدين.</div>
-        <div class="card-meta">
-          <div class="meta-item"><i class="ti ti-clock"></i> لقاءان أسبوعياً</div>
-          <div class="meta-item"><i class="ti ti-calendar"></i> ٦ أسابيع</div>
-        </div>
-        <div class="card-footer">
-          <div class="card-level"><i class="ti ti-award" style="color:var(--gold)"></i> المستوى الثاني</div>
-          <button class="btn-details">عرض التفاصيل</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- حديث -->
-    <div class="course-card" onclick="openModal('hadith')">
-      <div class="card-banner banner-hadith">
-        <div class="card-badge">أساسية</div>
-        <div class="card-icon">📜</div>
-      </div>
-      <div class="card-body">
-        <div class="card-title">الحديث</div>
-        <div class="card-desc">دراسة الأحاديث النبوية وشرحها واستنباط الأحكام منها مع تعلّم أصول علم المصطلح.</div>
-        <div class="card-meta">
-          <div class="meta-item"><i class="ti ti-clock"></i> لقاءان أسبوعياً</div>
-          <div class="meta-item"><i class="ti ti-calendar"></i> ٦ أسابيع</div>
-        </div>
-        <div class="card-footer">
-          <div class="card-level"><i class="ti ti-award" style="color:var(--gold)"></i> المستوى الثاني</div>
-          <button class="btn-details">عرض التفاصيل</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- قرآن -->
-    <div class="course-card" onclick="openModal('quran')">
-      <div class="card-banner banner-quran">
-        <div class="card-badge">أساسية</div>
-        <div class="card-icon">🌿</div>
-      </div>
-      <div class="card-body">
-        <div class="card-title">مقرأة متين</div>
-        <div class="card-desc">تلاوة مقرأة متين بالتجويد وحفظ المقرر مع الإتقان والمراجعة المنتظمة.</div>
-        <div class="card-meta">
-          <div class="meta-item"><i class="ti ti-clock"></i> يومياً</div>
-          <div class="meta-item"><i class="ti ti-calendar"></i> ٦ أسابيع</div>
-        </div>
-        <div class="card-footer">
-          <div class="card-level"><i class="ti ti-award" style="color:var(--gold)"></i> المستوى الثاني</div>
-          <button class="btn-details">عرض التفاصيل</button>
-        </div>
-      </div>
-    </div>
-
   </div>
-
-  <!-- Dynamic subjects from Firebase (admin-added) -->
-  <div id="dynamicSubjectsGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:24px;margin-top:24px;"></div>
 
 </div>
 
