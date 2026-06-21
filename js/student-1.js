@@ -137,6 +137,17 @@ async function initPage(studentId, user, role) {
     switchTab('attend');
   }
 
+  // الإدارة: صلاحية كاملة — تشوف كل التبويبات وتقدر تعدّل حضور + درجات + ملاحظات
+  if (role === 'admin') {
+    document.getElementById('newSessionWrap').style.display = 'block';
+    document.getElementById('newGradeWrap').style.display   = 'block';
+    document.getElementById('notesEditWrap').style.display  = 'block';
+    document.getElementById('notesTextarea').value = s.notes || '';
+    setupSupervisorAttendance(studentId);
+    setupAdminGrades(studentId);
+    setupSupervisorNotes(studentId);
+  }
+
   // Logout
   document.getElementById('logoutBtn').onclick = () =>
     signOut(auth).then(() => window.location.href = '../html/login.html');
