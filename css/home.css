@@ -1320,3 +1320,13 @@ footer {
   border-top: 1px solid var(--border) !important;
   background: var(--white) !important;
 }
+
+/* ══ السايدبار بحجم المحتوى بدون مساحة فاضية ══ */
+#sidebar-user.show-user {
+  height: auto !important;
+  min-height: unset !important;
+}
+.sidebar-offcanvas .offcanvas-body {
+  height: auto !important;
+  overflow-y: auto !important;
+}
