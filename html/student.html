@@ -137,6 +137,45 @@
 
     <!-- Tab: درجاتي -->
     <div class="stu-panel" id="tab-grades">
+      <!-- نموذج إضافة درجة جديدة — يظهر للإدارة فقط -->
+      <div id="newGradeWrap" style="display:none; margin-bottom:16px;">
+        <button class="btn-solid" id="newGradeBtn" type="button" style="margin-bottom:10px">
+          <i class="ti ti-plus"></i> إضافة درجة جديدة
+        </button>
+        <div id="newGradeForm" style="display:none; border:1px solid var(--border); border-radius:12px; padding:14px; background:var(--white);">
+          <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px;">
+            <div style="flex:1; min-width:140px;">
+              <label style="font-size:12px; color:var(--text-mid)">اسم الاختبار</label><br/>
+              <input type="text" id="gradeLabel" placeholder="مثال: اختبار شهري" style="width:100%; padding:6px 10px; border:1px solid var(--border); border-radius:8px;"/>
+            </div>
+            <div style="min-width:140px;">
+              <label style="font-size:12px; color:var(--text-mid)">المادة</label><br/>
+              <select id="gradeSubject" style="width:100%; padding:6px 10px; border:1px solid var(--border); border-radius:8px;">
+                <option value="تفسير">تفسير</option>
+                <option value="فقه">فقه</option>
+                <option value="عقيدة">عقيدة</option>
+                <option value="حديث">حديث</option>
+                <option value="قرآن">قرآن</option>
+              </select>
+            </div>
+          </div>
+          <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px;">
+            <div>
+              <label style="font-size:12px; color:var(--text-mid)">الدرجة</label><br/>
+              <input type="number" id="gradeScore" placeholder="0" style="width:90px; padding:6px 10px; border:1px solid var(--border); border-radius:8px;"/>
+            </div>
+            <div>
+              <label style="font-size:12px; color:var(--text-mid)">من</label><br/>
+              <input type="number" id="gradeTotal" placeholder="100" style="width:90px; padding:6px 10px; border:1px solid var(--border); border-radius:8px;"/>
+            </div>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button class="btn-solid" id="saveGradeBtn" type="button"><i class="ti ti-check"></i> حفظ الدرجة</button>
+            <button class="btn-outline" id="cancelGradeBtn" type="button">إلغاء</button>
+          </div>
+        </div>
+      </div>
+
       <div id="gradesList" class="stu-list">
         <div class="stu-empty"><i class="ti ti-school-off"></i><span>لا توجد درجات مسجلة</span></div>
       </div>
