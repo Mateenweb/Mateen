@@ -1,82 +1,3 @@
-
-// ═══════════════════════════════════════════════════════
-// Seed: أضف المواد الأساسية لـ Firebase لو مش موجودة
-// ═══════════════════════════════════════════════════════
-const SEED_SUBJECTS = [
-  {
-    id: 'tafseer',
-    name: 'التفسير',
-    icon: '📖',
-    color: 'linear-gradient(135deg,#5c3d2e,#8a5e3c)',
-    desc: 'دراسة معاني كتاب الله وفهم آياته والاستنباط منها وفق منهج السلف الصالح.',
-    meetings: '٣ لقاءات أسبوعياً',
-    weeks: '٦ أسابيع',
-    level: 'المستوى الثاني',
-    topics: ['مقدمات في علم التفسير','أسباب النزول','الناسخ والمنسوخ','تفسير المفردات','الاستنباط الفقهي','التدبر والتطبيق'],
-    addedAt: 1000,
-  },
-  {
-    id: 'fiqh',
-    name: 'الفقه',
-    icon: '⚖️',
-    color: 'linear-gradient(135deg,#1a3a5c,#2a5298)',
-    desc: 'تعلّم أحكام العبادات والمعاملات وفق المذهب الفقهي مع الأدلة الشرعية والتطبيق العملي.',
-    meetings: '٣ لقاءات أسبوعياً',
-    weeks: '٦ أسابيع',
-    level: 'المستوى الثاني',
-    topics: ['الطهارة والصلاة','الزكاة والصيام','الحج والعمرة','فقه الأسرة','المعاملات المالية','الفقه المعاصر'],
-    addedAt: 1001,
-  },
-  {
-    id: 'aqeedah',
-    name: 'العقيدة',
-    icon: '🕌',
-    color: 'linear-gradient(135deg,#4a2e1a,#8b5e3c)',
-    desc: 'تأصيل عقيدة أهل السنة والجماعة في أسماء الله وصفاته والإيمان بالغيب وأصول الدين.',
-    meetings: 'لقاءان أسبوعياً',
-    weeks: '٦ أسابيع',
-    level: 'المستوى الثاني',
-    topics: ['أصول الإيمان الستة','التوحيد وأقسامه','الأسماء والصفات','القضاء والقدر','الولاء والبراء','الفرق والمذاهب'],
-    addedAt: 1002,
-  },
-  {
-    id: 'hadith',
-    name: 'الحديث',
-    icon: '📜',
-    color: 'linear-gradient(135deg,#2e1a4a,#5e3c8b)',
-    desc: 'دراسة الأحاديث النبوية وشرحها واستنباط الأحكام منها مع تعلّم أصول علم المصطلح.',
-    meetings: 'لقاءان أسبوعياً',
-    weeks: '٦ أسابيع',
-    level: 'المستوى الثاني',
-    topics: ['مصطلح الحديث','أقسام الحديث','شرح الأربعين النووية','الجرح والتعديل','فقه الحديث','التخريج والدراسة'],
-    addedAt: 1003,
-  },
-  {
-    id: 'quran',
-    name: 'مقرأة متين',
-    icon: '🌿',
-    color: 'linear-gradient(135deg,#5c3d2e,#8a5e3c)',
-    desc: 'تلاوة مقرأة متين بالتجويد وحفظ المقرر مع الإتقان والمراجعة المنتظمة.',
-    meetings: 'يومياً',
-    weeks: '٦ أسابيع',
-    level: 'المستوى الثاني',
-    topics: ['أحكام التجويد','المخارج والصفات','حفظ المقرر','المراجعة الأسبوعية','التلاوة الجماعية','الإجازة والسند'],
-    addedAt: 1004,
-  },
-];
-
-async function seedSubjects() {
-  for (const s of SEED_SUBJECTS) {
-    const ref = doc(db, 'subjects', s.id);
-    const snap = await getDoc(ref);
-    if (!snap.exists()) {
-      await setDoc(ref, s);
-      console.log('[Seed] أضفت:', s.name);
-    }
-  }
-}
-seedSubjects().catch(e => console.warn('[Seed] خطأ:', e));
-
 import { initializeApp, getApps, getApp }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
 import { getAuth, onAuthStateChanged }
@@ -88,6 +9,29 @@ import { FIREBASE_CONFIG } from "./config.js";
 const app  = getApps().length ? getApp() : initializeApp(FIREBASE_CONFIG);
 const auth = getAuth(app);
 const db   = getFirestore(app);
+
+// ═══════════════════════════════════════════════════════
+// Seed: أضف المواد الأساسية لـ Firebase لو مش موجودة
+// ═══════════════════════════════════════════════════════
+const SEED_SUBJECTS = [
+  { id:'tafseer', name:'التفسير', icon:'📖', color:'linear-gradient(135deg,#5c3d2e,#8a5e3c)', desc:'دراسة معاني كتاب الله وفهم آياته والاستنباط منها وفق منهج السلف الصالح.', meetings:'٣ لقاءات أسبوعياً', weeks:'٦ أسابيع', level:'المستوى الثاني', topics:['مقدمات في علم التفسير','أسباب النزول','الناسخ والمنسوخ','تفسير المفردات','الاستنباط الفقهي','التدبر والتطبيق'], addedAt:1000 },
+  { id:'fiqh',    name:'الفقه',    icon:'⚖️',  color:'linear-gradient(135deg,#1a3a5c,#2a5298)', desc:'تعلّم أحكام العبادات والمعاملات وفق المذهب الفقهي مع الأدلة الشرعية والتطبيق العملي.', meetings:'٣ لقاءات أسبوعياً', weeks:'٦ أسابيع', level:'المستوى الثاني', topics:['الطهارة والصلاة','الزكاة والصيام','الحج والعمرة','فقه الأسرة','المعاملات المالية','الفقه المعاصر'], addedAt:1001 },
+  { id:'aqeedah', name:'العقيدة',  icon:'🕌',  color:'linear-gradient(135deg,#4a2e1a,#8b5e3c)', desc:'تأصيل عقيدة أهل السنة والجماعة في أسماء الله وصفاته والإيمان بالغيب وأصول الدين.',    meetings:'لقاءان أسبوعياً',    weeks:'٦ أسابيع', level:'المستوى الثاني', topics:['أصول الإيمان الستة','التوحيد وأقسامه','الأسماء والصفات','القضاء والقدر','الولاء والبراء','الفرق والمذاهب'],   addedAt:1002 },
+  { id:'hadith',  name:'الحديث',   icon:'📜',  color:'linear-gradient(135deg,#2e1a4a,#5e3c8b)', desc:'دراسة الأحاديث النبوية وشرحها واستنباط الأحكام منها مع تعلّم أصول علم المصطلح.',     meetings:'لقاءان أسبوعياً',    weeks:'٦ أسابيع', level:'المستوى الثاني', topics:['مصطلح الحديث','أقسام الحديث','شرح الأربعين النووية','الجرح والتعديل','فقه الحديث','التخريج والدراسة'],       addedAt:1003 },
+  { id:'quran',   name:'مقرأة متين',icon:'🌿', color:'linear-gradient(135deg,#5c3d2e,#8a5e3c)', desc:'تلاوة مقرأة متين بالتجويد وحفظ المقرر مع الإتقان والمراجعة المنتظمة.',               meetings:'يومياً',             weeks:'٦ أسابيع', level:'المستوى الثاني', topics:['أحكام التجويد','المخارج والصفات','حفظ المقرر','المراجعة الأسبوعية','التلاوة الجماعية','الإجازة والسند'],       addedAt:1004 },
+];
+
+async function seedSubjects() {
+  for (const s of SEED_SUBJECTS) {
+    const ref = doc(db, 'subjects', s.id);
+    const snap = await getDoc(ref);
+    if (!snap.exists()) {
+      await setDoc(ref, { ...s });
+      console.log('[Seed] أضفت:', s.name);
+    }
+  }
+}
+seedSubjects().catch(e => console.warn('[Seed] خطأ:', e));
 
 let allMats = [];
 let currentUserRole = null;
