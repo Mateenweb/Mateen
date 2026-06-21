@@ -1,84 +1,143 @@
-[README.md](https://github.com/user-attachments/files/28675819/README.md)
-# 📖 قاعدة بيانات طالبات برنامج متين العلمي
-نظام إدارة الطالبات — مبني على Firebase Firestore مع واجهة عربية كاملة.
+# 🌿 برنامج متين العلمي
+
+منصة تعليمية إسلامية متكاملة لإدارة الطالبات والمواد العلمية، مبنية على Firebase مع واجهة عربية RTL كاملة.
+
+🔗 **الموقع:** [mateenweb.github.io/Mateen](https://mateenweb.github.io/Mateen/)
 
 ---
 
 ## 🗂️ هيكل المشروع
 
 ```
-mateen2/
-├── index.html          # الصفحة الرئيسية
+Mateen/
+├── index.html                  # إعادة توجيه لصفحة الدخول
+├── html/
+│   ├── home.html               # الصفحة الرئيسية
+│   ├── login.html              # تسجيل الدخول والتسجيل
+│   ├── admin.html              # لوحة الإداريات
+│   ├── courses.html            # المواد العلمية
+│   ├── student.html            # ملف الطالبة
+│   ├── messages.html           # الرسائل
+│   ├── news.html               # الأخبار
+│   ├── library.html            # المكتبة
+│   ├── schedule.html           # الجدول الدراسي
+│   ├── supervisor.html         # لوحة المشرفة
+│   ├── teacher-*.html          # صفحات المعلمات (تفسير، فقه، عقيدة، حديث، مقرأة)
+│   └── about.html              # عن البرنامج
 ├── css/
-│   └── styles.css      # جميع الأنماط
+│   ├── shared.css              # الأنماط المشتركة (nav, footer, basmala)
+│   ├── home.css                # الصفحة الرئيسية
+│   ├── admin.css               # لوحة الإدارة
+│   ├── courses.css             # المواد العلمية
+│   ├── modals.css              # النوافذ المنبثقة
+│   ├── mobile.css              # الأنماط للجوال
+│   └── responsive-fix.css      # إصلاحات التجاوب
 ├── js/
-│   ├── config.js       # إعدادات Firebase والثوابت
-│   ├── dateUtils.js    # تحويل التاريخ هجري ↔ ميلادي
-│   ├── ui.js           # دوال عرض الجدول والإشعارات
-│   ├── export.js       # تصدير Word
-│   └── firebase.js     # منطق التطبيق الرئيسي
-└── README.md
+│   ├── config.js               # إعدادات Firebase
+│   ├── admin-1.js              # منطق لوحة الإدارة
+│   ├── courses-firebase.js     # منطق المواد العلمية
+│   ├── supervisor-1.js         # منطق لوحة المشرفة
+│   ├── teacher-*.js            # منطق صفحات المعلمات
+│   ├── export.js               # تصدير Word/PDF
+│   ├── dateUtils.js            # تحويل التاريخ هجري ↔ ميلادي
+│   ├── notifications.js        # إشعارات FCM
+│   └── sw-register.js          # Service Worker
+├── functions/
+│   └── index.js                # Firebase Cloud Functions
+├── libs/
+│   ├── tabler-icons/           # أيقونات Tabler
+│   └── fonts/                  # خطوط عربية
+├── manifest.json               # PWA manifest
+└── firebase.json               # إعدادات Firebase Hosting
 ```
 
 ---
 
 ## ✨ المميزات
 
-- ✅ إضافة طالبات بشكل فردي أو جماعي (كل اسم في سطر)
-- 📅 تحديد يوم ووقت المقابلة مع التاريخ الهجري والتحويل التلقائي للميلادي
-- 🔄 تحويل تلقائي من التاريخ الهجري إلى الميلادي فور اختيار اليوم والشهر والسنة
-- 🎙️ تتبع حالة المقابلة (تمت / لم تتم)
-- 📊 إدارة قرار القبول (مقبولة / غير مقبولة / لم يحدد)
-- 🔍 فلترة وبحث متعدد المعايير
-- ✏️ تطبيق يوم ووقت وتاريخ على عدة طالبات دفعة واحدة
-- ⬇️ تصدير مخصص لملف Word مع اختيار الأعمدة وتقسيم الصفحات حسب الوقت واليوم
-- ☁️ مزامنة فورية عبر Firebase Firestore على جميع الأجهزة
+### 👥 إدارة المستخدمين
+- **5 أدوار:** إدارة، مشرفة، معلمة، طالبة، أصدقاء متين
+- تسجيل دخول وتسجيل جديد مع التحقق من الدور
+- حذف الحساب نهائياً من Firestore و Firebase Auth عبر Cloud Function
+
+### 📚 المواد العلمية
+- **5 مواد:** التفسير، الفقه، العقيدة، الحديث، مقرأة متين
+- الأدمن والمشرفة: تعديل وحذف وإضافة محتوى لكل المواد
+- المعلمة: تضيف وتعدل وتحذف محتوى مادتها فقط
+- الطالبة: تشوف المواد المتاحة لها بعد الالتحاق
+
+### 🎓 إدارة الطالبات
+- إضافة طالبات فردياً أو جماعياً
+- تتبع حالة المقابلة وقرار القبول
+- تصدير بيانات الطالبات لملف Word مع خيارات تخصيص متقدمة
+- تقسيم الصفحات حسب الوقت واليوم
+
+### 📅 نظام التاريخ
+- إدخال بالتقويم **الهجري** مع تحويل تلقائي للـ**ميلادي**
+- جدول دراسي أسبوعي
+
+### 💬 التواصل
+- رسائل مباشرة بين المستخدمين
+- إشعارات فورية عبر Firebase Cloud Messaging (FCM)
+
+### 📰 الأخبار والمكتبة
+- إدارة الأخبار والإعلانات
+- مكتبة الموارد التعليمية
 
 ---
 
-## 📅 نظام التاريخ
+## 🛠️ التقنيات المستخدمة
 
-- الإدخال بالتقويم **الهجري** (يوم + شهر + سنة) عبر قوائم منسدلة
-- التاريخ **الميلادي يُحسب تلقائياً** ويظهر تحت الهجري بشكل قراءة فقط
-- نطاق السنوات الهجرية يتمركز حول السنة الحالية تلقائياً
-
----
-
-## ⬇️ خيارات التصدير
-
-عند الضغط على **تصدير Word** تظهر نافذة تتيح:
-
-- **اختيار الأعمدة:** الاسم، اليوم، التاريخ الهجري، التاريخ الميلادي، الوقت، المقابلة، القبول
-- **تقسيم الصفحات حسب الوقت:** كل نطاق زمني (ساعة / نصف ساعة / ساعتين) في صفحة مستقلة مع ذكر اليوم والوقت في عنوان كل صفحة
-- الطالبات بدون وقت محدد تظهر في صفحة منفصلة
-
----
-
-## 🚀 التشغيل
-
-المشروع يعمل مباشرة في المتصفح بدون خادم. افتح `index.html` أو ارفعه على GitHub Pages.
-
-> **ملاحظة:** يستخدم Firebase JS SDK عبر CDN، لا يحتاج `npm install`.
+| التقنية | الاستخدام |
+|---|---|
+| HTML / CSS / JS | واجهة المستخدم — بدون build tool |
+| Bootstrap 5 | Navbar, Offcanvas, Responsive |
+| Firebase Auth | تسجيل الدخول والأدوار |
+| Firebase Firestore | قاعدة البيانات الرئيسية |
+| Firebase Hosting | استضافة الموقع |
+| Firebase Functions | حذف المستخدمين من Auth |
+| Firebase Messaging | إشعارات Push |
+| GitHub Actions | Deploy تلقائي للـ Functions |
+| Tabler Icons | أيقونات الواجهة |
 
 ---
 
 ## ⚙️ إعداد Firebase
 
-لتغيير قاعدة البيانات، عدّل القيم في `js/config.js`:
+عدّلي القيم في `js/config.js`:
 
 ```js
 export const FIREBASE_CONFIG = {
-  apiKey:    "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT.firebaseapp.com",
-  projectId:  "YOUR_PROJECT",
-  // ...
+  apiKey:            "YOUR_API_KEY",
+  authDomain:        "YOUR_PROJECT.firebaseapp.com",
+  projectId:         "YOUR_PROJECT",
+  storageBucket:     "YOUR_PROJECT.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId:             "YOUR_APP_ID"
 };
 ```
 
 ---
 
-## 📦 رفع على GitHub Pages
+## 🚀 النشر
 
-1. `git init && git add . && git commit -m "init"`
-2. ارفع على GitHub
-3. فعّل **Pages** من `Settings → Pages → Branch: main`
+الموقع منشور على **GitHub Pages** ويتحدث تلقائياً عند كل push على `main`.
+
+لنشر Firebase Functions:
+- أضيفي `FIREBASE_SERVICE_ACCOUNT` كـ Secret في GitHub repo
+- GitHub Actions يتولى الـ deploy تلقائياً عند تعديل `functions/`
+
+---
+
+## 📁 Firestore Collections
+
+| Collection | المحتوى |
+|---|---|
+| `users` | بيانات المستخدمين والأدوار |
+| `students` | بيانات الطالبات وحالة القبول |
+| `materials` | المواد المضافة لكل مادة علمية |
+| `subjects` | المواد الرئيسية المضافة ديناميكياً |
+| `staticSubjects` | تعديلات المواد الثابتة (التفسير، الفقه، إلخ) |
+| `conversations` | المحادثات والرسائل |
+| `news` | الأخبار والإعلانات |
+| `library` | المكتبة |
