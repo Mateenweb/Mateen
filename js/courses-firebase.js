@@ -96,26 +96,42 @@ function renderMats(mats) {
 
 function renderModalMats() {
   const modalMap = {
-    'التفسير': 'tafseer', 'الفقه': 'fiqh', 'العقيدة': 'aqeedah',
-    'الحديث': 'hadith', 'مقرأة متين': 'quran'
+    'التفسير':    { id: 'tafseer',  staticId: 'static-tafseer'  },
+    'الفقه':      { id: 'fiqh',     staticId: 'static-fiqh'     },
+    'العقيدة':    { id: 'aqeedah',  staticId: 'static-aqeedah'  },
+    'الحديث':    { id: 'hadith',   staticId: 'static-hadith'   },
+    'مقرأة متين': { id: 'quran',    staticId: 'static-quran'    },
   };
-  Object.entries(modalMap).forEach(([subj, modalId]) => {
+
+  Object.entries(modalMap).forEach(([subj, { id: modalId }]) => {
+    // ── أزرار تعديل/حذف المادة الرئيسية (للأدمن فقط) ──
+    const adminActionsEl = document.getElementById('modal-admin-actions-' + modalId);
+    if (adminActionsEl) {
+      if (isAdmin()) {
+        adminActionsEl.innerHTML = `
+          <div style="display:flex;gap:8px;margin:12px 0 4px;">
+            <button onclick="openEditStaticSubject('${subj}')"
+              style="flex:1;padding:7px;border:1px solid var(--green-dark);background:transparent;color:var(--green-dark);border-radius:8px;font-family:inherit;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;">
+              <i class="ti ti-pencil"></i> تعديل المادة
+            </button>
+          </div>`;
+      } else {
+        adminActionsEl.innerHTML = '';
+      }
+    }
+
+    // ── المواد المضافة من Firebase ──
     const el = document.getElementById('modal-mats-' + modalId);
     if (!el) return;
     const subjMats = allMats.filter(m => m.course === subj);
-
-    // زر الإضافة للأدمن + المعلمة في مادتها
     const canAdd = isAdmin() || (currentUserRole === 'teacher' && currentUserSubjects.includes(subj));
     const addBtnHTML = canAdd ? `
       <button onclick="document.getElementById('newCourseCat').value='${subj}';document.getElementById('addCourseModal').style.display='flex'"
-        style="display:flex;align-items:center;gap:6px;background:var(--green-dark);color:white;border:none;padding:8px 14px;border-radius:8px;font-family:inherit;font-size:13px;cursor:pointer;margin-bottom:10px;margin-top:12px;">
-        <i class="ti ti-plus"></i> إضافة مادة لـ${subj}
+        style="display:flex;align-items:center;gap:6px;background:var(--green-dark);color:white;border:none;padding:8px 14px;border-radius:8px;font-family:inherit;font-size:13px;cursor:pointer;margin-bottom:10px;margin-top:8px;">
+        <i class="ti ti-plus"></i> إضافة محتوى لـ${subj}
       </button>` : '';
 
-    if (subjMats.length === 0) {
-      el.innerHTML = addBtnHTML;
-      return;
-    }
+    if (subjMats.length === 0) { el.innerHTML = addBtnHTML; return; }
     el.innerHTML = `
       <div style="margin:14px 0 6px;">
         <div style="font-size:13px;font-weight:700;color:var(--green-dark);margin-bottom:8px;">
@@ -140,7 +156,120 @@ window.filterMats = () => {
   renderMats(val ? mats.filter(m => m.course === val) : mats);
 };
 
-// ===== تعديل المادة =====
+// ===== تعديل المواد الثابتة (التفسير، الفقه، إلخ) =====
+const STATIC_SUBJECTS_DATA = {
+  'التفسير':    { modalId: 'tafseer',  bannerClass: 'banner-tafseer'  },
+  'الفقه':      { modalId: 'fiqh',     bannerClass: 'banner-fiqh'     },
+  'العقيدة':    { modalId: 'aqeedah',  bannerClass: 'banner-aqeedah'  },
+  'الحديث':    { modalId: 'hadith',   bannerClass: 'banner-hadith'   },
+  'مقرأة متين': { modalId: 'quran',    bannerClass: 'banner-quran'    },
+};
+
+window.openEditStaticSubject = (subj) => {
+  // اجمع البيانات الحالية من المودال
+  const { modalId } = STATIC_SUBJECTS_DATA[subj];
+  const modalEl = document.getElementById('modal-' + modalId);
+  const title    = modalEl.querySelector('.modal-title')?.textContent || subj;
+  const subtitle = modalEl.querySelector('.modal-subtitle')?.textContent || '';
+  const desc     = modalEl.querySelector('.modal-desc')?.textContent?.trim() || '';
+  const topicsEls = modalEl.querySelectorAll('.topics-list li');
+  const topics   = Array.from(topicsEls).map(li => li.textContent).join('\n');
+
+  // ابني مودال التعديل
+  const old = document.getElementById('editStaticModal');
+  if (old) old.remove();
+
+  const m = document.createElement('div');
+  m.id = 'editStaticModal';
+  m.style.cssText = 'display:flex;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:2000;align-items:center;justify-content:center;padding:20px;';
+  m.innerHTML = `
+    <div style="background:white;border-radius:16px;padding:28px;width:90%;max-width:500px;direction:rtl;max-height:90vh;overflow-y:auto;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+        <div style="font-family:Amiri,serif;font-size:17px;color:var(--green-dark);font-weight:700;">
+          <i class="ti ti-pencil"></i> تعديل مادة — ${subj}
+        </div>
+        <button onclick="document.getElementById('editStaticModal').remove()"
+          style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-mid);">✕</button>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:14px;">
+        <div>
+          <label style="font-size:13px;color:var(--text-dark);display:block;margin-bottom:6px;">العنوان الفرعي</label>
+          <input id="esSubtitle" value="${subtitle}" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:13px;box-sizing:border-box;">
+        </div>
+        <div>
+          <label style="font-size:13px;color:var(--text-dark);display:block;margin-bottom:6px;">وصف المادة</label>
+          <textarea id="esDesc" rows="4" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:13px;box-sizing:border-box;resize:vertical;">${desc}</textarea>
+        </div>
+        <div>
+          <label style="font-size:13px;color:var(--text-dark);display:block;margin-bottom:6px;">المحاور الرئيسية (سطر لكل محور)</label>
+          <textarea id="esTopics" rows="6" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:13px;box-sizing:border-box;resize:vertical;">${topics}</textarea>
+        </div>
+        <div id="esErr" style="display:none;color:#c0392b;font-size:13px;"></div>
+        <div style="display:flex;gap:10px;margin-top:4px;">
+          <button id="esSubmit" onclick="saveStaticSubject('${subj}')"
+            style="flex:1;padding:11px;background:var(--green-dark);color:white;border:none;border-radius:8px;font-family:inherit;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;">
+            <i class="ti ti-device-floppy"></i> حفظ التعديلات
+          </button>
+          <button onclick="document.getElementById('editStaticModal').remove()"
+            style="padding:11px 20px;background:var(--beige);color:var(--text-dark);border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:14px;cursor:pointer;">
+            إلغاء
+          </button>
+        </div>
+      </div>
+    </div>`;
+  document.body.appendChild(m);
+};
+
+window.saveStaticSubject = async (subj) => {
+  const { modalId } = STATIC_SUBJECTS_DATA[subj];
+  const subtitle = document.getElementById('esSubtitle').value.trim();
+  const desc     = document.getElementById('esDesc').value.trim();
+  const topics   = document.getElementById('esTopics').value.trim().split('\n').filter(Boolean);
+  const err      = document.getElementById('esErr');
+  const btn      = document.getElementById('esSubmit');
+
+  if (!desc) { err.style.display='block'; err.textContent='الوصف مطلوب'; return; }
+  err.style.display = 'none';
+  btn.disabled = true;
+  btn.innerHTML = '<i class="ti ti-loader"></i> جاري الحفظ...';
+
+  try {
+    // احفظ في Firestore collection staticSubjects
+    const { setDoc, doc: fsDoc } = await import("https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js");
+    await setDoc(fsDoc(db, 'staticSubjects', modalId), { subj, subtitle, desc, topics, updatedAt: Date.now() }, { merge: true });
+
+    // حدّث المودال مباشرة بدون reload
+    const modalEl = document.getElementById('modal-' + modalId);
+    if (modalEl.querySelector('.modal-subtitle')) modalEl.querySelector('.modal-subtitle').textContent = subtitle;
+    if (modalEl.querySelector('.modal-desc'))     modalEl.querySelector('.modal-desc').textContent = desc;
+    const topicsList = modalEl.querySelector('.topics-list');
+    if (topicsList) topicsList.innerHTML = topics.map(t => `<li>${t}</li>`).join('');
+
+    document.getElementById('editStaticModal').remove();
+  } catch(e) {
+    err.style.display = 'block';
+    err.textContent = 'حدث خطأ: ' + e.message;
+  }
+  btn.disabled = false;
+  btn.innerHTML = '<i class="ti ti-device-floppy"></i> حفظ التعديلات';
+};
+
+// تحميل تعديلات المواد الثابتة من Firestore عند فتح الصفحة
+onSnapshot(collection(db, 'staticSubjects'), snap => {
+  snap.docs.forEach(d => {
+    const data = d.data();
+    const modalEl = document.getElementById('modal-' + d.id);
+    if (!modalEl) return;
+    if (data.subtitle && modalEl.querySelector('.modal-subtitle'))
+      modalEl.querySelector('.modal-subtitle').textContent = data.subtitle;
+    if (data.desc && modalEl.querySelector('.modal-desc'))
+      modalEl.querySelector('.modal-desc').textContent = data.desc;
+    if (data.topics?.length && modalEl.querySelector('.topics-list'))
+      modalEl.querySelector('.topics-list').innerHTML = data.topics.map(t => `<li>${t}</li>`).join('');
+  });
+});
+
+// ===== تعديل المادة (materials) =====
 window.openEditModal = (id) => {
   const m = allMats.find(x => x.id === id);
   if (!m) return;
