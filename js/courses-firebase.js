@@ -216,6 +216,7 @@ onAuthStateChanged(auth, async user => {
   if (!user) {
     currentUserRole = null;
     currentUserSubjects = [];
+    authReady = true;
     window.filterMats();
     renderModalMats();
     return;
@@ -226,7 +227,6 @@ onAuthStateChanged(auth, async user => {
   currentUserRole = role;
 
   if (role === 'teacher') {
-    // المعلمة مادتها في حقل subject
     const teacherSubject = data.subject || '';
     currentUserSubjects = teacherSubject ? [teacherSubject] : [];
   } else {
@@ -238,9 +238,17 @@ onAuthStateChanged(auth, async user => {
     if (btns) btns.style.display = 'flex';
   }
 
+  authReady = true;
   updateEnrollButtons();
   window.filterMats();
   renderModalMats();
+
+  // لو الـ snapshot وصل قبل الـ auth — اعمل render تاني
+  if (pendingRender) {
+    pendingRender = false;
+    window.filterMats();
+    renderModalMats();
+  }
 });
 
 const SUBJ_MODAL_IDS = {
@@ -322,10 +330,17 @@ window.submitNewCourse = async () => {
   btn.innerHTML = '<i class="ti ti-circle-plus"></i> إضافة المادة';
 };
 
+let authReady = false;
+let pendingRender = false;
+
 onSnapshot(query(collection(db, 'materials'), orderBy('addedAt', 'desc')), snap => {
   allMats = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-  window.filterMats();
-  renderModalMats();
+  if (authReady) {
+    window.filterMats();
+    renderModalMats();
+  } else {
+    pendingRender = true;
+  }
 });
 
 // =============================================
