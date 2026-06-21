@@ -68,6 +68,13 @@ onAuthStateChanged(auth, async user => {
   if (guest)   guest.classList.add('d-none');
   if (userDiv) { userDiv.classList.remove('sidebar-user-hidden'); userDiv.classList.add('show-user'); }
 
+  // إخفاء كل الروابط الخاصة فوراً — قبل ما نعرف الدور
+  ['profileLink','linkCerts','linkAwards','linkGrades','linkSchedule',
+   'linkAdmin','linkNews','linkTeacher'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.add('d-none');
+  });
+
   // تفعيل إشعارات الموقع
   initNotifications(user.uid);
 
