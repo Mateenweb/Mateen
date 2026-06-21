@@ -1330,3 +1330,25 @@ footer {
   height: auto !important;
   overflow-y: auto !important;
 }
+
+/* ══ إعادة السايدبار لطوله الكامل مع تثبيت زرار الخروج في الأسفل ══ */
+#sidebar-user.show-user {
+  height: 100% !important;
+  min-height: unset !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+.sidebar-offcanvas .offcanvas-body {
+  height: 100% !important;
+  overflow: hidden !important;
+}
+#sidebar-user.show-user .sidebar-nav {
+  flex: 1 !important;
+  overflow-y: auto !important;
+}
+#sidebar-user.show-user > .px-3.pb-3 {
+  margin-top: auto !important;
+  flex-shrink: 0 !important;
+  border-top: 1px solid var(--border) !important;
+  padding-top: 10px !important;
+}
