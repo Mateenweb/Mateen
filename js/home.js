@@ -89,19 +89,20 @@ onAuthStateChanged(auth, async user => {
   function show(id) { const el = document.getElementById(id); if(el) el.classList.remove('d-none'); }
   function hide(id)  { const el = document.getElementById(id); if(el) el.classList.add('d-none'); }
 
-  // روابط خاصة ببنات متين بس — إخفاء إجباري لأي دور تاني (إجراء احترازي)
+  // روابط خاصة ببنات متين بس — إخفاء لأي دور تاني
+  const studentOnlyLinks = ['profileLink','linkCerts','linkAwards','linkGrades','linkSchedule'];
   if (role !== 'mateen') {
-    hide('profileLink');
-    hide('linkCerts');
-    hide('linkAwards');
-    hide('linkGrades');
-    hide('linkSchedule');
+    studentOnlyLinks.forEach(hide);
+  }
+
+  // روابط طالباتي — تخفى من الأدمن
+  if (role === 'admin' || role === 'supervisor') {
+    hide('linkTeacher');
   }
 
   if (role === 'admin') {
     show('linkAdmin');
     show('linkNews');
-    show('linkTeacher');
   } else if (role === 'supervisor') {
     const linkAdminEl = document.getElementById('linkAdmin');
     if (linkAdminEl) {
@@ -110,7 +111,6 @@ onAuthStateChanged(auth, async user => {
     }
     show('linkAdmin');
     show('linkNews');
-    show('linkTeacher');
   } else if (role === 'teacher') {
     show('linkNews');
     show('linkTeacher');
