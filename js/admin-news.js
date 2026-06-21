@@ -20,7 +20,7 @@ onAuthStateChanged(auth, async user => {
   if (!user) return;
   const snap = await import("https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js")
     .then(m => m.getDoc(doc(db,'users',user.uid)));
-  if (!snap.exists() || snap.data().role !== 'admin') return;
+  if (!snap.exists() || !['admin','supervisor','teacher'].includes(snap.data().role)) return;
 
   // أضيف زرار الأخبار في الأدمن
   addNewsButton();
