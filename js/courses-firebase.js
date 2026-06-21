@@ -32,8 +32,17 @@ const LINK_LABELS = { youtube: '▶️ يوتيوب', drive: '📁 درايف', 
 
 const isAdmin = () => currentUserRole === 'admin' || currentUserRole === 'supervisor';
 
+// المعلمة تقدر تعدل/تحذف مواد مادتها بس
+const canEditMat = (m) => {
+  if (isAdmin()) return true;
+  if (currentUserRole === 'teacher') {
+    return currentUserSubjects.some(s => m.course === s);
+  }
+  return false;
+};
+
 function matCardHTML(m) {
-  const adminBtns = isAdmin() ? `
+  const editBtns = canEditMat(m) ? `
     <div style="display:flex;gap:8px;margin-top:10px;border-top:1px solid var(--border);padding-top:10px;">
       <button onclick="event.preventDefault();event.stopPropagation();openEditModal('${m.id}')"
         style="flex:1;padding:6px;border:1px solid var(--green-dark);background:transparent;color:var(--green-dark);border-radius:8px;font-family:inherit;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;">
@@ -59,7 +68,7 @@ function matCardHTML(m) {
           ${m.notes ? `<div style="font-size:12px;color:var(--text-mid);background:var(--beige);padding:7px 10px;border-radius:8px;margin-bottom:8px">${m.notes}</div>` : ''}
           <div style="font-size:12px;color:var(--gold-dark)">${LINK_LABELS[detectLinkType(m.url)]}</div>
         </a>
-        ${adminBtns}
+        ${editBtns}
       </div>
     </div>`;
 }
@@ -95,7 +104,9 @@ function renderModalMats() {
     if (!el) return;
     const subjMats = allMats.filter(m => m.course === subj);
 
-    const addBtnHTML = isAdmin() ? `
+    // زر الإضافة للأدمن + المعلمة في مادتها
+    const canAdd = isAdmin() || (currentUserRole === 'teacher' && currentUserSubjects.includes(subj));
+    const addBtnHTML = canAdd ? `
       <button onclick="document.getElementById('newCourseCat').value='${subj}';document.getElementById('addCourseModal').style.display='flex'"
         style="display:flex;align-items:center;gap:6px;background:var(--green-dark);color:white;border:none;padding:8px 14px;border-radius:8px;font-family:inherit;font-size:13px;cursor:pointer;margin-bottom:10px;margin-top:12px;">
         <i class="ti ti-plus"></i> إضافة مادة لـ${subj}
@@ -213,7 +224,14 @@ onAuthStateChanged(auth, async user => {
   const data = snap.exists() ? snap.data() : {};
   const role = data.role || '';
   currentUserRole = role;
-  currentUserSubjects = Array.isArray(data.enrolledSubjects) ? data.enrolledSubjects : [];
+
+  if (role === 'teacher') {
+    // المعلمة مادتها في حقل subject
+    const teacherSubject = data.subject || '';
+    currentUserSubjects = teacherSubject ? [teacherSubject] : [];
+  } else {
+    currentUserSubjects = Array.isArray(data.enrolledSubjects) ? data.enrolledSubjects : [];
+  }
 
   if (isAdmin()) {
     const btns = document.getElementById('adminBtns');
