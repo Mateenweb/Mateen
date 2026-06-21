@@ -230,6 +230,46 @@ function setupSupervisorAttendance(studentId) {
   };
 }
 
+// ── الإدارة: إضافة درجة جديدة ──────────────────
+function setupAdminGrades(studentId) {
+  const toggleBtn = document.getElementById('newGradeBtn');
+  const form       = document.getElementById('newGradeForm');
+
+  toggleBtn.onclick = () => {
+    form.style.display = form.style.display === 'none' ? 'block' : 'none';
+  };
+  document.getElementById('cancelGradeBtn').onclick = () => {
+    form.style.display = 'none';
+  };
+
+  document.getElementById('saveGradeBtn').onclick = async () => {
+    const label   = document.getElementById('gradeLabel').value.trim();
+    const subject = document.getElementById('gradeSubject').value;
+    const score   = Number(document.getElementById('gradeScore').value);
+    const total   = Number(document.getElementById('gradeTotal').value);
+
+    if (!label || !total) {
+      alert('من فضلك أدخلي اسم الاختبار والدرجة الكلية');
+      return;
+    }
+
+    try {
+      await addDoc(collection(db, 'students', studentId, 'grades'), {
+        label, subject, score, total,
+        createdAt: serverTimestamp(),
+      });
+      form.style.display = 'none';
+      document.getElementById('gradeLabel').value = '';
+      document.getElementById('gradeScore').value = '';
+      document.getElementById('gradeTotal').value = '';
+      showSavedToast();
+    } catch (e) {
+      alert('حدث خطأ أثناء حفظ الدرجة');
+      console.error(e);
+    }
+  };
+}
+
 // ── المشرفة: كتابة/تعديل الملاحظات ────────────
 function setupSupervisorNotes(studentId) {
   document.getElementById('saveNotesBtn').onclick = async () => {
