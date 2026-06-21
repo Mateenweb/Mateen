@@ -1225,19 +1225,33 @@ footer {
   min-height: 0;
 }
 #sidebar-user.show-user {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
+  display: flex !important;
+  flex-direction: column !important;
+  height: 100% !important;
+  overflow: hidden !important;
   min-height: 0;
 }
 #sidebar-user.show-user .sidebar-nav {
-  flex: 1;
-  overflow-y: auto;
+  flex: 1 !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
 }
-#sidebar-user.show-user .px-3.pb-3 {
-  flex-shrink: 0;
-  padding-top: 8px;
-  border-top: 1px solid var(--border);
+#sidebar-user.show-user > .px-3.pb-3 {
+  flex-shrink: 0 !important;
+  margin-top: 0 !important;
+  padding-top: 10px !important;
+  border-top: 1px solid var(--border) !important;
+}
+
+.sidebar-offcanvas {
+  width: 280px !important;
+}
+.sidebar-offcanvas .offcanvas-body {
+  display: flex !important;
+  flex-direction: column !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  height: 100% !important;
 }
 
 .form-input-readonly {
@@ -1272,83 +1286,4 @@ footer {
 
 @keyframes spin {
   to { transform: rotate(360deg); }
-}
-
-
-
-
-/* ══ إصلاح layout السايدبار ══ */
-.sidebar-offcanvas .offcanvas-body {
-  display: flex;
-  flex-direction: column;
-  padding: 0;
-  overflow: hidden;
-}
-.sidebar-offcanvas .offcanvas-body > div {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  overflow-y: auto;
-  overflow-x: hidden;
-}
-
-/* ══ إصلاح نهائي للسايدبار ══ */
-.sidebar-offcanvas {
-  width: 280px !important;
-}
-.sidebar-offcanvas .offcanvas-body {
-  display: flex !important;
-  flex-direction: column !important;
-  overflow: hidden !important;
-  padding: 0 !important;
-  height: 100% !important;
-}
-#sidebar-user.show-user {
-  display: flex !important;
-  flex-direction: column !important;
-  height: 100% !important;
-  overflow: hidden !important;
-}
-#sidebar-user.show-user .sidebar-nav {
-  flex: 1 !important;
-  overflow-y: auto !important;
-  overflow-x: hidden !important;
-}
-#sidebar-user.show-user > .px-3.pb-3 {
-  flex-shrink: 0 !important;
-  padding-top: 8px !important;
-  border-top: 1px solid var(--border) !important;
-  background: var(--white) !important;
-}
-
-/* ══ السايدبار بحجم المحتوى بدون مساحة فاضية ══ */
-#sidebar-user.show-user {
-  height: auto !important;
-  min-height: unset !important;
-}
-.sidebar-offcanvas .offcanvas-body {
-  height: auto !important;
-  overflow-y: auto !important;
-}
-
-/* ══ إعادة السايدبار لطوله الكامل مع تثبيت زرار الخروج في الأسفل ══ */
-#sidebar-user.show-user {
-  height: 100% !important;
-  min-height: unset !important;
-  display: flex !important;
-  flex-direction: column !important;
-}
-.sidebar-offcanvas .offcanvas-body {
-  height: 100% !important;
-  overflow: hidden !important;
-}
-#sidebar-user.show-user .sidebar-nav {
-  flex: 1 !important;
-  overflow-y: auto !important;
-}
-#sidebar-user.show-user > .px-3.pb-3 {
-  margin-top: auto !important;
-  flex-shrink: 0 !important;
-  border-top: 1px solid var(--border) !important;
-  padding-top: 10px !important;
 }
