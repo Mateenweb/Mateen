@@ -75,8 +75,7 @@ onAuthStateChanged(auth, async user => {
   function show(id) { const el = document.getElementById(id); if(el) el.classList.remove('d-none'); }
   function hide(id)  { const el = document.getElementById(id); if(el) el.classList.add('d-none'); }
 
-  // روابط خاصة ببنات متين بس — اتأكد إنها مخفية تماماً لأي دور تاني
-  // (إجراء احترازي حتى لو حصل تعارض من مكان تاني في الكود)
+  // روابط خاصة ببنات متين بس — إخفاء لأي دور تاني
   if (role !== 'mateen') {
     hide('profileLink');
     hide('linkCerts');
@@ -85,13 +84,15 @@ onAuthStateChanged(auth, async user => {
     hide('linkSchedule');
   }
 
+  // طالباتي — تخفى من الأدمن والمشرفة
+  if (role === 'admin' || role === 'supervisor') {
+    hide('linkTeacher');
+  }
+
   if (role === 'admin') {
-    // الإدارة: الرئيسية + رسائلي + لوحة الإدارة + الأخبار + طالباتي
     show('linkAdmin');
     show('linkNews');
-    show('linkTeacher');
   } else if (role === 'supervisor') {
-    // المشرفة: الرئيسية + رسائلي + لوحة المشرفة + الأخبار + طالباتي
     const linkAdminEl = document.getElementById('linkAdmin');
     if (linkAdminEl) {
       linkAdminEl.href = 'supervisor.html';
@@ -99,13 +100,10 @@ onAuthStateChanged(auth, async user => {
     }
     show('linkAdmin');
     show('linkNews');
-    show('linkTeacher');
   } else if (role === 'teacher') {
-    // المعلمة: الرئيسية + رسائلي + الأخبار + طالباتي
     show('linkNews');
     show('linkTeacher');
   } else if (role === 'mateen') {
-    // الطالبة: الرئيسية + رسائلي + ملفي الشخصي + شهاداتي/إجازاتي/درجاتي + جدولي + الأخبار
     show('linkCerts');
     show('linkAwards');
     show('linkGrades');
