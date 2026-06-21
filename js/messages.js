@@ -81,7 +81,12 @@ onAuthStateChanged(auth, async user => {
   const myNameEl = document.getElementById('myName');
   if (myNameEl) myNameEl.textContent = data.name || currentUser.email;
 
-  // إلغاء أي listeners قديمة قبل إعادة التشغيل (مهم عند الريفريش)
+  // إظهار أزرار الصورة والتسجيل — للكل ما عدا الطالبة
+  const mediaButtons = document.getElementById('mediaButtons');
+  if (mediaButtons) {
+    const canMedia = !['student', 'mateen'].includes(data.role);
+    mediaButtons.style.display = canMedia ? 'flex' : 'none';
+  }
   if (convUnsub) { convUnsub(); convUnsub = null; }
   if (msgUnsub)  { msgUnsub();  msgUnsub  = null; }
   activeConvId = null;
