@@ -248,15 +248,29 @@ onAuthStateChanged(auth, async user => {
     console.log('[طالباتي] role:', role, '| subject:', subject, '| total mateen:', allDocs.length);
     console.log('[طالباتي] sample:', allDocs.slice(0,2).map(u => ({name:u.name, status:u.status, enrolled:u.enrolledSubjects})));
 
+    // تحويل subject ID → اسم المادة العربي
+    const SUBJECT_MAP = {
+      'tafseer':  'التفسير',
+      'fiqh':     'الفقه',
+      'aqeedah':  'العقيدة',
+      'hadith':   'الحديث',
+      'quran':    'مقرأة متين',
+      'quran1':   'مقرأة متين',
+      'quran2':   'مقرأة متين',
+    };
+    const subjectAr = SUBJECT_MAP[subject] || subject;
+
+    // تحديث badge المادة بالاسم العربي
+    if (subjectAr) {
+      document.getElementById('subjectName').textContent = subjectAr;
+    }
+
     // المعلمة: فقط طالباتها المسجلات في مادتها
     if (role === 'teacher') {
-      if (subject) {
+      if (subjectAr) {
         allDocs = allDocs.filter(s =>
-          Array.isArray(s.enrolledSubjects) && s.enrolledSubjects.includes(subject)
+          Array.isArray(s.enrolledSubjects) && s.enrolledSubjects.includes(subjectAr)
         );
-      } else {
-        // معلمة بدون مادة محددة — عرض الكل
-        allDocs = allDocs;
       }
     }
     // الأدمن/المشرفة: كل الطالبات
