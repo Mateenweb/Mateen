@@ -599,6 +599,15 @@ window.openDynModal = (id) => {
           <ul class="topics-list">${topics.map(t => `<li>${t}</li>`).join('')}</ul>` : ''}
         ${matsHTML}
         <div class="modal-actions">
+          ${isAdmin() ? `
+          <button onclick="document.getElementById('dynModal-${id}').remove();openEditSubjectModal('${id}')"
+            style="flex:1;padding:8px 14px;border:1px solid var(--green-dark);background:transparent;color:var(--green-dark);border-radius:8px;font-family:inherit;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;">
+            <i class="ti ti-pencil"></i> تعديل
+          </button>
+          <button onclick="document.getElementById('dynModal-${id}').remove();confirmDeleteSubject('${id}','${s.name.replace(/'/g, "\\'")}')"
+            style="flex:1;padding:8px 14px;border:1px solid #c0392b;background:transparent;color:#c0392b;border-radius:8px;font-family:inherit;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;">
+            <i class="ti ti-trash"></i> حذف
+          </button>` : ''}
           <button class="btn-close-modal" onclick="document.getElementById('dynModal-${id}').remove()">إغلاق</button>
         </div>
       </div>
