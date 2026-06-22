@@ -368,6 +368,7 @@ window.openConv = async (cid, otherId, otherName, otherRole) => {
           : `<button class="view-once-btn" onclick="viewOnceOpen('${activeConvId}','${m.id}','${m.url}','audio')"><i class="ti ti-player-play"></i> اضغطي للاستماع مرة واحدة</button>`)
       : `<audio controls controlsList="nodownload" src="${m.url}"></audio>`)
   : `<span class="msg-text">${escapeHtml(m.text || '')}</span>`}
+                ${m.viewOnce && mine ? `<span class="view-once-tag"><i class="ti ti-flame"></i> مرة واحدة</span>` : ''}
                 <span class="msg-time">${time}${mine ? ` <i class="ti ti-${seen ? 'checks' : 'check'}" style="color:${seen ? '#4fc3f7' : '#aaa'}"></i>` : ''}</span>
               </div>
             </div>
