@@ -142,7 +142,7 @@ function renderAttendance() {
           <div class="att-btns">
             <button class="att-btn att-present ${st==='present'?'active':''}" onclick="setAtt('${u.id}','present',this)"><i class="ti ti-check"></i> حاضرة</button>
             <button class="att-btn att-absent ${st==='absent'?'active':''}" onclick="setAtt('${u.id}','absent',this)"><i class="ti ti-x"></i> غائبة</button>
-            <button class="att-btn att-excused ${st==='excused'?'active':''}" onclick="setAtt('${u.id}','excused',this)"><i class="ti ti-clock-pause"></i> متذرة</button>
+            <button class="att-btn att-excused ${st==='excused'?'active':''}" onclick="setAtt('${u.id}','excused',this)"><i class="ti ti-clock-pause"></i> معتذرة</button>
           </div>
         </td>
       </tr>`;
