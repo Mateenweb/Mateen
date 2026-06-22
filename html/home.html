@@ -81,6 +81,9 @@
       <a class="nav-profile-btn" id="navProfileBtn" href="student.html" aria-label="ملفي الشخصي">
         <div class="nav-profile-avatar" id="navProfileAvatar">👩</div>
       </a>
+      <button class="nav-logout-btn" id="navLogoutBtn" onclick="doLogout()" title="تسجيل الخروج">
+        <i class="ti ti-logout"></i>
+      </button>
     </div>
 
     <button class="sidebar-fab" id="sidebarFab" aria-label="ملفي وحسابي" data-bs-toggle="offcanvas" data-bs-target="#mainSidebar" aria-controls="mainSidebar">
@@ -199,12 +202,6 @@
 
         <hr class="sidebar-divider mx-3 my-1"/>
 
-        <!-- زرار الخروج -->
-        <div class="px-3 pb-3">
-          <button class="sidebar-logout-btn w-100" onclick="doLogout()">
-            <i class="ti ti-logout"></i> تسجيل الخروج
-          </button>
-        </div>
       </div>
 
       <!-- فوتر السايدبار -->
