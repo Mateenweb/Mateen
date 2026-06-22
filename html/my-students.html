@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html dir="rtl" lang="ar">
-<head><!-- v3 -->
+<head>
 <meta charset="utf-8"/>
 <link href="../favicon.ico" rel="icon" type="image/x-icon"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
@@ -56,9 +56,12 @@
   }
   .search-box:focus { outline: none; border-color: var(--gold); }
   .students-grid {
-    display: grid;
+    display: none;
     grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
     gap: 16px;
+  }
+  .students-grid.visible {
+    display: grid;
   }
   .student-card {
     background: var(--white);
@@ -69,6 +72,7 @@
     align-items: center;
     gap: 14px;
     transition: box-shadow 0.2s;
+    cursor: pointer;
   }
   .student-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
   .student-avatar {
@@ -101,7 +105,7 @@
     margin-top: 5px;
     display: inline-block;
   }
-  .status-active { background: #e8f5e9; color: #2e7d32; }
+  .status-active  { background: #e8f5e9; color: #2e7d32; }
   .status-pending { background: #fff8e1; color: #f57f17; }
   .empty-state {
     text-align: center;
@@ -162,7 +166,7 @@
 
 <div class="students-wrap">
   <div class="page-title"><i class="ti ti-users" style="margin-left:8px;"></i>طالباتي</div>
-  <div class="page-sub">الطالبات المسجلات في مادتك</div>
+  <div class="page-sub" id="pageSub">الطالبات المسجلات في مادتك</div>
 
   <div id="subjectBadge" class="subject-badge" style="display:none;">
     <i class="ti ti-book"></i>
@@ -176,7 +180,7 @@
     <div>جاري التحميل...</div>
   </div>
 
-  <div class="students-grid" id="studentsGrid" style="display:none;"></div>
+  <div class="students-grid" id="studentsGrid"></div>
 </div>
 
 <script type="module">
@@ -194,6 +198,19 @@ const db   = getFirestore(app);
 
 let allStudents = [];
 
+const SUBJECT_MAP = {
+  'tafseer': 'التفسير',
+  'fiqh':    'الفقه',
+  'aqeedah': 'العقيدة',
+  'hadith':  'الحديث',
+  'quran':   'مقرأة متين',
+  'quran1':  'مقرأة متين',
+  'quran2':  'مقرأة متين',
+};
+
+function show(id)  { document.getElementById(id).style.display = ''; }
+function hide(id)  { document.getElementById(id).style.display = 'none'; }
+
 function studentCardHTML(s) {
   const statusClass = s.status === 'active' ? 'status-active' : 'status-pending';
   const statusText  = s.status === 'active' ? 'مفعّلة' : 'بانتظار التفعيل';
@@ -209,99 +226,67 @@ function studentCardHTML(s) {
 }
 
 window.filterStudents = () => {
-  const q = document.getElementById('searchInput').value.trim().toLowerCase();
+  const q        = document.getElementById('searchInput').value.trim().toLowerCase();
   const filtered = q ? allStudents.filter(s => (s.name || '').toLowerCase().includes(q)) : allStudents;
-  const grid = document.getElementById('studentsGrid');
-  document.getElementById('loadingState').style.display = 'none';
-  grid.style.display = 'grid';
-  document.getElementById('searchInput').style.display = 'block';
-  if (filtered.length === 0) {
-    grid.innerHTML = `<div class="empty-state"><i class="ti ti-user-off"></i>لا توجد طالبات مطابقة للبحث</div>`;
-  } else {
-    grid.innerHTML = filtered.map(studentCardHTML).join('');
-  }
+  const grid     = document.getElementById('studentsGrid');
+  grid.classList.add('visible');
+  grid.innerHTML = filtered.length === 0
+    ? `<div class="empty-state"><i class="ti ti-user-off"></i>لا توجد طالبات مطابقة للبحث</div>`
+    : filtered.map(studentCardHTML).join('');
 };
+
+function showError(msg) {
+  hide('loadingState');
+  document.getElementById('studentsGrid').innerHTML =
+    `<div class="empty-state"><i class="ti ti-alert-circle"></i>${msg}</div>`;
+  document.getElementById('studentsGrid').classList.add('visible');
+}
 
 onAuthStateChanged(auth, async user => {
   if (!user) { location.href = 'login.html'; return; }
 
-  const userSnap = await getDoc(doc(db, 'users', user.uid));
-  const userData = userSnap.exists() ? userSnap.data() : {};
-  const role     = userData.role || '';
-  const subject  = userData.subject || '';
-
-  // صلاحية الدخول: معلمة أو أدمن أو مشرفة
-  if (!['teacher','admin','supervisor'].includes(role)) {
-    location.href = 'home.html';
-    return;
-  }
-
-  // أظهر اسم المادة لو معلمة
-  if (subject) {
-    document.getElementById('subjectBadge').style.display = 'inline-flex';
-    document.getElementById('subjectName').textContent = subject;
-  }
-
-  // جلب الطالبات المسجلات في المادة
   try {
-    // جيب كل المستخدمين بدور mateen (المفعّلة وغيرها)
-    const snap = await getDocs(query(collection(db, 'users'), where('role', '==', 'mateen')));
-    let allDocs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    const userSnap = await getDoc(doc(db, 'users', user.uid));
+    const userData = userSnap.exists() ? userSnap.data() : {};
+    const role     = userData.role    || '';
+    const subject  = userData.subject || '';
 
-    console.log('[طالباتي] role:', role, '| subject:', subject, '| total mateen:', allDocs.length);
-    console.log('[طالباتي] sample:', allDocs.slice(0,2).map(u => ({name:u.name, status:u.status, enrolled:u.enrolledSubjects})));
+    if (!['teacher','admin','supervisor'].includes(role)) {
+      location.href = 'home.html';
+      return;
+    }
 
-    // تحويل subject ID → اسم المادة العربي
-    const SUBJECT_MAP = {
-      'tafseer':  'التفسير',
-      'fiqh':     'الفقه',
-      'aqeedah':  'العقيدة',
-      'hadith':   'الحديث',
-      'quran':    'مقرأة متين',
-      'quran1':   'مقرأة متين',
-      'quran2':   'مقرأة متين',
-    };
     const subjectAr = SUBJECT_MAP[subject] || subject;
 
-    // تحديث badge المادة بالاسم العربي
     if (subjectAr) {
-      document.getElementById('subjectName').textContent = subjectAr;
+      document.getElementById('subjectBadge').style.display = 'inline-flex';
+      document.getElementById('subjectName').textContent    = subjectAr;
     }
 
-    // المعلمة: فقط طالباتها المسجلات في مادتها
-    if (role === 'teacher') {
-      if (subjectAr) {
-        allDocs = allDocs.filter(s =>
-          Array.isArray(s.enrolledSubjects) && s.enrolledSubjects.includes(subjectAr)
-        );
-      }
+    // جلب الطالبات
+    const snap    = await getDocs(query(collection(db, 'users'), where('role', '==', 'mateen')));
+    let   allDocs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+    // المعلمة: فلتر على مادتها فقط
+    if (role === 'teacher' && subjectAr) {
+      allDocs = allDocs.filter(s =>
+        Array.isArray(s.enrolledSubjects) && s.enrolledSubjects.includes(subjectAr)
+      );
     }
-    // الأدمن/المشرفة: كل الطالبات
+
     allStudents = allDocs;
-    console.log('[طالباتي] بعد الفلترة:', allStudents.length);
 
-    document.getElementById('loadingState').style.display  = 'none';
-    document.getElementById('studentsGrid').style.display  = 'grid';
-    document.getElementById('searchInput').style.display   = 'block';
-
-    // عنوان مع عدد الطالبات
-    document.querySelector('.page-sub').innerHTML =
+    // إخفاء loading وإظهار باقي العناصر
+    hide('loadingState');
+    document.getElementById('searchInput').style.display = 'block';
+    document.getElementById('pageSub').innerHTML =
       `الطالبات المسجلات في مادتك <span class="count-badge">${allStudents.length}</span>`;
 
-    if (allStudents.length === 0) {
-      document.getElementById('studentsGrid').innerHTML =
-        `<div class="empty-state"><i class="ti ti-user-off"></i>لا توجد طالبات مسجلات في هذه المادة بعد</div>`;
-    } else {
-      console.log('[DEBUG] calling filterStudents, grid display:', document.getElementById('studentsGrid').style.display);
-      window.filterStudents();
-      console.log('[DEBUG] after filterStudents, grid display:', document.getElementById('studentsGrid').style.display);
-      console.log('[DEBUG] grid innerHTML length:', document.getElementById('studentsGrid').innerHTML.length);
-      console.log('[DEBUG] grid offsetHeight:', document.getElementById('studentsGrid').offsetHeight);
-    }
+    window.filterStudents();
+
   } catch(e) {
-    document.getElementById('loadingState').innerHTML =
-      `<div class="empty-state"><i class="ti ti-alert-circle"></i>حدث خطأ في التحميل، حاولي مرة أخرى</div>`;
-    console.error(e);
+    console.error('[طالباتي] خطأ:', e);
+    showError('حدث خطأ في التحميل، حاولي مرة أخرى');
   }
 });
 </script>
