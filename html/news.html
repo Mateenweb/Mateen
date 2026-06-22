@@ -159,7 +159,8 @@ onAuthStateChanged(auth, async user => {
   if (!user) return;
   const { getDoc } = await import("https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js");
   const snap = await getDoc(doc(db, 'users', user.uid));
-  if (snap.exists() && snap.data().role === 'admin') {
+  const role = snap.exists() ? snap.data().role : '';
+  if (['admin', 'supervisor', 'teacher'].includes(role)) {
     isAdmin = true;
     const btn = document.getElementById('addNewsBtn');
     if (btn) btn.classList.add('show');
