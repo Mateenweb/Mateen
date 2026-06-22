@@ -90,7 +90,6 @@ function showToast(msg) { const t=document.getElementById('toast'); t.textConten
 // ══════════════════════════════════════════════════════════════
 //  الغياب — Attendance
 // ══════════════════════════════════════════════════════════════
- from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 
 let allMateenUsers = [];   // كل الطالبات النشطات
 let attStatus = {};        // { uid: 'present'|'absent'|'excused' }
