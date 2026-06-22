@@ -141,7 +141,9 @@
             <button class="msg-media-btn" onclick="document.getElementById('imgFileInput').click()" title="إرسال صورة">
               <i class="ti ti-photo"></i>
             </button>
-
+            <button class="msg-media-btn" id="recordBtn" onclick="toggleRecording()" title="تسجيل صوتي">
+              <i class="ti ti-microphone"></i>
+            </button>
           </div>
 
           <textarea id="msgInput" class="msg-input"
@@ -150,7 +152,11 @@
                     onkeydown="handleMsgKey(event)"
                     oninput="autoGrow(this)"></textarea>
 
-
+          <!-- مؤشر التسجيل -->
+          <div id="recordingIndicator" style="display:none;align-items:center;gap:6px;font-size:12px;color:#c0392b;flex-shrink:0;">
+            <span style="width:8px;height:8px;background:#c0392b;border-radius:50%;animation:blink 1s infinite;"></span>
+            <span id="recordTimer">0:00</span>
+          </div>
 
           <button class="msg-send-btn" onclick="sendMsg()" title="إرسال">
             <i class="ti ti-send"></i>
