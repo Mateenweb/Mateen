@@ -20,6 +20,15 @@
 <meta name="apple-mobile-web-app-title" content="متين">
   <link href="../css/responsive-fix.css" rel="stylesheet"/>
   <link href="../css/modals.css" rel="stylesheet"/>
+<script>
+  function revealPage() { document.documentElement.classList.add('ready'); }
+  var t = setTimeout(revealPage, 100);
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(function() { clearTimeout(t); revealPage(); });
+  } else {
+    window.addEventListener('load', revealPage);
+  }
+</script>
 </head>
 <body>
 <div class="basmala-bar"><span class="bsm-ornament">❦</span>بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ<span class="bsm-ornament">❦</span></div>

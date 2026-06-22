@@ -14,6 +14,15 @@
 <link href="../css/responsive-fix.css" rel="stylesheet"/>
 <link rel="manifest" href="/Mateen/manifest.json">
 <meta name="theme-color" content="#1a4a2e">
+<script>
+  function revealPage() { document.documentElement.classList.add('ready'); }
+  var t = setTimeout(revealPage, 100);
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(function() { clearTimeout(t); revealPage(); });
+  } else {
+    window.addEventListener('load', revealPage);
+  }
+</script>
 </head>
 <body>
 
