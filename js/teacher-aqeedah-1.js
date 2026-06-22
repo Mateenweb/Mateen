@@ -50,8 +50,9 @@ onAuthStateChanged(auth, async user => {
     if (bc) bc.textContent = n;
     const ct = document.getElementById('contactTitle');
     if (ct) ct.textContent = 'تواصلي مع ' + n;
+  } else {
+    loadTeacherName();
   }
-  loadTeacherName();
 });
 
 window.sendMessage = async () => {
