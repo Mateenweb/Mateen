@@ -357,7 +357,7 @@ window.openConv = async (cid, otherId, otherName, otherRole) => {
                 ${m.type === 'image'
   ? `<img class="msg-img" src="${m.url}" alt="صورة" onclick="window.open('${m.url}','_blank')">`
   : m.type === 'audio'
-  ? `<audio controls src="${m.url}"></audio>`
+  ? `<audio controls controlsList="nodownload" src="${m.url}"></audio>`
   : `<span class="msg-text">${escapeHtml(m.text || '')}</span>`}
                 <span class="msg-time">${time}${mine ? ` <i class="ti ti-${seen ? 'checks' : 'check'}" style="color:${seen ? '#4fc3f7' : '#aaa'}"></i>` : ''}</span>
               </div>
