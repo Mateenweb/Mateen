@@ -126,7 +126,6 @@ window.loadAttendance = async () => {
   const dateVal = document.getElementById('attDate').value;
   if (!dateVal) { showToast('اختاري التاريخ أولاً'); return; }
 
-  // اعرفي اسم اليوم بالعربي
   const dateObj = new Date(dateVal + 'T00:00:00');
   const dayAr   = DAYS_AR[dateObj.getDay()];
   document.getElementById('attDayName').textContent = dayAr;
@@ -138,28 +137,24 @@ window.loadAttendance = async () => {
   attSessions = [];
   attData     = {};
 
-  // جيبي كل المواد اللي عندها جلسة في هذا اليوم
-  await Promise.all(SUBJECTS_MAP.map(async subj => {
-    const q = query(collection(db, 'teachers', subj.id, 'schedule'));
-    const snap = await getDocs(q);
-    const slots = [];
-    snap.forEach(d => { if (d.data().day === dayAr) slots.push(d.data()); });
-    if (slots.length > 0) {
-      attSessions.push({ subjectId: subj.id, subjectAr: subj.ar, slots });
-      attData[subj.id] = {};
-    }
-  }));
+  // جيبي الطالبات اللي يومهم = هذا اليوم
+  const studentsSnap = await getDocs(query(collection(db,'students'), orderBy('order')));
+  const todayStudents = studentsSnap.docs
+    .map(d => ({ id: d.id, ...d.data() }))
+    .filter(s => s.name && s.name.trim() && s.name !== 'طالبة جديدة' && s.day === dayAr);
 
-  // جيبي الغياب المسجل مسبقاً لهذا التاريخ
-  if (attSessions.length > 0) {
-    const q = query(
-      collection(db,'attendance'),
-      where('date','==',dateVal)
-    );
-    const snap = await getDocs(q);
-    snap.forEach(d => {
+  if (todayStudents.length > 0) {
+    // كل المواد الستة تظهر لطالبات اليوم ده
+    SUBJECTS_MAP.forEach(subj => {
+      attSessions.push({ subjectId: subj.id, subjectAr: subj.ar, students: todayStudents });
+      attData[subj.id] = {};
+    });
+
+    // جيبي الغياب المسجل مسبقاً
+    const oldSnap = await getDocs(query(collection(db,'attendance'), where('date','==',dateVal)));
+    oldSnap.forEach(d => {
       const { studentId, subjectId, status } = d.data();
-      if (attData[subjectId]) attData[subjectId][studentId] = status;
+      if (attData[subjectId] !== undefined) attData[subjectId][studentId] = status;
     });
   }
 
@@ -194,7 +189,7 @@ function renderAttendance(dateVal, dayAr) {
       <table class="pending-table att-table">
         <thead><tr><th>الطالبة</th><th>الحضور</th></tr></thead>
         <tbody>
-          ${allMateenUsers.map(u => {
+          ${sess.students.map(u => {
             const st = (attData[sess.subjectId]||{})[u.id] || 'present';
             return `<tr>
               <td class="att-student-name">${esc(u.name||'—')}</td>
@@ -245,7 +240,7 @@ window.saveAttendance = async () => {
     // احفظي الجديدة
     const writes = [];
     attSessions.forEach(sess => {
-      allMateenUsers.forEach(u => {
+      sess.students.forEach(u => {
         const status = (attData[sess.subjectId]||{})[u.id] || 'present';
         writes.push(addDoc(collection(db,'attendance'), {
           studentId:   u.id,
