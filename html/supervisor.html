@@ -69,23 +69,13 @@
   <div class="section-body">
     <div class="attendance-toolbar">
       <div class="att-field-group">
-        <label>المادة</label>
-        <select id="attSubject">
-          <option value="">اختاري المادة</option>
-          <option>التفسير</option>
-          <option>الفقه</option>
-          <option>العقيدة</option>
-          <option>الحديث</option>
-          <option>مقرأة متين</option>
-        </select>
-      </div>
-      <div class="att-field-group">
         <label>التاريخ</label>
         <input type="date" id="attDate"/>
       </div>
-      <button class="btn-load-att" onclick="loadAttendance()"><i class="ti ti-refresh"></i> تحميل الطالبات</button>
+      <button class="btn-load-att" id="btnLoadAtt" onclick="loadAttendance()"><i class="ti ti-refresh"></i> تحميل الجدول</button>
+      <span class="att-day-badge" id="attDayName"></span>
     </div>
-    <div id="attendanceContainer"><div class="empty-state"><i class="ti ti-calendar"></i>اختاري المادة والتاريخ أولاً</div></div>
+    <div id="attendanceContainer"><div class="empty-state"><i class="ti ti-calendar"></i>اختاري التاريخ لتحميل مواد اليوم</div></div>
     <div id="attSaveBar" style="display:none" class="att-save-bar">
       <button class="btn-save-att" onclick="saveAttendance()"><i class="ti ti-device-floppy"></i> حفظ الغياب</button>
     </div>
@@ -124,4 +114,5 @@
   <script src="../js/sw-register.js"></script>
 </body>
 </html>
+
 
