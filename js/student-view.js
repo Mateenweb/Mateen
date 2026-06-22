@@ -143,6 +143,101 @@ async function loadAll() {
   renderStats(sessions, grades);
   renderSessions(sessions);
   renderGrades(grades);
+  setupAttendanceForm(studentId);
+}
+
+// ── فورم تسجيل الغياب ────────────────────────────────────────────────────
+const SUBJECTS_LIST = ['التفسير', 'الفقه', 'العقيدة', 'الحديث', 'مقرأة متين'];
+
+function setupAttendanceForm(studentId) {
+  const toggleBtn = document.getElementById('newSessionBtn');
+  const form      = document.getElementById('newSessionForm');
+  const subjWrap  = document.getElementById('sessSubjects');
+  const dateInput = document.getElementById('sessDate');
+  const dayInput  = document.getElementById('sessDay');
+  const saveBtn   = document.getElementById('saveSessionBtn');
+  if (!toggleBtn || !form) return;
+
+  // تاريخ اليوم تلقائياً
+  const todayISO = new Date().toISOString().split('T')[0];
+  dateInput.value = todayISO;
+  const dayNames = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+  dayInput.value = dayNames[new Date().getDay()];
+
+  const subjState = {};
+  SUBJECTS_LIST.forEach(s => subjState[s] = 'present');
+
+  function renderSubjRow() {
+    const allPresent = SUBJECTS_LIST.every(s => subjState[s] === 'present');
+    const allAbsent  = SUBJECTS_LIST.every(s => subjState[s] === 'absent');
+    const allExcused = SUBJECTS_LIST.every(s => subjState[s] === 'excused');
+    const bs = (active, color) =>
+      `flex:1;padding:6px 4px;border-radius:7px;font-size:11px;cursor:pointer;font-family:inherit;
+       border:1.5px solid ${color};background:${active?color:'transparent'};color:${active?'#fff':color};`;
+
+    subjWrap.innerHTML = `
+      <div style="display:flex;gap:6px;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--border)">
+        <button type="button" onclick="svSetAll('present')" style="${bs(allPresent,'#1a6a3a')}">✓ كل حاضرة</button>
+        <button type="button" onclick="svSetAll('absent')"  style="${bs(allAbsent,'#c0392b')}">✗ كل غائبة</button>
+        <button type="button" onclick="svSetAll('excused')" style="${bs(allExcused,'#b8860b')}">~ كل بعذر</button>
+      </div>
+      ${SUBJECTS_LIST.map(s => `
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px solid var(--border)">
+        <span style="font-size:13px;font-weight:600">${s}</span>
+        <div style="display:flex;gap:4px">
+          <button type="button" data-subj="${s}" data-val="present"
+            style="padding:3px 10px;font-size:11px;border-radius:6px;cursor:pointer;font-family:inherit;
+              border:1.5px solid #1a6a3a;background:${subjState[s]==='present'?'#1a6a3a':'transparent'};
+              color:${subjState[s]==='present'?'#fff':'#1a6a3a'}">حاضرة</button>
+          <button type="button" data-subj="${s}" data-val="absent"
+            style="padding:3px 10px;font-size:11px;border-radius:6px;cursor:pointer;font-family:inherit;
+              border:1.5px solid #c0392b;background:${subjState[s]==='absent'?'#c0392b':'transparent'};
+              color:${subjState[s]==='absent'?'#fff':'#c0392b'}">غائبة</button>
+          <button type="button" data-subj="${s}" data-val="excused"
+            style="padding:3px 10px;font-size:11px;border-radius:6px;cursor:pointer;font-family:inherit;
+              border:1.5px solid #b8860b;background:${subjState[s]==='excused'?'#b8860b':'transparent'};
+              color:${subjState[s]==='excused'?'#fff':'#b8860b'}">بعذر</button>
+        </div>
+      </div>`).join('')}`;
+
+    subjWrap.querySelectorAll('button[data-subj]').forEach(btn => {
+      btn.onclick = () => { subjState[btn.dataset.subj] = btn.dataset.val; renderSubjRow(); };
+    });
+  }
+
+  window.svSetAll = (val) => { SUBJECTS_LIST.forEach(s => subjState[s] = val); renderSubjRow(); };
+  renderSubjRow();
+
+  // فتح/إغلاق الفورم
+  toggleBtn.onclick = () => {
+    form.style.display = form.style.display === 'none' ? 'block' : 'none';
+    toggleBtn.innerHTML = form.style.display === 'none'
+      ? '<i class="ti ti-plus"></i> تسجيل غياب'
+      : '<i class="ti ti-x"></i> إلغاء';
+  };
+
+  // حفظ
+  saveBtn.onclick = async () => {
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'جاري الحفظ...';
+    try {
+      await addDoc(collection(db, 'students', studentId, 'sessions'), {
+        date:     dateInput.value,
+        day:      dayInput.value,
+        subjects: { ...subjState },
+        createdAt: serverTimestamp(),
+      });
+      form.style.display = 'none';
+      toggleBtn.innerHTML = '<i class="ti ti-plus"></i> تسجيل غياب';
+      // إعادة تحميل الصفحة لتحديث السجل
+      location.reload();
+    } catch(e) {
+      alert('حدث خطأ، حاولي مرة أخرى');
+      console.error(e);
+    }
+    saveBtn.disabled = false;
+    saveBtn.textContent = 'حفظ';
+  };
 }
 
 // ── Stats ────────────────────────────────────
