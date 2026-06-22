@@ -32,6 +32,7 @@ function loadData() {
     document.getElementById('sPending').textContent = pending.length;
     document.getElementById('sActive').textContent  = active.length;
     document.getElementById('sTotal').textContent   = all.length;
+    window._allStudents = all;
     renderPending(pending);
     renderAll(all);
   });
@@ -60,18 +61,74 @@ function renderPending(list) {
 function renderAll(list) {
   const c = document.getElementById('allContainer');
   if (!list.length) { c.innerHTML = '<div class="empty-state"><i class="ti ti-inbox"></i>لا توجد طالبات</div>'; return; }
-  c.innerHTML = `<div style="overflow-x:auto"><table class="pending-table">
-    <thead><tr><th>الاسم</th><th>العمر</th><th>الجوال</th><th>البريد</th><th>الحالة</th><th></th></tr></thead>
-    <tbody>${list.map(u=>`<tr>
-      <td style="font-weight:600">${esc(u.name||'—')}</td>
-      <td>${u.age||'—'}</td>
-      <td dir="ltr">${esc(u.phone||'—')}</td>
-      <td dir="ltr" style="font-size:12px">${esc(u.email||'—')}</td>
-      <td>${u.status==='active'?'<span style="color:var(--green-dark);font-size:12px">✅ نشطة</span>':u.status==='pending'?'<span class="badge-pending">⏳ معلقة</span>':'<span style="color:#c0392b;font-size:12px">❌ مرفوضة</span>'}</td>
-      <td><button class="btn-reject" onclick="suspendUser('${u.id}','${u.status}')"><i class="ti ti-ban"></i> ${u.status==='suspended'?'رفع الإيقاف':'إيقاف'}</button></td>
-    </tr>`).join('')}</tbody>
-  </table></div>`;
+
+  // بحث
+  const searchVal = (document.getElementById('supSearch')?.value || '').toLowerCase();
+  const filtered  = searchVal ? list.filter(u => (u.name||'').toLowerCase().includes(searchVal)) : list;
+
+  c.innerHTML = `
+    <input id="supSearch" type="text" placeholder="🔍 ابحثي باسم الطالبة..."
+      oninput="filterSup()"
+      style="width:100%;padding:9px 14px;border:1px solid var(--border);border-radius:10px;
+             font-family:inherit;font-size:13px;margin-bottom:14px;box-sizing:border-box;">
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;">
+      ${filtered.map(u => `
+        <div style="background:var(--white);border:1px solid var(--border);border-radius:12px;overflow:hidden;
+                    box-shadow:0 2px 8px rgba(0,0,0,0.05);transition:box-shadow 0.2s;"
+             onmouseover="this.style.boxShadow='0 4px 16px rgba(0,0,0,0.1)'"
+             onmouseout="this.style.boxShadow='0 2px 8px rgba(0,0,0,0.05)'">
+          <!-- هيدر الكارت -->
+          <div style="background:var(--green-dark);padding:14px 16px;display:flex;align-items:center;gap:10px;">
+            <div style="width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,0.15);
+                        display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">👩</div>
+            <div style="flex:1;min-width:0;">
+              <div style="font-weight:700;color:#fff;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                ${esc(u.name||'—')}
+              </div>
+              <div style="font-size:11px;color:rgba(255,255,255,0.7);margin-top:2px;">${esc(u.email||'')}</div>
+            </div>
+            <span style="font-size:11px;padding:3px 8px;border-radius:10px;flex-shrink:0;
+              ${u.status==='active'    ? 'background:#e8f5e9;color:#2e7d32;'
+              : u.status==='pending'   ? 'background:#fff8e1;color:#f57f17;'
+              : 'background:#fdecea;color:#c0392b;'}">
+              ${u.status==='active' ? '✅ نشطة' : u.status==='pending' ? '⏳ معلقة' : '❌ موقوفة'}
+            </span>
+          </div>
+          <!-- بيانات -->
+          <div style="padding:12px 16px;font-size:12px;color:var(--text-mid);display:flex;flex-direction:column;gap:4px;">
+            ${u.phone ? `<div><i class="ti ti-phone" style="margin-left:4px;"></i>${esc(u.phone)}</div>` : ''}
+            ${u.year  ? `<div><i class="ti ti-calendar" style="margin-left:4px;"></i>${esc(u.year)}</div>` : ''}
+          </div>
+          <!-- أزرار -->
+          <div style="padding:10px 16px;border-top:1px solid var(--border);display:flex;gap:8px;">
+            <a href="student-view.html?id=${u.id}"
+               style="flex:1;padding:8px;background:var(--green-dark);color:white;border:none;border-radius:8px;
+                      font-family:inherit;font-size:12px;cursor:pointer;text-align:center;text-decoration:none;
+                      display:flex;align-items:center;justify-content:center;gap:4px;">
+              <i class="ti ti-user"></i> الملف والغياب
+            </a>
+            <button onclick="suspendUser('${u.id}','${u.status}')"
+               style="padding:8px 12px;border-radius:8px;font-family:inherit;font-size:12px;cursor:pointer;
+                      border:1px solid ${u.status==='suspended'?'var(--green-dark)':'#c0392b'};
+                      background:transparent;
+                      color:${u.status==='suspended'?'var(--green-dark)':'#c0392b'};">
+              <i class="ti ti-${u.status==='suspended'?'check':'ban'}"></i>
+              ${u.status==='suspended'?'تفعيل':'إيقاف'}
+            </button>
+          </div>
+        </div>`).join('')}
+    </div>`;
 }
+
+window.filterSup = () => {
+  const val = document.getElementById('supSearch')?.value?.toLowerCase() || '';
+  const list = window._allStudents || [];
+  const filtered = val ? list.filter(u => (u.name||'').toLowerCase().includes(val)) : list;
+  renderAll(filtered);
+  // حافظ على قيمة البحث
+  const inp = document.getElementById('supSearch');
+  if (inp) { inp.value = val; inp.focus(); }
+};
 
 const ALL_SUBJECTS = ['التفسير', 'الفقه', 'العقيدة', 'الحديث', 'مقرأة متين'];
 window.approveUser = async id => { await updateDoc(doc(db,'users',id),{status:'active', enrolledSubjects: ALL_SUBJECTS}); showToast('✓ تم قبول الحساب والتحاقها بكل المواد'); };
