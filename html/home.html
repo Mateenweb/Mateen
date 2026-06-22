@@ -114,6 +114,25 @@
   </div>
 </nav>
 
+<script>
+  // إخفاء الروابط فوراً — قبل ما يحمّل JavaScript
+  (function() {
+    const hideLinks = () => {
+      ['profileLink','linkCerts','linkAwards','linkGrades','linkSchedule',
+       'linkAdmin','linkNews','linkTeacher'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.add('d-none');
+      });
+    };
+    // نادي الدالة فوراً لو DOM جاهز
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', hideLinks);
+    } else {
+      hideLinks();
+    }
+  })();
+</script>
+
 <!-- PAGE LAYOUT -->
 <div class="page-layout guest-layout">
 
@@ -524,7 +543,7 @@
 </div>
 
 <script src="../libs/bootstrap/bootstrap.bundle.min.js"></script>
-<script src="../js/home.js?v=3" type="module"></script>
+<script src="../js/home.js?v=4" type="module"></script>
 <script>
 document.getElementById('mobileMenuToggle').addEventListener('click', function() {
   document.getElementById('mobileMenu').classList.toggle('open');
