@@ -60,8 +60,9 @@ onAuthStateChanged(auth, async user => {
   initNotifications(user.uid);
 
   const snap   = await getDoc(doc(db, 'users', user.uid));
-  const role   = snap.exists() ? snap.data().role   : 'student';
-  const status = snap.exists() ? snap.data().status : 'pending';
+  const role    = snap.exists() ? snap.data().role    : 'student';
+  const status  = snap.exists() ? snap.data().status  : 'pending';
+  const subject = snap.exists() ? snap.data().subject || '' : '';
   const name   = user.displayName || user.email.split('@')[0];
 
   document.getElementById('sidebarName').textContent = 'مرحباً، ' + name;
@@ -143,7 +144,13 @@ onAuthStateChanged(auth, async user => {
     } else if (role === 'supervisor') {
       if (navProfileBtn) { navProfileBtn.href = 'supervisor.html'; navProfileBtn.classList.remove('d-none'); }
     } else if (role === 'teacher') {
-      if (navProfileBtn) { navProfileBtn.href = 'teacher-aqeedah.html'; navProfileBtn.classList.remove('d-none'); }
+      const teacherPageMap = {
+        'tafseer':'teacher-tafseer.html','fiqh':'teacher-fiqh.html',
+        'aqeedah':'teacher-aqeedah.html','hadith':'teacher-hadeeth.html',
+        'quran':'teacher-quran1.html','quran1':'teacher-quran1.html','quran2':'teacher-quran2.html'
+      };
+      const teacherPage = teacherPageMap[subject] || 'teacher-profile.html';
+      if (navProfileBtn) { navProfileBtn.href = teacherPage; navProfileBtn.classList.remove('d-none'); }
     } else {
       if (navProfileBtn) navProfileBtn.classList.remove('d-none');
     }
