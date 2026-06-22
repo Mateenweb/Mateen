@@ -355,9 +355,17 @@ window.openConv = async (cid, otherId, otherName, otherRole) => {
               ${mine ? `<button class="msg-delete-btn ${seen ? 'seen' : ''}" title="${seen ? 'لا يمكن الحذف — تمت القراءة' : 'حذف الرسالة'}" onclick="deleteMsg('${activeConvId}','${m.id}',${seen})"><i class="ti ti-trash"></i></button>` : ''}
               <div class="msg-bubble ${mine ? 'mine' : 'theirs'}" title="${fullTime}">
                 ${m.type === 'image'
-  ? `<img class="msg-img" src="${m.url}" alt="صورة" onclick="window.open('${m.url}','_blank')">`
+  ? (m.viewOnce && !mine && currentUserData?.role === 'mateen'
+      ? (m.viewOnceViewedBy?.[currentUser?.uid]
+          ? `<span class="view-once-done"><i class="ti ti-eye-off"></i> تمت المشاهدة</span>`
+          : `<button class="view-once-btn" onclick="viewOnceOpen('${activeConvId}','${m.id}','${m.url}','image')"><i class="ti ti-eye"></i> اضغطي للمشاهدة مرة واحدة</button>`)
+      : `<img class="msg-img" src="${m.url}" alt="صورة" onclick="window.open('${m.url}','_blank')">`)
   : m.type === 'audio'
-  ? `<audio controls controlsList="nodownload" src="${m.url}"></audio>`
+  ? (m.viewOnce && !mine && currentUserData?.role === 'mateen'
+      ? (m.viewOnceViewedBy?.[currentUser?.uid]
+          ? `<span class="view-once-done"><i class="ti ti-eye-off"></i> تم الاستماع</span>`
+          : `<button class="view-once-btn" onclick="viewOnceOpen('${activeConvId}','${m.id}','${m.url}','audio')"><i class="ti ti-player-play"></i> اضغطي للاستماع مرة واحدة</button>`)
+      : `<audio controls controlsList="nodownload" src="${m.url}"></audio>`)
   : `<span class="msg-text">${escapeHtml(m.text || '')}</span>`}
                 <span class="msg-time">${time}${mine ? ` <i class="ti ti-${seen ? 'checks' : 'check'}" style="color:${seen ? '#4fc3f7' : '#aaa'}"></i>` : ''}</span>
               </div>
@@ -534,6 +542,52 @@ window.deleteConv = async (cid) => {
 
 
 // ── إرسال صورة ───────────────────────────────────────────────────────────
+
+// ── View Once Open ─────────────────────────────────────────────────────────
+window.viewOnceOpen = async (convId, msgId, url, type) => {
+  // افتح الميديا
+  if (type === 'image') {
+    window.open(url, '_blank');
+  } else {
+    // شغل الصوت في modal مؤقت
+    const a = document.createElement('audio');
+    a.src = url; a.controls = true; a.autoplay = true;
+    a.controlsList = 'nodownload';
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;z-index:9999;flex-direction:column;gap:12px;';
+    const closeBtn = document.createElement('button');
+    closeBtn.textContent = '✕ إغلاق';
+    closeBtn.style.cssText = 'background:white;border:none;padding:8px 20px;border-radius:8px;cursor:pointer;font-family:inherit;';
+    closeBtn.onclick = () => { a.pause(); document.body.removeChild(overlay); };
+    overlay.appendChild(a);
+    overlay.appendChild(closeBtn);
+    document.body.appendChild(overlay);
+  }
+
+  // احذف الرسالة من عند الطالبة بعد ثانية
+  setTimeout(async () => {
+    try {
+      const { deleteDoc, doc: fsDoc } = await import('https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js');
+      // مش بنحذف الرسالة كلها، بنحط viewOnceViewed عشان تختفي بس من عند الطالبة
+      const { updateDoc } = await import('https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js');
+      await updateDoc(fsDoc(db, 'conversations', convId, 'messages', msgId), {
+        [`viewOnceViewedBy.${currentUser.uid}`]: true
+      });
+    } catch(e) { console.error(e); }
+  }, 1000);
+};
+
+// ── View Once ─────────────────────────────────────────────────────────────
+window.toggleViewOnce = () => {
+  viewOnceMode = !viewOnceMode;
+  const btn = document.getElementById('viewOnceBtn');
+  if (btn) {
+    btn.style.opacity = viewOnceMode ? '1' : '0.5';
+    btn.style.color   = viewOnceMode ? 'var(--gold)' : '';
+    btn.title = viewOnceMode ? 'مرة واحدة (مفعّل)' : 'مرة واحدة';
+  }
+};
+
 window.sendImage = async (input) => {
   const file = input.files[0];
   if (!file || !activeConvId) return;
@@ -548,7 +602,9 @@ window.sendImage = async (input) => {
     senderName: currentUserData?.name || currentUser.email || '',
     senderRole: currentUserData?.role || '',
     sentAt: serverTimestamp(),
+    viewOnce: viewOnceMode,
   });
+  if (viewOnceMode) { viewOnceMode = false; const b = document.getElementById('viewOnceBtn'); if(b){b.style.opacity='0.5';b.style.color='';} }
   const convSnap = await getDoc(doc(db, 'conversations', activeConvId));
   const currentUnread = convSnap.exists() ? (convSnap.data().unread?.[otherId] || 0) : 0;
   await setDoc(doc(db, 'conversations', activeConvId), {
@@ -602,7 +658,9 @@ window.toggleRecording = async () => {
         senderName: currentUserData?.name || currentUser.email || '',
         senderRole: currentUserData?.role || '',
         sentAt: serverTimestamp(),
+        viewOnce: viewOnceMode,
       });
+      if (viewOnceMode) { viewOnceMode = false; const b = document.getElementById('viewOnceBtn'); if(b){b.style.opacity='0.5';b.style.color='';} }
       const convSnap = await getDoc(doc(db, 'conversations', activeConvId));
       const currentUnread = convSnap.exists() ? (convSnap.data().unread?.[otherId] || 0) : 0;
       await setDoc(doc(db, 'conversations', activeConvId), {
