@@ -53,47 +53,7 @@
 
     <!-- Attendance -->
     <div class="card">
-      <div class="card-head" style="display:flex;align-items:center;justify-content:space-between;">
-        <span>📅 سجل الحضور</span>
-        <button id="newSessionBtn"
-          style="display:none;padding:6px 14px;background:var(--green-dark);color:white;border:none;
-                 border-radius:8px;font-family:inherit;font-size:12px;cursor:pointer;gap:4px;
-                 align-items:center;">
-          <i class="ti ti-plus"></i> تسجيل غياب
-        </button>
-      </div>
-
-      <!-- فورم تسجيل الغياب -->
-      <div id="newSessionForm" style="display:none;background:var(--beige);border-radius:10px;padding:14px;margin:12px 0;border:1px solid var(--border);">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
-          <div>
-            <label style="font-size:12px;color:var(--text-mid);display:block;margin-bottom:4px;">التاريخ</label>
-            <input id="sessDate" type="date"
-              style="width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:7px;
-                     font-family:inherit;font-size:13px;box-sizing:border-box;">
-          </div>
-          <div>
-            <label style="font-size:12px;color:var(--text-mid);display:block;margin-bottom:4px;">اليوم</label>
-            <input id="sessDay" type="text" placeholder="الاثنين"
-              style="width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:7px;
-                     font-family:inherit;font-size:13px;box-sizing:border-box;">
-          </div>
-        </div>
-        <div id="sessSubjects" style="margin-bottom:12px;"></div>
-        <div style="display:flex;gap:8px;">
-          <button id="saveSessionBtn"
-            style="flex:1;padding:9px;background:var(--green-dark);color:white;border:none;
-                   border-radius:8px;font-family:inherit;font-size:13px;cursor:pointer;font-weight:600;">
-            <i class="ti ti-device-floppy"></i> حفظ
-          </button>
-          <button onclick="document.getElementById('newSessionForm').style.display='none'"
-            style="padding:9px 16px;border:1px solid var(--border);background:white;border-radius:8px;
-                   font-family:inherit;font-size:13px;cursor:pointer;">
-            إلغاء
-          </button>
-        </div>
-      </div>
-
+      <div class="card-head">📅 سجل الحضور</div>
       <div id="attendanceList" class="attendance-list">
         <div class="empty-msg">لا توجد جلسات مسجلة بعد</div>
       </div>
