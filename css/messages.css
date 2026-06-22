@@ -776,3 +776,11 @@
   height: 36px;
   display: block;
 }
+
+
+/* ── view-once tag على رسائل المُرسِل ── */
+.view-once-tag {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 10px; color: var(--gold); opacity: 0.8;
+  margin-bottom: 2px;
+}
