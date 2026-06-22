@@ -131,11 +131,8 @@ async function loadAll() {
   const sessions = sessSnap.docs.map(d => ({ id: d.id, ...d.data() }));
   const grades   = gradeSnap.docs.map(d => ({ id: d.id, ...d.data() }));
 
-  // Name & status
-  document.getElementById('studentName').textContent = s.name || 'بدون اسم';
-  document.title = (s.name || 'صفحتي') + ' — برنامج متين';
-  const statusMap = { mateen: '📖 بنات متين', new: '✨ المستجدات', '': '' };
-  document.getElementById('studentStatus').textContent = statusMap[s.status] || '';
+  // Name & status - مخفية (البيانات الشخصية لا تظهر للمشرفة)
+  document.title = 'سجل الطالبة — برنامج متين';
 
   // Notes
   if (s.notes && s.notes.trim()) {

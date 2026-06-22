@@ -29,6 +29,7 @@ function loadData() {
     const all     = snap.docs.map(d=>({id:d.id,...d.data()}));
     const pending = all.filter(u=>u.status==='pending');
     const active  = all.filter(u=>u.status==='active');
+    // كل الطالبات بغض النظر عن الحالة
     document.getElementById('sPending').textContent = pending.length;
     document.getElementById('sActive').textContent  = active.length;
     document.getElementById('sTotal').textContent   = all.length;
