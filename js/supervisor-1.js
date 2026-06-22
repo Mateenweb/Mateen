@@ -111,14 +111,11 @@ async function initSupervisorFeatures() {
 }
 
 async function loadMateenUsers() {
-  const q = query(
-    collection(db,'users'),
-    where('role','==','mateen'),
-    where('status','==','active')
-  );
+  const q = query(collection(db,'students'), orderBy('order'));
   const snap = await getDocs(q);
-  allMateenUsers = snap.docs.map(d => ({ id: d.id, ...d.data() }))
-    .sort((a,b) => (a.name||'').localeCompare(b.name||'','ar'));
+  allMateenUsers = snap.docs
+    .map(d => ({ id: d.id, ...d.data() }))
+    .filter(s => s.name && s.name.trim() && s.name !== 'طالبة جديدة');
   renderNotesStudents();
 }
 
