@@ -68,6 +68,7 @@ let msgUnsub        = null;
 let convUnsub       = null;   // unsubscribe للـ conversations listener
 let allUsers        = [];
 let allConvs        = [];
+let viewOnceMode    = false;
 
 // ── Auth ───────────────────────────────────────────────────────────────────
 onAuthStateChanged(auth, async user => {
@@ -691,3 +692,4 @@ window.toggleRecording = async () => {
     alert('لم يتم السماح بالوصول للميكروفون');
   }
 };
+
