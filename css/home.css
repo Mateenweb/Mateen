@@ -1287,3 +1287,7 @@ footer {
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
+
+
+/* ══ إصلاح: منع d-none يتأثر بـ display:flex !important ══ */
+.sidebar-nav a.d-none { display: none !important; }
