@@ -292,7 +292,11 @@ onAuthStateChanged(auth, async user => {
       document.getElementById('studentsGrid').innerHTML =
         `<div class="empty-state"><i class="ti ti-user-off"></i>لا توجد طالبات مسجلات في هذه المادة بعد</div>`;
     } else {
+      console.log('[DEBUG] calling filterStudents, grid display:', document.getElementById('studentsGrid').style.display);
       window.filterStudents();
+      console.log('[DEBUG] after filterStudents, grid display:', document.getElementById('studentsGrid').style.display);
+      console.log('[DEBUG] grid innerHTML length:', document.getElementById('studentsGrid').innerHTML.length);
+      console.log('[DEBUG] grid offsetHeight:', document.getElementById('studentsGrid').offsetHeight);
     }
   } catch(e) {
     document.getElementById('loadingState').innerHTML =
