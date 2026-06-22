@@ -241,25 +241,27 @@ onAuthStateChanged(auth, async user => {
 
   // جلب الطالبات المسجلات في المادة
   try {
-    let q;
-    if (role === 'teacher' && subject) {
-      // المعلمة: جيب كل mateen وافلتر على الكلاينت (بدون compound index)
-      q = query(collection(db, 'users'), where('role', '==', 'mateen'));
-    } else {
-      // الأدمن/المشرفة: كل بنات متين
-      q = query(collection(db, 'users'), where('role', '==', 'mateen'));
-    }
-
-    const snap = await getDocs(q);
-    // فلترة إضافية على الكلاينت عشان نتجنب مشكلة الـ compound index
+    // جيب كل المستخدمين بدور mateen (المفعّلة وغيرها)
+    const snap = await getDocs(query(collection(db, 'users'), where('role', '==', 'mateen')));
     let allDocs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    if (role === 'teacher' && subject) {
-      allDocs = allDocs.filter(s =>
-        Array.isArray(s.enrolledSubjects) && s.enrolledSubjects.includes(subject)
-      );
+
+    console.log('[طالباتي] role:', role, '| subject:', subject, '| total mateen:', allDocs.length);
+    console.log('[طالباتي] sample:', allDocs.slice(0,2).map(u => ({name:u.name, status:u.status, enrolled:u.enrolledSubjects})));
+
+    // المعلمة: فقط طالباتها المسجلات في مادتها
+    if (role === 'teacher') {
+      if (subject) {
+        allDocs = allDocs.filter(s =>
+          Array.isArray(s.enrolledSubjects) && s.enrolledSubjects.includes(subject)
+        );
+      } else {
+        // معلمة بدون مادة محددة — عرض الكل
+        allDocs = allDocs;
+      }
     }
+    // الأدمن/المشرفة: كل الطالبات
     allStudents = allDocs;
-    console.log('[طالباتي] role:', role, '| subject:', subject, '| total mateen:', snap.docs.length, '| filtered:', allStudents.length);
+    console.log('[طالباتي] بعد الفلترة:', allStudents.length);
 
     document.getElementById('loadingState').style.display  = 'none';
     document.getElementById('studentsGrid').style.display  = 'grid';
