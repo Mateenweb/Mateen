@@ -176,59 +176,51 @@ function setupSupervisorAttendance(studentId) {
   const subjState = {};
   SUPERVISOR_SUBJECTS.forEach(s => subjState[s] = null);
 
-  function setAll(val) {
-    SUPERVISOR_SUBJECTS.forEach(s => subjState[s] = val);
-    renderSubjRow();
-  }
-
   function renderSubjRow() {
     const allPresent = SUPERVISOR_SUBJECTS.every(s => subjState[s] === 'present');
     const allAbsent  = SUPERVISOR_SUBJECTS.every(s => subjState[s] === 'absent');
+    const allExcused = SUPERVISOR_SUBJECTS.every(s => subjState[s] === 'excused');
+
+    const btnStyle = (active, color) => `
+      flex:1;padding:6px 4px;border-radius:7px;font-size:12px;cursor:pointer;font-family:inherit;
+      border:1.5px solid ${color};
+      background:${active ? color : 'transparent'};
+      color:${active ? '#fff' : color};`;
 
     subjWrap.innerHTML = `
       <!-- أزرار تحديد الكل -->
-      <div style="display:flex;gap:8px;margin-bottom:10px;padding-bottom:10px;border-bottom:2px solid var(--border)">
-        <button type="button" onclick="setAllSubj('present')"
-          style="flex:1;padding:7px;border-radius:8px;font-size:13px;cursor:pointer;font-family:inherit;
-            border:1.5px solid var(--green-dark);
-            background:${allPresent ? 'var(--green-dark)' : 'transparent'};
-            color:${allPresent ? '#fff' : 'var(--green-dark)'};">
-          ✓ كل المواد حاضرة
-        </button>
-        <button type="button" onclick="setAllSubj('absent')"
-          style="flex:1;padding:7px;border-radius:8px;font-size:13px;cursor:pointer;font-family:inherit;
-            border:1.5px solid #c0392b;
-            background:${allAbsent ? '#c0392b' : 'transparent'};
-            color:${allAbsent ? '#fff' : '#c0392b'};">
-          ✗ كل المواد غائبة
-        </button>
+      <div style="display:flex;gap:6px;margin-bottom:10px;padding-bottom:10px;border-bottom:2px solid var(--border)">
+        <button type="button" onclick="setAllSubj('present')"  style="${btnStyle(allPresent,'#1a6a3a')}">✓ كل حاضرة</button>
+        <button type="button" onclick="setAllSubj('absent')"   style="${btnStyle(allAbsent,'#c0392b')}">✗ كل غائبة</button>
+        <button type="button" onclick="setAllSubj('excused')"  style="${btnStyle(allExcused,'#b8860b')}">~ كل بعذر</button>
       </div>
       ${SUPERVISOR_SUBJECTS.map(s => `
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px solid var(--border)">
-        <span style="font-size:13px;font-weight:600">${s}</span>
-        <div style="display:flex;gap:6px">
-          <button type="button" class="btn-outline" data-subj="${s}" data-val="present"
-            style="padding:4px 14px;font-size:12px;border-radius:6px;cursor:pointer;font-family:inherit;
-              border:1.5px solid var(--green-dark);
-              background:${subjState[s]==='present' ? 'var(--green-dark)' : 'transparent'};
-              color:${subjState[s]==='present' ? '#fff' : 'var(--green-dark)'};">حاضرة</button>
-          <button type="button" class="btn-outline" data-subj="${s}" data-val="absent"
-            style="padding:4px 14px;font-size:12px;border-radius:6px;cursor:pointer;font-family:inherit;
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 0;border-bottom:1px solid var(--border)">
+        <span style="font-size:13px;font-weight:600;min-width:50px">${s}</span>
+        <div style="display:flex;gap:5px">
+          <button type="button" data-subj="${s}" data-val="present"
+            style="padding:4px 10px;font-size:11px;border-radius:6px;cursor:pointer;font-family:inherit;
+              border:1.5px solid #1a6a3a;
+              background:${subjState[s]==='present' ? '#1a6a3a' : 'transparent'};
+              color:${subjState[s]==='present' ? '#fff' : '#1a6a3a'};">حاضرة</button>
+          <button type="button" data-subj="${s}" data-val="absent"
+            style="padding:4px 10px;font-size:11px;border-radius:6px;cursor:pointer;font-family:inherit;
               border:1.5px solid #c0392b;
               background:${subjState[s]==='absent' ? '#c0392b' : 'transparent'};
               color:${subjState[s]==='absent' ? '#fff' : '#c0392b'};">غائبة</button>
+          <button type="button" data-subj="${s}" data-val="excused"
+            style="padding:4px 10px;font-size:11px;border-radius:6px;cursor:pointer;font-family:inherit;
+              border:1.5px solid #b8860b;
+              background:${subjState[s]==='excused' ? '#b8860b' : 'transparent'};
+              color:${subjState[s]==='excused' ? '#fff' : '#b8860b'};">بعذر</button>
         </div>
       </div>`).join('')}`;
 
     subjWrap.querySelectorAll('button[data-subj]').forEach(btn => {
-      btn.onclick = () => {
-        subjState[btn.dataset.subj] = btn.dataset.val;
-        renderSubjRow();
-      };
+      btn.onclick = () => { subjState[btn.dataset.subj] = btn.dataset.val; renderSubjRow(); };
     });
   }
 
-  // دالة عامة للـ onclick في الـ HTML
   window.setAllSubj = (val) => { SUPERVISOR_SUBJECTS.forEach(s => subjState[s] = val); renderSubjRow(); };
 
   // افتراضياً: كل المواد حاضرة
