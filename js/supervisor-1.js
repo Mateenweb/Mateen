@@ -102,7 +102,7 @@ function renderAll(list) {
           </div>
           <!-- أزرار -->
           <div style="padding:10px 16px;border-top:1px solid var(--border);display:flex;gap:8px;">
-            <a href="student-view.html?id=${u.id}"
+            <a href="student.html?id=${u.id}"
                style="flex:1;padding:8px;background:var(--green-dark);color:white;border:none;border-radius:8px;
                       font-family:inherit;font-size:12px;cursor:pointer;text-align:center;text-decoration:none;
                       display:flex;align-items:center;justify-content:center;gap:4px;">
