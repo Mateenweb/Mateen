@@ -212,6 +212,9 @@ window.filterStudents = () => {
   const q = document.getElementById('searchInput').value.trim().toLowerCase();
   const filtered = q ? allStudents.filter(s => (s.name || '').toLowerCase().includes(q)) : allStudents;
   const grid = document.getElementById('studentsGrid');
+  document.getElementById('loadingState').style.display = 'none';
+  grid.style.display = 'grid';
+  document.getElementById('searchInput').style.display = 'block';
   if (filtered.length === 0) {
     grid.innerHTML = `<div class="empty-state"><i class="ti ti-user-off"></i>لا توجد طالبات مطابقة للبحث</div>`;
   } else {
