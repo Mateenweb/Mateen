@@ -12,21 +12,6 @@ const auth = getAuth(app);
 const TEACHER_ID = "hadeeth";
 const SUBJECT_AR = "الحديث الشريف";
 
-// جلب اسم المعلمة من users collection
-async function loadTeacherName() {
-  try {
-    const q = query(collection(db, 'users'),
-      where('role', '==', 'teacher'),
-      where('subject', '==', TEACHER_ID),
-      where('status', '==', 'active')
-    );
-    const snap = await getDocs(q);
-    if (!snap.empty) {
-      const name = snap.docs[0].data().name || 'دكتورة حصة بنت عبدالعزيز';
-      document.getElementById('teacherName').textContent = name;
-      document.getElementById('breadcrumbName').textContent = name;
-      document.getElementById('contactTitle').textContent = 'تواصلي مع ' + name;
-    }
   } catch(e) {}
 }
 
@@ -41,7 +26,6 @@ onAuthStateChanged(auth, async user => {
   if (status === 'pending' || status === 'suspended') {
     window.location.href = '../html/login.html'; return;
   }
-  loadTeacherName();
 });
 
 window.sendMessage = async () => {
