@@ -41,18 +41,7 @@ onAuthStateChanged(auth, async user => {
   if (status === 'pending' || status === 'suspended') {
     window.location.href = '../html/login.html'; return;
   }
-  // إظهار اسم المعلمة المسجلة دخولها
-  if (snap.exists() && snap.data().name) {
-    const n = snap.data().name;
-    const el = document.getElementById('teacherName');
-    if (el) el.textContent = n;
-    const bc = document.getElementById('breadcrumbName');
-    if (bc) bc.textContent = n;
-    const ct = document.getElementById('contactTitle');
-    if (ct) ct.textContent = 'تواصلي مع ' + n;
-  } else {
-    loadTeacherName();
-  }
+  loadTeacherName();
 });
 
 window.sendMessage = async () => {
