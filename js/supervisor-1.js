@@ -137,18 +137,30 @@ window.loadAttendance = async () => {
   attSessions = [];
   attData     = {};
 
-  // جيبي الطالبات اللي يومهم = هذا اليوم
+  // جيبي كل الطالبات
   const studentsSnap = await getDocs(query(collection(db,'students'), orderBy('order')));
   const todayStudents = studentsSnap.docs
     .map(d => ({ id: d.id, ...d.data() }))
-    .filter(s => s.name && s.name.trim() && s.name !== 'طالبة جديدة' && s.day === dayAr);
+    .filter(s => s.name && s.name.trim() && s.name !== 'طالبة جديدة');
 
   if (todayStudents.length > 0) {
-    // كل المواد الستة تظهر لطالبات اليوم ده
-    SUBJECTS_MAP.forEach(subj => {
-      attSessions.push({ subjectId: subj.id, subjectAr: subj.ar, students: todayStudents });
-      attData[subj.id] = {};
-    });
+    // جيبي المواد اللي عندها جدول في هذا اليوم من teachers collection
+    await Promise.all(SUBJECTS_MAP.map(async subj => {
+      const snap = await getDocs(collection(db, 'teachers', subj.id, 'schedule'));
+      const hasDay = snap.docs.some(d => d.data().day === dayAr);
+      if (hasDay) {
+        attSessions.push({ subjectId: subj.id, subjectAr: subj.ar, students: todayStudents });
+        attData[subj.id] = {};
+      }
+    }));
+
+    // لو مفيش جدول لأي مادة، اعرض كل المواد
+    if (attSessions.length === 0) {
+      SUBJECTS_MAP.forEach(subj => {
+        attSessions.push({ subjectId: subj.id, subjectAr: subj.ar, students: todayStudents });
+        attData[subj.id] = {};
+      });
+    }
 
     // جيبي الغياب المسجل مسبقاً
     const oldSnap = await getDocs(query(collection(db,'attendance'), where('date','==',dateVal)));
