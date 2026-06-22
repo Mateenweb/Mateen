@@ -18,7 +18,7 @@ onAuthStateChanged(auth, async user => {
   document.getElementById('authGate').style.display    = 'none';
   document.getElementById('mainContent').style.display = 'flex';
   loadData();
-  loadMateenUsers();
+  initSupervisorFeatures();
 });
 
 window.doLogout = () => signOut(auth).then(() => window.location.href = '../html/login.html');
@@ -88,97 +88,180 @@ function showToast(msg) { const t=document.getElementById('toast'); t.textConten
 
 
 // ══════════════════════════════════════════════════════════════
-//  الغياب — Attendance
+//  الخريطة: subjectId → اسم عربي
 // ══════════════════════════════════════════════════════════════
+const SUBJECTS_MAP = [
+  { id: 'tafseer',  ar: 'التفسير' },
+  { id: 'fiqh',     ar: 'الفقه' },
+  { id: 'aqeedah',  ar: 'العقيدة' },
+  { id: 'hadeeth',  ar: 'الحديث الشريف' },
+  { id: 'quran1',   ar: 'مقرأة متين (1)' },
+  { id: 'quran2',   ar: 'مقرأة متين (2)' },
+];
 
-let allMateenUsers = [];   // كل الطالبات النشطات
-let attStatus = {};        // { uid: 'present'|'absent'|'excused' }
-let currentAttSubject = '';
-let currentAttDate    = '';
+const DAYS_AR = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
 
-// تحميل قائمة الطالبات النشطات عند فتح الصفحة
+let allMateenUsers  = [];
+let attSessions     = [];   // [{subjectId, subjectAr, slots:[{time}]}]
+let attData         = {};   // { subjectId: { uid: 'present'|'absent'|'excused' } }
+
+// ── init بعد auth ──────────────────────────────────────────
+async function initSupervisorFeatures() {
+  await loadMateenUsers();
+}
+
 async function loadMateenUsers() {
-  const q = query(collection(db,'users'), where('role','==','mateen'), where('status','==','active'), orderBy('name'));
+  const q = query(
+    collection(db,'users'),
+    where('role','==','mateen'),
+    where('status','==','active')
+  );
   const snap = await getDocs(q);
-  allMateenUsers = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  allMateenUsers = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+    .sort((a,b) => (a.name||'').localeCompare(b.name||'','ar'));
   renderNotesStudents();
 }
 
+// ══════════════════════════════════════════════════════════════
+//  الغياب — بناءً على الجدول
+// ══════════════════════════════════════════════════════════════
 window.loadAttendance = async () => {
-  const subject = document.getElementById('attSubject').value;
-  const date    = document.getElementById('attDate').value;
-  if (!subject || !date) { showToast('اختاري المادة والتاريخ'); return; }
-  currentAttSubject = subject;
-  currentAttDate    = date;
-  attStatus = {};
+  const dateVal = document.getElementById('attDate').value;
+  if (!dateVal) { showToast('اختاري التاريخ أولاً'); return; }
 
-  // جيبي الغياب المسجل مسبقاً لهذا اليوم والمادة
-  const q = query(
-    collection(db, 'attendance'),
-    where('subject', '==', subject),
-    where('date', '==', date)
-  );
-  const snap = await getDocs(q);
-  snap.forEach(d => { attStatus[d.data().studentId] = d.data().status; });
+  // اعرفي اسم اليوم بالعربي
+  const dateObj = new Date(dateVal + 'T00:00:00');
+  const dayAr   = DAYS_AR[dateObj.getDay()];
+  document.getElementById('attDayName').textContent = dayAr;
 
-  renderAttendance();
-  document.getElementById('attSaveBar').style.display = 'block';
+  const btn = document.getElementById('btnLoadAtt');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="ti ti-loader spin"></i> جارٍ التحميل...';
+
+  attSessions = [];
+  attData     = {};
+
+  // جيبي كل المواد اللي عندها جلسة في هذا اليوم
+  await Promise.all(SUBJECTS_MAP.map(async subj => {
+    const q = query(collection(db, 'teachers', subj.id, 'schedule'));
+    const snap = await getDocs(q);
+    const slots = [];
+    snap.forEach(d => { if (d.data().day === dayAr) slots.push(d.data()); });
+    if (slots.length > 0) {
+      attSessions.push({ subjectId: subj.id, subjectAr: subj.ar, slots });
+      attData[subj.id] = {};
+    }
+  }));
+
+  // جيبي الغياب المسجل مسبقاً لهذا التاريخ
+  if (attSessions.length > 0) {
+    const q = query(
+      collection(db,'attendance'),
+      where('date','==',dateVal)
+    );
+    const snap = await getDocs(q);
+    snap.forEach(d => {
+      const { studentId, subjectId, status } = d.data();
+      if (attData[subjectId]) attData[subjectId][studentId] = status;
+    });
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = '<i class="ti ti-refresh"></i> تحديث';
+
+  renderAttendance(dateVal, dayAr);
+  document.getElementById('attSaveBar').style.display = attSessions.length ? 'flex' : 'none';
 };
 
-function renderAttendance() {
+function renderAttendance(dateVal, dayAr) {
   const c = document.getElementById('attendanceContainer');
+
+  if (!attSessions.length) {
+    c.innerHTML = '<div class="empty-state"><i class="ti ti-calendar-off"></i>لا توجد مواد مجدولة يوم ' + dayAr + '</div>';
+    return;
+  }
+
   if (!allMateenUsers.length) {
     c.innerHTML = '<div class="empty-state"><i class="ti ti-users"></i>لا توجد طالبات نشطات</div>';
     return;
   }
-  c.innerHTML = `<table class="pending-table att-table">
-    <thead><tr><th>الطالبة</th><th>الحضور</th></tr></thead>
-    <tbody>${allMateenUsers.map(u => {
-      const st = attStatus[u.id] || 'present';
-      return `<tr>
-        <td style="font-weight:600">${esc(u.name||'—')}</td>
-        <td>
-          <div class="att-btns">
-            <button class="att-btn att-present ${st==='present'?'active':''}" onclick="setAtt('${u.id}','present',this)"><i class="ti ti-check"></i> حاضرة</button>
-            <button class="att-btn att-absent ${st==='absent'?'active':''}" onclick="setAtt('${u.id}','absent',this)"><i class="ti ti-x"></i> غائبة</button>
-            <button class="att-btn att-excused ${st==='excused'?'active':''}" onclick="setAtt('${u.id}','excused',this)"><i class="ti ti-clock-pause"></i> معتذرة</button>
-          </div>
-        </td>
-      </tr>`;
-    }).join('')}</tbody>
-  </table>`;
+
+  let html = '';
+  attSessions.forEach(sess => {
+    const timesStr = sess.slots.map(s => s.time||'').filter(Boolean).join('، ');
+    html += `<div class="att-subject-block">
+      <div class="att-subject-head">
+        <span class="att-subject-name">${sess.subjectAr}</span>
+        ${timesStr ? '<span class="att-subject-time"><i class="ti ti-clock"></i> ' + timesStr + '</span>' : ''}
+      </div>
+      <table class="pending-table att-table">
+        <thead><tr><th>الطالبة</th><th>الحضور</th></tr></thead>
+        <tbody>
+          ${allMateenUsers.map(u => {
+            const st = (attData[sess.subjectId]||{})[u.id] || 'present';
+            return `<tr>
+              <td class="att-student-name">${esc(u.name||'—')}</td>
+              <td>
+                <div class="att-btns">
+                  <button class="att-btn att-present ${st==='present'?'active':''}" onclick="setAtt('${sess.subjectId}','${u.id}','present',this)">
+                    <i class="ti ti-check"></i> حاضرة
+                  </button>
+                  <button class="att-btn att-absent ${st==='absent'?'active':''}" onclick="setAtt('${sess.subjectId}','${u.id}','absent',this)">
+                    <i class="ti ti-x"></i> غائبة
+                  </button>
+                  <button class="att-btn att-excused ${st==='excused'?'active':''}" onclick="setAtt('${sess.subjectId}','${u.id}','excused',this)">
+                    <i class="ti ti-clock-pause"></i> معتذرة
+                  </button>
+                </div>
+              </td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>`;
+  });
+  c.innerHTML = html;
 }
 
-window.setAtt = (uid, status, btn) => {
-  attStatus[uid] = status;
-  // تحديث أزرار الصف نفسه
+window.setAtt = (subjectId, uid, status, btn) => {
+  if (!attData[subjectId]) attData[subjectId] = {};
+  attData[subjectId][uid] = status;
   const row = btn.closest('tr');
   row.querySelectorAll('.att-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
 };
 
 window.saveAttendance = async () => {
-  if (!currentAttSubject || !currentAttDate) return;
+  const dateVal = document.getElementById('attDate').value;
+  if (!dateVal || !attSessions.length) return;
+
   const btn = document.querySelector('.btn-save-att');
   btn.disabled = true;
   btn.innerHTML = '<i class="ti ti-loader spin"></i> جارٍ الحفظ...';
-  try {
-    // احذفي القديم لهذا اليوم والمادة ثم أضيفي الجديد
-    const q = query(collection(db,'attendance'), where('subject','==',currentAttSubject), where('date','==',currentAttDate));
-    const old = await getDocs(q);
-    await Promise.all(old.docs.map(d => deleteDoc(doc(db,'attendance',d.id))));
 
-    // أضيفي السجلات الجديدة
-    await Promise.all(allMateenUsers.map(u =>
-      addDoc(collection(db,'attendance'), {
-        studentId: u.id,
-        studentName: u.name || '',
-        subject: currentAttSubject,
-        date: currentAttDate,
-        status: attStatus[u.id] || 'present',
-        recordedAt: Timestamp.now(),
-      })
-    ));
+  try {
+    // احذفي السجلات القديمة لهذا التاريخ
+    const oldQ = query(collection(db,'attendance'), where('date','==',dateVal));
+    const oldSnap = await getDocs(oldQ);
+    await Promise.all(oldSnap.docs.map(d => deleteDoc(doc(db,'attendance',d.id))));
+
+    // احفظي الجديدة
+    const writes = [];
+    attSessions.forEach(sess => {
+      allMateenUsers.forEach(u => {
+        const status = (attData[sess.subjectId]||{})[u.id] || 'present';
+        writes.push(addDoc(collection(db,'attendance'), {
+          studentId:   u.id,
+          studentName: u.name || '',
+          subjectId:   sess.subjectId,
+          subjectAr:   sess.subjectAr,
+          date:        dateVal,
+          status,
+          recordedAt:  Timestamp.now(),
+        }));
+      });
+    });
+    await Promise.all(writes);
     showToast('✅ تم حفظ الغياب بنجاح');
   } catch(e) {
     showToast('خطأ: ' + e.message);
@@ -187,6 +270,7 @@ window.saveAttendance = async () => {
     btn.innerHTML = '<i class="ti ti-device-floppy"></i> حفظ الغياب';
   }
 };
+
 
 // ══════════════════════════════════════════════════════════════
 //  النوتس — Notes
@@ -270,5 +354,6 @@ window.deleteNote = async (noteId, uid, text) => {
 window.closeNotesModal = (e) => {
   if (e.target.id === 'notesModal') document.getElementById('notesModal').style.display = 'none';
 };
+
 
 
