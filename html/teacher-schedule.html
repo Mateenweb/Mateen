@@ -74,45 +74,21 @@
 
 <div class="teacher-wrap">
 
+  <!-- صورة الجدول الرسمي -->
+  <div style="text-align:center;padding:8px 16px 20px;">
+    <img src="../schedule.jpg" alt="جدول متين" style="max-width:100%;width:min(500px,95vw);border-radius:16px;box-shadow:0 4px 20px rgba(0,0,0,0.12);"/>
+  </div>
+
   <div class="t-section">
     <div class="t-section-head">
       <i class="ti ti-calendar"></i> الجدول الأسبوعي
-      <button class="tp-add-btn" id="addSlotBtn" onclick="showAddSlot()" style="margin-right:auto"><i class="ti ti-plus"></i> إضافة موعد</button>
+
     </div>
     <div class="t-section-body">
       <div id="scheduleContainer"><div class="empty-state"><i class="ti ti-loader"></i> جارٍ التحميل...</div></div>
     </div>
   </div>
 
-  <!-- نموذج إضافة موعد -->
-  <div class="t-section" id="addSlotForm" style="display:none">
-    <div class="t-section-head"><i class="ti ti-plus"></i> إضافة موعد جديد</div>
-    <div class="t-section-body">
-      <div class="t-contact-form">
-        <div class="t-form-row">
-          <div class="t-field">
-            <label>اليوم</label>
-            <select id="slotDay">
-              <option>الأحد</option><option>الاثنين</option><option>الثلاثاء</option>
-              <option>الأربعاء</option><option>الخميس</option><option>الجمعة</option><option>السبت</option>
-            </select>
-          </div>
-          <div class="t-field">
-            <label>الوقت</label>
-            <input type="time" id="slotTime"/>
-          </div>
-        </div>
-        <div class="t-field">
-          <label>ملاحظة (اختياري)</label>
-          <input type="text" id="slotNote" placeholder="مثال: مراجعة — المجموعة الأولى"/>
-        </div>
-        <div style="display:flex;gap:10px">
-          <button class="t-submit" onclick="saveSlot()"><i class="ti ti-check"></i> حفظ</button>
-          <button class="t-submit" style="background:var(--beige2);color:var(--text-dark)" onclick="document.getElementById('addSlotForm').style.display='none'">إلغاء</button>
-        </div>
-      </div>
-    </div>
-  </div>
 
 </div>
 
