@@ -4,7 +4,7 @@
 import { initializeApp, getApps, getApp }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
 import { getFirestore, collection, query, where, orderBy,
-         onSnapshot, doc, updateDoc, addDoc, serverTimestamp, deleteDoc, getDocs }
+         onSnapshot, doc, getDoc, updateDoc, addDoc, serverTimestamp, deleteDoc, getDocs }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 import { getAuth, onAuthStateChanged }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
@@ -153,15 +153,21 @@ function startListening(userId) {
 
       if (isNewMsg && notFromMe && hasContent && !isReadEvent) {
         lastSeen[convId] = lastAt;
-        console.log('[Notif] 🔔 NEW MESSAGE! showing notification');
         const onMsgsPage = window.location.pathname.includes('messages.html');
         playSound();
-        // إشعار للـ SW عشان يشتغل على الموبايل في الخلفية
-        pushToSW(userId, 'رسالة جديدة 💬', lastMsg,
-          'https://mateenweb.github.io/Mateen/html/messages.html');
+
+        // جيب اسم المرسل
+        let senderName = 'رسالة جديدة';
+        try {
+          const senderSnap = await getDoc(doc(db, 'users', lastSenderId));
+          if (senderSnap.exists()) senderName = senderSnap.data().name || senderName;
+        } catch(e) {}
+
+        const notifTitle = `💬 ${senderName}`;
+        pushToSW(userId, notifTitle, lastMsg, 'https://mateenweb.github.io/Mateen/html/messages.html');
         if (!onMsgsPage) {
-          showNotifToast('رسالة جديدة 💬', lastMsg, '/Mateen/html/messages.html');
-          showBrowserNotif('رسالة جديدة — متين 💬', lastMsg);
+          showNotifToast(notifTitle, lastMsg, '/Mateen/html/messages.html');
+          showBrowserNotif(notifTitle, lastMsg);
         }
       }
     });
