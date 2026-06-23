@@ -192,7 +192,7 @@ function loadConversations() {
       const data = d.data();
 
       // تجاهل المحادثات المخفية — إلا لو كانت هي المحادثة المفتوحة حالياً
-      // if (data.hiddenBy?.[currentUser.uid] && d.id !== activeConvId) return; // كل المحادثات تظهر
+      if (data.hiddenBy?.[currentUser.uid] && d.id !== activeConvId) return;
 
       const otherId = data.participants?.find(p => p !== currentUser.uid);
       if (!otherId) return;
