@@ -157,7 +157,17 @@ async function initPage(studentId, user, role) {
 }
 
 // ── المشرفة: تسجيل حضور جديد ──────────────────
-const SUPERVISOR_SUBJECTS = ['التفسير', 'الفقه', 'العقيدة', 'الحديث', 'مقرأة متين'];
+// مواد كل يوم — من student.js
+const DAY_SUBJECTS_MAP = {
+  'الأحد':    ['فقه', 'تفسير', 'قرآن'],
+  'الاثنين':  ['تفسير', 'فقه', 'قرآن'],
+  'الثلاثاء': ['عقيدة', 'حديث', 'قرآن'],
+  'الأربعاء': ['فقه', 'حديث', 'قرآن'],
+  'الخميس':   ['تفسير', 'عقيدة', 'قرآن'],
+};
+function getSupervisorSubjects(day) {
+  return DAY_SUBJECTS_MAP[day] || ['التفسير', 'الفقه', 'العقيدة', 'الحديث', 'مقرأة متين'];
+}
 
 function setupSupervisorAttendance(studentId) {
   const toggleBtn = document.getElementById('newSessionBtn');
@@ -174,12 +184,13 @@ function setupSupervisorAttendance(studentId) {
 
   // حالة كل مادة (present/absent) — افتراضياً غائبة لحد ما تتحدد
   const subjState = {};
-  SUPERVISOR_SUBJECTS.forEach(s => subjState[s] = null);
+  getSupervisorSubjects(dayInput.value).forEach(s => subjState[s] = null);
 
   function renderSubjRow() {
-    const allPresent = SUPERVISOR_SUBJECTS.every(s => subjState[s] === 'present');
-    const allAbsent  = SUPERVISOR_SUBJECTS.every(s => subjState[s] === 'absent');
-    const allExcused = SUPERVISOR_SUBJECTS.every(s => subjState[s] === 'excused');
+    const todaySubjs = getSupervisorSubjects(dayInput.value);
+    const allPresent = todaySubjs.every(s => subjState[s] === 'present');
+    const allAbsent  = todaySubjs.every(s => subjState[s] === 'absent');
+    const allExcused = todaySubjs.every(s => subjState[s] === 'excused');
 
     const btnStyle = (active, color) => `
       flex:1;padding:6px 4px;border-radius:7px;font-size:12px;cursor:pointer;font-family:inherit;
@@ -194,7 +205,7 @@ function setupSupervisorAttendance(studentId) {
         <button type="button" onclick="setAllSubj('absent')"   style="${btnStyle(allAbsent,'#c0392b')}">✗ كل غائبة</button>
         <button type="button" onclick="setAllSubj('excused')"  style="${btnStyle(allExcused,'#b8860b')}">~ كل بعذر</button>
       </div>
-      ${SUPERVISOR_SUBJECTS.map(s => `
+      ${getSupervisorSubjects(dayInput.value).map(s => `
       <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 0;border-bottom:1px solid var(--border)">
         <span style="font-size:13px;font-weight:600;min-width:50px">${s}</span>
         <div style="display:flex;gap:5px">
@@ -221,10 +232,10 @@ function setupSupervisorAttendance(studentId) {
     });
   }
 
-  window.setAllSubj = (val) => { SUPERVISOR_SUBJECTS.forEach(s => subjState[s] = val); renderSubjRow(); };
+  window.setAllSubj = (val) => { getSupervisorSubjects(dayInput.value).forEach(s => subjState[s] = val); renderSubjRow(); };
 
   // افتراضياً: كل المواد حاضرة
-  SUPERVISOR_SUBJECTS.forEach(s => subjState[s] = 'present');
+  getSupervisorSubjects(dayInput.value).forEach(s => subjState[s] = 'present');
   renderSubjRow();
 
   toggleBtn.onclick = () => {
@@ -236,7 +247,7 @@ function setupSupervisorAttendance(studentId) {
 
   document.getElementById('saveSessionBtn').onclick = async () => {
     const subjects = {};
-    SUPERVISOR_SUBJECTS.forEach(s => { if (subjState[s]) subjects[s] = subjState[s]; });
+    getSupervisorSubjects(dayInput.value).forEach(s => { if (subjState[s]) subjects[s] = subjState[s]; });
 
     if (!Object.keys(subjects).length) {
       alert('حددي حضور أو غياب لمادة واحدة على الأقل');
@@ -251,7 +262,7 @@ function setupSupervisorAttendance(studentId) {
         createdAt: serverTimestamp(),
       });
       form.style.display = 'none';
-      SUPERVISOR_SUBJECTS.forEach(s => subjState[s] = null);
+      getSupervisorSubjects(dayInput.value).forEach(s => subjState[s] = null);
       renderSubjRow();
     } catch (e) {
       alert('حدث خطأ أثناء حفظ الحضور');
