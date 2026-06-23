@@ -177,10 +177,24 @@ function setupSupervisorAttendance(studentId) {
   const dayInput   = document.getElementById('sessDay');
 
   // قيم افتراضية: تاريخ اليوم + اسم اليوم بالعربي
+  const dayNames = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+
+  function updateDayFromDate(dateStr) {
+    if (!dateStr) return;
+    // نضيف T00:00:00 عشان نتجنب مشكلة timezone
+    const d = new Date(dateStr + 'T00:00:00');
+    dayInput.value = dayNames[d.getDay()];
+  }
+
   const todayISO = new Date().toISOString().split('T')[0];
   dateInput.value = todayISO;
-  const dayNames = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
-  dayInput.value = dayNames[new Date().getDay()];
+  updateDayFromDate(todayISO);
+
+  // لما تغيري التاريخ — اسم اليوم يتحدث تلقائياً
+  dateInput.addEventListener('change', () => {
+    updateDayFromDate(dateInput.value);
+    renderSubjRow();
+  });
 
   // حالة كل مادة (present/absent) — افتراضياً غائبة لحد ما تتحدد
   const subjState = {};
