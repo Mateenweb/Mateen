@@ -11,7 +11,7 @@ import { getAuth, onAuthStateChanged, signOut }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
 import { initNotifications } from "./notifications.js";
 import { getFirestore, doc, getDoc, getDocs, addDoc, setDoc,
-         collection, query, where, orderBy, serverTimestamp }
+         collection, query, where, orderBy, serverTimestamp, onSnapshot }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 import { FIREBASE_CONFIG } from "./config.js";
 
@@ -185,69 +185,45 @@ onAuthStateChanged(auth, async user => {
     ctName.value = (snap.exists() && snap.data().name) ? snap.data().name : name;
   }
 
-  /* ───────────────────────────────────────────────────────────
-     [من home-msg.js] — عداد الرسائل غير المقروءة
-     ─────────────────────────────────────────────────────────── */
-  const navMsgBadge     = document.getElementById('navMsgBadge');
-  const sidebarMsgBadge = document.getElementById('sidebarMsgBadge');
-  if (navMsgBadge || sidebarMsgBadge) {
-    try {
-      const q = query(
-        collection(db, 'conversations'),
-        where('participants', 'array-contains', user.uid)
-      );
-      const convSnap = await getDocs(q);
-
+  /* ── عداد الرسائل — real-time ── */
+  const updateMsgBadges = (total) => {
+    ['navMsgBadge','sidebarMsgBadge'].forEach(id => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      if (total > 0) { el.textContent = total > 99 ? '99+' : String(total); el.classList.remove('d-none'); }
+      else el.classList.add('d-none');
+    });
+  };
+  onSnapshot(
+    query(collection(db, 'conversations'), where('participants', 'array-contains', user.uid)),
+    snap => {
       let total = 0;
-      convSnap.forEach(d => {
-        const data   = d.data();
-        const unread = data.unread && data.unread[user.uid] ? data.unread[user.uid] : 0;
-        total += unread;
-      });
+      snap.forEach(d => { total += (d.data().unread?.[user.uid] || 0); });
+      updateMsgBadges(total);
+    },
+    err => console.error('msg-badge:', err)
+  );
 
-      [navMsgBadge, sidebarMsgBadge].forEach(badge => {
-        if (!badge) return;
-        if (total > 0) {
-          badge.textContent = total > 99 ? '99+' : String(total);
-          badge.classList.remove('d-none');
-        } else {
-          badge.classList.add('d-none');
-        }
-      });
-
-    } catch (err) {
-      console.error('home-msg:', err);
-    }
-  }
-
-  /* ───────────────────────────────────────────────────────────
-     [من home-msg.js] — عداد الأخبار الجديدة منذ آخر زيارة
-     ─────────────────────────────────────────────────────────── */
-  const navNewsBadge     = document.getElementById('navNewsBadge');
-  const sidebarNewsBadge = document.getElementById('sidebarNewsBadge');
-  if (navNewsBadge || sidebarNewsBadge) {
-    try {
-      const lastSeenKey = `news_last_seen_${user.uid}`;
-      const lastSeen    = parseInt(localStorage.getItem(lastSeenKey) || '0');
-      const newsSnap = await getDocs(
-        query(collection(db, 'news'), orderBy('createdAt', 'desc'))
-      );
+  /* ── عداد الأخبار — real-time ── */
+  const updateNewsBadges = (count) => {
+    ['navNewsBadge','navNewsBadge2','sidebarNewsBadge'].forEach(id => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      if (count > 0) { el.textContent = count > 99 ? '99+' : String(count); el.classList.remove('d-none'); }
+      else el.classList.add('d-none');
+    });
+  };
+  const lastSeenKey = `news_last_seen_${user.uid}`;
+  const lastSeen    = parseInt(localStorage.getItem(lastSeenKey) || '0');
+  onSnapshot(
+    query(collection(db, 'news'), orderBy('createdAt', 'desc')),
+    snap => {
       let count = 0;
-      newsSnap.forEach(d => {
-        const ts = d.data().createdAt;
-        if (ts && ts.toMillis() > lastSeen) count++;
-      });
-      [navNewsBadge, sidebarNewsBadge].forEach(badge => {
-        if (!badge) return;
-        if (count > 0) {
-          badge.textContent = count > 99 ? '99+' : String(count);
-          badge.classList.remove('d-none');
-        } else {
-          badge.classList.add('d-none');
-        }
-      });
-    } catch(e) { console.error('news-badge:', e); }
-  }
+      snap.forEach(d => { const ts = d.data().createdAt; if (ts && ts.toMillis() > lastSeen) count++; });
+      updateNewsBadges(count);
+    },
+    err => console.error('news-badge:', err)
+  );
 });
 
 window.doLogout = () =>
