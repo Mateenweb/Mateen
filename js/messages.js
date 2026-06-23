@@ -241,7 +241,8 @@ function renderConvList(list) {
   }
   el.innerHTML = list.map(c => {
     const time   = fmtTime(c.lastAt?.seconds);
-    const unread = (currentUser && c.unread?.[currentUser.uid] > 0) ? c.unread[currentUser.uid] : 0;
+    const unreadVal = c[`unread.${currentUser?.uid}`] ?? c.unread?.[currentUser?.uid] ?? 0;
+    const unread = unreadVal > 0 ? unreadVal : 0;
     const roleLabel = ROLE_LABELS[c.otherRole] || '';
     const isActive = activeConvId === c.id;
 
