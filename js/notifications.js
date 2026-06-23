@@ -145,11 +145,13 @@ function startListening(userId) {
       const lastSenderId = data.lastSenderId || '';
 
       // إشعار بس لو رسالة جديدة فعلاً ومن حد تاني وعنده محتوى
-      const isNewMsg  = lastAt > (lastSeen[convId] || 0);
-      const notFromMe = lastSenderId !== '' && lastSenderId !== userId;
+      const isNewMsg   = lastAt > (lastSeen[convId] || 0);
+      const notFromMe  = lastSenderId !== '' && lastSenderId !== userId;
       const hasContent = lastMsg.trim() !== '';
+      // تجاهل لو الـ unread بتاع المستخدم اتصفّر (يعني حد فتح الشات بس)
+      const isReadEvent = data[`unread.${userId}`] === 0 && !isNewMsg;
 
-      if (isNewMsg && notFromMe && hasContent) {
+      if (isNewMsg && notFromMe && hasContent && !isReadEvent) {
         lastSeen[convId] = lastAt;
         console.log('[Notif] 🔔 NEW MESSAGE! showing notification');
         const onMsgsPage = window.location.pathname.includes('messages.html');
