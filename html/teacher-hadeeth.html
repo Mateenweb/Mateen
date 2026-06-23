@@ -63,6 +63,49 @@
 <span id="breadcrumbName">دكتورة حصة بنت عبدالعزيز</span>
 </div>
 
+<div class="teacher-main-wrap">
+  <div class="t-quick-cards">
+    <div class="t-qcard"><i class="ti ti-calendar-week"></i><span id="qTotalSlots">—</span><small>إجمالي المواعيد</small></div>
+    <div class="t-qcard"><i class="ti ti-calendar-event"></i><span id="qTotalDays">—</span><small>أيام الأسبوع</small></div>
+    <div class="t-qcard"><i class="ti ti-clock-play"></i><span id="qNextDay">—</span><small>أقرب موعد</small></div>
+  </div>
+  <div class="section">
+    <div class="section-head">
+      <div class="section-head-title"><i class="ti ti-calendar-week"></i> جدولي الدراسي</div>
+      <button class="btn-add-slot" onclick="window.showAddSlot()"><i class="ti ti-plus"></i> إضافة موعد</button>
+    </div>
+    <div id="addSlotForm" style="display:none" class="add-slot-form">
+      <div class="slot-form-row">
+        <div class="slot-field">
+          <label>اليوم</label>
+          <select id="slotDay">
+            <option>الأحد</option><option>الاثنين</option><option>الثلاثاء</option>
+            <option>الأربعاء</option><option>الخميس</option><option>الجمعة</option><option>السبت</option>
+          </select>
+        </div>
+        <div class="slot-field">
+          <label>الوقت</label>
+          <input type="time" id="slotTime"/>
+        </div>
+        <div class="slot-field slot-field-note">
+          <label>ملاحظة (اختياري)</label>
+          <input type="text" id="slotNote" placeholder="مثال: مراجعة أسبوعية"/>
+        </div>
+      </div>
+      <div class="slot-form-btns">
+        <button class="btn-save-slot" onclick="window.saveSlot()"><i class="ti ti-device-floppy"></i> حفظ</button>
+        <button class="btn-cancel-slot" onclick="document.getElementById('addSlotForm').style.display='none'">إلغاء</button>
+      </div>
+    </div>
+    <div id="scheduleContainer"><div class="empty-state"><i class="ti ti-loader spin"></i></div></div>
+  </div>
+</div>
+
+<!-- صورة الجدول -->
+<div style="text-align:center;padding:24px 16px 8px;">
+  <img src="../schedule.jpg" alt="جدول متين" style="max-width:100%;width:min(480px,95vw);border-radius:16px;box-shadow:0 4px 20px rgba(0,0,0,0.12);"/>
+</div>
+
 <footer>
 <div style="display:flex;align-items:center;gap:8px">
 <img alt="متين" src="../logo.png" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:1px solid var(--gold);"/>
@@ -74,6 +117,7 @@
 <a href="#"><i class="ti ti-brand-instagram"></i></a>
 </div>
 </footer>
+<script src="../js/teacher-schedule-shared.js" type="module" data-teacher-id="hadeeth"></script>
 <script src="../js/teacher-hadeeth-1.js" type="module"></script>
   <script type="module" src="../js/notifications.js"></script>
   <script src="../js/sw-register.js"></script>
