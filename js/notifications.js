@@ -143,14 +143,13 @@ function startListening(userId) {
       const unread  = data.unread?.[userId] || 0;
 
       const lastSenderId = data.lastSenderId || '';
-      console.log('[Notif] conv change:', change.type, convId, 'unread:', unread, 'lastAt:', lastAt, 'lastSeen:', lastSeen[convId], 'sender:', lastSenderId);
 
-      // إشعار لو آخر رسالة جديدة ومش من المستخدم الحالي
-      const isNewMsg   = lastAt > (lastSeen[convId] || 0);
-      // لو lastSenderId فاضي (رسائل قديمة) نكتفي بـ isNewMsg
-      const notFromMe = lastSenderId === '' ? true : lastSenderId !== userId;
+      // إشعار بس لو رسالة جديدة فعلاً ومن حد تاني وعنده محتوى
+      const isNewMsg  = lastAt > (lastSeen[convId] || 0);
+      const notFromMe = lastSenderId !== '' && lastSenderId !== userId;
+      const hasContent = lastMsg.trim() !== '';
 
-      if (isNewMsg && notFromMe) {
+      if (isNewMsg && notFromMe && hasContent) {
         lastSeen[convId] = lastAt;
         console.log('[Notif] 🔔 NEW MESSAGE! showing notification');
         const onMsgsPage = window.location.pathname.includes('messages.html');
