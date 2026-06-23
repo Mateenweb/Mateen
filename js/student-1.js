@@ -375,7 +375,14 @@ function renderSessions(sessions) {
           <div class="session-day-date">${s.day || ''} — ${formatDate(s.date)}</div>
           <div class="session-summary">${present}/${keys.length} مواد حاضرة</div>
         </div>
-        <i class="ti ti-chevron-down session-arrow" id="arr_${s.id}"></i>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <button onclick="event.stopPropagation();deleteSession('${s.id}')"
+            style="background:none;border:none;cursor:pointer;color:#c0392b;font-size:15px;padding:4px;border-radius:6px;"
+            title="حذف الجلسة">
+            <i class="ti ti-trash"></i>
+          </button>
+          <i class="ti ti-chevron-down session-arrow" id="arr_${s.id}"></i>
+        </div>
       </div>
       <div class="session-body" id="subj_${s.id}">${subjRows || '<div class="stu-empty" style="padding:12px"><span>لا توجد مواد</span></div>'}</div>
     </div>`;
@@ -386,6 +393,17 @@ window.toggleSession = id => {
   document.getElementById(`subj_${id}`)?.classList.toggle('open');
   const arr = document.getElementById(`arr_${id}`);
   if (arr) arr.style.transform = arr.style.transform === 'rotate(180deg)' ? '' : 'rotate(180deg)';
+};
+
+window.deleteSession = async (sessionId) => {
+  if (!confirm('هل أنتِ متأكدة من حذف هذه الجلسة؟')) return;
+  try {
+    const studentId = new URLSearchParams(location.search).get('id');
+    await deleteDoc(doc(db, 'students', studentId, 'sessions', sessionId));
+  } catch(e) {
+    alert('حدث خطأ أثناء الحذف');
+    console.error(e);
+  }
 };
 
 // ── Render Grades ─────────────────────────────
