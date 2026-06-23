@@ -198,7 +198,12 @@ onAuthStateChanged(auth, async user => {
     query(collection(db, 'conversations'), where('participants', 'array-contains', user.uid)),
     snap => {
       let total = 0;
-      snap.forEach(d => { total += (d.data().unread?.[user.uid] || 0); });
+      snap.forEach(d => {
+        const data = d.data();
+        // Firestore بيحفظها كـ flat field "unread.uid" أو كـ nested object
+        const val = data[`unread.${user.uid}`] ?? data.unread?.[user.uid] ?? 0;
+        total += val;
+      });
       updateMsgBadges(total);
     },
     err => console.error('msg-badge:', err)
