@@ -126,6 +126,9 @@ onAuthStateChanged(auth, async user => {
     console.log('✅ Showing links for TEACHER');
     show('linkNews');
     show('linkTeacher');
+    show('linkSchedule');
+    const schedLink = document.getElementById('linkSchedule');
+    if (schedLink) schedLink.href = 'teacher-schedule.html';
   } else if (role === 'mateen') {
     console.log('✅ Showing links for MATEEN');
     show('linkCerts');
@@ -451,4 +454,5 @@ document.addEventListener("click",function(e){
   var nav=document.querySelector("nav");
   if(nav && !nav.contains(e.target)){ var nl=document.querySelector(".nav-links"); if(nl) nl.classList.remove("open"); }
 });
+
 
