@@ -217,8 +217,8 @@ function loadConversations() {
 
     renderConvList(allConvs);
 
-    // افتح أحدث محادثة تلقائياً لو مفيش محادثة مفتوحة
-    if (!activeConvId && allConvs.length > 0) {
+    // افتح أحدث محادثة تلقائياً على الديسكتوب بس
+    if (!activeConvId && allConvs.length > 0 && window.innerWidth >= 768) {
       const first = allConvs[0];
       openConv(first.id, first.otherId, first.otherName, first.otherRole);
     }
