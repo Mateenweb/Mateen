@@ -647,6 +647,9 @@
 
   .mob-back-btn { display: flex !important; }
 
+  /* إخفاء الـ empty state على الموبايل */
+  .msg-empty-state { display: none !important; }
+
   .msg-conv-head { padding: 12px 14px; }
   .msg-conv-name { font-size: 16px; }
 
