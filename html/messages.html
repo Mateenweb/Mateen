@@ -214,6 +214,10 @@ window.mobBackToList = function() {
 };
 
 window.addEventListener('load', () => {
+  if (isMob()) {
+    const main = document.querySelector('.msg-main');
+    if (main) main.classList.remove('mob-visible');
+  }
   document.getElementById('convList').addEventListener('click', e => {
     if (e.target.closest('.conv-item')) setTimeout(mobOpenChat, 60);
   });
