@@ -217,11 +217,7 @@ function loadConversations() {
 
     renderConvList(allConvs);
 
-    // افتح أحدث محادثة تلقائياً على الديسكتوب بس
-    if (!activeConvId && allConvs.length > 0 && window.innerWidth >= 768) {
-      const first = allConvs[0];
-      openConv(first.id, first.otherId, first.otherName, first.otherRole);
-    }
+    // لا تفتح محادثة أوتوماتيك - المستخدم يختار بنفسه
   }, err => {
     console.error('conversations query error:', err);
     document.getElementById('convList').innerHTML = `
