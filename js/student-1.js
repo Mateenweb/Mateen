@@ -157,7 +157,7 @@ async function initPage(studentId, user, role) {
 }
 
 // ── المشرفة: تسجيل حضور جديد ──────────────────
-const SUPERVISOR_SUBJECTS = ['تفسير', 'فقه', 'عقيدة', 'حديث', 'قرآن'];
+const SUPERVISOR_SUBJECTS = ['التفسير', 'الفقه', 'العقيدة', 'الحديث', 'مقرأة متين'];
 
 function setupSupervisorAttendance(studentId) {
   const toggleBtn = document.getElementById('newSessionBtn');
@@ -450,3 +450,4 @@ function formatTime(hour, ampm) {
   if (!hour) return null;
   return `${hour}:00 ${ampm === 'am' ? 'صباحاً' : ampm === 'pm' ? 'مساءً' : ''}`;
 }
+
