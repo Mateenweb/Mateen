@@ -141,3 +141,16 @@ window.addEventListener('appinstalled', () => {
   console.log('[PWA] installed successfully');
   deferredInstallPrompt = null;
 });
+
+// ── تثبيت بالضغط على اللوجو ──────────────────────────────────────────────
+window.triggerInstall = async () => {
+  if (deferredInstallPrompt) {
+    // Chrome جاهز — افتح حوار التثبيت
+    deferredInstallPrompt.prompt();
+    const { outcome } = await deferredInstallPrompt.userChoice;
+    if (outcome === 'accepted') deferredInstallPrompt = null;
+  } else {
+    // Chrome مش جاهز — أظهر تعليمات يدوية
+    showInstallBanner();
+  }
+};

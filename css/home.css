@@ -1294,3 +1294,12 @@ footer {
 .sidebar-nav a.d-none { display: none !important; }
 
 
+
+/* اللوجو قابل للضغط للتثبيت */
+.nav-logo:hover .logo-circle {
+  border-color: var(--gold-light);
+  box-shadow: 0 0 0 3px rgba(201,162,39,0.3);
+  transform: scale(1.05);
+  transition: all 0.2s;
+}
+.logo-circle { transition: all 0.2s; }
