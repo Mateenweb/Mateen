@@ -15,7 +15,8 @@ if ('serviceWorker' in navigator) {
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   deferredInstallPrompt = e;
-  showInstallBanner();
+  // أظهر البانر بعد 3 ثواني
+  setTimeout(showInstallBanner, 3000);
 });
 
 function showInstallBanner() {
@@ -68,10 +69,13 @@ window.addEventListener('load', () => {
     if (Notification.permission === 'granted') return;
     if (Notification.permission === 'denied') return;
 
-    // فقط لو المستخدم مسجّل دخول (وجود firebase auth)
-    const isLoggedIn = document.cookie.includes('loggedIn') ||
-      localStorage.getItem('mateenUser');
-    if (!isLoggedIn) return;
+    // تحقق من Firebase Auth
+    try {
+      const { getAuth } = await import("https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js");
+      const auth = getAuth();
+      const user = auth.currentUser;
+      if (!user) return;
+    } catch(e) { return; }
 
     showNotifBanner();
   }, 5000);
