@@ -1,19 +1,62 @@
 /* ================================================
    برنامج متين العلمي — زخارف إسلامية
-   islamic.css  — نسخة واضحة ومميزة
+   islamic.css — متوافق مع هوية البراند
+   ألوان: بيج فاتح → بني غامق، ذهبي، أخضر في أماكن قليلة
    ================================================ */
 
 :root {
-  --accent-green:      #3a7a4a;
-  --accent-green-soft: rgba(58,122,74,0.13);
+  --accent-green:      #2d6e45;
+  --accent-green-soft: rgba(45,110,69,0.10);
   --zukhruf-border:    rgba(201,162,39,0.4);
+  --brand-light:       #fdf8f0;   /* أفتح */
+  --brand-mid:         #ede0cc;   /* بيج وسط */
+  --brand-dark:        #5c3d2e;   /* بني متوسط */
+  --brand-darkest:     #2c1a0e;   /* بني غامق */
 }
 
 /* ════════════════════════════════════════════════
-   1. شريط البسملة
+   1. خلفية الصفحة — تدرج فاتح + أعرابيسك خفي
+   ════════════════════════════════════════════════ */
+body {
+  background: linear-gradient(170deg,
+    var(--brand-light) 0%,
+    var(--brand-mid)   40%,
+    #e8d5b7            75%,
+    #d4b896           100%) fixed !important;
+}
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cg fill='none' stroke='%235c3d2e' stroke-width='1'%3E%3Crect x='8' y='8' width='84' height='84' rx='3'/%3E%3Crect x='20' y='20' width='60' height='60' rx='3' transform='rotate(45 50 50)'/%3E%3Ccircle cx='50' cy='50' r='18'/%3E%3Ccircle cx='50' cy='50' r='30'/%3E%3Cline x1='50' y1='8' x2='50' y2='92'/%3E%3Cline x1='8' y1='50' x2='92' y2='50'/%3E%3Cline x1='22' y1='22' x2='78' y2='78'/%3E%3Cline x1='78' y1='22' x2='22' y2='78'/%3E%3Cpolygon points='50,8 56,30 80,30 61,44 68,66 50,53 32,66 39,44 20,30 44,30'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 100px 100px;
+}
+
+/* ════════════════════════════════════════════════
+   2. زخرفة إسلامية في الحافة اليمنى فقط
+   ════════════════════════════════════════════════ */
+body::after {
+  content: '';
+  position: fixed;
+  top: 0; right: 0;
+  width: 48px;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.07;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48'%3E%3Cg fill='%235c3d2e'%3E%3Cpolygon points='24,4 27,16 39,16 30,23 33,35 24,28 15,35 18,23 9,16 21,16'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 48px 48px;
+  background-repeat: repeat-y;
+}
+
+/* ════════════════════════════════════════════════
+   3. شريط البسملة — بني غامق (الأقل مساحة)
    ════════════════════════════════════════════════ */
 .basmala-bar {
-  background: linear-gradient(135deg, var(--green-dark) 0%, var(--green-mid) 50%, var(--green-dark) 100%);
+  background: linear-gradient(135deg, var(--brand-darkest) 0%, var(--brand-dark) 50%, var(--brand-darkest) 100%);
   text-align: center;
   padding: 9px 20px;
   font-family: 'Amiri', serif;
@@ -24,12 +67,11 @@
   overflow: hidden;
   border-bottom: 2px solid var(--gold);
 }
-/* نمط هندسي خلف البسملة */
 .basmala-bar::before {
   content: '';
   position: absolute;
   inset: 0;
-  opacity: 0.12;
+  opacity: 0.10;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30'%3E%3Cpolygon points='15,2 17,11 26,11 19,17 22,26 15,20 8,26 11,17 4,11 13,11' fill='%23c9a227'/%3E%3C/svg%3E");
   background-size: 30px 30px;
 }
@@ -41,7 +83,7 @@
 }
 
 /* ════════════════════════════════════════════════
-   2. الـ nav — خط ذهبي أسفل + نمط جانبي
+   4. الـ nav
    ════════════════════════════════════════════════ */
 nav {
   position: relative;
@@ -54,17 +96,12 @@ nav::after {
   left: 0; right: 0;
   height: 2px;
   background: linear-gradient(to right,
-transparent 0%,
-var(--accent-green) 20%,
-var(--gold) 50%,
-var(--accent-green) 80%,
-transparent 100%);
-  opacity: 0.6;
+    transparent 0%, var(--gold) 50%, transparent 100%);
+  opacity: 0.5;
 }
 
 /* ════════════════════════════════════════════════
-   3. hero / page-hero / teacher-hero
-  نمط هندسي واضح + إطار ذهبي
+   5. hero / page-hero / teacher-hero — بني متوسط→غامق
    ════════════════════════════════════════════════ */
 .hero,
 .page-hero,
@@ -73,8 +110,6 @@ transparent 100%);
   overflow: hidden;
   border-bottom: 3px solid var(--gold) !important;
 }
-
-/* نجمة إسلامية واضحة */
 .hero::after,
 .page-hero::after,
 .teacher-hero::after {
@@ -83,12 +118,10 @@ transparent 100%);
   inset: 0;
   pointer-events: none;
   z-index: 0;
-  opacity: 0.13;
+  opacity: 0.10;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='90' height='90'%3E%3Cg fill='%23c9a227'%3E%3Cpolygon points='45,6 52,34 80,34 58,52 66,80 45,63 24,80 32,52 10,34 38,34'/%3E%3C/g%3E%3C/svg%3E");
   background-size: 90px 90px;
 }
-
-/* ركني الإطار الذهبي */
 .hero::before,
 .page-hero::before,
 .teacher-hero::before {
@@ -100,7 +133,6 @@ transparent 100%);
   z-index: 1;
   border-radius: 6px;
 }
-
 .hero > *,
 .page-hero > *,
 .teacher-hero > * {
@@ -109,7 +141,7 @@ transparent 100%);
 }
 
 /* ════════════════════════════════════════════════
-   4. section-title — زخرفة واضحة
+   6. section-title
    ════════════════════════════════════════════════ */
 .section-title {
   position: relative;
@@ -118,11 +150,10 @@ transparent 100%);
 .section-title::before,
 .section-title::after {
   content: '✦ ❧ ✦' !important;
-  color: var(--accent-green) !important;
+  color: var(--gold) !important;
   font-size: 13px !important;
   letter-spacing: 3px;
 }
-/* خط تحت العنوان */
 .section-title::after {
   position: absolute !important;
   bottom: 0 !important;
@@ -131,12 +162,12 @@ transparent 100%);
   content: '' !important;
   width: 60px !important;
   height: 2px !important;
-  background: linear-gradient(to right, var(--accent-green), var(--gold), var(--accent-green)) !important;
+  background: linear-gradient(to right, var(--brand-dark), var(--gold), var(--brand-dark)) !important;
   border-radius: 2px !important;
 }
 
 /* ════════════════════════════════════════════════
-   5. فاصل مزخرف  islamic-divider
+   7. فاصل مزخرف
    ════════════════════════════════════════════════ */
 .islamic-divider {
   display: flex;
@@ -151,7 +182,7 @@ transparent 100%);
   flex: 1;
   height: 2px;
   background: linear-gradient(to var(--dir, left),
-transparent 0%, var(--gold) 40%, var(--accent-green) 100%);
+    transparent 0%, var(--gold) 100%);
 }
 .islamic-divider::before { --dir: right; }
 .islamic-divider span {
@@ -163,10 +194,10 @@ transparent 0%, var(--gold) 40%, var(--accent-green) 100%);
 }
 
 /* ════════════════════════════════════════════════
-   6. شريط آية قرآنية
+   8. شريط آية — بني داكن (الأقل)
    ════════════════════════════════════════════════ */
 .aya-banner {
-  background: linear-gradient(135deg, var(--green-dark) 0%, var(--green-mid) 100%);
+  background: linear-gradient(135deg, var(--brand-darkest) 0%, var(--brand-dark) 100%);
   padding: 20px 32px;
   text-align: center;
   position: relative;
@@ -178,11 +209,10 @@ transparent 0%, var(--gold) 40%, var(--accent-green) 100%);
   content: '';
   position: absolute;
   inset: 0;
-  opacity: 0.1;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='50' height='50'%3E%3Ccircle cx='25' cy='25' r='10' fill='none' stroke='%23c9a227' stroke-width='1.5'/%3E%3Ccircle cx='25' cy='25' r='20' fill='none' stroke='%23c9a227' stroke-width='0.8'/%3E%3Cline x1='25' y1='5' x2='25' y2='45' stroke='%23c9a227' stroke-width='0.8'/%3E%3Cline x1='5' y1='25' x2='45' y2='25' stroke='%23c9a227' stroke-width='0.8'/%3E%3Cline x1='11' y1='11' x2='39' y2='39' stroke='%23c9a227' stroke-width='0.5'/%3E%3Cline x1='39' y1='11' x2='11' y2='39' stroke='%23c9a227' stroke-width='0.5'/%3E%3C/svg%3E");
+  opacity: 0.08;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='50' height='50'%3E%3Ccircle cx='25' cy='25' r='10' fill='none' stroke='%23c9a227' stroke-width='1.5'/%3E%3Ccircle cx='25' cy='25' r='20' fill='none' stroke='%23c9a227' stroke-width='0.8'/%3E%3Cline x1='25' y1='5' x2='25' y2='45' stroke='%23c9a227' stroke-width='0.8'/%3E%3Cline x1='5' y1='25' x2='45' y2='25' stroke='%23c9a227' stroke-width='0.8'/%3E%3C/svg%3E");
   background-size: 50px 50px;
 }
-/* زخرفة جانبية يمين ويسار */
 .aya-banner::after {
   content: '❦';
   position: absolute;
@@ -210,7 +240,7 @@ transparent 0%, var(--gold) 40%, var(--accent-green) 100%);
 }
 
 /* ════════════════════════════════════════════════
-   7. عناوين t-section-head و section-head
+   9. section-head — إطار ذهبي
    ════════════════════════════════════════════════ */
 .t-section-head,
 .section-head {
@@ -229,21 +259,7 @@ transparent 0%, var(--gold) 40%, var(--accent-green) 100%);
 }
 
 /* ════════════════════════════════════════════════
-   8. خلفية الصفحة — نمط أعرابيسك واضح
-   ════════════════════════════════════════════════ */
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: -1;
-  opacity: 0.04;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cg fill='none' stroke='%235c3d2e' stroke-width='1'%3E%3Crect x='8' y='8' width='84' height='84' rx='3'/%3E%3Crect x='20' y='20' width='60' height='60' rx='3' transform='rotate(45 50 50)'/%3E%3Ccircle cx='50' cy='50' r='18'/%3E%3Ccircle cx='50' cy='50' r='30'/%3E%3Cline x1='50' y1='8' x2='50' y2='92'/%3E%3Cline x1='8' y1='50' x2='92' y2='50'/%3E%3Cline x1='22' y1='22' x2='78' y2='78'/%3E%3Cline x1='78' y1='22' x2='22' y2='78'/%3E%3Cpolygon points='50,8 56,30 80,30 61,44 68,66 50,53 32,66 39,44 20,30 44,30'/%3E%3C/g%3E%3C/svg%3E");
-  background-size: 100px 100px;
-}
-
-/* ════════════════════════════════════════════════
-   9. الـ footer — إطار علوي ذهبي + زخرفة
+   10. footer — بني غامق (الأقل)
    ════════════════════════════════════════════════ */
 footer {
   border-top: 3px solid var(--gold) !important;
@@ -255,7 +271,7 @@ footer::before {
   top: -13px;
   left: 50%;
   transform: translateX(-50%);
-  background: var(--green-dark);
+  background: var(--brand-darkest);
   color: var(--gold);
   font-size: 11px;
   padding: 0 12px;
@@ -264,7 +280,7 @@ footer::before {
 }
 
 /* ════════════════════════════════════════════════
-   10. البطاقات — إطار وتأثير hover
+   11. البطاقات
    ════════════════════════════════════════════════ */
 .path-card,
 .teacher-card,
@@ -283,7 +299,7 @@ footer::before {
 }
 
 /* ════════════════════════════════════════════════
-   11. الـ breadcrumb — حد ذهبي
+   12. breadcrumb
    ════════════════════════════════════════════════ */
 .breadcrumb {
   border-bottom: 2px solid rgba(201,162,39,0.3) !important;
@@ -291,7 +307,7 @@ footer::before {
 }
 
 /* ════════════════════════════════════════════════
-   12. badge الأخضر للقبول / الحضور
+   13. badge أخضر — في أماكن قليلة فقط
    ════════════════════════════════════════════════ */
 .badge-done,
 .badge-accepted,
@@ -299,16 +315,7 @@ footer::before {
 .grade-pct.high {
   background: var(--accent-green-soft) !important;
   color: var(--accent-green) !important;
-  border: 1px solid rgba(58,122,74,0.3) !important;
-}
-
-/* ════════════════════════════════════════════════
-   13. logo-circle — إطار ذهبي + توهج أخضر
-   ════════════════════════════════════════════════ */
-.logo-circle {
-  border: 2px solid var(--gold) !important;
-  box-shadow: 0 0 0 3px var(--accent-green-soft),
-          0 0 12px rgba(201,162,39,0.2) !important;
+  border: 1px solid rgba(45,110,69,0.25) !important;
 }
 
 /* ════════════════════════════════════════════════
@@ -330,38 +337,25 @@ footer::before {
 .ornament-badge::after  { content: '✦'; font-size: 10px; }
 
 /* ════════════════════════════════════════════════
-   15. زخرفة إطار الصفحة الكاملة (corner ornaments)
+   15. logo-circle
    ════════════════════════════════════════════════ */
-.teacher-wrap,
-.main-wrap {
-  position: relative;
+.logo-circle {
+  border: 2px solid var(--gold) !important;
+  box-shadow: 0 0 0 3px rgba(201,162,39,0.15),
+              0 0 12px rgba(201,162,39,0.2) !important;
 }
 
 /* ════════════════════════════════════════════════
-   responsive
+   Responsive
    ════════════════════════════════════════════════ */
-@media (max-width: 600px) {
-  .basmala-bar       { font-size: 14px; letter-spacing: 1px; }
-  .aya-text          { font-size: 16px; }
-  .aya-banner::after { display: none; }
-  footer::before     { font-size: 9px; letter-spacing: 2px; }
-}
-
-/* ════════════════════════════════════════
-   MOBILE RESPONSIVE
-   ════════════════════════════════════════ */
 @media (max-width: 768px) {
+  body::after { width: 24px; }
   .islamic-divider { margin: 12px 0 !important; }
-  .islamic-divider span { font-size: 16px !important; letter-spacing: 3px !important; }
-
-  .aya-banner { padding: 14px 12px !important; margin: 12px 0 !important; }
-  .aya-text { font-size: 15px !important; line-height: 1.6 !important; }
-  .aya-source { font-size: 11px !important; }
+  .aya-banner { padding: 14px 12px !important; }
+  .aya-text { font-size: 15px !important; }
 }
-
 @media (max-width: 480px) {
-  .islamic-divider span { font-size: 14px !important; letter-spacing: 2px !important; }
+  body::after { display: none; }
   .aya-text { font-size: 13px !important; }
-  .aya-source { font-size: 10px !important; }
+  footer::before { font-size: 9px; letter-spacing: 2px; }
 }
-
