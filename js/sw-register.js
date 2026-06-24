@@ -15,7 +15,10 @@ if ('serviceWorker' in navigator) {
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   deferredInstallPrompt = e;
-  // أظهر البانر بعد 3 ثواني
+  // أظهر زرار التثبيت في الناف بار
+  const installBtn = document.getElementById('installAppBtn');
+  if (installBtn) installBtn.style.display = 'flex';
+  // وبانر بعد 3 ثواني
   setTimeout(showInstallBanner, 3000);
 });
 
