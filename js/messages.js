@@ -319,7 +319,7 @@ window.openConv = async (cid, otherId, otherName, otherRole) => {
     if (convInList.unread) convInList.unread[currentUser.uid] = 0;
     renderConvList(allConvs);
   }
-  await updateDoc(doc(db, 'conversations', cid), { [`unread.${currentUser.uid}`]: 0, unread: { [currentUser.uid]: 0 } });
+  await updateDoc(doc(db, 'conversations', cid), { [`unread.${currentUser.uid}`]: 0 });
 
   // علّم رسائل الطرف الثاني كمقروءة (عشان يعرف المرسل إن رسالته اتقرأت)
   const allMsgsSnap = await getDocs(collection(db, 'conversations', cid, 'messages'));
@@ -422,7 +422,7 @@ window.sendMsg = async () => {
   // اجلب unread الحالي من Firestore مباشرة عشان نضمن الدقة
   const convSnap = await getDoc(doc(db, 'conversations', activeConvId));
   const currentUnread = convSnap.exists()
-    ? (convSnap.data().unread?.[otherId] || 0)
+    ? (convSnap.data()[`unread.${otherId}`] ?? convSnap.data().unread?.[otherId] ?? 0)
     : 0;
 
   await setDoc(doc(db, 'conversations', activeConvId), {
@@ -626,7 +626,7 @@ window.sendImage = async (input) => {
   });
   if (viewOnceMode) { viewOnceMode = false; const b = document.getElementById('viewOnceBtn'); if(b){b.style.opacity='0.5';b.style.color='';} }
   const convSnap = await getDoc(doc(db, 'conversations', activeConvId));
-  const currentUnread = convSnap.exists() ? (convSnap.data().unread?.[otherId] || 0) : 0;
+  const currentUnread = convSnap.exists() ? (convSnap.data()[`unread.${otherId}`] ?? convSnap.data().unread?.[otherId] ?? 0) : 0;
   await setDoc(doc(db, 'conversations', activeConvId), {
     participants: [currentUser.uid, otherId].filter(Boolean),
     lastMsg: '📷 صورة', lastAt: serverTimestamp(), lastSenderId: currentUser.uid,
@@ -682,7 +682,7 @@ window.toggleRecording = async () => {
       });
       if (viewOnceMode) { viewOnceMode = false; const b = document.getElementById('viewOnceBtn'); if(b){b.style.opacity='0.5';b.style.color='';} }
       const convSnap = await getDoc(doc(db, 'conversations', activeConvId));
-      const currentUnread = convSnap.exists() ? (convSnap.data().unread?.[otherId] || 0) : 0;
+      const currentUnread = convSnap.exists() ? (convSnap.data()[`unread.${otherId}`] ?? convSnap.data().unread?.[otherId] ?? 0) : 0;
       await setDoc(doc(db, 'conversations', activeConvId), {
         participants: [currentUser.uid, otherId].filter(Boolean),
         lastMsg: '🎙️ رسالة صوتية', lastAt: serverTimestamp(), lastSenderId: currentUser.uid,
