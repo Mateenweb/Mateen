@@ -170,6 +170,8 @@ let isAdmin = false;
 
 onAuthStateChanged(auth, async user => {
   if (!user) return;
+  // حدّث lastSeen عشان يصفّر كونتر الأخبار
+  localStorage.setItem(`news_last_seen_${user.uid}`, Date.now().toString());
   const { getDoc } = await import("https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js");
   const snap = await getDoc(doc(db, 'users', user.uid));
   const role = snap.exists() ? snap.data().role : '';
