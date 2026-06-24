@@ -128,7 +128,7 @@ onAuthStateChanged(auth, async user => {
       role === 'admin'      ? '👑' :
       role === 'supervisor' ? '🎓' :
       role === 'teacher'    ? '📚' :
-      role === 'mateen'     ? '👩' : '🌸';
+      role === 'mateen'     ? '🧕' : '🌸';
     if (navAvatar) navAvatar.textContent = avatarEmoji;
 
     if (role === 'mateen') {
