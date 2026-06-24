@@ -68,6 +68,7 @@ let msgUnsub        = null;
 let convUnsub       = null;   // unsubscribe للـ conversations listener
 let allUsers        = [];
 let allConvs        = [];
+const readConvIds   = new Set(); // المحادثات اللي اتقرأت locally
 let viewOnceMode    = false;
 
 // ── Auth ───────────────────────────────────────────────────────────────────
@@ -199,15 +200,13 @@ function loadConversations() {
       const existing = allConvs.find(cv => cv.id === d.id);
       if (existing) {
         const uid = currentUser.uid;
-        // احفظ الـ unread الحالي قبل ما نعمل assign
-        const prevFlat   = existing[`unread.${uid}`] ?? null;
-        const prevNested = existing.unread?.[uid]    ?? null;
-
         Object.assign(existing, data);
 
-        // لو كان صفر قبل كده (اتقرأت) ارجعه صفر
-        if (prevFlat === 0)   existing[`unread.${uid}`] = 0;
-        if (prevNested === 0 && existing.unread) existing.unread[uid] = 0;
+        // لو المحادثة اتقرأت locally، اجبر الـ unread على صفر
+        if (readConvIds.has(d.id)) {
+          existing[`unread.${uid}`] = 0;
+          if (existing.unread) existing.unread[uid] = 0;
+        }
         return;
       }
 
@@ -327,6 +326,7 @@ window.openConv = async (cid, otherId, otherName, otherRole) => {
   document.getElementById('convRole').style.color  = ROLE_COLORS[otherRole] || 'var(--text-mid)';
 
   // Mark as read - فوراً في الـ local state + Firestore
+  readConvIds.add(cid); // علّم المحادثة كمقروءة locally
   const convInList = allConvs.find(cv => cv.id === cid);
   if (convInList) {
     convInList[`unread.${currentUser.uid}`] = 0;
