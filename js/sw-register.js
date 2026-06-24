@@ -21,16 +21,18 @@ window.addEventListener('beforeinstallprompt', (e) => {
   showInstallBanner();
 });
 
-// أظهر الزرار فوراً بدون انتظار Chrome
+// أظهر بانر التثبيت فوراً لو الموقع مش مثبّت
 window.addEventListener('load', () => {
-  // لو مش مثبّت بالفعل
   const isStandalone = window.matchMedia('(display-mode: standalone)').matches
     || window.navigator.standalone;
   if (!isStandalone) {
+    // أظهر زرار الناف بار
     setTimeout(() => {
       const installBtn = document.getElementById('installAppBtn');
       if (installBtn) installBtn.style.display = 'flex';
     }, 1000);
+    // وبانر بعد 4 ثواني
+    setTimeout(showInstallBanner, 4000);
   }
 });
 
