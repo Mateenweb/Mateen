@@ -266,10 +266,12 @@ function renderConvList(list) {
   el.innerHTML = list.map(c => {
     const time   = fmtTime(c.lastAt?.seconds);
     const uid = currentUser?.uid || '';
-    const unread = Math.max(
-      Number(c[`unread.${uid}`] ?? 0),
-      Number(c.unread?.[uid] ?? 0)
-    );
+    const flatVal   = Number(c[`unread.${uid}`] ?? -1);
+    const nestedVal = Number(c.unread?.[uid]    ?? -1);
+    // لو أي منهم صفر يبقى اتقرأ
+    const unread = (flatVal === 0 || nestedVal === 0)
+      ? 0
+      : Math.max(flatVal === -1 ? 0 : flatVal, nestedVal === -1 ? 0 : nestedVal);
     const roleLabel = ROLE_LABELS[c.otherRole] || '';
     const isActive = activeConvId === c.id;
 
@@ -331,16 +333,8 @@ window.openConv = async (cid, otherId, otherName, otherRole) => {
     if (convInList.unread) convInList.unread[currentUser.uid] = 0;
     renderConvList(allConvs);
   }
-  await updateDoc(doc(db, 'conversations', cid), {
-    [`unread.${currentUser.uid}`]: 0,
-  });
-  // صفّر الـ nested object كمان
-  try {
-    const _snap = await getDoc(doc(db, 'conversations', cid));
-    if (_snap.exists() && _snap.data().unread?.[currentUser.uid] > 0) {
-      await updateDoc(doc(db, 'conversations', cid), { unread: { [currentUser.uid]: 0 } });
-    }
-  } catch(e) {}
+  // صفّر flat field
+  await updateDoc(doc(db, 'conversations', cid), { [`unread.${currentUser.uid}`]: 0 });
 
   // علّم رسائل الطرف الثاني كمقروءة (عشان يعرف المرسل إن رسالته اتقرأت)
   const allMsgsSnap = await getDocs(collection(db, 'conversations', cid, 'messages'));

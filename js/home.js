@@ -200,11 +200,12 @@ onAuthStateChanged(auth, async user => {
       let total = 0;
       snap.forEach(d => {
         const data = d.data();
-        // اقرأ flat وnested الاتنين
-        const val = Math.max(
-          Number(data[`unread.${user.uid}`] ?? 0),
-          Number(data.unread?.[user.uid] ?? 0)
-        );
+        // لو أي منهم صفر يبقى اتقرأ
+        const fv = Number(data[`unread.${user.uid}`] ?? -1);
+        const nv = Number(data.unread?.[user.uid]    ?? -1);
+        const val = (fv === 0 || nv === 0)
+          ? 0
+          : Math.max(fv === -1 ? 0 : fv, nv === -1 ? 0 : nv);
         total += val;
       });
       updateMsgBadges(total);
