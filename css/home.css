@@ -1174,7 +1174,9 @@ footer {
     padding: clamp(20px, 6vw, 40px) 16px;
     top: 50%;
   }
-  .hero-overlay { background: rgba(247,239,227,0.82); }
+  .hero-text h1 { text-shadow: 0 1px 8px rgba(255,255,255,0.9); }
+  .hero-text p  { text-shadow: 0 1px 4px rgba(255,255,255,0.9); }
+  .hero-overlay { background: rgba(247,239,227,0.55); }
   .hero-logos { justify-content: center; }
   .hero-btns { justify-content: center; }
   .hero-btn-primary, .hero-btn-secondary { padding: 9px 18px; font-size: 13px; }
