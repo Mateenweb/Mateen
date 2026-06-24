@@ -225,15 +225,17 @@ onAuthStateChanged(auth, async user => {
   const lastSeenKey = `news_last_seen_${user.uid}`;
   let lastNewsSnap = null;
 
-  // لما الطالبة ترجع للصفحة نحدث الكاونتر من الـ snapshot المحفوظ
-  document.addEventListener('visibilitychange', () => {
-    if (!document.hidden && lastNewsSnap) {
-      const ls = parseInt(localStorage.getItem(lastSeenKey) || '0');
-      let count = 0;
-      lastNewsSnap.forEach(d => { const ts = d.data().createdAt; if (ts && ts.toMillis() > ls) count++; });
-      updateNewsBadges(count);
-    }
-  });
+  // لما الطالبة ترجع للصفحة نحدث الكاونتر
+  const refreshNewsBadge = () => {
+    if (!lastNewsSnap) return;
+    const ls = parseInt(localStorage.getItem(lastSeenKey) || '0');
+    let count = 0;
+    lastNewsSnap.forEach(d => { const ts = d.data().createdAt; if (ts && ts.toMillis() > ls) count++; });
+    updateNewsBadges(count);
+  };
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) refreshNewsBadge(); });
+  window.addEventListener('focus', refreshNewsBadge);
+  window.addEventListener('pageshow', refreshNewsBadge);
 
   onSnapshot(
     query(collection(db, 'news'), orderBy('createdAt', 'desc')),
