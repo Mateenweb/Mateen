@@ -615,7 +615,9 @@ body {
 .hero {
   position: relative;
   width: 100%;
-  height: clamp(340px, 55vw, 640px);
+  aspect-ratio: 16 / 9;   /* نفس نسبة الصورة الأصلية — يمنع القص على أي حجم شاشة */
+  min-height: 280px;       /* حد أدنى فقط للشاشات الصغيرة جداً */
+  max-height: 760px;       /* حد أعلى فقط للشاشات الواسعة جداً (4K) */
   overflow: hidden;
   background-color: var(--beige, #f7efe3);
 }
@@ -655,9 +657,6 @@ body {
   text-align: right;
 }
 
-.hero {
-  position: relative !important;
-}
 .hero-logo-mobile {
   width: 56px; height: 56px;
   border-radius: 50%; object-fit: cover;
@@ -1163,7 +1162,7 @@ footer {
 
 /* Mobile (≤ 767px) */
 @media (max-width: 767px) {
-  .hero { justify-content: center; min-height: 320px; }
+  .hero { justify-content: center; }
   .hero-text {
     position: absolute;
     right: 50%;
@@ -1294,3 +1293,4 @@ footer {
 
 /* ══ إصلاح: منع d-none يتأثر بـ display:flex !important ══ */
 .sidebar-nav a.d-none { display: none !important; }
+
