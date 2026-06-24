@@ -1158,22 +1158,18 @@ footer {
 
 /* Mobile (≤ 767px) */
 @media (max-width: 767px) {
-  .hero { justify-content: center; }
+  .hero { justify-content: center; min-height: 320px; }
   .hero-text {
-    right: auto;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    position: absolute;
+    right: 50%;
+    transform: translate(50%, -50%);
     max-width: 90%;
+    width: 90%;
     text-align: center;
-    padding: 20px;
+    padding: clamp(20px, 6vw, 40px) 16px;
+    top: 50%;
   }
-  .hero-overlay { background: rgba(247,239,227,0.78); }
-  .hero-text {
-    max-width: 100%;
-    margin: 0;
-    text-align: center;
-    padding: clamp(28px, 8vw, 48px) 20px clamp(36px, 9vw, 56px);
-  }
+  .hero-overlay { background: rgba(247,239,227,0.82); }
   .hero-logos { justify-content: center; }
   .hero-btns { justify-content: center; }
   .hero-btn-primary, .hero-btn-secondary { padding: 9px 18px; font-size: 13px; }
