@@ -26,10 +26,29 @@ window.addEventListener('load', () => {
   const isStandalone = window.matchMedia('(display-mode: standalone)').matches
     || window.navigator.standalone;
   if (!isStandalone) {
-    // أظهر زرار الناف بار
+    // أنشئ زرار التثبيت ديناميكياً في الناف بار لو مش موجود
     setTimeout(() => {
-      const installBtn = document.getElementById('installAppBtn');
-      if (installBtn) installBtn.style.display = 'flex';
+      if (!document.getElementById('installAppBtn')) {
+        const nav = document.querySelector('nav .nav-inner, nav');
+        if (nav) {
+          const btn = document.createElement('button');
+          btn.id = 'installAppBtn';
+          btn.onclick = () => triggerInstall();
+          btn.title = 'تثبيت التطبيق';
+          btn.innerHTML = '<i class="ti ti-download"></i>';
+          btn.style.cssText = `
+            display:flex;align-items:center;justify-content:center;
+            gap:6px;background:var(--gold,#c9a227);color:#2c1a0e;
+            border:none;padding:6px 12px;border-radius:8px;
+            font-family:inherit;font-size:13px;cursor:pointer;
+            font-weight:700;flex-shrink:0;
+          `;
+          // أضفه قبل آخر عنصر في الناف بار
+          nav.appendChild(btn);
+        }
+      } else {
+        document.getElementById('installAppBtn').style.display = 'flex';
+      }
     }, 1000);
     // وبانر بعد 4 ثواني
     setTimeout(showInstallBanner, 4000);
