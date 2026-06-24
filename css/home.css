@@ -615,12 +615,11 @@ body {
 .hero {
   position: relative;
   width: 100%;
-  min-height: 320px;
-  max-height: 90vh;
+  aspect-ratio: 16 / 7;
+  min-height: 260px;
+  max-height: 85vh;
   overflow: hidden;
   background-color: #f5ede0;
-  display: flex;
-  align-items: stretch;
 }
 
 /* الصورة تظهر كاملة على كل الشاشات */
@@ -629,10 +628,9 @@ body {
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: contain;
-  object-position: left center;
+  object-fit: cover;
+  object-position: center center;
   display: block;
-  background: #f5ede0;
 }
 
 /* طبقة التعتيم بدل ::before */
