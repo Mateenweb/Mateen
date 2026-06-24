@@ -312,7 +312,13 @@ window.openConv = async (cid, otherId, otherName, otherRole) => {
   document.getElementById('convRole').textContent  = ROLE_LABELS[otherRole] || otherRole;
   document.getElementById('convRole').style.color  = ROLE_COLORS[otherRole] || 'var(--text-mid)';
 
-  // Mark as read
+  // Mark as read - فوراً في الـ local state + Firestore
+  const convInList = allConvs.find(cv => cv.id === cid);
+  if (convInList) {
+    convInList[`unread.${currentUser.uid}`] = 0;
+    if (convInList.unread) convInList.unread[currentUser.uid] = 0;
+    renderConvList(allConvs);
+  }
   await updateDoc(doc(db, 'conversations', cid), { [`unread.${currentUser.uid}`]: 0 });
 
   // علّم رسائل الطرف الثاني كمقروءة (عشان يعرف المرسل إن رسالته اتقرأت)
