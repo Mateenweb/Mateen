@@ -15,11 +15,23 @@ if ('serviceWorker' in navigator) {
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   deferredInstallPrompt = e;
-  // أظهر زرار التثبيت في الناف بار
+  // أظهر زرار التثبيت فوراً
   const installBtn = document.getElementById('installAppBtn');
   if (installBtn) installBtn.style.display = 'flex';
-  // وبانر بعد 3 ثواني
-  setTimeout(showInstallBanner, 3000);
+  showInstallBanner();
+});
+
+// أظهر الزرار فوراً بدون انتظار Chrome
+window.addEventListener('load', () => {
+  // لو مش مثبّت بالفعل
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches
+    || window.navigator.standalone;
+  if (!isStandalone) {
+    setTimeout(() => {
+      const installBtn = document.getElementById('installAppBtn');
+      if (installBtn) installBtn.style.display = 'flex';
+    }, 1000);
+  }
 });
 
 function showInstallBanner() {
