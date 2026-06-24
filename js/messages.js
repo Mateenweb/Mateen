@@ -198,19 +198,16 @@ function loadConversations() {
       // لو المحادثة موجودة بالفعل نحدث بياناتها
       const existing = allConvs.find(cv => cv.id === d.id);
       if (existing) {
-        Object.assign(existing, data);
-        // لو الـ unread في الـ local state صفر (اتقرأت) متردهاش من Firestore
         const uid = currentUser.uid;
-        const localUnread = existing[`unread.${uid}`] ?? existing.unread?.[uid] ?? null;
-        const firestoreUnread = Math.max(
-          Number(data[`unread.${uid}`] ?? 0),
-          Number(data.unread?.[uid] ?? 0)
-        );
-        // لو اتقرأت locally خليها صفر
-        if (localUnread === 0) {
-          existing[`unread.${uid}`] = 0;
-          if (existing.unread) existing.unread[uid] = 0;
-        }
+        // احفظ الـ unread الحالي قبل ما نعمل assign
+        const prevFlat   = existing[`unread.${uid}`] ?? null;
+        const prevNested = existing.unread?.[uid]    ?? null;
+
+        Object.assign(existing, data);
+
+        // لو كان صفر قبل كده (اتقرأت) ارجعه صفر
+        if (prevFlat === 0)   existing[`unread.${uid}`] = 0;
+        if (prevNested === 0 && existing.unread) existing.unread[uid] = 0;
         return;
       }
 
