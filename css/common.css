@@ -624,10 +624,13 @@ button:hover, .btn:hover { transform: none !important; }
 body {
   font-family: "Noto Naskh Arabic", serif;
   direction: rtl;
-  background: var(--beige);
+  background: linear-gradient(170deg,
+    #fdf8f0 0%,
+    #ede0cc 40%,
+    #e8d5b7 75%,
+    #d4b896 100%) fixed;
   color: var(--text-dark);
   font-size: 13px;
-  /* overflow-x على الـ html بدل body عشان لا يكسر position:fixed على iOS */
 }
 html { overflow-x: hidden; }
 
