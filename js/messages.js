@@ -68,7 +68,6 @@ let msgUnsub        = null;
 let convUnsub       = null;   // unsubscribe للـ conversations listener
 let allUsers        = [];
 let allConvs        = [];
-window._allConvs = allConvs;
 let viewOnceMode    = false;
 
 // ── Auth ───────────────────────────────────────────────────────────────────
@@ -241,7 +240,7 @@ function loadConversations() {
     // ترتيب من الأحدث للأقدم
     allConvs.sort((a, b) => (b.lastAt?.seconds || 0) - (a.lastAt?.seconds || 0));
 
-    window._allConvs = allConvs;
+    window._debug_convs = allConvs;
     renderConvList(allConvs);
 
     // لا تفتح محادثة أوتوماتيك - المستخدم يختار بنفسه
