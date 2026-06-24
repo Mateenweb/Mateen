@@ -181,9 +181,8 @@ function loadConversations() {
   );
 
   convUnsub = onSnapshot(q, async snap => {
-    allConvs = [];
-
     if (snap.empty) {
+      allConvs = [];
       renderConvList([]);
       return;
     }
@@ -191,28 +190,42 @@ function loadConversations() {
     const promises = snap.docs.map(async d => {
       const data = d.data();
 
-      // تجاهل المحادثات المخفية — إلا لو كانت هي المحادثة المفتوحة حالياً
       if (data.hiddenBy?.[currentUser.uid] && d.id !== activeConvId) return;
 
       const otherId = data.participants?.find(p => p !== currentUser.uid);
       if (!otherId) return;
+
+      // لو المحادثة موجودة بالفعل نحدث بياناتها بدل ما نجيب المستخدم من أول
+      const existing = allConvs.find(cv => cv.id === d.id);
+      if (existing) {
+        Object.assign(existing, data);
+        return;
+      }
 
       let otherName = 'الإدارة';
       let otherRole = '';
       try {
         const otherSnap = await getDoc(doc(db, 'users', otherId));
         if (otherSnap.exists()) {
-          otherName = otherSnap.data().name ||  'الإدارة';
+          otherName = otherSnap.data().name || 'الإدارة';
           otherRole = otherSnap.data().role  || '';
         }
-      } catch(e) { /* مش قادر يجيب بيانات المستخدم — نكمل */ }
+      } catch(e) {}
 
       allConvs.push({ id: d.id, ...data, otherId, otherName, otherRole });
     });
 
     await Promise.all(promises);
 
-    // ترتيب من الأحدث للأقدم في الـ client
+    // حذف المحادثات المخفية
+    allConvs = allConvs.filter(cv => {
+      const d = snap.docs.find(x => x.id === cv.id);
+      if (!d) return false;
+      const data = d.data();
+      return !(data.hiddenBy?.[currentUser.uid] && cv.id !== activeConvId);
+    });
+
+    // ترتيب من الأحدث للأقدم
     allConvs.sort((a, b) => (b.lastAt?.seconds || 0) - (a.lastAt?.seconds || 0));
 
     renderConvList(allConvs);
@@ -241,8 +254,10 @@ function renderConvList(list) {
   }
   el.innerHTML = list.map(c => {
     const time   = fmtTime(c.lastAt?.seconds);
-    const unreadVal = c[`unread.${currentUser?.uid}`] ?? c.unread?.[currentUser?.uid] ?? 0;
-    const unread = unreadVal > 0 ? unreadVal : 0;
+    // Firestore flat field: "unread.uid" أو nested object unread.uid
+    const uid = currentUser?.uid || '';
+    const unreadVal = (c[`unread.${uid}`] ?? c.unread?.[uid] ?? 0);
+    const unread = Number(unreadVal) > 0 ? Number(unreadVal) : 0;
     const roleLabel = ROLE_LABELS[c.otherRole] || '';
     const isActive = activeConvId === c.id;
 
