@@ -241,6 +241,7 @@ function loadConversations() {
     allConvs.sort((a, b) => (b.lastAt?.seconds || 0) - (a.lastAt?.seconds || 0));
 
     window._debug_convs = allConvs;
+    console.log("[DEBUG] allConvs:", allConvs.map(cv => ({id:cv.id.slice(0,8), unread:cv.unread, flat:cv[`unread.${currentUser?.uid}`]})));
     renderConvList(allConvs);
 
     // لا تفتح محادثة أوتوماتيك - المستخدم يختار بنفسه
