@@ -650,8 +650,13 @@ body {
   right: 0;
   transform: translateY(-50%);
   max-width: 42%;
+  width: 42%;
   padding: clamp(16px, 3vw, 50px) clamp(16px, 4vw, 60px);
   text-align: right;
+}
+
+.hero {
+  position: relative !important;
 }
 .hero-logo-mobile {
   width: 56px; height: 56px;
