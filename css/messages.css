@@ -7,7 +7,7 @@
   display: flex;
   height: calc(100vh - 58px);
   overflow: hidden;
-  background: var(--beige, #faf7f2);
+  background: var(--white, #fff);
 }
 
 /* ── Sidebar (conversation list) ─────────── */
