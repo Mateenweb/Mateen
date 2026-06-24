@@ -1,7 +1,7 @@
 
 /* ─── PAGE LAYOUT ─── */
 body { background: var(--beige); min-height: 100vh; display: flex; flex-direction: column; }
-.hero { background: linear-gradient(135deg, var(--green-dark) 0%, var(--green-mid) 100%); padding: 28px 32px; }
+.hero { background: linear-gradient(135deg, #2c1a0e 0%, #5c3d2e 100%); padding: 28px 32px; }
 .hero-badge { display: inline-block; background: rgba(201,162,39,0.2); border: 1px solid rgba(201,162,39,0.35); color: var(--gold-light); padding: 3px 14px; border-radius: 20px; font-size: 12px; margin-bottom: 8px; }
 .hero h1 { font-family: Amiri, serif; font-size: 24px; color: var(--gold-light); margin-bottom: 4px; }
 .hero p  { color: rgba(255,255,255,0.65); font-size: 13px; }
@@ -813,7 +813,7 @@ body { background: var(--beige); min-height: 100vh; display: flex; flex-directio
 .navbar-toggler:focus { box-shadow: none !important; }
 @media (max-width: 767px) {
   #adminNavMenu {
-    background: var(--green-dark, #1a4a2e);
+    background: var(--green-dark, #5c3d2e);
     padding: 10px 0;
   }
   .admin-nav-links .nav-link { padding: 8px 16px; }
@@ -821,5 +821,6 @@ body { background: var(--beige); min-height: 100vh; display: flex; flex-directio
 
 /* ══ تثبيت خلفية الـ collapse على الموبايل ══ */
 #adminNavMenu.show {
-  background: var(--green-dark, #1a4a2e) !important;
+  background: var(--green-dark, #5c3d2e) !important;
 }
+
