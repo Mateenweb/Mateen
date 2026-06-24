@@ -222,20 +222,22 @@ onAuthStateChanged(auth, async user => {
     });
   };
   const lastSeenKey = `news_last_seen_${user.uid}`;
+  let lastNewsSnap = null;
 
-  // لما الطالبة ترجع للصفحة نحدث الكاونتر
+  // لما الطالبة ترجع للصفحة نحدث الكاونتر من الـ snapshot المحفوظ
   document.addEventListener('visibilitychange', () => {
-    if (!document.hidden) {
+    if (!document.hidden && lastNewsSnap) {
       const ls = parseInt(localStorage.getItem(lastSeenKey) || '0');
-      // trigger re-read by dispatching storage event
-      window.dispatchEvent(new Event('storage'));
+      let count = 0;
+      lastNewsSnap.forEach(d => { const ts = d.data().createdAt; if (ts && ts.toMillis() > ls) count++; });
+      updateNewsBadges(count);
     }
   });
 
   onSnapshot(
     query(collection(db, 'news'), orderBy('createdAt', 'desc')),
     snap => {
-      // اقرأ lastSeen في كل مرة عشان يتحدث لو الطالبة فتحت الأخبار
+      lastNewsSnap = snap;
       const lastSeen = parseInt(localStorage.getItem(lastSeenKey) || '0');
       let count = 0;
       snap.forEach(d => { const ts = d.data().createdAt; if (ts && ts.toMillis() > lastSeen) count++; });
