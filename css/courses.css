@@ -83,7 +83,7 @@ nav {
 
 /* ── HERO ── */
 .page-hero {
-  background: linear-gradient(135deg, var(--green-dark) 0%, var(--green-mid) 60%, var(--green-dark) 100%);
+  background: linear-gradient(135deg, #2c1a0e 0%, #5c3d2e 60%, #2c1a0e 100%);
   padding: 48px 24px 40px;
   text-align: center;
   position: relative;
@@ -276,9 +276,9 @@ nav {
 
 /* ── COLOR THEMES PER SUBJECT ── */
 .banner-tafseer  { background: linear-gradient(135deg, #5c3d2e, #8a5e3c); }
-.banner-fiqh     { background: linear-gradient(135deg, #1a3a5c, #2a5298); }
+.banner-fiqh     { background: linear-gradient(135deg, #5c3d2e, #8a5e3c); }
 .banner-aqeedah  { background: linear-gradient(135deg, #4a2e1a, #8b5e3c); }
-.banner-hadith   { background: linear-gradient(135deg, #2e1a4a, #5e3c8b); }
+.banner-hadith   { background: linear-gradient(135deg, #3d2e1a, #6b4c2a); }
 .banner-quran    { background: linear-gradient(135deg, #5c3d2e, #8a5e3c); }
 
 /* ── MODAL ── */
@@ -444,3 +444,4 @@ footer {
   transform: translateY(-2px);
   box-shadow: 0 6px 16px rgba(92,61,46,0.1);
 }
+
