@@ -254,10 +254,11 @@ function renderConvList(list) {
   }
   el.innerHTML = list.map(c => {
     const time   = fmtTime(c.lastAt?.seconds);
-    // Firestore flat field: "unread.uid" أو nested object unread.uid
     const uid = currentUser?.uid || '';
-    const unreadVal = (c[`unread.${uid}`] ?? c.unread?.[uid] ?? 0);
-    const unread = Number(unreadVal) > 0 ? Number(unreadVal) : 0;
+    const unread = Math.max(
+      Number(c[`unread.${uid}`] ?? 0),
+      Number(c.unread?.[uid] ?? 0)
+    );
     const roleLabel = ROLE_LABELS[c.otherRole] || '';
     const isActive = activeConvId === c.id;
 
@@ -319,7 +320,16 @@ window.openConv = async (cid, otherId, otherName, otherRole) => {
     if (convInList.unread) convInList.unread[currentUser.uid] = 0;
     renderConvList(allConvs);
   }
-  await updateDoc(doc(db, 'conversations', cid), { [`unread.${currentUser.uid}`]: 0 });
+  await updateDoc(doc(db, 'conversations', cid), {
+    [`unread.${currentUser.uid}`]: 0,
+  });
+  // صفّر الـ nested object كمان
+  try {
+    const _snap = await getDoc(doc(db, 'conversations', cid));
+    if (_snap.exists() && _snap.data().unread?.[currentUser.uid] > 0) {
+      await updateDoc(doc(db, 'conversations', cid), { unread: { [currentUser.uid]: 0 } });
+    }
+  } catch(e) {}
 
   // علّم رسائل الطرف الثاني كمقروءة (عشان يعرف المرسل إن رسالته اتقرأت)
   const allMsgsSnap = await getDocs(collection(db, 'conversations', cid, 'messages'));

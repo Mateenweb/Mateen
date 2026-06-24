@@ -200,8 +200,11 @@ onAuthStateChanged(auth, async user => {
       let total = 0;
       snap.forEach(d => {
         const data = d.data();
-        // اقرأ flat field فقط (الكود بيكتب فيها)
-        const val = Number(data[`unread.${user.uid}`] ?? 0);
+        // اقرأ flat وnested الاتنين
+        const val = Math.max(
+          Number(data[`unread.${user.uid}`] ?? 0),
+          Number(data.unread?.[user.uid] ?? 0)
+        );
         total += val;
       });
       updateMsgBadges(total);
