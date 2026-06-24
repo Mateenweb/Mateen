@@ -615,11 +615,9 @@ body {
 .hero {
   position: relative;
   width: 100%;
-  aspect-ratio: 16 / 7;
-  min-height: 260px;
-  max-height: 85vh;
+  height: clamp(320px, 55vw, 640px);
   overflow: hidden;
-  background-color: #f5ede0;
+  background-color: #2c1a0e;
 }
 
 /* الصورة تغطي كل الهيرو */
@@ -633,15 +631,15 @@ body {
   display: block;
 }
 
-/* overlay من اليمين للشمال (RTL) - يبيّض الجانب الأيمن تدريجياً */
+/* overlay خفيف من اليسار للشمال عشان النص يظهر */
 .hero-overlay {
   z-index: 1;
   background: linear-gradient(
     to left,
     rgba(247,239,227,0.0)  0%,
-    rgba(247,239,227,0.0) 30%,
-    rgba(247,239,227,0.7) 58%,
-    rgba(247,239,227,0.95) 100%
+    rgba(247,239,227,0.0) 45%,
+    rgba(247,239,227,0.55) 68%,
+    rgba(247,239,227,0.82) 100%
   );
 }
 .hero-text {
