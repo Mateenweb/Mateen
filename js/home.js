@@ -200,9 +200,10 @@ onAuthStateChanged(auth, async user => {
       let total = 0;
       snap.forEach(d => {
         const data = d.data();
-        // Firestore بيحفظها كـ flat field "unread.uid" أو كـ nested object
-        const val = data[`unread.${user.uid}`] ?? data.unread?.[user.uid] ?? 0;
-        total += val;
+        // اقرأ من nested object وكمان flat field
+        const nested = data.unread?.[user.uid] ?? 0;
+        const flat   = data[`unread.${user.uid}`] ?? 0;
+        total += Math.max(Number(nested), Number(flat));
       });
       updateMsgBadges(total);
     },

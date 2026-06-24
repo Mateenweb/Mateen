@@ -319,7 +319,7 @@ window.openConv = async (cid, otherId, otherName, otherRole) => {
     if (convInList.unread) convInList.unread[currentUser.uid] = 0;
     renderConvList(allConvs);
   }
-  await updateDoc(doc(db, 'conversations', cid), { [`unread.${currentUser.uid}`]: 0 });
+  await updateDoc(doc(db, 'conversations', cid), { [`unread.${currentUser.uid}`]: 0, unread: { [currentUser.uid]: 0 } });
 
   // علّم رسائل الطرف الثاني كمقروءة (عشان يعرف المرسل إن رسالته اتقرأت)
   const allMsgsSnap = await getDocs(collection(db, 'conversations', cid, 'messages'));
