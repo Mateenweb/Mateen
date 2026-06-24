@@ -96,7 +96,7 @@
 }
 
 .tp-search:focus {
-  border-color: var(--green-mid, #2d6a4f);
+  border-color: var(--green-mid, #5c3d2e);
   background: #fff;
 }
 
@@ -118,7 +118,7 @@
   white-space: nowrap;
 }
 
-.compose-btn:hover { background: var(--green-mid, #2d6a4f); }
+.compose-btn:hover { background: var(--green-mid, #5c3d2e); }
 .compose-btn:active { transform: scale(0.97); }
 
 /* ── Conversation list ───────────────────── */
@@ -443,7 +443,7 @@
 }
 
 .msg-input:focus {
-  border-color: var(--green-mid, #2d6a4f);
+  border-color: var(--green-mid, #5c3d2e);
   background: #fff;
 }
 
@@ -463,7 +463,7 @@
   transition: background 0.2s, transform 0.1s;
 }
 
-.msg-send-btn:hover  { background: var(--green-mid, #2d6a4f); }
+.msg-send-btn:hover  { background: var(--green-mid, #5c3d2e); }
 .msg-send-btn:active { transform: scale(0.93); }
 
 /* ── New Conv Modal ──────────────────────── */
@@ -792,3 +792,4 @@
   font-size: 10px; color: var(--gold); opacity: 0.8;
   margin-bottom: 2px;
 }
+
