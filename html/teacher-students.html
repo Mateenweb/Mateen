@@ -27,9 +27,6 @@
 <body>
 <div class="basmala-bar"><span class="bsm-ornament">❦</span>بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ<span class="bsm-ornament">❦</span></div>
 <nav>
-    <button onclick="history.back()" class="nav-back-btn" aria-label="رجوع">
-      <i class="ti ti-arrow-right"></i>
-    </button>
 
 <a class="nav-logo" href="#">
 <div class="logo-circle"><img alt="متين" src="../logo.png" style="width:100%;height:100%;border-radius:50%;object-fit:cover;"/></div>
@@ -41,6 +38,9 @@
 <a class="btn-outline" href="home.html"><i class="ti ti-home"></i> الرئيسية</a>
 <button class="btn-logout" onclick="doLogout()"><i class="ti ti-logout"></i> خروج</button>
 </div>
+    <button onclick="history.back()" class="nav-back-btn" aria-label="رجوع">
+      <i class="ti ti-arrow-right"></i>
+    </button>
 </nav>
 <div id="authGate"><i class="ti ti-loader spin" style="font-size:40px;color:var(--border)"></i><p>جارٍ التحميل...</p></div>
 <div id="mainContent" style="display:none; flex-direction:column; flex:1;">
