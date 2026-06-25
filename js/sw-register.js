@@ -127,8 +127,12 @@ window.addEventListener('load', () => {
   const isSafari = /safari/i.test(navigator.userAgent) && !/chrome/i.test(navigator.userAgent);
   const isStandalone = window.navigator.standalone === true;
   const dismissed = localStorage.getItem('iosBannerDismissed');
+  const visitCount = parseInt(localStorage.getItem('visitCount') || '0') + 1;
+  localStorage.setItem('visitCount', visitCount);
 
+  // اعرض البانر من الزيارة الثانية فصاعداً لو مش مضافة ولو ما اتعملش dismiss
   if (!isIOS || !isSafari || isStandalone || dismissed) return;
+  if (visitCount < 2) return;
 
   setTimeout(() => showIOSBanner(), 3000);
 });
