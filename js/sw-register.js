@@ -5,7 +5,7 @@ const BASE = window.location.hostname.includes('github.io') ? '/Mateen' : '';
 let deferredInstallPrompt = null;
 
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('${BASE}/firebase-messaging-sw.js', {
+  navigator.serviceWorker.register(`${BASE}/firebase-messaging-sw.js`, {
     scope: BASE + '/'
   }).then(reg => {
     console.log('[SW] registered:', reg.scope);
