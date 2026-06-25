@@ -108,6 +108,7 @@ onAuthStateChanged(auth, async user => {
   if (convUnsub) { convUnsub(); convUnsub = null; }
   if (msgUnsub)  { msgUnsub();  msgUnsub  = null; }
   activeConvId = null;
+  // لا تمسح allConvs عشان تفضل القائمة ظاهرة أثناء إعادة التحميل
 
   loadConversations();
   loadAllUsers();
@@ -183,8 +184,11 @@ function loadConversations() {
 
   convUnsub = onSnapshot(q, async snap => {
     if (snap.empty) {
-      allConvs = [];
-      renderConvList([]);
+      // لو القائمة فاضية بس عندنا محادثات - ممكن لسه بيتحمّل
+      if (allConvs.length === 0) {
+        allConvs = [];
+        renderConvList([]);
+      }
       return;
     }
 
