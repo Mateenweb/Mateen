@@ -200,31 +200,25 @@ function loadConversations() {
       const otherId = data.participants?.find(p => p !== currentUser.uid);
       if (!otherId) return;
 
-      // لو المحادثة موجودة بالفعل نحدث بياناتها
       const existing = allConvs.find(cv => cv.id === d.id);
       if (existing) {
-        const uid = currentUser.uid;
+        // حدّث بيانات المحادثة الموجودة
         Object.assign(existing, data);
-
-        // لو المحادثة اتقرأت locally، اجبر الـ unread على صفر
         if (readConvIds.has(d.id)) {
-          existing[`unread.${uid}`] = 0;
-          if (existing.unread) existing.unread[uid] = 0;
+          existing[`unread.${currentUser.uid}`] = 0;
+          if (existing.unread) existing.unread[currentUser.uid] = 0;
         }
-        // لا نعمل return عشان الـ render يحصل في الآخر
-      }
-      else {
-
-      let otherName = 'الإدارة';
-      let otherRole = '';
-      try {
-        const otherSnap = await getDoc(doc(db, 'users', otherId));
-        if (otherSnap.exists()) {
-          otherName = otherSnap.data().name || 'الإدارة';
-          otherRole = otherSnap.data().role  || '';
-        }
-      } catch(e) {}
-
+      } else {
+        // محادثة جديدة — اجيب بيانات الطرف الآخر
+        let otherName = 'الإدارة';
+        let otherRole = '';
+        try {
+          const otherSnap = await getDoc(doc(db, 'users', otherId));
+          if (otherSnap.exists()) {
+            otherName = otherSnap.data().name || 'الإدارة';
+            otherRole = otherSnap.data().role  || '';
+          }
+        } catch(e) {}
         allConvs.push({ id: d.id, ...data, otherId, otherName, otherRole });
       }
     });
