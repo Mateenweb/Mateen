@@ -81,7 +81,7 @@ function renderAll(list) {
           <!-- هيدر الكارت -->
           <div style="background:var(--green-dark);padding:14px 16px;display:flex;align-items:center;gap:10px;">
             <div style="width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,0.15);
-                        display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">👩</div>
+                        display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">🧕</div>
             <div style="flex:1;min-width:0;">
               <div style="font-weight:700;color:#fff;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
                 ${esc(u.name||'—')}
@@ -346,7 +346,7 @@ function renderNotesStudents() {
   }
   c.innerHTML = `<div class="notes-students-grid">${allMateenUsers.map(u => `
     <div class="notes-student-card" onclick="openNotesModal('${u.id}','${esc(u.name||'—')}')">
-      <div class="nsc-avatar">👩</div>
+      <div class="nsc-avatar">🧕</div>
       <div class="nsc-name">${esc(u.name||'—')}</div>
       <div class="nsc-action"><i class="ti ti-notes"></i> ملاحظات</div>
     </div>
