@@ -448,6 +448,7 @@ window.sendMsg = async () => {
     [`unread.${otherId}`]: currentUnread + 1,
     [`unread.${currentUser.uid}`]: 0,
     [`hiddenBy.${otherId}`]: false,
+    [`hiddenBy.${currentUser.uid}`]: false,
   }, { merge: true });
 };
 
@@ -520,6 +521,8 @@ window.startConv = async (otherId, otherName, otherRole) => {
     lastAt:  serverTimestamp(),
     [`unread.${currentUser.uid}`]: 0,
     [`unread.${otherId}`]: 0,
+    [`hiddenBy.${currentUser.uid}`]: false,
+    [`hiddenBy.${otherId}`]: false,
   }, { merge: true });
   openConv(cid, otherId, otherName, otherRole);
 };
