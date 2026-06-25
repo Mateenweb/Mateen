@@ -96,7 +96,7 @@ onAuthStateChanged(auth, async user => {
     if (layout)  layout.classList.add('guest-layout');
 
     // اعترض كل الروابط الداخلية وأظهر رسالة تسجيل الدخول
-    const protectedLinks = ['courses.html','messages.html','news.html','about.html',
+    const protectedLinks = ['courses.html','messages.html','news.html',
       'library.html','schedule.html','student.html','admin.html','supervisor.html',
       'teacher-quran1.html','teacher-quran2.html','teacher-aqeedah.html',
       'teacher-fiqh.html','teacher-hadeeth.html','teacher-tafseer.html'];
