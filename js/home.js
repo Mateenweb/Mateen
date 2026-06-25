@@ -11,7 +11,7 @@ import { getAuth, onAuthStateChanged, signOut }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
 import { initNotifications } from "./notifications.js";
 import { getFirestore, doc, getDoc, getDocs, addDoc, setDoc,
-         collection, query, where, orderBy, serverTimestamp, onSnapshot }
+         collection, query, where, orderBy, serverTimestamp }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 import { FIREBASE_CONFIG } from "./config.js";
 
@@ -24,60 +24,12 @@ const db   = getFirestore(app);
    (كان فيه 4 مستمعات منفصلة في home-1 + home-2 + home-msg×2)
    notifications.js له مستمعه الخاص لأنه ملف مشترك بين 23 صفحة
    ═══════════════════════════════════════════════════════════════ */
-function showLoginPrompt() {
-  // شوف لو في modal موجود بالفعل
-  if (document.getElementById('loginPromptModal')) return;
-
-  const modal = document.createElement('div');
-  modal.id = 'loginPromptModal';
-  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;';
-  modal.innerHTML = `
-    <div style="background:white;border-radius:20px;padding:36px 32px;max-width:360px;width:90%;text-align:center;font-family:inherit;">
-      <div style="font-size:40px;margin-bottom:12px;">🔒</div>
-      <div style="font-family:Amiri,serif;font-size:22px;color:var(--green-dark);font-weight:700;margin-bottom:10px;">يلزم تسجيل الدخول</div>
-      <p style="color:var(--text-mid);font-size:14px;line-height:1.7;margin-bottom:24px;">هذا القسم متاح للطالبات المسجلات فقط. سجّلي دخولك للاستمرار.</p>
-      <div style="display:flex;gap:10px;justify-content:center;">
-        <a href="login.html" style="background:var(--green-dark);color:white;padding:10px 24px;border-radius:10px;text-decoration:none;font-size:14px;font-weight:600;">تسجيل الدخول</a>
-        <button onclick="document.getElementById('loginPromptModal').remove()" style="background:var(--beige);border:1px solid var(--border);color:var(--text-mid);padding:10px 20px;border-radius:10px;font-family:inherit;font-size:14px;cursor:pointer;">إلغاء</button>
-      </div>
-    </div>`;
-  document.body.appendChild(modal);
-  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
-}
-
-// ── أخبار عامة للزوار غير المسجلين ──────────────────────────────
-(async () => {
-  try {
-    const { getFirestore, collection, query, where, orderBy, limit, getDocs } =
-      await import('https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js');
-    const _db = getFirestore();
-    const snap = await getDocs(
-      query(collection(_db, 'news'), orderBy('createdAt', 'desc'), limit(6))
-    );
-    if (!snap.empty) {
-      const section = document.getElementById('publicNewsSection');
-      const list    = document.getElementById('publicNewsList');
-      if (section && list) {
-        list.innerHTML = snap.docs.map(d => {
-          const n = d.data();
-          const date = n.createdAt?.toDate?.()?.toLocaleDateString('ar', { day:'numeric', month:'long', year:'numeric' }) || '';
-          return `
-            <div class="col-12 col-md-4">
-              <div class="ann-card h-100">
-                <div style="font-size:12px;color:var(--gold-dark);margin-bottom:6px;">${n.tag || '📝 خبر'}</div>
-                <h4>${n.title || ''}</h4>
-                <p>${(n.body || '').slice(0, 100)}${n.body?.length > 100 ? '...' : ''}</p>
-                <div class="ann-date"><i class="ti ti-calendar"></i> ${date}</div>
-              </div>
-            </div>`;
-        }).join('');
-        section.style.display = '';
-      }
-    }
-  } catch(e) { console.error('public news:', e); }
-})();
-
 onAuthStateChanged(auth, async user => {
+  // ── Onboarding: أول مرة فقط ──────────────────────────────────
+  if (user && !localStorage.getItem('ob_done')) {
+    window.location.href = 'onboarding.html';
+    return;
+  }
 
   /* ───────────────────────────────────────────────────────────
      [من home-1.js] — السايدبار، الروابط حسب الدور، تسجيل الخروج
@@ -94,32 +46,6 @@ onAuthStateChanged(auth, async user => {
     if (guest)   guest.classList.remove('d-none');
     if (userDiv) userDiv.classList.add('sidebar-user-hidden');
     if (layout)  layout.classList.add('guest-layout');
-
-    // اعترض كل الروابط الداخلية وأظهر رسالة تسجيل الدخول
-    const protectedLinks = ['courses.html','messages.html','news.html',
-      'library.html','schedule.html','student.html','admin.html','supervisor.html',
-      'teacher-quran1.html','teacher-quran2.html','teacher-aqeedah.html',
-      'teacher-fiqh.html','teacher-hadeeth.html','teacher-tafseer.html'];
-
-    document.addEventListener('click', e => {
-      const a = e.target.closest('a[href]');
-      const btn = e.target.closest('[onclick]');
-      let href = a?.getAttribute('href') || '';
-
-      // تحقق من path-card onclick
-      if (!href && btn) {
-        const onclickVal = btn.getAttribute('onclick') || '';
-        const match = onclickVal.match(/href='([^']+)'/);
-        if (match) href = match[1];
-      }
-
-      if (href && protectedLinks.some(p => href.includes(p))) {
-        e.preventDefault();
-        e.stopPropagation();
-        showLoginPrompt();
-      }
-    }, true);
-
     return;
   }
 
@@ -188,11 +114,6 @@ onAuthStateChanged(auth, async user => {
     hide('linkTeacher');
   }
 
-  // أظهر زرار الإشعارات للمسجلين
-  const notifWrap = document.getElementById('notifBtnWrap');
-  if (notifWrap && Notification.permission !== 'granted') notifWrap.classList.remove('d-none');
-  else if (notifWrap && Notification.permission === 'granted') notifWrap.innerHTML = '<div style="text-align:center;font-size:12px;color:var(--green-dark);padding:4px 0;"><i class="ti ti-check"></i> الإشعارات مفعّلة</div>';
-
   if (role === 'admin') {
     console.log('✅ Showing links for ADMIN');
     show('linkAdmin');
@@ -203,8 +124,8 @@ onAuthStateChanged(auth, async user => {
     if (linkAdminEl) {
       linkAdminEl.href = 'supervisor.html';
       linkAdminEl.innerHTML = '<i class="ti ti-shield"></i> لوحة المشرفة';
-      show('linkAdmin');
     }
+    show('linkAdmin');
     show('linkNews');
   } else if (role === 'teacher') {
     console.log('✅ Showing links for TEACHER');
@@ -234,7 +155,7 @@ onAuthStateChanged(auth, async user => {
     role === 'admin'      ? '👑' :
     role === 'supervisor' ? '🎓' :
     role === 'teacher'    ? '📚' :
-    role === 'mateen'     ? '🧕' : '🌸';
+    role === 'mateen'     ? '👩' : '🌸';
   if (navAvatar) navAvatar.textContent = avatarEmoji;
 
   if (role === 'mateen') {
@@ -269,92 +190,70 @@ onAuthStateChanged(auth, async user => {
     ctName.value = (snap.exists() && snap.data().name) ? snap.data().name : name;
   }
 
-  /* ── عداد الرسائل — real-time ── */
-  const updateMsgBadges = (total) => {
-    ['navMsgBadge','sidebarMsgBadge'].forEach(id => {
-      const el = document.getElementById(id);
-      if (!el) return;
-      if (total > 0) {
-        // نقطة صغيرة بدل الرقم
-        el.textContent = '';
-        el.style.cssText = 'width:9px;height:9px;padding:0;border-radius:50%;min-width:unset;';
-        el.classList.remove('d-none');
-      } else {
-        el.classList.add('d-none');
-      }
-    });
-  };
-  onSnapshot(
-    query(collection(db, 'conversations'), where('participants', 'array-contains', user.uid)),
-    snap => {
+  /* ───────────────────────────────────────────────────────────
+     [من home-msg.js] — عداد الرسائل غير المقروءة
+     ─────────────────────────────────────────────────────────── */
+  const navMsgBadge     = document.getElementById('navMsgBadge');
+  const sidebarMsgBadge = document.getElementById('sidebarMsgBadge');
+  if (navMsgBadge || sidebarMsgBadge) {
+    try {
+      const q = query(
+        collection(db, 'conversations'),
+        where('participants', 'array-contains', user.uid)
+      );
+      const convSnap = await getDocs(q);
+
       let total = 0;
-      snap.forEach(d => {
-        const data = d.data();
-        // اقرأ الـ flat field أولاً، لو مش موجود جرب الـ nested
-        const fv = data[`unread.${user.uid}`];
-        const nv = data.unread?.[user.uid];
-        const val = fv !== undefined ? Number(fv) : (nv !== undefined ? Number(nv) : 0);
-        total += val;
+      convSnap.forEach(d => {
+        const data   = d.data();
+        const unread = data.unread && data.unread[user.uid] ? data.unread[user.uid] : 0;
+        total += unread;
       });
-      updateMsgBadges(total);
-    },
-    err => console.error('msg-badge:', err)
-  );
 
-  /* ── عداد الأخبار — real-time ── */
-  const updateNewsBadges = (count) => {
-    ['navNewsBadge','navNewsBadge2','sidebarNewsBadge'].forEach(id => {
-      const el = document.getElementById(id);
-      if (!el) return;
-      if (count > 0) { el.textContent = count > 99 ? '99+' : String(count); el.classList.remove('d-none'); }
-      else el.classList.add('d-none');
-    });
-  };
-  const lastSeenKey = `news_last_seen_${user.uid}`;
-  let lastNewsSnap = null;
+      [navMsgBadge, sidebarMsgBadge].forEach(badge => {
+        if (!badge) return;
+        if (total > 0) {
+          badge.textContent = total > 99 ? '99+' : String(total);
+          badge.classList.remove('d-none');
+        } else {
+          badge.classList.add('d-none');
+        }
+      });
 
-  // لما الطالبة ترجع للصفحة نحدث الكاونتر
-  const refreshNewsBadge = () => {
-    if (!lastNewsSnap) return;
-    const ls = parseInt(localStorage.getItem(lastSeenKey) || '0');
-    let count = 0;
-    lastNewsSnap.forEach(d => { const ts = d.data().createdAt; if (ts && ts.toMillis() > ls) count++; });
-    updateNewsBadges(count);
-  };
-  window.addEventListener('focus', refreshNewsBadge);
-  window.addEventListener('pageshow', refreshNewsBadge);
+    } catch (err) {
+      console.error('home-msg:', err);
+    }
+  }
 
-  onSnapshot(
-    query(collection(db, 'news'), orderBy('createdAt', 'desc')),
-    snap => {
-      lastNewsSnap = snap;
-      refreshNewsBadge();
-    },
-    err => console.error('news-badge:', err)
-  );
-
-  // حدّث الكاونتر كل مرة يرجع المستخدم للصفحة
-  document.addEventListener('visibilitychange', () => {
-    if (!document.hidden) refreshNewsBadge();
-  });
+  /* ───────────────────────────────────────────────────────────
+     [من home-msg.js] — عداد الأخبار الجديدة منذ آخر زيارة
+     ─────────────────────────────────────────────────────────── */
+  const navNewsBadge     = document.getElementById('navNewsBadge');
+  const sidebarNewsBadge = document.getElementById('sidebarNewsBadge');
+  if (navNewsBadge || sidebarNewsBadge) {
+    try {
+      const lastSeenKey = `news_last_seen_${user.uid}`;
+      const lastSeen    = parseInt(localStorage.getItem(lastSeenKey) || '0');
+      const newsSnap = await getDocs(
+        query(collection(db, 'news'), orderBy('createdAt', 'desc'))
+      );
+      let count = 0;
+      newsSnap.forEach(d => {
+        const ts = d.data().createdAt;
+        if (ts && ts.toMillis() > lastSeen) count++;
+      });
+      [navNewsBadge, sidebarNewsBadge].forEach(badge => {
+        if (!badge) return;
+        if (count > 0) {
+          badge.textContent = count > 99 ? '99+' : String(count);
+          badge.classList.remove('d-none');
+        } else {
+          badge.classList.add('d-none');
+        }
+      });
+    } catch(e) { console.error('news-badge:', e); }
+  }
 });
-
-// ── فعّلي الإشعارات ────────────────────────────────────────────────────────
-window.enableNotifications = async () => {
-  if (!('Notification' in window)) {
-    alert('متصفحك لا يدعم الإشعارات');
-    return;
-  }
-  const permission = await Notification.requestPermission();
-  if (permission === 'granted') {
-    const btn = document.getElementById('notifBtnWrap');
-    if (btn) btn.innerHTML = '<div style="text-align:center;font-size:12px;color:var(--green-dark);padding:4px 0;"><i class="ti ti-check"></i> الإشعارات مفعّلة</div>';
-    // استدعاء saveFCMToken من notifications.js
-    if (window._saveFCMToken) window._saveFCMToken();
-  } else {
-    alert('لم يتم السماح بالإشعارات. يمكنك تفعيلها من إعدادات المتصفح.');
-  }
-};
 
 window.doLogout = () =>
   signOut(auth).then(() => window.location.href = '../html/login.html');
