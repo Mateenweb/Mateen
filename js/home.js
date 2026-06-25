@@ -188,6 +188,11 @@ onAuthStateChanged(auth, async user => {
     hide('linkTeacher');
   }
 
+  // أظهر زرار الإشعارات للمسجلين
+  const notifWrap = document.getElementById('notifBtnWrap');
+  if (notifWrap && Notification.permission !== 'granted') notifWrap.classList.remove('d-none');
+  else if (notifWrap && Notification.permission === 'granted') notifWrap.innerHTML = '<div style="text-align:center;font-size:12px;color:var(--green-dark);padding:4px 0;"><i class="ti ti-check"></i> الإشعارات مفعّلة</div>';
+
   if (role === 'admin') {
     console.log('✅ Showing links for ADMIN');
     show('linkAdmin');
@@ -328,6 +333,23 @@ onAuthStateChanged(auth, async user => {
     err => console.error('news-badge:', err)
   );
 });
+
+// ── فعّلي الإشعارات ────────────────────────────────────────────────────────
+window.enableNotifications = async () => {
+  if (!('Notification' in window)) {
+    alert('متصفحك لا يدعم الإشعارات');
+    return;
+  }
+  const permission = await Notification.requestPermission();
+  if (permission === 'granted') {
+    const btn = document.getElementById('notifBtnWrap');
+    if (btn) btn.innerHTML = '<div style="text-align:center;font-size:12px;color:var(--green-dark);padding:4px 0;"><i class="ti ti-check"></i> الإشعارات مفعّلة</div>';
+    // استدعاء saveFCMToken من notifications.js
+    if (window._saveFCMToken) window._saveFCMToken();
+  } else {
+    alert('لم يتم السماح بالإشعارات. يمكنك تفعيلها من إعدادات المتصفح.');
+  }
+};
 
 window.doLogout = () =>
   signOut(auth).then(() => window.location.href = '../html/login.html');

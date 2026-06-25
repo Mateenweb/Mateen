@@ -233,6 +233,9 @@ onAuthStateChanged(auth, user => {
     }
     startListening(user.uid);
     showMissedNotifications(user.uid);
+    // تشغيل saveFCMToken عند تسجيل الدخول
+    saveFCMToken(user.uid);
+
     // ملاحظة: saveFCMToken() وطلب إذن الإشعارات التلقائي عُطّلا مؤقتاً.
     // السبب: VAPID key الحالية placeholder وبتفشل بـ 401 من Firebase،
     // وطلب الإذن تلقائياً عند تحميل الصفحة مخالف لمعايير الأداء وتجربة المستخدم.
