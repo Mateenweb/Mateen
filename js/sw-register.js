@@ -15,23 +15,7 @@ if ('serviceWorker' in navigator) {
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   deferredInstallPrompt = e;
-  // أظهر زرار التثبيت فوراً
-  const installBtn = document.getElementById('installAppBtn');
-  if (installBtn) installBtn.style.display = 'flex';
   showInstallBanner();
-});
-
-// أظهر زرار التثبيت في home.html بس
-window.addEventListener('load', () => {
-  const isStandalone = window.matchMedia('(display-mode: standalone)').matches
-    || window.navigator.standalone;
-  if (!isStandalone) {
-    setTimeout(() => {
-      const installBtn = document.getElementById('installAppBtn');
-      if (installBtn) installBtn.style.display = 'flex';
-    }, 1000);
-    setTimeout(showInstallBanner, 4000);
-  }
 });
 
 function showInstallBanner() {
@@ -84,13 +68,10 @@ window.addEventListener('load', () => {
     if (Notification.permission === 'granted') return;
     if (Notification.permission === 'denied') return;
 
-    // تحقق من Firebase Auth
-    try {
-      const { getAuth } = await import("https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js");
-      const auth = getAuth();
-      const user = auth.currentUser;
-      if (!user) return;
-    } catch(e) { return; }
+    // فقط لو المستخدم مسجّل دخول (وجود firebase auth)
+    const isLoggedIn = document.cookie.includes('loggedIn') ||
+      localStorage.getItem('mateenUser');
+    if (!isLoggedIn) return;
 
     showNotifBanner();
   }, 5000);
@@ -140,15 +121,61 @@ window.addEventListener('appinstalled', () => {
   deferredInstallPrompt = null;
 });
 
-// ── تثبيت بالضغط على اللوجو ──────────────────────────────────────────────
-window.triggerInstall = async () => {
-  if (deferredInstallPrompt) {
-    // Chrome جاهز — افتح حوار التثبيت
-    deferredInstallPrompt.prompt();
-    const { outcome } = await deferredInstallPrompt.userChoice;
-    if (outcome === 'accepted') deferredInstallPrompt = null;
-  } else {
-    // Chrome مش جاهز — أظهر تعليمات يدوية
-    showInstallBanner();
-  }
-};
+// ── بانر iOS (Safari) ────────────────────────────────────────────────────
+window.addEventListener('load', () => {
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const isSafari = /safari/i.test(navigator.userAgent) && !/chrome/i.test(navigator.userAgent);
+  const isStandalone = window.navigator.standalone === true;
+  const dismissed = localStorage.getItem('iosBannerDismissed');
+
+  if (!isIOS || !isSafari || isStandalone || dismissed) return;
+
+  setTimeout(() => showIOSBanner(), 3000);
+});
+
+function showIOSBanner() {
+  if (document.getElementById('iosBanner')) return;
+
+  const banner = document.createElement('div');
+  banner.id = 'iosBanner';
+  banner.innerHTML = `
+    <div style="
+      position:fixed; bottom:0; left:0; right:0;
+      background:linear-gradient(135deg,#2c1a0e,#5c3d2e);
+      color:#e8c96a; border-top:2px solid #c9a227;
+      padding:16px 20px 24px;
+      box-shadow:0 -6px 30px rgba(0,0,0,0.4); z-index:9999;
+      font-family:'Noto Naskh Arabic',serif; direction:rtl;
+    ">
+      <button onclick="document.getElementById('iosBanner').remove();localStorage.setItem('iosBannerDismissed','1')" style="
+        position:absolute; top:10px; left:14px;
+        background:none; border:none; color:rgba(255,255,255,0.5);
+        cursor:pointer; font-size:20px; line-height:1;
+      ">✕</button>
+
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+        <img src="/Mateen/logo.png" style="width:40px;height:40px;border-radius:50%;border:1.5px solid #c9a227;">
+        <div>
+          <div style="font-weight:700;font-size:15px;">أضيفي متين لشاشتك الرئيسية</div>
+          <div style="font-size:12px;color:rgba(255,255,255,0.6);margin-top:2px;">للوصول السريع في أي وقت</div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,0.07);border-radius:10px;padding:10px 12px;">
+          <span style="font-size:22px;">⬆️</span>
+          <span style="font-size:13px;">اضغطي على زر <b style="color:#c9a227;">المشاركة</b> في أسفل Safari</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,0.07);border-radius:10px;padding:10px 12px;">
+          <span style="font-size:22px;">➕</span>
+          <span style="font-size:13px;">اختاري <b style="color:#c9a227;">"أضف إلى الشاشة الرئيسية"</b></span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,0.07);border-radius:10px;padding:10px 12px;">
+          <span style="font-size:22px;">✅</span>
+          <span style="font-size:13px;">اضغطي <b style="color:#c9a227;">"إضافة"</b> وتم!</span>
+        </div>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(banner);
+}
