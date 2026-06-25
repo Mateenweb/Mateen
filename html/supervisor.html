@@ -74,6 +74,100 @@
 <div id="allContainer"><div class="empty-state"><i class="ti ti-loader spin"></i></div></div>
 </div>
 
+
+<!-- ══ قسم قاعدة بيانات الطالبات ══ -->
+<div class="section" id="studentsSection">
+<div class="section-head">
+  <div class="section-head-title"><i class="ti ti-users"></i> قاعدة بيانات الطالبات والمقابلات</div>
+  <div class="section-head-actions">
+    <button class="btn-add-row btn-export-word" onclick="openExportModal()"><i class="ti ti-download"></i> تصدير Word / PDF</button>
+    <button class="btn-add-row btn-export-att" onclick="openAttModal()"><i class="ti ti-clipboard-list"></i> تصدير الحضور والغياب</button>
+  </div>
+</div>
+
+<!-- إحصاء -->
+<div class="stu-stats-bar">
+  <div class="stu-stat"><span id="stuTotal">0</span><small>الإجمالي</small></div>
+  <div class="stu-stat"><span id="stuDone">0</span><small>أُجريت مقابلتهن</small></div>
+  <div class="stu-stat"><span id="stuPending">0</span><small>في الانتظار</small></div>
+  <div class="stu-stat"><span id="stuAccepted">0</span><small>مقبولات</small></div>
+  <div class="stu-stat"><span id="stuRejected">0</span><small>مرفوضات</small></div>
+</div>
+
+<!-- فلاتر -->
+<div class="stu-filters">
+  <input type="text" id="stuSearch" placeholder="🔍 ابحثي باسم الطالبة..." oninput="applyStudentFilters()"/>
+  <select id="stuFilterInterview" onchange="applyStudentFilters()">
+    <option value="all">📋 كل المقابلات</option>
+    <option value="done">✅ أُجريت</option>
+    <option value="pending">⏳ لم تُجرَ</option>
+  </select>
+  <select id="stuFilterResult" onchange="applyStudentFilters()">
+    <option value="all">📊 كل النتائج</option>
+    <option value="accepted">✔️ مقبولة</option>
+    <option value="rejected">✖️ مرفوضة</option>
+    <option value="na">— لم يحدد</option>
+  </select>
+  <select id="stuFilterStatus" onchange="applyStudentFilters()">
+    <option value="all">📖 كل الطالبات</option>
+    <option value="mateen">📖 بنات متين</option>
+    <option value="new">✨ مستجدات</option>
+  </select>
+  <button id="sortAlphaBtn" class="btn-add-row" onclick="toggleAlphaSort()" title="ترتيب أبجدي"><i class="ti ti-sort-ascending-letters"></i></button>
+</div>
+
+<!-- جدول الطالبات -->
+<div class="table-wrap">
+  <div id="stu-cards-wrap"></div>
+  <table class="pending-table" id="stuTable">
+    <thead>
+      <tr>
+        <th><input type="checkbox" onchange="selectAllRows(this.checked)"></th>
+        <th>#</th>
+        <th>الاسم والتصنيف</th>
+        <th>اليوم والتاريخ</th>
+        <th>الوقت</th>
+        <th>المقابلة</th>
+        <th>القبول</th>
+        <th>الاختبار</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody id="stuTableBody">
+      <tr><td colspan="9" class="empty-state"><i class="ti ti-loader spin"></i></td></tr>
+    </tbody>
+  </table>
+</div>
+</div>
+
+<!-- مودال التصدير -->
+<div id="exportModal" class="modal-overlay">
+  <div class="modal-box">
+    <div class="modal-head"><span class="m-title m-title-amber">📥 تصدير بيانات الطالبات</span><button class="m-close" onclick="closeExportModal()">✕</button></div>
+    <div class="modal-body">
+      <p style="color:var(--text-mid);font-size:13px;margin-bottom:16px">سيتم تصدير الطالبات المعروضات حالياً حسب الفلتر المختار</p>
+      <div style="display:flex;gap:10px;justify-content:center">
+        <button class="m-btn" onclick="doExport('word')"><i class="ti ti-file-type-doc"></i> Word</button>
+        <button class="m-btn" onclick="doExport('pdf')"><i class="ti ti-file-type-pdf"></i> PDF</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- مودال تصدير الحضور -->
+<div id="attModal" class="modal-overlay">
+  <div class="modal-box">
+    <div class="modal-head"><span class="m-title m-title-amber">📋 تصدير الحضور والغياب</span><button class="m-close" onclick="closeAttModal()">✕</button></div>
+    <div class="modal-body">
+      <p style="color:var(--text-mid);font-size:13px;margin-bottom:12px">اختاري نوع التصدير</p>
+      <div style="display:flex;gap:10px;justify-content:center">
+        <button class="m-btn" onclick="doAttExport('word')"><i class="ti ti-file-type-doc"></i> Word</button>
+        <button class="m-btn" onclick="doAttExport('pdf')"><i class="ti ti-file-type-pdf"></i> PDF</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ══ قسم الغياب ══ -->
 <div class="section">
   <div class="section-head">
@@ -122,10 +216,12 @@
   </div>
 </div>
 <div class="toast" id="toast"></div>
+<script type="module" src="../js/export.js"></script>
 <script src="../js/supervisor-1.js" type="module"></script>
   <script type="module" src="../js/notifications.js"></script>
   <script src="../js/sw-register.js"></script>
 </body>
 </html>
+
 
 
