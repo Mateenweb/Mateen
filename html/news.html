@@ -139,6 +139,13 @@
           </label>
         </div>
       </div>
+      <div>
+        <label class="m-field-label">الظهور</label>
+        <select id="newsVisibility" class="m-select-news">
+          <option value="members">👩‍💻 للمسجلات فقط</option>
+          <option value="public">🌐 للجميع</option>
+        </select>
+      </div>
     </div>
 
     <div class="m-foot-news">
@@ -195,7 +202,13 @@ onSnapshot(q, snap => {
   }
 
   document.getElementById('newsEmpty').classList.add('hidden');
-  list.innerHTML = snap.docs.map(d => {
+  // فلتر الأخبار حسب الـ visibility - الأخبار بدون visibility تعتبر للمسجلات
+  const visibleDocs = snap.docs.filter(d => {
+    const v = d.data().visibility;
+    if (!v || v === 'members') return true; // للمسجلات - وهنا في الصفحة المسجلة
+    return true; // public كمان تظهر
+  });
+  list.innerHTML = visibleDocs.map(d => {
     const n = d.data();
     const date = n.createdAt?.toDate?.()?.toLocaleDateString('ar', { day:'numeric', month:'long', year:'numeric' }) || '';
     return `
@@ -211,6 +224,11 @@ onSnapshot(q, snap => {
         <p>${n.body || ''}</p>
       </div>`;
   }).join('');
+
+  if (visibleDocs.length === 0) {
+    document.getElementById('newsEmpty').classList.remove('hidden');
+    list.innerHTML = '';
+  }
 });
 
 window.deleteNews = async id => {
@@ -221,15 +239,16 @@ window.deleteNews = async id => {
 const { addDoc, serverTimestamp } = await import("https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js");
 
 window.submitNews = async () => {
-  const title  = document.getElementById('newsTitle').value.trim();
-  const body   = document.getElementById('newsBody').value.trim();
-  const tag    = document.getElementById('newsTag').value;
-  const pinned = document.getElementById('newsPinned').checked;
+  const title      = document.getElementById('newsTitle').value.trim();
+  const body       = document.getElementById('newsBody').value.trim();
+  const tag        = document.getElementById('newsTag').value;
+  const pinned     = document.getElementById('newsPinned').checked;
+  const visibility = document.getElementById('newsVisibility').value;
 
   if (!title) { alert('يرجى إدخال العنوان'); return; }
 
   await addDoc(collection(db, 'news'), {
-    title, body, tag, pinned,
+    title, body, tag, pinned, visibility,
     createdAt: serverTimestamp()
   });
 
@@ -237,6 +256,7 @@ window.submitNews = async () => {
   document.getElementById('newsTitle').value  = '';
   document.getElementById('newsBody').value   = '';
   document.getElementById('newsPinned').checked = false;
+  document.getElementById('newsVisibility').value = 'members';
   document.getElementById('addNewsModal').classList.remove('show');
 };
 </script>
