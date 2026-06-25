@@ -2,6 +2,7 @@
 import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
 import { getFirestore, collection, doc, getDoc, getDocs, onSnapshot, query, where, orderBy, updateDoc, deleteDoc, addDoc, Timestamp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
+import { exportWord, exportPdf } from "./export.js";
 import { FIREBASE_CONFIG } from "./config.js";
 import { fullDeleteUser } from "./delete-account.js";
 
@@ -418,3 +419,148 @@ window.closeNotesModal = (e) => {
 
 
 
+
+
+
+// ══════════════════════════════════════════════════════════════
+//  قاعدة بيانات الطالبات — نفس الأدمن (قراءة فقط للمشرفة)
+// ══════════════════════════════════════════════════════════════
+let allStudents = [];
+let stuSortAlpha = false;
+
+const MONTHS_HIJRI = ['محرم','صفر','ربيع الأول','ربيع الثاني','جمادى الأولى','جمادى الثانية','رجب','شعبان','رمضان','شوال','ذو القعدة','ذو الحجة'];
+const YEARS_HIJRI  = Array.from({length:11},(_,i)=>1442+i);
+
+function makeDatePicker(sid, dateStr) {
+  if (!dateStr) return '—';
+  return dateStr.replace(/-/g, '/');
+}
+
+const stuQuery2 = query(collection(db,'students'), orderBy('order'));
+onSnapshot(stuQuery2, snap => {
+  allStudents = snap.docs.map(d=>({id:d.id,...d.data()}));
+  renderStudents(allStudents);
+  updateStuStats(allStudents);
+});
+
+function updateStuStats(list) {
+  const el = id => document.getElementById(id);
+  if(el('stuTotal'))    el('stuTotal').textContent    = list.length;
+  if(el('stuDone'))     el('stuDone').textContent     = list.filter(s=>s.interview==='done').length;
+  if(el('stuPending'))  el('stuPending').textContent  = list.filter(s=>s.interview==='pending').length;
+  if(el('stuAccepted')) el('stuAccepted').textContent = list.filter(s=>s.accepted==='accepted').length;
+  if(el('stuRejected')) el('stuRejected').textContent = list.filter(s=>s.accepted==='rejected').length;
+}
+
+window.applyStudentFilters = () => {
+  const q  = (document.getElementById('stuSearch')?.value||'').toLowerCase();
+  const fi = document.getElementById('stuFilterInterview')?.value || 'all';
+  const fr = document.getElementById('stuFilterResult')?.value || 'all';
+  const fs = document.getElementById('stuFilterStatus')?.value || 'all';
+  let filtered = allStudents.filter(s=>
+    (!q  || (s.name||'').toLowerCase().includes(q)) &&
+    (fi==='all' || s.interview===fi) &&
+    (fr==='all' || s.accepted===fr) &&
+    (fs==='all' || s.status===fs)
+  );
+  if (stuSortAlpha) filtered = [...filtered].sort((a,b)=>(a.name||'').localeCompare(b.name||'','ar'));
+  renderStudents(filtered);
+};
+
+window.toggleAlphaSort = () => {
+  stuSortAlpha = !stuSortAlpha;
+  document.getElementById('sortAlphaBtn')?.classList.toggle('active', stuSortAlpha);
+  window.applyStudentFilters();
+};
+
+window.selectAllRows = (checked) => {
+  document.querySelectorAll('.row-check').forEach(cb => cb.checked = checked);
+};
+
+function renderStudents(list) {
+  const tb = document.getElementById('stuTableBody');
+  if (!tb) return;
+  if (!list.length) {
+    tb.innerHTML = `<tr><td colspan="9" class="empty-state"><i class="ti ti-inbox"></i>لا توجد طالبات</td></tr>`;
+    return;
+  }
+  const isMob = window.innerWidth <= 640;
+  if (isMob) {
+    const wrap = document.getElementById('stu-cards-wrap');
+    if (wrap) {
+      wrap.innerHTML = list.map(s => {
+        const intLabel = s.interview==='done'?'✅ تمت':'⏳ لم تتم';
+        let accLabel = '— لم يحدد';
+        if(s.accepted==='accepted') accLabel='✔️ مقبولة';
+        if(s.accepted==='rejected') accLabel='✖️ مرفوضة';
+        const statusLabel = s.status==='mateen'?'📖 بنات متين':s.status==='new'?'✨ مستجدة':'';
+        return `<div class="stu-mob-card">
+          <div class="stu-mob-top">
+            <div class="stu-mob-name">
+              <a class="btn-stu-link" href="student.html?id=${s.id}" target="_blank">👤</a>
+              <span style="font-weight:600">${esc(s.name||'—')}</span>
+            </div>
+            ${statusLabel ? `<span class="stu-mob-badge">${statusLabel}</span>` : ''}
+          </div>
+          <div class="stu-mob-row"><span class="stu-mob-label">📅 اليوم</span><span>${s.day||'—'}</span></div>
+          <div class="stu-mob-row"><span class="stu-mob-label">🕐 الوقت</span><span>${s.hour?s.hour+' '+s.ampm:'—'}</span></div>
+          <div class="stu-mob-row"><span class="stu-mob-label">📋 المقابلة</span><span>${intLabel}</span></div>
+          <div class="stu-mob-row"><span class="stu-mob-label">📊 القبول</span><span>${accLabel}</span></div>
+        </div>`;
+      }).join('');
+    }
+    tb.innerHTML = '';
+    return;
+  }
+  tb.innerHTML = list.map((s,i) => {
+    const intClass = s.interview==='done'?'btn-done':'btn-pending';
+    const intLabel = s.interview==='done'?'✅ تمت':'⏳ لم تتم';
+    let accClass='btn-na', accLabel='— لم يحدد';
+    if(s.accepted==='accepted'){accClass='btn-accepted';accLabel='✔️ مقبولة';}
+    if(s.accepted==='rejected'){accClass='btn-rejected';accLabel='✖️ مرفوضة';}
+    const statusLabel = s.status==='mateen'?'📖 بنات متين':s.status==='new'?'✨ مستجدات':'';
+    return `<tr>
+      <td><input type="checkbox" class="row-check" data-id="${s.id}"></td>
+      <td style="color:var(--text-mid);font-size:12px">${i+1}</td>
+      <td><div class="stu-name-cell">
+        <a class="btn-stu-link" href="student.html?id=${s.id}" target="_blank">👤</a>
+        <span>${esc(s.name||'—')}</span>
+        ${statusLabel?`<span class="status-badge">${statusLabel}</span>`:''}
+      </div></td>
+      <td>${s.day||'—'}<br><small style="color:var(--text-mid)">${s.dateH?s.dateH.replace(/-/g,'/'):'—'}</small></td>
+      <td>${s.hour?s.hour+' '+s.ampm:'—'}</td>
+      <td><span class="btn-interview ${intClass}">${intLabel}</span></td>
+      <td><span class="btn-accept ${accClass}">${accLabel}</span></td>
+      <td>${s.placementScore!=null?s.placementScore+'/100':'—'}</td>
+      <td><a class="btn-stu-link" href="student.html?id=${s.id}" target="_blank"><i class="ti ti-eye"></i></a></td>
+    </tr>`;
+  }).join('');
+}
+
+// ── Export ──────────────────────────────────────────────────
+window.openExportModal = () => document.getElementById('exportModal')?.classList.add('show');
+window.closeExportModal = () => document.getElementById('exportModal')?.classList.remove('show');
+window.openAttModal = () => document.getElementById('attModal')?.classList.add('show');
+window.closeAttModal = () => document.getElementById('attModal')?.classList.remove('show');
+
+window.doExport = async (type) => {
+  const q  = (document.getElementById('stuSearch')?.value||'').toLowerCase();
+  const fi = document.getElementById('stuFilterInterview')?.value||'all';
+  const fr = document.getElementById('stuFilterResult')?.value||'all';
+  const fs = document.getElementById('stuFilterStatus')?.value||'all';
+  let data = allStudents.filter(s=>
+    (!q||(s.name||'').toLowerCase().includes(q))&&
+    (fi==='all'||s.interview===fi)&&
+    (fr==='all'||s.accepted===fr)&&
+    (fs==='all'||s.status===fs)
+  );
+  if (stuSortAlpha) data=[...data].sort((a,b)=>(a.name||'').localeCompare(b.name||'','ar'));
+  if (type==='word') await exportWord(data);
+  else await exportPdf(data);
+  window.closeExportModal();
+};
+
+window.doAttExport = async () => {
+  showToast('ميزة تصدير الحضور والغياب قيد التطوير قريباً');
+  window.closeAttModal();
+};
