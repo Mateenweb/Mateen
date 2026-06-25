@@ -24,26 +24,12 @@ const db   = getFirestore(app);
    (كان فيه 4 مستمعات منفصلة في home-1 + home-2 + home-msg×2)
    notifications.js له مستمعه الخاص لأنه ملف مشترك بين 23 صفحة
    ═══════════════════════════════════════════════════════════════ */
-function showLoginPrompt() {
-  if (document.getElementById('loginPromptModal')) return;
-  const modal = document.createElement('div');
-  modal.id = 'loginPromptModal';
-  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;';
-  modal.innerHTML = `
-    <div style="background:white;border-radius:20px;padding:36px 32px;max-width:360px;width:90%;text-align:center;font-family:inherit;">
-      <div style="font-size:40px;margin-bottom:12px;">🔒</div>
-      <div style="font-family:Amiri,serif;font-size:22px;color:var(--green-dark);font-weight:700;margin-bottom:10px;">يلزم تسجيل الدخول</div>
-      <p style="color:var(--text-mid);font-size:14px;line-height:1.7;margin-bottom:24px;">هذا القسم متاح للطالبات المسجلات فقط. سجّلي دخولك للاستمرار.</p>
-      <div style="display:flex;gap:10px;justify-content:center;">
-        <a href="login.html" style="background:var(--green-dark);color:white;padding:10px 24px;border-radius:10px;text-decoration:none;font-size:14px;font-weight:600;">تسجيل الدخول</a>
-        <button onclick="document.getElementById('loginPromptModal').remove()" style="background:var(--beige);border:1px solid var(--border);color:var(--text-mid);padding:10px 20px;border-radius:10px;font-family:inherit;font-size:14px;cursor:pointer;">إلغاء</button>
-      </div>
-    </div>`;
-  document.body.appendChild(modal);
-  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
-}
-
 onAuthStateChanged(auth, async user => {
+  // ── Onboarding: بعد تسجيل الدخول، أول مرة فقط ──────────────
+  if (user && !localStorage.getItem('ob_done')) {
+    window.location.href = 'onboarding.html';
+    return;
+  }
 
   /* ───────────────────────────────────────────────────────────
      [من home-1.js] — السايدبار، الروابط حسب الدور، تسجيل الخروج
@@ -60,30 +46,6 @@ onAuthStateChanged(auth, async user => {
     if (guest)   guest.classList.remove('d-none');
     if (userDiv) userDiv.classList.add('sidebar-user-hidden');
     if (layout)  layout.classList.add('guest-layout');
-
-    const protectedLinks = ['courses.html','messages.html','news.html',
-      'library.html','schedule.html','student.html','admin.html','supervisor.html',
-      'teacher-quran1.html','teacher-quran2.html','teacher-aqeedah.html',
-      'teacher-fiqh.html','teacher-hadeeth.html','teacher-tafseer.html'];
-
-    document.addEventListener('click', e => {
-      const a = e.target.closest('a[href]');
-      let href = a?.getAttribute('href') || '';
-      if (!href) {
-        const parent = e.target.closest('[onclick]');
-        if (parent) {
-          const onclickVal = parent.getAttribute('onclick') || '';
-          const match = onclickVal.match(/location\.href='([^']+)'/) || onclickVal.match(/href='([^']+)'/);
-          if (match) href = match[1];
-        }
-      }
-      if (href && protectedLinks.some(p => href.includes(p))) {
-        e.preventDefault();
-        e.stopPropagation();
-        showLoginPrompt();
-      }
-    }, true);
-
     return;
   }
 
