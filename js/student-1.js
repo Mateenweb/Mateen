@@ -125,16 +125,9 @@ async function initPage(studentId, user, role) {
     document.getElementById('deleteAccBtn')?.closest('.delete-acc-section')?.remove();
   }
 
-  // المشرفة: تشوف بس تبويبي "حضوري" و"ملاحظات" — وتقدر تسجل حضور وتكتب ملاحظات
+  // المشرفة: تشوف بيانات الطالبة فقط بدون تعديل
   if (role === 'supervisor') {
-    document.getElementById('tabBtn-info')?.remove();
-    document.getElementById('tabBtn-grades')?.remove();
-    document.getElementById('newSessionWrap').style.display = 'block';
-    document.getElementById('notesEditWrap').style.display  = 'block';
-    document.getElementById('notesTextarea').value = s.notes || '';
-    setupSupervisorAttendance(studentId);
-    setupSupervisorNotes(studentId);
-    switchTab('attend');
+    switchTab('info');
   }
 
   // الإدارة: صلاحية كاملة — تشوف كل التبويبات وتقدر تعدّل حضور + درجات + ملاحظات
