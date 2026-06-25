@@ -188,38 +188,6 @@
     </div>
   </div>
 </div>
-
-<!-- ══ قسم النوتس ══ -->
-<div class="section">
-  <div class="section-head">
-    <div class="section-head-title"><i class="ti ti-notes"></i> ملاحظات الطالبات</div>
-  </div>
-  <div id="notesContainer"><div class="empty-state"><i class="ti ti-loader spin"></i></div></div>
-</div>
-</div>
-</div>
-
-<!-- مودال النوتس -->
-<div id="notesModal" class="notes-modal-overlay" style="display:none" onclick="closeNotesModal(event)">
-  <div class="notes-modal-box">
-    <div class="notes-modal-head">
-      <span id="notesModalTitle">ملاحظات الطالبة</span>
-      <button class="notes-modal-close" onclick="document.getElementById('notesModal').style.display='none'"><i class="ti ti-x"></i></button>
-    </div>
-    <div class="notes-modal-body">
-      <div id="existingNotes" class="existing-notes"></div>
-      <div class="new-note-area">
-        <textarea id="newNoteText" placeholder="اكتبي ملاحظتك هنا..." rows="3"></textarea>
-        <button class="btn-add-note" onclick="saveNote()"><i class="ti ti-plus"></i> إضافة ملاحظة</button>
-      </div>
-    </div>
-  </div>
-</div>
-<div class="toast" id="toast"></div>
-<script type="module" src="../js/export.js"></script>
-<script src="../js/supervisor-1.js" type="module"></script>
-  <script type="module" src="../js/notifications.js"></script>
-  <script src="../js/sw-register.js"></script>
 </body>
 </html>
 
