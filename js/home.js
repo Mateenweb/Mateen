@@ -315,7 +315,6 @@ onAuthStateChanged(auth, async user => {
     lastNewsSnap.forEach(d => { const ts = d.data().createdAt; if (ts && ts.toMillis() > ls) count++; });
     updateNewsBadges(count);
   };
-  document.addEventListener('visibilitychange', () => { if (!document.hidden) refreshNewsBadge(); });
   window.addEventListener('focus', refreshNewsBadge);
   window.addEventListener('pageshow', refreshNewsBadge);
 
@@ -323,13 +322,15 @@ onAuthStateChanged(auth, async user => {
     query(collection(db, 'news'), orderBy('createdAt', 'desc')),
     snap => {
       lastNewsSnap = snap;
-      const lastSeen = parseInt(localStorage.getItem(lastSeenKey) || '0');
-      let count = 0;
-      snap.forEach(d => { const ts = d.data().createdAt; if (ts && ts.toMillis() > lastSeen) count++; });
-      updateNewsBadges(count);
+      refreshNewsBadge();
     },
     err => console.error('news-badge:', err)
   );
+
+  // حدّث الكاونتر كل مرة يرجع المستخدم للصفحة
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) refreshNewsBadge();
+  });
 });
 
 // ── فعّلي الإشعارات ────────────────────────────────────────────────────────
