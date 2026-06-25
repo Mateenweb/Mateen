@@ -45,6 +45,38 @@ function showLoginPrompt() {
   modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
 }
 
+// ── أخبار عامة للزوار غير المسجلين ──────────────────────────────
+(async () => {
+  try {
+    const { getFirestore, collection, query, where, orderBy, limit, getDocs } =
+      await import('https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js');
+    const _db = getFirestore();
+    const snap = await getDocs(
+      query(collection(_db, 'news'), where('visibility', '==', 'public'), orderBy('createdAt', 'desc'), limit(6))
+    );
+    if (!snap.empty) {
+      const section = document.getElementById('publicNewsSection');
+      const list    = document.getElementById('publicNewsList');
+      if (section && list) {
+        list.innerHTML = snap.docs.map(d => {
+          const n = d.data();
+          const date = n.createdAt?.toDate?.()?.toLocaleDateString('ar', { day:'numeric', month:'long', year:'numeric' }) || '';
+          return `
+            <div class="col-12 col-md-4">
+              <div class="ann-card h-100">
+                <div style="font-size:12px;color:var(--gold-dark);margin-bottom:6px;">${n.tag || '📝 خبر'}</div>
+                <h4>${n.title || ''}</h4>
+                <p>${(n.body || '').slice(0, 100)}${n.body?.length > 100 ? '...' : ''}</p>
+                <div class="ann-date"><i class="ti ti-calendar"></i> ${date}</div>
+              </div>
+            </div>`;
+        }).join('');
+        section.style.display = '';
+      }
+    }
+  } catch(e) { console.error('public news:', e); }
+})();
+
 onAuthStateChanged(auth, async user => {
 
   /* ───────────────────────────────────────────────────────────
