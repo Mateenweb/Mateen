@@ -265,12 +265,9 @@ function renderConvList(list) {
   el.innerHTML = list.map(c => {
     const time   = fmtTime(c.lastAt?.seconds);
     const uid = currentUser?.uid || '';
-    const flatVal   = Number(c[`unread.${uid}`] ?? -1);
-    const nestedVal = Number(c.unread?.[uid]    ?? -1);
-    // لو أي منهم صفر يبقى اتقرأ
-    const unread = (flatVal === 0 || nestedVal === 0)
-      ? 0
-      : Math.max(flatVal === -1 ? 0 : flatVal, nestedVal === -1 ? 0 : nestedVal);
+    const fv = c[`unread.${uid}`];
+    const nv = c.unread?.[uid];
+    const unread = fv !== undefined ? Number(fv) : (nv !== undefined ? Number(nv) : 0);
     const roleLabel = ROLE_LABELS[c.otherRole] || '';
     const isActive = activeConvId === c.id;
 

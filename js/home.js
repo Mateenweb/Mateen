@@ -274,8 +274,14 @@ onAuthStateChanged(auth, async user => {
     ['navMsgBadge','sidebarMsgBadge'].forEach(id => {
       const el = document.getElementById(id);
       if (!el) return;
-      if (total > 0) { el.textContent = total > 99 ? '99+' : String(total); el.classList.remove('d-none'); }
-      else el.classList.add('d-none');
+      if (total > 0) {
+        // نقطة صغيرة بدل الرقم
+        el.textContent = '';
+        el.style.cssText = 'width:9px;height:9px;padding:0;border-radius:50%;min-width:unset;';
+        el.classList.remove('d-none');
+      } else {
+        el.classList.add('d-none');
+      }
     });
   };
   onSnapshot(
