@@ -198,8 +198,8 @@ onAuthStateChanged(auth, async user => {
     if (linkAdminEl) {
       linkAdminEl.href = 'supervisor.html';
       linkAdminEl.innerHTML = '<i class="ti ti-shield"></i> لوحة المشرفة';
+      show('linkAdmin');
     }
-    show('linkAdmin');
     show('linkNews');
   } else if (role === 'teacher') {
     console.log('✅ Showing links for TEACHER');
