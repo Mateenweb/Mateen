@@ -1,3 +1,6 @@
+
+// ── كشف البيئة ──────────────────────────────────────────────────────────
+const BASE = window.location.hostname.includes('github.io') ? '/Mateen' : '';
 // ═══════════════════════════════════════════════════════
 //  notifications.js — إشعارات فورية بـ Firestore onSnapshot
 // ═══════════════════════════════════════════════════════
@@ -71,7 +74,7 @@ function showNotifToast(title, body, url) {
 
   t.innerHTML = `
     <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">
-      <div onclick="window.location.href='${url || '/Mateen/html/messages.html'}'" style="flex:1">
+      <div onclick="window.location.href='${url || BASE + '/html/messages.html'}'" style="flex:1">
         <div style="font-weight:700;font-size:14px;margin-bottom:3px">${title}</div>
         <div style="font-size:12.5px;opacity:.85">${body}</div>
       </div>
@@ -100,8 +103,8 @@ async function showBrowserNotif(title, body) {
   if (Notification.permission === 'granted') {
     new Notification(title, {
       body,
-      icon: 'https://mateenweb.github.io/Mateen/logo.png',
-      badge: 'https://mateenweb.github.io/Mateen/favicon.ico',
+      icon: window.location.origin + BASE + '/logo.png',
+      badge: window.location.origin + BASE + '/favicon.ico',
       dir: 'rtl',
       lang: 'ar',
       tag: 'mateen-msg',
@@ -164,9 +167,9 @@ function startListening(userId) {
         } catch(e) {}
 
         const notifTitle = `💬 ${senderName}`;
-        pushToSW(userId, notifTitle, lastMsg, 'https://mateenweb.github.io/Mateen/html/messages.html');
+        pushToSW(userId, notifTitle, lastMsg, window.location.origin + BASE + '/html/messages.html');
         if (!onMsgsPage) {
-          showNotifToast(notifTitle, lastMsg, '/Mateen/html/messages.html');
+          showNotifToast(notifTitle, lastMsg, BASE + '/html/messages.html');
           showBrowserNotif(notifTitle, lastMsg);
         }
       }
@@ -333,5 +336,6 @@ export async function initAdminNotifications(userId, role) {
 }
 
 export { showNotifToast as showToast };
+
 
 
