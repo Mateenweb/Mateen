@@ -25,11 +25,6 @@ const db   = getFirestore(app);
    notifications.js له مستمعه الخاص لأنه ملف مشترك بين 23 صفحة
    ═══════════════════════════════════════════════════════════════ */
 onAuthStateChanged(auth, async user => {
-  // ── Onboarding: أول مرة فقط ──────────────────────────────────
-  if (user && !localStorage.getItem('ob_done')) {
-    window.location.href = 'onboarding.html';
-    return;
-  }
 
   /* ───────────────────────────────────────────────────────────
      [من home-1.js] — السايدبار، الروابط حسب الدور، تسجيل الخروج
