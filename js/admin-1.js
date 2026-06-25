@@ -8,6 +8,7 @@ import { getFirestore, collection, addDoc, deleteDoc, doc,
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 import { FIREBASE_CONFIG } from "./config.js";
 import { exportWord, exportPdf } from "./export.js";
+import { fullDeleteUser } from "./delete-account.js";
 
 const app  = getApps().length ? getApp() : initializeApp(FIREBASE_CONFIG);
 const auth = getAuth(app);
