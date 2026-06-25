@@ -284,12 +284,10 @@ onAuthStateChanged(auth, async user => {
       let total = 0;
       snap.forEach(d => {
         const data = d.data();
-        // لو أي منهم صفر يبقى اتقرأ
-        const fv = Number(data[`unread.${user.uid}`] ?? -1);
-        const nv = Number(data.unread?.[user.uid]    ?? -1);
-        const val = (fv === 0 || nv === 0)
-          ? 0
-          : Math.max(fv === -1 ? 0 : fv, nv === -1 ? 0 : nv);
+        // اقرأ الـ flat field أولاً، لو مش موجود جرب الـ nested
+        const fv = data[`unread.${user.uid}`];
+        const nv = data.unread?.[user.uid];
+        const val = fv !== undefined ? Number(fv) : (nv !== undefined ? Number(nv) : 0);
         total += val;
       });
       updateMsgBadges(total);
