@@ -19,8 +19,8 @@ onAuthStateChanged(auth, async user => {
   if (!user) { window.location.href = '../html/login.html'; return; }
   const snap = await getDoc(doc(db, 'users', user.uid));
   const role = snap.exists() ? snap.data().role : 'student';
-  if (role === 'student' || role === 'mateen') {
-    window.location.href = '../html/login.html'; return;
+  if (role !== 'admin') {
+    window.location.href = '../html/home.html'; return;
   }
   document.getElementById('navUserName').textContent  = user.displayName || user.email.split('@')[0];
   document.getElementById('authGate').style.display   = 'none';
