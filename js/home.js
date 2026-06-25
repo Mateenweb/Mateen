@@ -52,7 +52,7 @@ function showLoginPrompt() {
       await import('https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js');
     const _db = getFirestore();
     const snap = await getDocs(
-      query(collection(_db, 'news'), where('visibility', '==', 'public'), orderBy('createdAt', 'desc'), limit(6))
+      query(collection(_db, 'news'), orderBy('createdAt', 'desc'), limit(6))
     );
     if (!snap.empty) {
       const section = document.getElementById('publicNewsSection');
