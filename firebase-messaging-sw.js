@@ -1,3 +1,6 @@
+// ── كشف البيئة ──
+const BASE = self.registration.scope.includes('github.io') ? '/Mateen' : '';
+
 // ═══════════════════════════════════════════════════════
 //  firebase-messaging-sw.js
 //  Service Worker — إشعارات Mateen بدون سيرفر خارجي
@@ -57,8 +60,8 @@ function setupFirestoreListener() {
       // عرض الإشعار
       self.registration.showNotification(d.title || 'رسالة جديدة 💬', {
         body:     d.body  || 'لديك رسالة جديدة في متين',
-        icon:     '/Mateen/logo.png',
-        badge:    '/Mateen/favicon.ico',
+        icon:     self.location.pathname.includes('github.io') ? '/Mateen/logo.png' : '/logo.png',
+        badge:    self.location.pathname.includes('github.io') ? '/Mateen/favicon.ico' : '/favicon.ico',
         dir:      'rtl',
         lang:     'ar',
         vibrate:  [200, 100, 200],
@@ -99,7 +102,7 @@ messaging.onBackgroundMessage(payload => {
   const { title, body } = payload.notification || {};
   self.registration.showNotification(title || 'رسالة جديدة 💬', {
     body:    body || 'لديك رسالة جديدة في متين',
-    icon:    '/Mateen/logo.png',
+    icon:    self.location.pathname.includes('github.io') ? '/Mateen/logo.png' : '/logo.png',
     dir:     'rtl',
     lang:    'ar',
     vibrate: [200, 100, 200],
@@ -108,3 +111,4 @@ messaging.onBackgroundMessage(payload => {
     data:    payload.data || {}
   });
 });
+
