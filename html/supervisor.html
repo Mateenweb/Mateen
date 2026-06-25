@@ -167,8 +167,60 @@
     </div>
   </div>
 </div>
+
+<!-- ══ قسم الغياب ══ -->
+<div class="section">
+  <div class="section-head">
+    <div class="section-head-title"><i class="ti ti-calendar-off"></i> تسجيل الغياب</div>
+  </div>
+  <div class="section-body">
+    <div class="attendance-toolbar">
+      <div class="att-field-group">
+        <label>التاريخ</label>
+        <input type="date" id="attDate"/>
+      </div>
+      <button class="btn-load-att" id="btnLoadAtt" onclick="loadAttendance()"><i class="ti ti-refresh"></i> تحميل الجدول</button>
+      <span class="att-day-badge" id="attDayName"></span>
+    </div>
+    <div id="attendanceContainer"><div class="empty-state"><i class="ti ti-calendar"></i>اختاري التاريخ لتحميل مواد اليوم</div></div>
+    <div id="attSaveBar" style="display:none" class="att-save-bar">
+      <button class="btn-save-att" onclick="saveAttendance()"><i class="ti ti-device-floppy"></i> حفظ الغياب</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ قسم النوتس ══ -->
+<div class="section">
+  <div class="section-head">
+    <div class="section-head-title"><i class="ti ti-notes"></i> ملاحظات الطالبات</div>
+  </div>
+  <div id="notesContainer"><div class="empty-state"><i class="ti ti-loader spin"></i></div></div>
+</div>
+</div>
+</div>
+
+<!-- مودال النوتس -->
+<div id="notesModal" class="notes-modal-overlay" style="display:none" onclick="closeNotesModal(event)">
+  <div class="notes-modal-box">
+    <div class="notes-modal-head">
+      <span id="notesModalTitle">ملاحظات الطالبة</span>
+      <button class="notes-modal-close" onclick="document.getElementById('notesModal').style.display='none'"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="notes-modal-body">
+      <div id="existingNotes" class="existing-notes"></div>
+      <div class="new-note-area">
+        <textarea id="newNoteText" placeholder="اكتبي ملاحظتك هنا..." rows="3"></textarea>
+        <button class="btn-add-note" onclick="saveNote()"><i class="ti ti-plus"></i> إضافة ملاحظة</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<script type="module" src="../js/export.js"></script>
+<script src="../js/supervisor-1.js" type="module"></script>
+  <script type="module" src="../js/notifications.js"></script>
+  <script src="../js/sw-register.js"></script>
 </body>
 </html>
-
 
 
