@@ -211,8 +211,9 @@ function loadConversations() {
           existing[`unread.${uid}`] = 0;
           if (existing.unread) existing.unread[uid] = 0;
         }
-        return;
+        // لا نعمل return عشان الـ render يحصل في الآخر
       }
+      else {
 
       let otherName = 'الإدارة';
       let otherRole = '';
@@ -224,7 +225,8 @@ function loadConversations() {
         }
       } catch(e) {}
 
-      allConvs.push({ id: d.id, ...data, otherId, otherName, otherRole });
+        allConvs.push({ id: d.id, ...data, otherId, otherName, otherRole });
+      }
     });
 
     await Promise.all(promises);
