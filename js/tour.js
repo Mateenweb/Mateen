@@ -52,8 +52,13 @@ window.MateenTour = {
     document.getElementById('tourNext').textContent = this.current === this.steps.length-1 ? 'إنهاء ✅' : 'التالي →';
 
     if (el) {
+      const r = el.getBoundingClientRect();
+      // لو العنصر مخفي أو حجمه صفر — تخطاه
+      if (r.width === 0 && r.height === 0) {
+        this.next();
+        return;
+      }
       el.scrollIntoView({ behavior:'smooth', block:'center' });
-      // انتظر scroll + render قبل حساب الموضع
       setTimeout(() => this._highlight(el), 400);
     } else {
       this._clearHighlight();
@@ -62,7 +67,6 @@ window.MateenTour = {
 
   _highlight(el) {
     const r = el.getBoundingClientRect();
-    console.log('[Tour] element:', el, 'rect:', JSON.stringify({top:r.top,left:r.left,width:r.width,height:r.height}));
     const pad = 8;
     const hole = document.getElementById('tourHole');
     hole.setAttribute('x', r.left - pad);
@@ -81,7 +85,9 @@ window.MateenTour = {
     else if (spaceAbove > bh + 20) top = r.top - bh - pad - 10;
     else top = window.innerHeight/2 - bh/2;
 
-    left = Math.max(10, Math.min(window.innerWidth - bw - 10, r.left + r.width/2 - bw/2));
+    // احسب الـ center بعد الـ scroll
+    const newR = el.getBoundingClientRect();
+    left = Math.max(10, Math.min(window.innerWidth - bw - 10, newR.left + newR.width/2 - bw/2));
     box.style.top = top + 'px';
     box.style.left = left + 'px';
     box.style.right = 'auto';
