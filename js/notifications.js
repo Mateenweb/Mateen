@@ -44,7 +44,7 @@ async function pushToSW(userId, title, body, url) {
       collection(db, 'notifications', userId, 'pending'),
       { title, body, url, createdAt: serverTimestamp() }
     );
-  } catch(e) { }
+  } catch(e) { console.warn('[Notif] SW push failed:', e); }
 }
 
 // ── Toast إشعار ──────────────────────────────────────────────────────────
@@ -224,6 +224,7 @@ document.addEventListener('touchstart', unlockAudio, { once: true });
 
 onAuthStateChanged(auth, user => {
   if (user) {
+    console.log('[Notif] user logged in:', user.uid);
     // أرسل الـ UID للـ Service Worker عشان يبدأ يستمع
     if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
       navigator.serviceWorker.controller.postMessage({
@@ -238,6 +239,7 @@ onAuthStateChanged(auth, user => {
     // لتفعيلهم مجدداً: ضعي VAPID key حقيقية من Firebase Console، وفعّلي
     // الإذن فقط عند ضغط المستخدم على زرار صريح (مثلاً "فعّلي الإشعارات").
   } else {
+    console.log('[Notif] no user');
     if (notifUnsub) { notifUnsub(); notifUnsub = null; }
     if (newsUnsub)  { newsUnsub();  newsUnsub  = null; }
   }
@@ -267,11 +269,13 @@ async function saveFCMToken(userId) {
     });
 
     if (token) {
+      console.log('[Notif] FCM token saved');
       await updateDoc(doc(db, 'users', userId), {
         [`fcmTokens.${token}`]: true
       });
     }
   } catch(e) {
+    console.warn('[Notif] FCM token error:', e);
   }
 }
 
@@ -291,6 +295,7 @@ async function showMissedNotifications(userId) {
       d.ref.delete().catch(() => {});
     });
   } catch(e) {
+    console.warn('[Notif] missed notifications error:', e);
   }
 }
 
@@ -331,7 +336,6 @@ export async function initAdminNotifications(userId, role) {
 }
 
 export { showNotifToast as showToast };
-
 
 
 
