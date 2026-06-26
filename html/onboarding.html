@@ -96,7 +96,7 @@ let current = 0;
 function buildAllSlides(role) {
   const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
   const base = [
-    { icon:'🕌', title:'أهلاً بك في متين', desc:'منصة تعليمية إسلامية أصيلة\nمن القرآن والسنة' },
+    { icon:'<img src="../logo.png" style="width:90px;height:90px;border-radius:50%;object-fit:cover;border:2px solid #c9a227;">', title:'أهلاً بك في متين', desc:'منصة تعليمية إسلامية أصيلة\nمن القرآن والسنة' },
     ...(isIOS ? [{
       icon:'📲', title:'أضيفي التطبيق لهاتفك',
       desc:'للوصول السريع في أي وقت بدون متصفح',
@@ -114,7 +114,7 @@ function renderSlides(role) {
   const label = ROLE_LABELS[role] || '';
   document.getElementById('obSlides').innerHTML = slides.map((s,i) => `
     <div class="ob-slide">
-      <div class="ob-illus"><span class="ob-icon">${s.icon}</span></div>
+      <div class="ob-illus"><span class="ob-icon" style="display:flex;align-items:center;justify-content:center;">${s.icon}</span></div>
       ${i===0 && label ? `<div class="role-badge">✦ ${label} ✦</div>` : ''}
       <div class="ob-title">${s.title}</div>
       <div class="ob-desc">${(s.desc||'').replace(/\n/g,'<br>')}</div>
