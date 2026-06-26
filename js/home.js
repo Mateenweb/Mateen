@@ -26,9 +26,8 @@ const db   = getFirestore(app);
    ═══════════════════════════════════════════════════════════════ */
 
 // ── Onboarding ─────────────────────────────────────────────────────────────
-function showOnboarding(userName) {
-  const key = `onboarding_done_${userName}`;
-  if (localStorage.getItem(key)) return;
+function showOnboarding() {
+  if (document.getElementById('onboardingModal')) return;
 
   const modal = document.createElement('div');
   modal.id = 'onboardingModal';
@@ -48,42 +47,62 @@ function showOnboarding(userName) {
         </button>
       </div>
 
-      <button onclick="closeOnboarding('${key}')" style="background:none;border:none;color:var(--text-mid);font-family:inherit;font-size:13px;cursor:pointer;text-decoration:underline;">تخطّي الآن</button>
+      <button onclick="closeOnboarding()" style="background:none;border:none;color:var(--text-mid);font-family:inherit;font-size:13px;cursor:pointer;text-decoration:underline;">تخطّي الآن</button>
     </div>`;
   document.body.appendChild(modal);
 }
 
-window.closeOnboarding = (key) => {
-  localStorage.setItem(key, '1');
+window.closeOnboarding = () => {
   document.getElementById('onboardingModal')?.remove();
+  // أظهر الأزرار في السايدبار
+  showSidebarSetup();
 };
 
-window.obEnableNotif = async () => {
-  const btn = document.getElementById('ob-notif-btn');
-  if (!('Notification' in window)) { btn.innerHTML = '<i class="ti ti-x"></i> غير مدعوم'; return; }
+function showSidebarSetup() {
+  const wrap = document.getElementById('notifBtnWrap');
+  if (!wrap) return;
+  wrap.classList.remove('d-none');
+  wrap.innerHTML = `
+    <div style="display:flex;flex-direction:column;gap:8px;padding:0 4px 8px;">
+      <button id="sb-notif-btn" onclick="obEnableNotif('sb')" style="width:100%;padding:9px;border:1px solid var(--gold);background:transparent;color:var(--green-dark);border-radius:10px;font-family:inherit;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
+        <i class="ti ti-bell"></i> تفعيل الإشعارات
+      </button>
+      <button onclick="obInstallApp('sb')" style="width:100%;padding:9px;border:1px solid var(--border);background:transparent;color:var(--text-mid);border-radius:10px;font-family:inherit;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
+        <i class="ti ti-download"></i> تثبيت التطبيق
+      </button>
+    </div>`;
+  // لو الإشعارات مفعلة بالفعل
+  if (Notification.permission === 'granted') {
+    const btn = document.getElementById('sb-notif-btn');
+    if (btn) { btn.innerHTML = '<i class="ti ti-check"></i> الإشعارات مفعّلة'; btn.disabled = true; }
+  }
+}
+
+window.obEnableNotif = async (src) => {
+  const btn = document.getElementById(src === 'sb' ? 'sb-notif-btn' : 'ob-notif-btn');
+  if (!('Notification' in window)) { if(btn) btn.innerHTML = '<i class="ti ti-x"></i> غير مدعوم'; return; }
   const perm = await Notification.requestPermission();
   if (perm === 'granted') {
-    btn.innerHTML = '<i class="ti ti-check"></i> تم تفعيل الإشعارات ✅';
-    btn.style.background = '#2d6a4f';
-    btn.disabled = true;
+    if (btn) { btn.innerHTML = '<i class="ti ti-check"></i> تم تفعيل الإشعارات ✅'; btn.disabled = true; }
     if (window._saveFCMToken) window._saveFCMToken();
   } else {
-    btn.innerHTML = '<i class="ti ti-x"></i> لم يتم السماح';
+    if (btn) btn.innerHTML = '<i class="ti ti-x"></i> لم يتم السماح';
   }
 };
 
-window.obInstallApp = async () => {
-  const btn = document.getElementById('ob-install-btn');
+window.obInstallApp = async (src) => {
+  const btn = src === 'sb'
+    ? document.querySelector('#notifBtnWrap button:last-child')
+    : document.getElementById('ob-install-btn');
   if (window.deferredInstallPrompt) {
     window.deferredInstallPrompt.prompt();
     const { outcome } = await window.deferredInstallPrompt.userChoice;
     if (outcome === 'accepted') {
-      btn.innerHTML = '<i class="ti ti-check"></i> تم التثبيت ✅';
-      btn.disabled = true;
+      if (btn) { btn.innerHTML = '<i class="ti ti-check"></i> تم التثبيت ✅'; btn.disabled = true; }
     }
     window.deferredInstallPrompt = null;
   } else {
-    btn.innerHTML = '<i class="ti ti-info-circle"></i> أضيفيه من قائمة المشاركة';
+    if (btn) btn.innerHTML = '<i class="ti ti-info-circle"></i> أضيفيه من قائمة المشاركة';
   }
 };
 
@@ -153,7 +172,7 @@ onAuthStateChanged(auth, async user => {
   if (layout) layout.classList.remove('guest-layout');
   // أظهر الـ onboarding أول مرة
   const _name = user.uid;
-  setTimeout(() => showOnboarding(_name), 1200);
+  setTimeout(() => showOnboarding(), 1200);
 
   // إخفاء زراير الـ hero لما تسجل دخول
   const heroBtns = document.getElementById('heroBtns');
