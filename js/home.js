@@ -26,6 +26,7 @@ const db   = getFirestore(app);
    ═══════════════════════════════════════════════════════════════ */
 onAuthStateChanged(auth, async user => {
   // ── Onboarding: بعد تسجيل الدخول، أول مرة فقط ──────────────
+  if (user) localStorage.setItem('userRole', userData?.role || 'mateen');
   if (user && !localStorage.getItem('ob_done')) {
     window.location.href = 'onboarding.html';
     return;
