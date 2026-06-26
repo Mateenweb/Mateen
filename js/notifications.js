@@ -233,9 +233,6 @@ onAuthStateChanged(auth, user => {
     }
     startListening(user.uid);
     showMissedNotifications(user.uid);
-    // تشغيل saveFCMToken عند تسجيل الدخول
-    saveFCMToken(user.uid);
-
     // ملاحظة: saveFCMToken() وطلب إذن الإشعارات التلقائي عُطّلا مؤقتاً.
     // السبب: VAPID key الحالية placeholder وبتفشل بـ 401 من Firebase،
     // وطلب الإذن تلقائياً عند تحميل الصفحة مخالف لمعايير الأداء وتجربة المستخدم.
@@ -257,7 +254,7 @@ async function saveFCMToken(userId) {
 
     // جيب الـ VAPID key من Firebase Console
     // Firebase Console → Project Settings → Cloud Messaging → Web Push certificates
-    const VAPID_KEY = 'BGpdEBdSHx8TkFZ95X_9kwFOvKbq4iCqLaRE5dPEh7JvvAzPz2yjbF_7BnuJF4uWBpNZ8YHf3KCpXlOiMOEY9mo';
+    const VAPID_KEY = 'BAMZ2n5lXHUV_qZnniDhTbJZTAI2uqHnJai6ukrnNIZhIc-8-wgwci_CaDpcH25oacehhSYScFgk14XIp7aZJ2c';
 
     const swReg = await navigator.serviceWorker.ready;
 
