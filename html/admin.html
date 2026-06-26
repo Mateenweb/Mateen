@@ -339,7 +339,8 @@
 </div>
 <div class="foot-actions-row">
 <button class="btn-add-row" onclick="addStudentRow()"><i class="ti ti-plus"></i> إضافة طالبة</button>
-<button class="btn-add-row btn-export-word" onclick="openExportModal()"><i class="ti ti-download"></i> تصدير Word / PDF</button>
+<button class="btn-add-row" style="background:linear-gradient(135deg,#2c1a0e,#5c3d2e);color:#e8c96a;border:none;" onclick="openBulkGradeModal()"><i class="ti ti-plus"></i> إضافة اختبار جماعي</button>
+    <button class="btn-add-row btn-export-word" onclick="openExportModal()"><i class="ti ti-download"></i> تصدير Word / PDF</button>
 <button class="btn-add-row btn-export-att" onclick="openAttModal()"><i class="ti ti-clipboard-list"></i> تصدير الحضور والغياب</button>
 <a href="stats.html" class="btn-add-row btn-export-stats"><i class="ti ti-chart-bar"></i> الإحصائيات</a>
 </div>
@@ -511,8 +512,57 @@
 <script src="../js/admin-1.js" type="module"></script>
 <script type="module" src="../js/notifications.js"></script>
 <script src="../js/sw-register.js"></script>
+
+<!-- ══ مودال إضافة اختبار جماعي ══ -->
+<div id="bulkGradeModal" class="modal-overlay" style="display:none">
+  <div class="modal-box" style="max-width:700px;width:95vw">
+    <div class="modal-head">
+      <span class="m-title m-title-amber">📝 إضافة اختبار لعدة طالبات</span>
+      <button class="m-close" onclick="closeBulkGradeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <!-- معلومات الاختبار -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px">
+        <div>
+          <label style="font-size:12px;color:var(--text-mid);display:block;margin-bottom:4px">اسم الاختبار *</label>
+          <input id="bgLabel" type="text" placeholder="مثال: اختبار نهاية الفصل" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:inherit;font-size:13px"/>
+        </div>
+        <div>
+          <label style="font-size:12px;color:var(--text-mid);display:block;margin-bottom:4px">المادة</label>
+          <select id="bgSubject" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:inherit;font-size:13px">
+            <option value="">— اختياري —</option>
+            <option>التفسير</option><option>الفقه</option><option>العقيدة</option>
+            <option>الحديث</option><option>مقرأة متين</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:12px;color:var(--text-mid);display:block;margin-bottom:4px">الدرجة الكلية *</label>
+          <input id="bgTotal" type="number" min="1" max="100" value="100" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:inherit;font-size:13px"/>
+        </div>
+      </div>
+
+      <!-- اختيار الطالبات -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <div style="font-size:13px;font-weight:600;color:var(--text-dark)">الطالبات</div>
+        <div style="display:flex;gap:8px">
+          <button onclick="bgSelectAll()" style="font-size:12px;background:var(--beige2);border:1px solid var(--border);border-radius:6px;padding:4px 12px;cursor:pointer;font-family:inherit">تحديد الكل</button>
+          <button onclick="bgClearAll()" style="font-size:12px;background:var(--beige2);border:1px solid var(--border);border-radius:6px;padding:4px 12px;cursor:pointer;font-family:inherit">إلغاء الكل</button>
+        </div>
+      </div>
+
+      <div id="bgStudentsList" style="max-height:360px;overflow-y:auto;border:1px solid var(--border);border-radius:10px;padding:4px"></div>
+
+      <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:16px">
+        <button onclick="closeBulkGradeModal()" style="background:var(--beige2);border:1px solid var(--border);border-radius:8px;padding:9px 20px;font-family:inherit;cursor:pointer">إلغاء</button>
+        <button onclick="saveBulkGrades()" style="background:linear-gradient(135deg,#2c1a0e,#5c3d2e);color:#e8c96a;border:none;border-radius:8px;padding:9px 24px;font-family:inherit;font-weight:700;cursor:pointer"><i class="ti ti-device-floppy"></i> حفظ الدرجات</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
+
 
 
 
