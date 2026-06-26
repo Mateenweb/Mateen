@@ -205,8 +205,7 @@ onAuthStateChanged(auth, async user => {
 
   const snap = await getDoc(doc(db, 'users', user.uid));
   const role    = snap.exists() ? snap.data().role    : 'student';
-  const subject = snap.exists() ? snap.data().subject || '' : '';
-  console.log('👤 User Role:', role); // DEBUG
+  const subject = snap.exists() ? snap.data().subject || '' : ''; // DEBUG
   const name = user.displayName || user.email.split('@')[0];
 
   const sidebarNameEl = document.getElementById('sidebarName');
@@ -235,11 +234,9 @@ onAuthStateChanged(auth, async user => {
   }
 
   if (role === 'admin') {
-    console.log('✅ Showing links for ADMIN');
     show('linkAdmin');
     show('linkNews');
   } else if (role === 'supervisor') {
-    console.log('✅ Showing links for SUPERVISOR');
     const linkAdminEl = document.getElementById('linkAdmin');
     if (linkAdminEl) {
       linkAdminEl.href = 'supervisor.html';
@@ -248,21 +245,18 @@ onAuthStateChanged(auth, async user => {
     show('linkAdmin');
     show('linkNews');
   } else if (role === 'teacher') {
-    console.log('✅ Showing links for TEACHER');
     show('linkNews');
     show('linkTeacher');
     show('linkSchedule');
     const schedLink = document.getElementById('linkSchedule');
     if (schedLink) schedLink.href = 'teacher-schedule.html';
   } else if (role === 'mateen') {
-    console.log('✅ Showing links for MATEEN');
     show('linkCerts');
     show('linkAwards');
     show('linkGrades');
     show('linkSchedule');
     show('linkNews');
   } else {
-    console.log('✅ Showing links for STUDENT (default)');
   }
 
   // ── أيقونة البروفايل وملفي الشخصي — بنات متين فقط ──────
@@ -579,5 +573,6 @@ document.addEventListener("click",function(e){
   var nav=document.querySelector("nav");
   if(nav && !nav.contains(e.target)){ var nl=document.querySelector(".nav-links"); if(nl) nl.classList.remove("open"); }
 });
+
 
 
