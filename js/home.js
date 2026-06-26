@@ -31,7 +31,7 @@ function showOnboarding() {
 
   const modal = document.createElement('div');
   modal.id = 'onboardingModal';
-  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9999;display:flex;align-items:center;justify-content:center;';
+  modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:99999;display:flex;align-items:center;justify-content:center;';
   modal.innerHTML = `
     <div style="background:white;border-radius:24px;padding:36px 28px;max-width:380px;width:92%;text-align:center;font-family:inherit;direction:rtl;">
       <img src="../logo.png" style="width:72px;height:72px;border-radius:50%;border:3px solid var(--gold);margin-bottom:16px;">
