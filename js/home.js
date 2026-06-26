@@ -26,10 +26,14 @@ const db   = getFirestore(app);
    ═══════════════════════════════════════════════════════════════ */
 onAuthStateChanged(auth, async user => {
   // ── Onboarding: بعد تسجيل الدخول، أول مرة فقط ──────────────
-  if (user) localStorage.setItem('userRole', userData?.role || 'mateen');
-  if (user && !localStorage.getItem('ob_done')) {
-    window.location.href = 'onboarding.html';
-    return;
+  if (user) {
+    const _snap = await getDoc(doc(db, 'users', user.uid)).catch(() => null);
+    const _role = _snap?.data()?.role || 'mateen';
+    localStorage.setItem('userRole', _role);
+    if (!localStorage.getItem('ob_done')) {
+      window.location.href = 'onboarding.html';
+      return;
+    }
   }
 
   /* ───────────────────────────────────────────────────────────
