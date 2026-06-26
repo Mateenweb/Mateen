@@ -24,6 +24,69 @@ const db   = getFirestore(app);
    (كان فيه 4 مستمعات منفصلة في home-1 + home-2 + home-msg×2)
    notifications.js له مستمعه الخاص لأنه ملف مشترك بين 23 صفحة
    ═══════════════════════════════════════════════════════════════ */
+
+// ── Onboarding ─────────────────────────────────────────────────────────────
+function showOnboarding(userName) {
+  const key = `onboarding_done_${userName}`;
+  if (localStorage.getItem(key)) return;
+
+  const modal = document.createElement('div');
+  modal.id = 'onboardingModal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9999;display:flex;align-items:center;justify-content:center;';
+  modal.innerHTML = `
+    <div style="background:white;border-radius:24px;padding:36px 28px;max-width:380px;width:92%;text-align:center;font-family:inherit;direction:rtl;">
+      <img src="../logo.png" style="width:72px;height:72px;border-radius:50%;border:3px solid var(--gold);margin-bottom:16px;">
+      <div style="font-family:Amiri,serif;font-size:24px;color:var(--green-dark);font-weight:700;margin-bottom:6px;">أهلاً بكِ في متين 🌿</div>
+      <p style="color:var(--text-mid);font-size:14px;line-height:1.8;margin-bottom:24px;">لتحصلي على أفضل تجربة، فعّلي الإشعارات وأضيفي التطبيق لشاشتك الرئيسية</p>
+
+      <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:24px;">
+        <button id="ob-notif-btn" onclick="obEnableNotif()" style="display:flex;align-items:center;justify-content:center;gap:10px;background:var(--green-dark);color:white;border:none;padding:13px 20px;border-radius:12px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;">
+          <i class="ti ti-bell"></i> تفعيل الإشعارات
+        </button>
+        <button id="ob-install-btn" onclick="obInstallApp()" style="display:flex;align-items:center;justify-content:center;gap:10px;background:var(--beige);border:2px solid var(--gold);color:var(--green-dark);padding:13px 20px;border-radius:12px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;">
+          <i class="ti ti-download"></i> إضافة لشاشتك الرئيسية
+        </button>
+      </div>
+
+      <button onclick="closeOnboarding('${key}')" style="background:none;border:none;color:var(--text-mid);font-family:inherit;font-size:13px;cursor:pointer;text-decoration:underline;">تخطّي الآن</button>
+    </div>`;
+  document.body.appendChild(modal);
+}
+
+window.closeOnboarding = (key) => {
+  localStorage.setItem(key, '1');
+  document.getElementById('onboardingModal')?.remove();
+};
+
+window.obEnableNotif = async () => {
+  const btn = document.getElementById('ob-notif-btn');
+  if (!('Notification' in window)) { btn.innerHTML = '<i class="ti ti-x"></i> غير مدعوم'; return; }
+  const perm = await Notification.requestPermission();
+  if (perm === 'granted') {
+    btn.innerHTML = '<i class="ti ti-check"></i> تم تفعيل الإشعارات ✅';
+    btn.style.background = '#2d6a4f';
+    btn.disabled = true;
+    if (window._saveFCMToken) window._saveFCMToken();
+  } else {
+    btn.innerHTML = '<i class="ti ti-x"></i> لم يتم السماح';
+  }
+};
+
+window.obInstallApp = async () => {
+  const btn = document.getElementById('ob-install-btn');
+  if (window.deferredInstallPrompt) {
+    window.deferredInstallPrompt.prompt();
+    const { outcome } = await window.deferredInstallPrompt.userChoice;
+    if (outcome === 'accepted') {
+      btn.innerHTML = '<i class="ti ti-check"></i> تم التثبيت ✅';
+      btn.disabled = true;
+    }
+    window.deferredInstallPrompt = null;
+  } else {
+    btn.innerHTML = '<i class="ti ti-info-circle"></i> أضيفيه من قائمة المشاركة';
+  }
+};
+
 function showLoginPrompt() {
   if (document.getElementById('loginPromptModal')) return;
   const modal = document.createElement('div');
@@ -88,6 +151,9 @@ onAuthStateChanged(auth, async user => {
   }
 
   if (layout) layout.classList.remove('guest-layout');
+  // أظهر الـ onboarding أول مرة
+  const _name = user.uid;
+  setTimeout(() => showOnboarding(_name), 1200);
 
   // إخفاء زراير الـ hero لما تسجل دخول
   const heroBtns = document.getElementById('heroBtns');
