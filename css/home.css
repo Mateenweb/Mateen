@@ -615,9 +615,11 @@ body {
 .hero {
   position: relative;
   width: 100%;
-  height: clamp(320px, 55vw, 640px);
+  aspect-ratio: 16 / 9;   /* نفس نسبة الصورة الأصلية — يمنع القص على أي حجم شاشة */
+  min-height: 280px;
+  max-height: 760px;
   overflow: hidden;
-  background-color: #2c1a0e;
+  background-color: var(--beige, #f7efe3);
 }
 
 /* الصورة تغطي كل الهيرو */
@@ -631,11 +633,12 @@ body {
   display: block;
 }
 
-/* overlay خفيف من اليسار للشمال عشان النص يظهر */
+/* النص على اليمين، فلازم التعتيم يكون خفيف/شفاف من الشمال (تبان الصورة)
+   ويزيد تدريجياً لليمين (خلف النص) عشان يكون مقروءاً بوضوح */
 .hero-overlay {
   z-index: 1;
   background: linear-gradient(
-    to left,
+    to right,
     rgba(247,239,227,0.0)  0%,
     rgba(247,239,227,0.0) 45%,
     rgba(247,239,227,0.55) 68%,
@@ -1301,3 +1304,4 @@ footer {
   transition: all 0.2s;
 }
 .logo-circle { transition: all 0.2s; }
+
