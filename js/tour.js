@@ -142,7 +142,7 @@ window.TOUR_STEPS = {
     { el:'.hero', title:'الصفحة الرئيسية', desc:'ترحيب بكِ في برنامج متين العلمي' },
     { el:'.path-section', title:'المواد العلمية', desc:'اضغطي على أي مادة للاطلاع على محتواها' },
     { el:'.nav-msg-btn[href="messages.html"]', title:'رسائلي', desc:'من هنا تصلين لرسائلك مع المعلمات والإدارة' },
-    { el:'a[href="news.html"]', title:'الأخبار', desc:'متابعة آخر أخبار وإعلانات البرنامج' },
+    { el:'#navNewsBtn', title:'الأخبار', desc:'متابعة آخر أخبار وإعلانات البرنامج' },
   ],
 
   messages: [
