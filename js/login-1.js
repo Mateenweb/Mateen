@@ -39,9 +39,10 @@ onAuthStateChanged(auth, async user => {
     }
 
     // لو أول مرة يدخل، وجّهيه للـ onboarding
-    const obKey = `ob_done_${data.uid || ''}`;
+    const obKey = `ob_done_${user.uid}`;
     if (!localStorage.getItem('ob_done') && !localStorage.getItem(obKey)) {
       localStorage.setItem('userRole', role);
+      localStorage.setItem('userSubject', data.subject || '');
       window.location.replace('onboarding.html');
     } else {
       window.location.replace(redirect);
