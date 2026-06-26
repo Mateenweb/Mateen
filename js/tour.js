@@ -53,9 +53,14 @@ window.MateenTour = {
 
     if (el) {
       const r = el.getBoundingClientRect();
-      // لو العنصر مخفي أو حجمه صفر — تخطاه
+      // لو العنصر مخفي أو حجمه صفر — تخطاه بدون loop
       if (r.width === 0 && r.height === 0) {
-        this.next();
+        if (this.current < this.steps.length - 1) {
+          this.current++;
+          this._show();
+        } else {
+          this.end();
+        }
         return;
       }
       el.scrollIntoView({ behavior:'smooth', block:'center' });
