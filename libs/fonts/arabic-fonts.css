@@ -1,15 +1,47 @@
-/* ── Arabic Fonts ─────────────────────────────────────────────
+/* ── Arabic Fonts — محلي بالكامل ──────────────────────────────
    Noto Naskh Arabic  •  Amiri
-   مصدر واحد يسهّل التغيير لاحقاً
    ─────────────────────────────────────────────────────────── */
-@import url("https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;500;600;700&family=Amiri:wght@400;700&display=swap");
 
-/* ── Font display: swap يمنع blocking ── */
 @font-face {
   font-family: 'Noto Naskh Arabic';
+  font-style: normal;
+  font-weight: 400;
   font-display: swap;
+  src: url('NotoNaskhArabic-400.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Noto Naskh Arabic';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('NotoNaskhArabic-500.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Noto Naskh Arabic';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('NotoNaskhArabic-600.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Noto Naskh Arabic';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('NotoNaskhArabic-700.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Amiri';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('Amiri-400.woff2') format('woff2');
 }
 @font-face {
   font-family: 'Amiri';
+  font-style: normal;
+  font-weight: 700;
   font-display: swap;
+  src: url('Amiri-700.woff2') format('woff2');
 }
