@@ -6,6 +6,14 @@
 <title>مرحباً بك — متين</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;600;700&family=Amiri:wght@400;700&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="../css/common.css"/>
+<link href="../libs/tabler-icons/tabler-icons.min.css" rel="stylesheet"/>
+<script>
+  function revealPage() { document.documentElement.classList.add('ready'); }
+  var t = setTimeout(revealPage, 100);
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(function() { clearTimeout(t); revealPage(); });
+  }
+</script>
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
 body {
@@ -101,7 +109,11 @@ function buildAllSlides(role) {
       icon:'📲', title:'أضيفي التطبيق لهاتفك',
       desc:'للوصول السريع في أي وقت بدون متصفح',
       steps:['اضغطي زر المشاركة ⬆️ في Safari','اختاري "أضف إلى الشاشة الرئيسية"','اضغطي "إضافة" ✅'],
-    }] : []),
+    }] : [{
+      icon:'📲', title:'أضيفي التطبيق لهاتفك',
+      desc:'للوصول السريع في أي وقت بدون متصفح',
+      install:true,
+    }]),
     { icon:'🔔', title:'فعّلي الإشعارات', desc:'لتصلك آخر الأخبار والرسائل فوراً', notif:true },
   ];
   slides = [...base, ...(ROLE_SLIDES[role] || ROLE_SLIDES.mateen)];
@@ -122,7 +134,11 @@ function renderSlides(role) {
         <div class="ob-step"><div class="ob-step-num">${n+1}</div><div class="ob-step-text">${t}</div></div>
       `).join('')}</div>` : ''}
       ${s.notif ? `
-        <button class="notif-btn" onclick="askNotif()">🔔 تفعيل الإشعارات</button>
+        <button class="notif-btn" id="notifBtn" onclick="askNotif()">🔔 تفعيل الإشعارات</button>
+        <button class="notif-skip" onclick="nextSlide()">تخطي</button>
+      ` : ''}
+      ${s.install ? `
+        <button class="notif-btn" id="installBtn" onclick="askInstall()" style="background:linear-gradient(135deg,#2c1a0e,#5c3d2e);">📲 إضافة لشاشتك الرئيسية</button>
         <button class="notif-skip" onclick="nextSlide()">تخطي</button>
       ` : ''}
     </div>
@@ -167,8 +183,28 @@ function finish() {
 }
 
 function askNotif() {
-  if ('Notification' in window) Notification.requestPermission();
-  nextSlide();
+  if ('Notification' in window) {
+    Notification.requestPermission().then(p => {
+      const btn = document.getElementById('notifBtn');
+      if (btn) btn.textContent = p === 'granted' ? '✅ تم تفعيل الإشعارات' : '❌ لم يتم السماح';
+    });
+  }
+  setTimeout(nextSlide, 1200);
+}
+
+function askInstall() {
+  if (window.deferredInstallPrompt) {
+    window.deferredInstallPrompt.prompt();
+    window.deferredInstallPrompt.userChoice.then(r => {
+      const btn = document.getElementById('installBtn');
+      if (btn) btn.textContent = r.outcome === 'accepted' ? '✅ تم التثبيت' : '❌ تم الإلغاء';
+      window.deferredInstallPrompt = null;
+    });
+  } else {
+    const btn = document.getElementById('installBtn');
+    if (btn) btn.textContent = '💡 أضيفيه من قائمة المشاركة ⬆️';
+  }
+  setTimeout(nextSlide, 1500);
 }
 
 // ── تحديد الدور ──────────────────────────────────────────────
