@@ -5,7 +5,9 @@ if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/Mateen/firebase-messaging-sw.js', {
     scope: '/Mateen/'
   }).then(reg => {
+    console.log('[SW] registered:', reg.scope);
   }).catch(err => {
+    console.warn('[SW] registration failed:', err);
   });
 }
 
@@ -52,6 +54,7 @@ window.installApp = async () => {
   if (!deferredInstallPrompt) return;
   deferredInstallPrompt.prompt();
   const { outcome } = await deferredInstallPrompt.userChoice;
+  console.log('[PWA] install outcome:', outcome);
   deferredInstallPrompt = null;
   const banner = document.getElementById('installBanner');
   if (banner) banner.remove();
@@ -109,10 +112,12 @@ window.requestNotifPermission = async () => {
   const banner = document.getElementById('notifBanner');
   if (banner) banner.remove();
   const perm = await Notification.requestPermission();
+  console.log('[Notif] permission:', perm);
 };
 
 // ── بعد التثبيت ──────────────────────────────────────────────────────────
 window.addEventListener('appinstalled', () => {
+  console.log('[PWA] installed successfully');
   deferredInstallPrompt = null;
 });
 
