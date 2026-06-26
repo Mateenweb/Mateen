@@ -138,7 +138,6 @@ window.TOUR_STEPS = {
     { el:'#convList', title:'قائمة المحادثات', desc:'هنا تظهر جميع محادثاتك - اضغطي على أي محادثة لفتحها' },
     { el:'#convSearch', title:'البحث', desc:'ابحثي في محادثاتك باسم الشخص' },
     { el:'.msg-input', title:'كتابة رسالة', desc:'اكتبي رسالتك هنا ثم اضغطي إرسال أو Enter' },
-    { el:'#mediaButtons', title:'مرفقات', desc:'يمكنك إرسال صور أو تسجيلات صوتية' },
   ],
 
   news: [
