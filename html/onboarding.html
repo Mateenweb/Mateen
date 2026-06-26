@@ -157,7 +157,13 @@ function updateNav() {
 
 function finish() {
   localStorage.setItem('ob_done','1');
-  window.location.href = 'home.html';
+  const role = localStorage.getItem('userRole') || 'mateen';
+  if (role === 'teacher') {
+    const subject = localStorage.getItem('userSubject') || '';
+    window.location.href = subject ? `teacher-${subject}.html` : 'home.html';
+  } else {
+    window.location.href = 'home.html';
+  }
 }
 
 function askNotif() {

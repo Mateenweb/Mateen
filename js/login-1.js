@@ -38,7 +38,14 @@ onAuthStateChanged(auth, async user => {
       redirect = 'home.html';
     }
 
-    window.location.replace(redirect);
+    // لو أول مرة يدخل، وجّهيه للـ onboarding
+    const obKey = `ob_done_${data.uid || ''}`;
+    if (!localStorage.getItem('ob_done') && !localStorage.getItem(obKey)) {
+      localStorage.setItem('userRole', role);
+      window.location.replace('onboarding.html');
+    } else {
+      window.location.replace(redirect);
+    }
   } catch(e) {
     window.location.replace('home.html');
   }

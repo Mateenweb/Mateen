@@ -170,9 +170,6 @@ onAuthStateChanged(auth, async user => {
   }
 
   if (layout) layout.classList.remove('guest-layout');
-  // أظهر الـ onboarding أول مرة
-  const _name = user.uid;
-  setTimeout(() => showOnboarding(), 1200);
 
   // إخفاء زراير الـ hero لما تسجل دخول
   const heroBtns = document.getElementById('heroBtns');
