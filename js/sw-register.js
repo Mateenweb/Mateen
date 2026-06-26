@@ -25,7 +25,7 @@ function showInstallBanner() {
   banner.id = 'installBanner';
   banner.innerHTML = `
     <div style="
-      position:fixed; top:70px; left:50%; transform:translateX(-50%);
+      position:fixed; top:80px; right:16px; left:auto; transform:none;
       background:linear-gradient(135deg,#2c1a0e,#5c3d2e);
       color:#e8c96a; border:1px solid #c9a227; border-radius:16px;
       padding:14px 20px; display:flex; align-items:center; gap:12px;
@@ -85,7 +85,7 @@ function showNotifBanner() {
   banner.id = 'notifBanner';
   banner.innerHTML = `
     <div style="
-      position:fixed; top:70px; left:50%; transform:translateX(-50%);
+      position:fixed; top:80px; right:16px; left:auto; transform:none;
       background:linear-gradient(135deg,#2c1a0e,#5c3d2e);
       color:#e8c96a; border:1px solid #c9a227; border-radius:16px;
       padding:14px 20px; display:flex; align-items:center; gap:12px;
