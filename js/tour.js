@@ -22,7 +22,7 @@ window.MateenTour = {
         <defs><mask id="tourMask"><rect width="100%" height="100%" fill="white"/><rect id="tourHole" rx="8" fill="black"/></mask></defs>
         <rect width="100%" height="100%" fill="rgba(0,0,0,0.55)" mask="url(#tourMask)"/>
       </svg>
-      <div id="tourBox" style="position:absolute;background:white;border-radius:16px;padding:20px;max-width:300px;width:90vw;box-shadow:0 8px 32px rgba(0,0,0,0.3);direction:rtl;font-family:inherit;z-index:99999;">
+      <div id="tourBox" style="position:absolute;background:white;border-radius:16px;padding:20px;max-width:300px;width:90vw;box-shadow:0 8px 32px rgba(0,0,0,0.3);direction:rtl;font-family:inherit;z-index:99999;pointer-events:all;">
         <div id="tourTitle" style="font-family:Amiri,serif;font-size:18px;color:#2c1a0e;font-weight:700;margin-bottom:8px;"></div>
         <div id="tourDesc" style="font-size:13px;color:#6b4c2a;line-height:1.8;margin-bottom:16px;"></div>
         <div style="display:flex;gap:8px;align-items:center;justify-content:space-between;">
