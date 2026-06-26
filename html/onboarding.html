@@ -172,14 +172,8 @@ function updateNav() {
 }
 
 function finish() {
-  localStorage.setItem('ob_done','1');
-  const role = localStorage.getItem('userRole') || 'mateen';
-  if (role === 'teacher') {
-    const subject = localStorage.getItem('userSubject') || '';
-    window.location.href = subject ? `teacher-${subject}.html` : 'home.html';
-  } else {
-    window.location.href = 'home.html';
-  }
+  const redirect = localStorage.getItem('ob_redirect') || 'home.html';
+  window.location.href = redirect;
 }
 
 function askNotif() {
