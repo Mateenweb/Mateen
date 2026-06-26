@@ -53,7 +53,8 @@ window.MateenTour = {
 
     if (el) {
       el.scrollIntoView({ behavior:'smooth', block:'center' });
-      setTimeout(() => this._highlight(el), 300);
+      // انتظر scroll + render قبل حساب الموضع
+      setTimeout(() => this._highlight(el), 400);
     } else {
       this._clearHighlight();
     }
@@ -68,10 +69,15 @@ window.MateenTour = {
     hole.setAttribute('width', r.width + pad*2);
     hole.setAttribute('height', r.height + pad*2);
 
-    // موضع الـ box
+    // موضع الـ box — نضمن إن الـ box visible قبل نقيس
     const box = this.box;
-    const bh = box.offsetHeight || 160;
-    const bw = box.offsetWidth || 300;
+    box.style.visibility = 'hidden';
+    box.style.top = '0px';
+    box.style.left = '0px';
+    // نقيس بعد render
+    const bh = box.getBoundingClientRect().height || 160;
+    const bw = box.getBoundingClientRect().width || 300;
+    box.style.visibility = 'visible';
     const spaceBelow = window.innerHeight - r.bottom - pad;
     const spaceAbove = r.top - pad;
 
