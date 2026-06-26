@@ -62,6 +62,7 @@ window.MateenTour = {
 
   _highlight(el) {
     const r = el.getBoundingClientRect();
+    console.log('[Tour] element:', el, 'rect:', JSON.stringify({top:r.top,left:r.left,width:r.width,height:r.height}));
     const pad = 8;
     const hole = document.getElementById('tourHole');
     hole.setAttribute('x', r.left - pad);
@@ -69,15 +70,9 @@ window.MateenTour = {
     hole.setAttribute('width', r.width + pad*2);
     hole.setAttribute('height', r.height + pad*2);
 
-    // موضع الـ box — نضمن إن الـ box visible قبل نقيس
     const box = this.box;
-    box.style.visibility = 'hidden';
-    box.style.top = '0px';
-    box.style.left = '0px';
-    // نقيس بعد render
-    const bh = box.getBoundingClientRect().height || 160;
-    const bw = box.getBoundingClientRect().width || 300;
-    box.style.visibility = 'visible';
+    const bh = box.offsetHeight || 180;
+    const bw = box.offsetWidth  || 300;
     const spaceBelow = window.innerHeight - r.bottom - pad;
     const spaceAbove = r.top - pad;
 
