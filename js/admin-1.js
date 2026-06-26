@@ -875,3 +875,65 @@ window.addEventListener("resize", () => {
 
 
 
+
+
+// ══════════════════════════════════════════════════════════════
+//  إضافة اختبار جماعي
+// ══════════════════════════════════════════════════════════════
+window.openBulkGradeModal = () => {
+  const modal = document.getElementById('bulkGradeModal');
+  modal.style.display = 'flex';
+  renderBGStudents();
+};
+
+window.closeBulkGradeModal = () => {
+  document.getElementById('bulkGradeModal').style.display = 'none';
+};
+
+function renderBGStudents() {
+  const list = document.getElementById('bgStudentsList');
+  const students = allStudents.filter(s => s.name && s.name !== 'طالبة جديدة');
+  list.innerHTML = students.map(s => `
+    <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-bottom:1px solid var(--border)">
+      <input type="checkbox" class="bg-check" data-id="${s.id}" data-name="${esc(s.name||'')}" checked style="width:16px;height:16px;cursor:pointer"/>
+      <span style="flex:1;font-size:13px;font-weight:600">${esc(s.name||'—')}</span>
+      <input type="number" class="bg-score" data-id="${s.id}" min="0" placeholder="الدرجة"
+        style="width:80px;border:1px solid var(--border);border-radius:7px;padding:5px 8px;font-family:inherit;font-size:13px;text-align:center"/>
+    </div>
+  `).join('');
+}
+
+window.bgSelectAll = () => document.querySelectorAll('.bg-check').forEach(cb => cb.checked = true);
+window.bgClearAll  = () => document.querySelectorAll('.bg-check').forEach(cb => cb.checked = false);
+
+window.saveBulkGrades = async () => {
+  const label   = document.getElementById('bgLabel').value.trim();
+  const subject = document.getElementById('bgSubject').value;
+  const total   = Number(document.getElementById('bgTotal').value);
+
+  if (!label || !total) { showToast('أدخلي اسم الاختبار والدرجة الكلية'); return; }
+
+  const checked = [...document.querySelectorAll('.bg-check:checked')];
+  if (!checked.length) { showToast('اختاري طالبة واحدة على الأقل'); return; }
+
+  const btn = document.querySelector('#bulkGradeModal .m-btn') ||
+    document.querySelector('[onclick="saveBulkGrades()"]');
+  if (btn) { btn.disabled = true; btn.textContent = 'جارٍ الحفظ...'; }
+
+  try {
+    await Promise.all(checked.map(cb => {
+      const sid   = cb.dataset.id;
+      const score = Number(document.querySelector(`.bg-score[data-id="${sid}"]`)?.value || 0);
+      return addDoc(collection(db, 'students', sid, 'grades'), {
+        label, subject, score, total,
+        createdAt: serverTimestamp(),
+      });
+    }));
+    showToast(`✅ تم حفظ الدرجات لـ ${checked.length} طالبة`);
+    closeBulkGradeModal();
+  } catch(e) {
+    showToast('خطأ: ' + e.message);
+  } finally {
+    if (btn) { btn.disabled = false; btn.innerHTML = '<i class="ti ti-device-floppy"></i> حفظ الدرجات'; }
+  }
+};
