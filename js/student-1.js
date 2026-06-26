@@ -12,6 +12,8 @@ import { getAuth, onAuthStateChanged, signOut,
 import { FIREBASE_CONFIG } from './config.js';
 
 const app  = getApps().length ? getApp() : initializeApp(FIREBASE_CONFIG);
+let _isAdmin = false;
+let _studentId = '';
 const db   = getFirestore(app);
 const auth = getAuth(app);
 
@@ -76,6 +78,8 @@ function showNoData() {
 
 // ── Main init ─────────────────────────────────
 async function initPage(studentId, user, role) {
+  _isAdmin = role === 'admin';
+  _studentId = studentId;
 
   // Load student info
   const stuSnap = await getDoc(doc(db, 'students', studentId));
@@ -426,6 +430,7 @@ function renderGrades(grades) {
         ${pctEl}
         <span class="grade-num">${g.score}</span>
         <span class="grade-total">/ ${g.total}</span>
+        ${_isAdmin ? `<button onclick="deleteGrade('${_studentId}','${g.id}')" style="background:none;border:none;color:#c0392b;cursor:pointer;font-size:15px;padding:0 4px;opacity:0.7" title="حذف"><i class="ti ti-trash"></i></button>` : ''}
       </div>
     </div>`;
   }).join('');
@@ -493,3 +498,15 @@ function formatTime(hour, ampm) {
   if (!hour) return null;
   return `${hour}:00 ${ampm === 'am' ? 'صباحاً' : ampm === 'pm' ? 'مساءً' : ''}`;
 }
+
+
+// ── حذف درجة (أدمن فقط) ────────────────────────────────────
+window.deleteGrade = async (studentId, gradeId) => {
+  if (!confirm('حذف هذه الدرجة؟')) return;
+  try {
+    await deleteDoc(doc(db, 'students', studentId, 'grades', gradeId));
+    showSavedToast();
+  } catch(e) {
+    alert('خطأ: ' + e.message);
+  }
+};
