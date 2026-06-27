@@ -1,10 +1,10 @@
 /* ================================================
-   برنامج متين العلمي — موبايل أول
+   Mateen Academic Program — Mobile First
    mobile.css
    ================================================ */
 
 /* ════════════════════════════════════════
-   متغيرات الموبايل
+   Mobile variables
    ════════════════════════════════════════ */
 :root {
   --mob-pad: 14px;
@@ -13,7 +13,7 @@
 }
 
 /* ════════════════════════════════════════
-   1. NAV — موبايل
+   1. NAV — Mobile
    ════════════════════════════════════════ */
 @media (max-width: 768px) {
 
@@ -22,14 +22,14 @@ padding: 0 14px;
 height: 52px;
   }
 
-  /* ── إخفاء الروابط وإظهار زر الهامبرغر ── */
+  /* ── Hide nav links and show hamburger button ── */
   .nav-links {
 display: none !important;
   }
   .nav-links.open {
 display: flex !important;
 flex-direction: column !important;
-/* position:absolute بدل fixed عشان overflow:hidden على body */
+/* position:absolute instead of fixed So that overflow:hidden on body */
 position: absolute !important;
 top: 52px !important;
 right: 0 !important;
@@ -68,13 +68,13 @@ color: var(--gold-light) !important;
   .nav-tagline { display: none; }
   .logo-circle { width: 32px; height: 32px; }
 
-  /* ── البسملة ── */
+  /* ── Basmala ── */
   .basmala-bar { font-size: 13px; padding: 7px 12px; letter-spacing: 1px; }
   .bsm-ornament { display: none; }
 }
 
 /* ════════════════════════════════════════
-   2. HERO — موبايل
+   2. HERO — Mobile
    ════════════════════════════════════════ */
 @media (max-width: 768px) {
 
@@ -102,11 +102,11 @@ min-height: unset !important;
 }
 
 /* ════════════════════════════════════════
-   3. LAYOUT — الشبكة الرئيسية
+   3. LAYOUT — Main grid
    ════════════════════════════════════════ */
 @media (max-width: 768px) {
 
-  /* home main-wrap: إزالة الـ sidebar */
+  /* home main-wrap: remove sidebar */
   .main-wrap {
 grid-template-columns: 1fr !important;
 padding: 0 !important;
@@ -115,7 +115,7 @@ gap: 0 !important;
   .sidebar { display: none !important; }
   .content-area { min-width: 0; }
 
-  /* padding عام للأقسام */
+  /* General section padding */
   .section       { padding: 16px var(--mob-pad) !important; }
   .teacher-wrap  { padding: 14px var(--mob-pad) !important; }
   .section-wrap  { padding: 0 var(--mob-pad) 20px !important; }
@@ -123,36 +123,36 @@ gap: 0 !important;
 }
 
 /* ════════════════════════════════════════
-   4. GRIDS — شبكات البطاقات
+   4. GRIDS — Card grids
    ════════════════════════════════════════ */
 @media (max-width: 768px) {
 
-  /* مسارات الرئيسية */
+  /* Main routes */
   .paths-grid     { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
 
-  /* المعلمات */
+  /* Data/Info */
 
-  /* الإعلانات */
+  /* Announcements */
   .ann-grid       { grid-template-columns: 1fr !important; }
   .ann-img        { display: none !important; }
 
-  /* إحصائيات */
+  /* Statistics */
   .stats-bar      { grid-template-columns: 1fr 1fr !important; gap: 10px !important; padding: 14px var(--mob-pad) !important; }
   .stat-item      { border-left: none !important; padding: 12px 8px !important; }
 
-  /* جدول المعلمة */
+  /* Teacher schedule */
   .schedule-grid  { grid-template-columns: 1fr 1fr !important; gap: 8px !important; }
 
-  /* نموذج */
+  /* Form */
   .t-form-row     { grid-template-columns: 1fr !important; }
   .contact-grid   { grid-template-columns: 1fr !important; }
   .form-row       { grid-template-columns: 1fr !important; }
 
-  /* إحصاء stats page */
+  /* Stats page counter */
   .charts-grid    { grid-template-columns: 1fr !important; }
   .summary-bar    { grid-template-columns: 1fr 1fr !important; }
 
-  /* صفحة الطالبة */
+  /* Student page */
   .cards-grid     { grid-template-columns: 1fr !important; }
   .main-grid      { grid-template-columns: 1fr !important; }
   .msg-meta-grid  { grid-template-columns: 1fr 1fr !important; }
@@ -165,7 +165,7 @@ gap: 0 !important;
 }
 
 /* ════════════════════════════════════════
-   5. TABLE — الجدول الرئيسي (admin/database)
+   5. TABLE — Main table (admin/database)
    ════════════════════════════════════════ */
 @media (max-width: 768px) {
 
@@ -176,7 +176,7 @@ border-radius: var(--mob-radius);
 border: 1px solid var(--border);
   }
 
-  /* تلميح السحب للمستخدم */
+  /* Drag hint for user */
   .table-wrapper::before {
 content: '← اسحبي للمشاهدة →';
 display: block;
@@ -191,7 +191,7 @@ border-bottom: 1px solid var(--border);
   table     { min-width: 700px !important; }
   th, td    { padding: 8px 8px !important; font-size: 12px !important; white-space: nowrap; }
 
-  /* inputs داخل الجدول */
+  /* inputs داخل Schedule/Table */
   .name-cell input { font-size: 12px !important; padding: 5px 7px !important; }
   .status-select,
   .day-select      { font-size: 11px !important; padding: 4px !important; }
@@ -202,13 +202,13 @@ border-bottom: 1px solid var(--border);
   .time-minute     { width: 36px !important; font-size: 11px !important; }
   .time-ampm       { width: 44px !important; font-size: 11px !important; }
 
-  /* أزرار الصفوف */
+  /* Row buttons */
   .row-btns { gap: 4px !important; flex-wrap: nowrap; }
   .row-btns button { padding: 4px 7px !important; font-size: 11px !important; }
 }
 
 /* ════════════════════════════════════════
-   6. TOPBAR / FILTERS — شريط الأدوات
+   6. TOPBAR / FILTERS — Toolbar
    ════════════════════════════════════════ */
 @media (max-width: 768px) {
 
@@ -235,14 +235,14 @@ min-width: 0 !important;
 font-size: 12px !important;
   }
 
-  /* أزرار الأدوات تمتلئ عرضياً */
+  /* Tool buttons fill width responsively */
   .topbar-actions { width: 100%; display: flex; gap: 8px; flex-wrap: wrap; }
   .topbar-actions button,
   .topbar-actions a { flex: 1; justify-content: center; font-size: 12px !important; }
 }
 
 /* ════════════════════════════════════════
-   7. CARDS — بطاقات عامة
+   7. CARDS — General cards
    ════════════════════════════════════════ */
 @media (max-width: 768px) {
 
@@ -289,7 +289,7 @@ gap: 4px;
 }
 
 /* ════════════════════════════════════════
-   9. MODALS — نوافذ منبثقة
+   9. MODALS — Popup dialogs
    ════════════════════════════════════════ */
 @media (max-width: 768px) {
 
@@ -309,7 +309,7 @@ margin: 12px !important;
 
   .msg-meta-grid { grid-template-columns: 1fr 1fr !important; gap: 8px !important; }
 
-  /* stepper تسجيل */
+  /* Registration stepper */
   .stepper { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 4px; }
   .step-label { font-size: 10px !important; }
 }
@@ -341,7 +341,7 @@ font-size: 14px !important;
 }
 
 /* ════════════════════════════════════════
-   11. STUDENT PAGE — صفحة الطالبة
+   11. STUDENT PAGE — Student page
    ════════════════════════════════════════ */
 @media (max-width: 768px) {
 
@@ -380,18 +380,18 @@ white-space: nowrap;
 flex-shrink: 0;
   }
 
-  /* جدول الطالبات في صفحة المعلمة */
+  /* Schedule/Table Studentات في Page Teacher (f) */
   #studentsTableWrap table { min-width: 550px !important; }
   #studentsTableWrap th,
   #studentsTableWrap td   { font-size: 12px !important; padding: 8px 8px !important; }
 
-  /* قائمة الرسائل */
+  /* List/Menu الMessages */
   .msg-item    { padding: 12px var(--mob-pad) !important; }
   .msg-sender  { font-size: 12px !important; }
   .msg-preview { font-size: 11px !important; }
   .msg-filters { padding: 10px var(--mob-pad) !important; flex-wrap: wrap; }
 
-  /* stats في صفحة المعلمة */
+  /* stats في Page Teacher (f) */
   .stats-bar.teacher-stats { grid-template-columns: 1fr 1fr !important; }
 }
 
@@ -476,7 +476,7 @@ justify-content: center !important;
 }
 
 /* ════════════════════════════════════════
-   إضافة: جدول admin (mat-table)
+   Add: Schedule/Table admin (mat-table)
    ════════════════════════════════════════ */
 @media (max-width: 768px) {
   .mat-table-wrap,
@@ -494,7 +494,7 @@ padding: 8px 8px !important;
 font-size: 11.5px !important;
 white-space: nowrap;
   }
-  /* أزرار صغيرة */
+  /* Buttons صغيرة */
   .action-btn,
   .view-btn,
   .edit-btn,
@@ -502,7 +502,7 @@ white-space: nowrap;
 padding: 4px 8px !important;
 font-size: 11px !important;
   }
-  /* الـ hero في admin */
+  /* the hero في admin */
   .hero h1   { font-size: 19px !important; }
   .hero      { padding: 18px 14px !important; }
   /* filter bar */
@@ -516,7 +516,7 @@ padding: 12px !important;
 }
 
 /* ════════════════════════════════════════
-   19. LIBRARY PAGE — صفحة المكتبة
+   19. LIBRARY PAGE — Page الLibrary
    ════════════════════════════════════════ */
 @media (max-width: 768px) {
   .lib-filters {
@@ -593,27 +593,27 @@ button:hover, .btn:hover { transform: none !important; }
   input, textarea, select { font-size: 14px !important; }
 }
 /* ===========================
-   برنامج متين العلمي — shared styles
+   Mateen Academic Program — shared styles
    =========================== */
 
 @import url("https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;500;600;700&family=Amiri:wght@400;700&display=swap");
 
 :root {
-  /* بني للـ nav/footer/basmala فقط */
+  /* Dark brown — nav/footer/basmala only */
   --green-dark:  #5c3d2e;
-  /* بني متوسط للأزرار والـ hover */
+  /* Dark brown centered — buttons and hover */
   --green-mid:   #8a5e3c;
-  /* بني فاتح للحدود والتفاصيل */
+  /* Light brown — borders and details */
   --green-light: #b8966e;
-  /* ذهبي */
+  /* gold */
   --gold:        #c9a227;
   --gold-light:  #e8c96a;
-  /* تدرج البيج من فاتح لغامق */
-  --beige:       #f7efe3;   /* خلفية الصفحة */
-  --beige2:      #ede0cc;   /* البطاقات والـ sidebar */
-  --beige3:      #d6c4a8;   /* حدود، section-head، hover */
+  /* Beige gradient from light to dark */
+  --beige:       #f7efe3;   /* Page background */
+  --beige2:      #ede0cc;   /* Cards and sidebar */
+  --beige3:      #d6c4a8;   /* Borders, section headers, hover states */
   --white:       #fff;
-  /* النصوص */
+  /* Text colors */
   --text-dark:   #2c1a0e;
   --text-mid:    #8a6a52;
   --border:      #b8966e44;
@@ -871,11 +871,11 @@ box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 }
 
 /* ════════════════════════════════════════════════
-   توازن الألوان — الفاتح هو الغالب
-   اللون الغامق فقط في: nav, footer, basmala
+   Color balance — light is الغالب
+   الIfن الdark only في: nav, footer, basmala
    ════════════════════════════════════════════════ */
 
-/* page-hero — فاتح بدل غامق */
+/* page-hero — light instead of dark */
 .page-hero {
   background: linear-gradient(135deg, var(--beige2) 0%, var(--beige) 100%) !important;
   border-bottom: 3px solid var(--gold) !important;
@@ -888,7 +888,7 @@ box-shadow: 0 4px 12px rgba(0,0,0,0.3);
   color: var(--green-dark) !important;
 }
 
-/* section-head / card-head / t-section-head — بيج ذهبي بدل غامق */
+/* section-head / card-head / t-section-head — beige gold instead of dark */
 .section-head,
 .card-head,
 .t-section-head,
@@ -902,7 +902,7 @@ box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 .card-head *,
 .t-section-head * { color: var(--green-dark) !important; }
 
-/* teacher-hero — بيج ذهبي */
+/* teacher-hero — beige gold */
 .teacher-hero {
   background: linear-gradient(135deg, var(--beige2) 0%, var(--beige) 100%) !important;
   border-bottom: 3px solid var(--gold) !important;
@@ -916,7 +916,7 @@ box-shadow: 0 4px 12px rgba(0,0,0,0.3);
   border-color: rgba(92,61,46,0.25) !important;
 }
 
-/* sidebar header — بيج */
+/* sidebar header — beige */
 .sidebar-header { background: var(--beige3) !important;
 }
 .sidebar { background: var(--beige2) !important; border-left: 2px solid var(--gold) !important; }
@@ -951,7 +951,7 @@ box-shadow: 0 4px 12px rgba(0,0,0,0.3);
   color: var(--gold-light) !important;
 }
 
-/* tabs في teacher / stats  */
+/* tabs in teacher / stats pages  */
 .page-tab.active,
 .tab.active {
   background: var(--beige) !important;
@@ -964,13 +964,13 @@ box-shadow: 0 4px 12px rgba(0,0,0,0.3);
   color: var(--text-mid) !important;
 }
 
-/* page-tabs bar نفسه */
+/* page-tabs bar (same style) */
 .page-tabs {
   background: var(--white) !important;
   border-bottom: 2px solid var(--gold) !important;
 }
 
-/* msg-modal-head — بيج */
+/* msg-modal-head — beige */
 .msg-modal-head {
   background: linear-gradient(to left, var(--beige2), var(--beige)) !important;
   border-bottom: 2px solid var(--gold) !important;
@@ -1000,7 +1000,7 @@ box-shadow: 0 4px 12px rgba(0,0,0,0.3);
   background: var(--accent-green, #3a7a4a) !important;
 }
 
-/* أزرار submit عامة  */
+/* General submit buttons  */
 .btn-solid,
 .t-submit,
 .reg-next,
@@ -1032,7 +1032,7 @@ box-shadow: 0 4px 12px rgba(0,0,0,0.3);
   font-weight: 700 !important;
 }
 
-/* hero الرئيسية */
+/* Home hero */
 .hero {
   background: linear-gradient(135deg, var(--beige2) 0%, var(--beige) 60%, #fff5e8 100%) !important;
   border-bottom: 3px solid var(--gold) !important;
@@ -1048,10 +1048,10 @@ box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 }
 .hero-btn-white:hover { background: var(--green-dark) !important; color: var(--gold-light) !important; }
 
-/* basmala تبقى غامقة — nav + basmala هم فقط الغامقين */
+/* basmala تبقى darkة — nav + basmala هم only الdarkين */
 .basmala-bar { background: linear-gradient(135deg, var(--green-dark), var(--green-mid)) !important; }
 
-/* aya-banner — بيج ذهبي بدل غامق */
+/* aya-banner — beige gold instead of dark */
 .aya-banner {
   background: linear-gradient(135deg, var(--beige2) 0%, #fff9ee 100%) !important;
   border-top: 2px solid var(--gold) !important;
@@ -1062,7 +1062,7 @@ box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 .aya-banner::before { opacity: 0.06 !important; }
 .aya-banner::after  { color: rgba(92,61,46,0.3) !important; }
 
-/* nav links dropdown موبايل يبقى غامق — ok */
+/* nav links dropdown Mobile يبقى dark — ok */
 
 /* ════════════════════════════════════════
    MOBILE RESPONSIVE — تحسينات إضافية
