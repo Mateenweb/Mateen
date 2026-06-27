@@ -36,7 +36,7 @@ function showOnboarding() {
     <div style="background:white;border-radius:24px;padding:36px 28px;max-width:380px;width:92%;text-align:center;font-family:inherit;direction:rtl;">
       <img src="../logo.png" style="width:72px;height:72px;border-radius:50%;border:3px solid var(--gold);margin-bottom:16px;">
       <div style="font-family:Amiri,serif;font-size:24px;color:var(--green-dark);font-weight:700;margin-bottom:6px;">أهلاً بكِ في متين 🌿</div>
-      <p style="color:var(--text-mid);font-size:14px;line-height:1.8;margin-bottom:24px;">لتحصلي على أفضل تجربة، فعّلي الإشعارات وأضيفي التطبيق لشاشتك الرئيسية</p>
+      <p style="color:var(--text-mid);font-size:14px;line-height:1.8;margin-bottom:24px;">فعّلي الإشعارات وأضيفي التطبيق لشاشتك الرئيسية</p>
 
       <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:24px;">
         <button id="ob-notif-btn" onclick="obEnableNotif()" style="display:flex;align-items:center;justify-content:center;gap:10px;background:var(--green-dark);color:white;border:none;padding:13px 20px;border-radius:12px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;">

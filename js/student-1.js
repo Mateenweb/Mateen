@@ -380,11 +380,11 @@ function renderSessions(sessions) {
           <div class="session-summary">${present}/${keys.length} مواد حاضرة</div>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <button onclick="event.stopPropagation();deleteSession('${s.id}')"
+          ${_isAdmin ? `<button onclick="event.stopPropagation();deleteSession('${s.id}')"
             style="background:none;border:none;cursor:pointer;color:#c0392b;font-size:15px;padding:4px;border-radius:6px;"
             title="حذف الجلسة">
             <i class="ti ti-trash"></i>
-          </button>
+          </button>` : ''}
           <i class="ti ti-chevron-down session-arrow" id="arr_${s.id}"></i>
         </div>
       </div>
