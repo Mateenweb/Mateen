@@ -17,7 +17,7 @@ const DAYS_ORDER = ['الأحد','الاثنين','الثلاثاء','الأرب
 
 let scheduleSlots = [];
 
-// ── تحميل الجدول ─────────────────────────────────────────────
+// ── Load Schedule/Table ─────────────────────────────────────────────
 async function loadSchedule() {
   const snap = await getDocs(collection(db, 'teachers', TEACHER_ID, 'schedule'));
   scheduleSlots = snap.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -26,7 +26,7 @@ async function loadSchedule() {
   updateQuickCards();
 }
 
-// ── عرض الجدول ───────────────────────────────────────────────
+// ── Width/Display Schedule/Table ───────────────────────────────────────────────
 function renderSchedule() {
   const c = document.getElementById('scheduleContainer');
   if (!c) return;
@@ -81,7 +81,7 @@ function updateQuickCards() {
   }
 }
 
-// ── إضافة موعد ───────────────────────────────────────────────
+// ── Add موعد ───────────────────────────────────────────────
 window.showAddSlot = () => {
   const f = document.getElementById('addSlotForm');
   if (f) f.style.display = f.style.display === 'none' ? 'block' : 'none';
@@ -107,7 +107,7 @@ window.saveSlot = async () => {
   finally { btn.disabled = false; }
 };
 
-// ── حذف موعد ─────────────────────────────────────────────────
+// ── Delete موعد ─────────────────────────────────────────────────
 window.deleteSlot = async (id) => {
   if (!confirm('حذف هذا الموعد؟')) return;
   await deleteDoc(doc(db, 'teachers', TEACHER_ID, 'schedule', id));
