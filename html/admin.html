@@ -216,6 +216,50 @@
 <a href="stats.html" class="btn-add-row btn-export-stats"><i class="ti ti-chart-bar"></i> الإحصائيات</a>
 </div>
 </div>
+<!-- PENDING ACCOUNTS SECTION -->
+<div class="section" id="pendingSection" style="display:none">
+  <div class="section-head">
+    <div class="section-head-title">
+      <i class="ti ti-bell"></i> حسابات تنتظر الموافقة
+      <span id="pendingBadge" class="count-badge" style="display:none"></span>
+    </div>
+  </div>
+  <div id="pendingContainer">
+    <div class="empty-state"><i class="ti ti-checks"></i> لا توجد حسابات معلقة</div>
+  </div>
+</div>
+
+<!-- ALL USERS SECTION -->
+<div class="section" id="allUsersSection" style="display:none">
+  <div class="section-head">
+    <div class="section-head-title">
+      <i class="ti ti-users"></i> كل الحسابات
+      <span id="allUsersBadge" class="count-badge" style="display:none"></span>
+    </div>
+  </div>
+  <!-- فلاتر -->
+  <div class="stu-filter-bar" style="margin-bottom:12px">
+    <input id="usersSearch" type="text" placeholder="🔎 بحث بالاسم أو الإيميل..." oninput="filterUsersTable()"/>
+    <select id="usersFilterRole" onchange="filterUsersTable()">
+      <option value="">كل الأدوار</option>
+      <option value="mateen">بنات متين</option>
+      <option value="student">طالبة عادية</option>
+      <option value="teacher">معلمة</option>
+      <option value="supervisor">مشرفة</option>
+      <option value="admin">إدارة</option>
+    </select>
+    <select id="usersFilterStatus" onchange="filterUsersTable()">
+      <option value="">كل الحالات</option>
+      <option value="active">مفعّلة</option>
+      <option value="pending">معلقة</option>
+      <option value="suspended">موقوفة</option>
+    </select>
+  </div>
+  <div id="allUsersBody">
+    <div class="empty-state"><i class="ti ti-loader spin"></i> جارٍ التحميل...</div>
+  </div>
+</div>
+
 <!-- MATERIALS LIST -->
 <div class="section">
 <div class="section-head">
@@ -235,6 +279,38 @@
 <option>اختبار</option><option>مرجع</option><option>فيديو</option><option>أخرى</option>
 </select>
 </input></div>
+<!-- إضافة مادة جديدة -->
+<div class="m-add-mat-form" style="margin-bottom:16px; padding:14px; border:1px solid var(--border); border-radius:12px; background:var(--white); display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+  <input id="fTitle" type="text" placeholder="عنوان المادة *" style="border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-family:inherit;grid-column:1/-1"/>
+  <select id="fCourse" style="border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-family:inherit">
+    <option value="">المادة *</option>
+    <option>التفسير</option><option>الفقه</option><option>العقيدة</option>
+    <option>الحديث</option><option>السيرة النبوية</option><option>القرآن الكريم</option>
+    <option>التجويد والتلاوة</option><option>النحو</option><option>أخرى</option>
+  </select>
+  <select id="fType" style="border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-family:inherit">
+    <option value="">النوع *</option>
+    <option>محاضرة</option><option>ملخص</option><option>واجب</option>
+    <option>اختبار</option><option>مرجع</option><option>فيديو</option><option>أخرى</option>
+  </select>
+  <input id="fUrl" type="url" placeholder="رابط المادة (اختياري)" style="border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-family:inherit"/>
+  <input id="fNotes" type="text" placeholder="ملاحظات (اختياري)" style="border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-family:inherit;grid-column:1/-1"/>
+  <div style="grid-column:1/-1; display:flex; gap:8px; justify-content:flex-end">
+    <span id="errMsg" style="color:#c0392b;font-size:12px;align-self:center"></span>
+    <button id="addBtn" onclick="addMat()" style="background:var(--green-dark);color:#e8c96a;border:none;border-radius:8px;padding:9px 24px;font-family:inherit;font-weight:700;cursor:pointer">
+      <i class="ti ti-plus"></i> إضافة المادة
+    </button>
+  </div>
+</div>
+
+<!-- إحصائيات المواد -->
+<div style="display:flex;gap:12px;margin-bottom:12px;flex-wrap:wrap;">
+  <span class="stu-stat" style="min-width:80px"><span id="sTotal">0</span><small>الكل</small></span>
+  <span class="stu-stat" style="min-width:80px"><span id="sVid">0</span><small>فيديو</small></span>
+  <span class="stu-stat" style="min-width:80px"><span id="sMah">0</span><small>محاضرة</small></span>
+  <span class="stu-stat" style="min-width:80px"><span id="sOth">0</span><small>أخرى</small></span>
+</div>
+
 <div id="matsContainer">
 <div class="empty-state"><i class="ti ti-inbox"></i>لا توجد مواد مضافة بعد</div>
 </div>
