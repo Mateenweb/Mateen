@@ -4,6 +4,14 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>المواد العلمية — برنامج متين العلمي</title>
+    <meta name="description" content="المواد العلمية في برنامج متين — قرآن كريم، فقه، عقيدة، حديث، تفسير، ومواد متنوعة بإشراف نخبة من المعلمات">
+    <meta name="keywords" content="مواد علمية, دورات إسلامية, قرآن, فقه, عقيدة, حديث, تفسير, برنامج متين">
+    <meta property="og:title" content="المواد العلمية — برنامج متين العلمي">
+    <meta property="og:description" content="استكشفي المواد العلمية الأصيلة في برنامج متين">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://mateenweb.github.io/Mateen/html/courses.html">
+    <meta property="og:image" content="https://mateenweb.github.io/Mateen/logo.png">
+    <link rel="canonical" href="https://mateenweb.github.io/Mateen/html/courses.html">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;500;600;700&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../libs/tabler-icons/tabler-icons.min.css">
   <link rel="stylesheet" href="../css/courses.css">
@@ -34,7 +42,7 @@
       <div class="nav-tagline">نحو بناء علميٍّ متين</div>
     </div>
   </div>
-    <div class="nav-shuraka" style="display:flex;align-items:center;margin-inline-start:10px;padding-inline-start:12px;border-inline-start:1px solid rgba(201,162,39,0.35);"><img src="../shuraka-logo.png" alt="شركاء الخير" class="nav-shuraka-img" style="height:48px;width:120px;display:block;object-fit:contain;filter:brightness(1.7) contrast(1.4);"/></div>
+    <div class="nav-shuraka" style="display:flex;align-items:center;margin-inline-start:10px;padding-inline-start:12px;border-inline-start:1px solid rgba(201,162,39,0.35);"><img src="../shuraka-logo.png" alt="شركاء الخير" class="nav-shuraka-img" style="height:48px;width:120px;display:block;object-fit:contain;filter:brightness(1.7) contrast(1.4);" width="40" height="40"/></div>
   <ul class="nav-links">
     <li><a href="home.html">الرئيسية</a></li>
     <li><a href="about.html">عن البرنامج</a></li>
@@ -639,7 +647,7 @@
       const reader = new FileReader();
       reader.onload = (e) => {
         const prev = document.getElementById(previewId);
-        prev.innerHTML = `<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover;">`;
+        prev.innerHTML = `<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover;" loading="lazy">`;
         if (dataId) document.getElementById(dataId).value = e.target.result;
       };
       reader.readAsDataURL(file);
@@ -648,7 +656,7 @@
       const url = input.value.trim();
       if (!url) return;
       const prev = document.getElementById(previewId);
-      prev.innerHTML = `<img src="${url}" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.innerHTML='<i class=ti ti-photo-off style=font-size:24px;color:red;></i>'">`;
+      prev.innerHTML = `<img src="${url}" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.innerHTML='<i class=ti ti-photo-off style=font-size:24px;color:red; loading="lazy"></i>'">`;
     }
   </script>
   <script src="../js/courses.js"></script>
