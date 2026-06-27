@@ -26,14 +26,25 @@ window.doLogout = () => signOut(auth).then(() => window.location.href = '../html
 
 function loadData() {
   const mateenQuery = query(collection(db,'users'), where('role','==','mateen'), orderBy('createdAt','desc'));
-  onSnapshot(mateenQuery, snap => {
+  onSnapshot(mateenQuery, async snap => {
     const all     = snap.docs.map(d=>({id:d.id,...d.data()}));
     const pending = all.filter(u=>u.status==='pending');
     const active  = all.filter(u=>u.status==='active');
-    // كل Studentات بغض النظر عن الحالة
     document.getElementById('sPending').textContent = pending.length;
     document.getElementById('sActive').textContent  = active.length;
     document.getElementById('sTotal').textContent   = all.length;
+
+    // جيب students وابني map: userId -> studentId
+    const stuSnap = await getDocs(collection(db,'students'));
+    window._studentLinkMap = {}; // userId -> {studentId, name}
+    stuSnap.forEach(d => {
+      const s = d.data();
+      if (s.userId) window._studentLinkMap[s.userId] = { studentId: d.id, name: s.name||s.fullName||d.id };
+    });
+    window._allStudentsUnlinked = stuSnap.docs
+      .filter(d => !d.data().userId)
+      .map(d => ({ id: d.id, name: d.data().name||d.data().fullName||d.id }));
+
     window._allStudents = all;
     renderPending(pending);
     renderAll(all);
@@ -101,14 +112,36 @@ function renderAll(list) {
             ${u.phone ? `<div><i class="ti ti-phone" style="margin-left:4px;"></i>${esc(u.phone)}</div>` : ''}
             ${u.year  ? `<div><i class="ti ti-calendar" style="margin-left:4px;"></i>${esc(u.year)}</div>` : ''}
           </div>
+          <!-- بادج الربط -->
+          <div style="padding:6px 16px 0;font-size:12px;">
+            ${(window._studentLinkMap||{})[u.id]
+              ? `<span style="color:#2e7d32;background:#e8f5e9;padding:3px 8px;border-radius:8px;font-size:11px;">
+                   ✅ مرتبطة بـ: ${(window._studentLinkMap[u.id]||{}).name||''}
+                 </span>`
+              : `<span style="color:#b45309;background:#fef3c7;padding:3px 8px;border-radius:8px;font-size:11px;">
+                   🔗 غير مرتبطة
+                 </span>`
+            }
+          </div>
           <!-- Buttons -->
-          <div style="padding:10px 16px;border-top:1px solid var(--border);display:flex;gap:8px;">
+          <div style="padding:10px 16px;border-top:1px solid var(--border);display:flex;gap:8px;flex-wrap:wrap;">
             <a href="student.html?id=${u.id}"
                style="flex:1;padding:8px;background:var(--green-dark);color:white;border:none;border-radius:8px;
                       font-family:inherit;font-size:12px;cursor:pointer;text-align:center;text-decoration:none;
                       display:flex;align-items:center;justify-content:center;gap:4px;">
               <i class="ti ti-user"></i> الملف والغياب
             </a>
+            ${!(window._studentLinkMap||{})[u.id] ? `
+            <button onclick="openLinkModal('${u.id}')"
+               style="padding:8px 12px;border-radius:8px;font-family:inherit;font-size:12px;cursor:pointer;
+                      border:1px solid var(--gold);background:transparent;color:var(--gold);">
+              <i class="ti ti-link"></i> ربط
+            </button>` : `
+            <button onclick="unlinkStudent('${u.id}')"
+               style="padding:8px 12px;border-radius:8px;font-family:inherit;font-size:12px;cursor:pointer;
+                      border:1px solid #9ca3af;background:transparent;color:#9ca3af;">
+              <i class="ti ti-unlink"></i> فك
+            </button>`}
             <button onclick="suspendUser('${u.id}','${u.status}')"
                style="padding:8px 12px;border-radius:8px;font-family:inherit;font-size:12px;cursor:pointer;
                       border:1px solid ${u.status==='suspended'?'var(--green-dark)':'#c0392b'};
@@ -164,6 +197,38 @@ window.approveUser = async id => {
     }
   };
   document.getElementById('linkStudentModal').classList.add('show');
+};
+
+window.openLinkModal = async (userId) => {
+  _pendingApproveId = userId;
+  const unlinked = window._allStudentsUnlinked || [];
+  const sel = document.getElementById('linkStudentSelect');
+  sel.innerHTML = '<option value="">— اختاري ملف الطالبة —</option>';
+  unlinked.forEach(s => {
+    const opt = document.createElement('option');
+    opt.value = s.id;
+    opt.textContent = s.name;
+    sel.appendChild(opt);
+  });
+  sel.onchange = () => {
+    const prev = document.getElementById('linkStudentPreview');
+    prev.style.display = sel.value ? 'block' : 'none';
+    if (sel.value) {
+      const chosen = unlinked.find(s=>s.id===sel.value);
+      prev.innerHTML = chosen ? `<b>${chosen.name}</b>` : '';
+    }
+  };
+  document.getElementById('linkStudentPreview').style.display = 'none';
+  document.getElementById('linkStudentModal').classList.add('show');
+};
+
+window.unlinkStudent = async (userId) => {
+  if (!confirm('فك الربط بين هذا الحساب وملف الطالبة؟')) return;
+  const map = window._studentLinkMap || {};
+  const link = map[userId];
+  if (!link) return;
+  await updateDoc(doc(db,'students',link.studentId), { userId: '' });
+  showToast('تم فك الربط');
 };
 
 window.confirmApprove = async (doLink) => {
