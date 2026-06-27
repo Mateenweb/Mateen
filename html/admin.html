@@ -6,6 +6,7 @@
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>لوحة الإداريات — متين العلمي</title>
 <link href="../libs/fonts/arabic-fonts.css" rel="stylesheet"/>
+<link rel="preload" as="font" type="font/woff2" href="../libs/tabler-icons/fonts/tabler-icons.woff2?v3.42.0" crossorigin/>
 <link href="../libs/tabler-icons/tabler-icons.min.css" rel="stylesheet"/>
 <!-- Bootstrap CSS -->
 <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet"/>
@@ -89,8 +90,6 @@
     <button onclick="history.back()" class="nav-back-btn" aria-label="رجوع">
       <i class="ti ti-arrow-right"></i>
     </button>
-    <button onclick="startPageTour()" title="جولة تعريفية"
-      style="background:none;border:none;color:white;font-size:18px;cursor:pointer;padding:6px 8px;display:flex;align-items:center;opacity:0.85;">❓</button>
 </nav>
 <!-- AUTH GATE -->
 <div id="authGate">
@@ -101,10 +100,140 @@
 <div id="mainContent" class="main-content-hidden">
 <div class="hero">
 <div class="hero-badge">🛡️ لوحة الإداريات</div>
-<h1>لوحة الإدارة</h1>
-<p>إدارة الطالبات والمقابلات والحسابات</p>
+<h1>إدارة المواد العلمية</h1>
+<p>إضافة وإدارة روابط مواد الدراسة لجميع المسارات</p>
 </div>
 <div class="container">
+<!-- STATS -->
+<div class="stats-row">
+<div class="stat-card"><div class="stat-num" id="sTotal">0</div><div class="stat-label">إجمالي المواد</div></div>
+<div class="stat-card"><div class="stat-num" id="sMah">0</div><div class="stat-label">محاضرات</div></div>
+<div class="stat-card"><div class="stat-num" id="sVid">0</div><div class="stat-label">فيديو</div></div>
+<div class="stat-card"><div class="stat-num" id="sOth">0</div><div class="stat-label">ملفات أخرى</div></div>
+</div>
+<!-- ADD FORM -->
+<div class="section">
+<div class="section-head">
+<div class="section-head-title"><i class="ti ti-plus"></i> إضافة مادة جديدة</div>
+</div>
+<div class="section-body">
+<div class="howto">
+<div class="howto-title"><i class="ti ti-info-circle"></i> كيف أحصل على الرابط؟</div>
+<div class="howto-steps">
+<div class="howto-step"><span class="step-num">1</span>ارفعي الملف على Google Drive أو Dropbox أو أي خدمة تخزين</div>
+<div class="howto-step"><span class="step-num">2</span>اضغطي "مشاركة" واجعليه "يمكن لأي شخص لديه الرابط العرض"</div>
+<div class="howto-step"><span class="step-num">3</span>انسخي الرابط والصقيه في الحقل أدناه</div>
+</div>
+</div>
+<div class="err-msg" id="errMsg"><i class="ti ti-alert-circle"></i><span id="errText"></span></div>
+<div class="add-form">
+<div class="field">
+<label>رابط الملف <span class="required-star">*</span></label>
+<div class="link-wrap">
+<i class="ti ti-link"></i>
+<input id="fUrl" placeholder="https://drive.google.com/file/d/..." type="url"/>
+</div>
+<div class="link-hint">Google Drive · Dropbox · OneDrive · YouTube · أي رابط مباشر</div>
+</div>
+<div class="form-row">
+<div class="field">
+<label>المادة / المسار <span class="required-star">*</span></label>
+<select id="fCourse">
+<option value="">اختاري المادة</option>
+<option>التفسير</option><option>الفقه</option><option>العقيدة</option>
+<option>الحديث</option><option>السيرة النبوية</option>
+<option>التجويد والتلاوة</option><option>النحو</option><option>أخرى</option>
+</select>
+</div>
+<div class="field">
+<label>نوع المحتوى</label>
+<select id="fType">
+<option value="محاضرة">محاضرة</option>
+<option value="ملخص">ملخص</option>
+<option value="واجب">واجب</option>
+<option value="اختبار">اختبار</option>
+<option value="مرجع">مرجع علمي</option>
+<option value="فيديو">فيديو</option>
+<option value="أخرى">أخرى</option>
+</select>
+</div>
+</div>
+<div class="field">
+<label>عنوان المادة <span class="required-star">*</span></label>
+<input id="fTitle" placeholder="مثال: محاضرة تفسير سورة الفاتحة — الأسبوع الأول" type="text"/>
+</div>
+<div class="field">
+<label>ملاحظات للطالبات (اختياري)</label>
+<textarea id="fNotes" placeholder="أي تعليمات أو ملاحظات..."></textarea>
+</div>
+<button class="btn-add" id="addBtn" onclick="doAdd()">
+<i class="ti ti-circle-plus"></i> إضافة المادة
+          </button>
+</div>
+</div>
+</div>
+<!-- PENDING ACCOUNTS SECTION (admin only) -->
+<div class="section section-collapsed" id="pendingSection">
+<div class="section-head">
+<div class="section-head-title">
+<i class="ti ti-user-check"></i> الحسابات المعلقة — بانتظار الموافقة
+          <span class="pending-badge badge-hidden" id="pendingBadge"></span>
+</div>
+</div>
+<div id="pendingContainer">
+<div class="empty-state"><i class="ti ti-inbox"></i>لا توجد حسابات معلقة</div>
+</div>
+</div>
+<!-- ALL USERS SECTION (admin only) -->
+<div class="section section-collapsed" id="allUsersSection">
+  <div class="section-head">
+    <div class="section-head-title">
+      <i class="ti ti-users"></i> جميع الحسابات المسجلة
+      <span class="pending-badge badge-hidden badge-green" id="allUsersBadge"></span>
+    </div>
+    <div class="users-filter-row">
+      <input id="usersSearch" type="text" placeholder="ابحثي بالاسم أو البريد..."
+        oninput="renderAllUsers()"
+        class="users-search-input"/>
+      <select id="usersFilterRole" onchange="renderAllUsers()"
+        class="users-filter-select">
+        <option value="all">كل الأدوار</option>
+        <option value="student">أصدقاء متين</option>
+        <option value="mateen">بنات متين</option>
+        <option value="teacher">معلمة</option>
+        <option value="supervisor">مشرفة</option>
+        <option value="admin">إدارة</option>
+      </select>
+      <select id="usersFilterStatus" onchange="renderAllUsers()"
+        class="users-filter-select">
+        <option value="all">كل الحالات</option>
+        <option value="active">مفعّل</option>
+        <option value="pending">معلق</option>
+        <option value="suspended">موقوف</option>
+      </select>
+    </div>
+  </div>
+  <div class="stu-stats-row">
+    <div class="stu-stat"><span id="uTotal">0</span><small>الكل</small></div>
+    <div class="stu-stat accepted"><span id="uActive">0</span><small>مفعّلون</small></div>
+    <div class="stu-stat pending"><span id="uPending">0</span><small>معلقون</small></div>
+    <div class="stu-stat rejected"><span id="uSuspended">0</span><small>موقوفون</small></div>
+  </div>
+  <div class="table-scroll-wrap">
+    <table class="pending-table">
+      <thead><tr>
+        <th>#</th><th>الاسم</th><th>الدور</th>
+        <th>البريد الإلكتروني</th><th>الجوال</th>
+        <th>تاريخ التسجيل</th><th>الحالة</th><th>إجراء</th>
+      </tr></thead>
+      <tbody id="allUsersBody">
+        <tr><td colspan="8" class="table-loader-cell">
+          <i class="ti ti-loader spin loader-spin-lg"></i>
+        </td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
 
 <!-- STUDENTS / INTERVIEWS SECTION -->
 <div class="section" id="studentsSection">
@@ -216,65 +345,6 @@
 <a href="stats.html" class="btn-add-row btn-export-stats"><i class="ti ti-chart-bar"></i> الإحصائيات</a>
 </div>
 </div>
-<!-- PENDING ACCOUNTS SECTION -->
-<div class="section" id="pendingSection" style="display:none">
-  <div class="section-head">
-    <div class="section-head-title">
-      <i class="ti ti-bell"></i> حسابات تنتظر الموافقة
-      <span id="pendingBadge" style="display:none;background:var(--gold);color:#fff;border-radius:20px;padding:2px 10px;font-size:12px;margin-right:8px;"></span>
-    </div>
-  </div>
-  <div id="pendingContainer">
-    <div class="empty-state"><i class="ti ti-inbox"></i> لا توجد حسابات معلقة</div>
-  </div>
-</div>
-
-<!-- ALL USERS SECTION -->
-<div class="section" id="allUsersSection" style="display:none">
-  <div class="section-head">
-    <div class="section-head-title">
-      <i class="ti ti-users"></i> كل الحسابات
-      <span id="allUsersBadge" style="display:none;background:var(--green-mid);color:#fff;border-radius:20px;padding:2px 10px;font-size:12px;margin-right:8px;"></span>
-    </div>
-  </div>
-  <!-- فلاتر -->
-  <div class="stu-filter-bar" style="margin-bottom:12px">
-    <input id="usersSearch" type="text" placeholder="🔎 بحث بالاسم أو الإيميل..." oninput="filterUsersTable()"/>
-    <select id="usersFilterRole" onchange="filterUsersTable()">
-      <option value="">كل الأدوار</option>
-      <option value="mateen">بنات متين</option>
-      <option value="student">طالبة عادية</option>
-      <option value="teacher">معلمة</option>
-      <option value="supervisor">مشرفة</option>
-      <option value="admin">إدارة</option>
-    </select>
-    <select id="usersFilterStatus" onchange="filterUsersTable()">
-      <option value="">كل الحالات</option>
-      <option value="active">مفعّلة</option>
-      <option value="pending">معلقة</option>
-      <option value="suspended">موقوفة</option>
-    </select>
-  </div>
-  <div class="stu-table-wrap">
-    <table class="pending-table">
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>الاسم</th>
-          <th>الإيميل</th>
-          <th>الدور</th>
-          <th>الحالة</th>
-          <th>تاريخ التسجيل</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody id="allUsersBody">
-        <tr><td colspan="7" class="empty-state"><i class="ti ti-loader spin"></i> جارٍ التحميل...</td></tr>
-      </tbody>
-    </table>
-  </div>
-</div>
-
 <!-- MATERIALS LIST -->
 <div class="section">
 <div class="section-head">
@@ -294,38 +364,6 @@
 <option>اختبار</option><option>مرجع</option><option>فيديو</option><option>أخرى</option>
 </select>
 </input></div>
-<!-- إضافة مادة جديدة -->
-<div class="m-add-mat-form" style="margin-bottom:16px; padding:14px; border:1px solid var(--border); border-radius:12px; background:var(--white); display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-  <input id="fTitle" type="text" placeholder="عنوان المادة *" style="border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-family:inherit;grid-column:1/-1"/>
-  <select id="fCourse" style="border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-family:inherit">
-    <option value="">المادة *</option>
-    <option>التفسير</option><option>الفقه</option><option>العقيدة</option>
-    <option>الحديث</option><option>السيرة النبوية</option><option>القرآن الكريم</option>
-    <option>التجويد والتلاوة</option><option>النحو</option><option>أخرى</option>
-  </select>
-  <select id="fType" style="border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-family:inherit">
-    <option value="">النوع *</option>
-    <option>محاضرة</option><option>ملخص</option><option>واجب</option>
-    <option>اختبار</option><option>مرجع</option><option>فيديو</option><option>أخرى</option>
-  </select>
-  <input id="fUrl" type="url" placeholder="رابط المادة (اختياري)" style="border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-family:inherit"/>
-  <input id="fNotes" type="text" placeholder="ملاحظات (اختياري)" style="border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-family:inherit;grid-column:1/-1"/>
-  <div style="grid-column:1/-1; display:flex; gap:8px; justify-content:flex-end">
-    <span id="errMsg" style="color:#c0392b;font-size:12px;align-self:center"></span>
-    <button id="addBtn" onclick="doAdd()" style="background:var(--green-dark);color:#e8c96a;border:none;border-radius:8px;padding:9px 24px;font-family:inherit;font-weight:700;cursor:pointer">
-      <i class="ti ti-plus"></i> إضافة المادة
-    </button>
-  </div>
-</div>
-
-<!-- إحصائيات المواد -->
-<div style="display:flex;gap:12px;margin-bottom:12px;flex-wrap:wrap;">
-  <span class="stu-stat" style="min-width:80px"><span id="sTotal">0</span><small>الكل</small></span>
-  <span class="stu-stat" style="min-width:80px"><span id="sVid">0</span><small>فيديو</small></span>
-  <span class="stu-stat" style="min-width:80px"><span id="sMah">0</span><small>محاضرة</small></span>
-  <span class="stu-stat" style="min-width:80px"><span id="sOth">0</span><small>أخرى</small></span>
-</div>
-
 <div id="matsContainer">
 <div class="empty-state"><i class="ti ti-inbox"></i>لا توجد مواد مضافة بعد</div>
 </div>
@@ -522,8 +560,8 @@
   </div>
 </div>
 
-<script src="../js/tour.js"></script>
 
+<script src="../js/tour.js"></script>
 </body>
 </html>
 
