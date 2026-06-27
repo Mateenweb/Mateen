@@ -1,5 +1,5 @@
 // ===========================
-//  صفحة متابعة الطالبة
+//  Page متابعة Student (f)
 // ===========================
 
 import { initializeApp }
@@ -34,7 +34,7 @@ onAuthStateChanged(auth, async user => {
   const params    = new URLSearchParams(location.search);
   const studentId = params.get('id');
 
-  // الطالبة: تشوف بس صفحتها هي
+  // Student (f): تشوف but/only Rowحتها هي
   if (role === 'student' || role === 'mateen') {
     if (!studentId || user.uid !== studentId) {
       window.location.href = '../html/home.html'; return;
@@ -43,14 +43,14 @@ onAuthStateChanged(auth, async user => {
     return;
   }
 
-  // الإدارة فقط: تشوف الكل
+  // الإدارة only: تشوف الكل
   if (role === 'admin') {
     if (!studentId) { window.location.href = '../html/home.html'; return; }
     initPage();
     return;
   }
 
-  // المعلمة: بس طالباتها
+  // Teacher (f): but/only طالباتها
   if (role === 'teacher') {
     if (!studentId) { window.location.href = '../html/home.html'; return; }
     const teacherSubject = userData.subject || '';
@@ -65,7 +65,7 @@ onAuthStateChanged(auth, async user => {
   window.location.href = '../html/login.html';
 });
 
-// ── جدول المواد لكل يوم ──────────────────────
+// ── Schedule/Table Subjects لكل يوم ──────────────────────
 const DAY_SUBJECTS = {
   'الأحد':    ['الفقه', 'التفسير', 'مقرأة متين'],
   'الاثنين':  ['التفسير', 'الفقه', 'مقرأة متين'],
