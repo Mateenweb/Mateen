@@ -1,5 +1,5 @@
 // ===========================
-//  صفحة الإحصائيات
+//  Page الStatistics
 // ===========================
 
 import { initializeApp, getApps, getApp }
@@ -14,7 +14,7 @@ const app  = getApps().length ? getApp() : initializeApp(FIREBASE_CONFIG);
 const db   = getFirestore(app);
 const auth = getAuth(app);
 
-// ── AUTH GUARD — للإدارة/المشرفة/المعلمة فقط ───────────────
+// ── AUTH GUARD — للإدارة/الnot/don'tرفة/Teacher (f) only ───────────────
 onAuthStateChanged(auth, async user => {
   if (!user) { window.location.href = '../html/login.html'; return; }
   const snap = await getDoc(doc(db, 'users', user.uid));
@@ -283,4 +283,4 @@ window.switchTab = function (name) {
 };
 
 // ── Start ─────────────────────────────────────
-// (loadAll() بيتنادي من جوه onAuthStateChanged فوق بعد التحقق من الصلاحية)
+// (loadAll() بيتناthis من جوه onAuthStateChanged above بعد Validation from the صلاحية)
