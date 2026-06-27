@@ -246,7 +246,7 @@ body { background: var(--beige); min-height: 100vh; display: flex; flex-directio
 
 .stu-name-cell { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
 .stu-name-cell input { flex: 1; min-width: 90px; }
-/* زرار/قايمة التصنيف — كان بياخد flex:0 ويتقزّز جوه الصف المزدحم */
+/* Button/قايمة التصنيف — كان Takes flex:0 ويتقزّز جوه الRow المزدحم */
 .status-sel {
   flex-shrink: 0;
   width: auto;
@@ -573,11 +573,11 @@ body { background: var(--beige); min-height: 100vh; display: flex; flex-directio
    STU MOBILE CARDS
    ══════════════════════════════════════════ */
 @media (max-width: 640px) {
-  /* إخفاء الجدول وإظهار البطاقات */
+  /* Hide Schedule/Table وShow البطاقات */
   .stu-table-wrap          { display: none !important; }
   #stu-cards-wrap          { display: block !important; }
 
-  /* البطاقة الواحدة */
+  /* الCard اIfاحدة */
   .stu-mob-card {
     background: #fff;
     border: 1px solid var(--border, #e8e0d0);
@@ -587,7 +587,7 @@ body { background: var(--beige); min-height: 100vh; display: flex; flex-directio
     box-shadow: 0 2px 6px rgba(0,0,0,.07);
   }
 
-  /* السطر العلوي: الاسم + حذف */
+  /* السطر العIfي: الاسم + Delete */
   .stu-mob-top {
     display: flex;
     align-items: center;
@@ -621,7 +621,7 @@ body { background: var(--beige); min-height: 100vh; display: flex; flex-directio
     outline: none;
   }
 
-  /* صف بيانات */
+  /* Row بيانات */
   .stu-mob-row {
     display: flex;
     align-items: center;
@@ -662,7 +662,7 @@ body { background: var(--beige); min-height: 100vh; display: flex; flex-directio
     text-align: center;
   }
 
-  /* أزرار المقابلة والقبول */
+  /* Buttons المقابلة  and the قبول */
   .stu-mob-actions {
     display: flex;
     gap: 8px;
@@ -677,7 +677,7 @@ body { background: var(--beige); min-height: 100vh; display: flex; flex-directio
     border-radius: 8px !important;
   }
 
-  /* تقليص date picker على الموبايل */
+  /* تقليص date picker on Mobile */
   .arabic-date {
     display: flex;
     gap: 4px;
@@ -799,7 +799,7 @@ body { background: var(--beige); min-height: 100vh; display: flex; flex-directio
   }
 }
 
-/* ══ Bootstrap navbar override — ألوان الروابط ══ */
+/* ══ Bootstrap navbar override — أIfان الروابط ══ */
 .admin-nav-links .nav-link {
   color: rgba(255,255,255,0.82) !important;
   font-size: 13px;
@@ -819,7 +819,7 @@ body { background: var(--beige); min-height: 100vh; display: flex; flex-directio
   .admin-nav-links .nav-link { padding: 8px 16px; }
 }
 
-/* ══ تثبيت خلفية الـ collapse على الموبايل ══ */
+/* ══ تثبيت خلفية الـ collapse on Mobile ══ */
 #adminNavMenu.show {
   background: var(--green-dark, #5c3d2e) !important;
 }
