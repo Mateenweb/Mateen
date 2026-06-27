@@ -101,16 +101,14 @@ nav::after {
 }
 
 /* ════════════════════════════════════════════════
-   5. hero / page-hero / teacher-hero — بني متوسط→غامق
+   5. page-hero / teacher-hero فقط (مش home hero)
    ════════════════════════════════════════════════ */
-.hero,
 .page-hero,
 .teacher-hero {
   position: relative;
   overflow: hidden;
   border-bottom: 3px solid var(--gold) !important;
 }
-.hero::after,
 .page-hero::after,
 .teacher-hero::after {
   content: '';
@@ -122,7 +120,6 @@ nav::after {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='90' height='90'%3E%3Cg fill='%23c9a227'%3E%3Cpolygon points='45,6 52,34 80,34 58,52 66,80 45,63 24,80 32,52 10,34 38,34'/%3E%3C/g%3E%3C/svg%3E");
   background-size: 90px 90px;
 }
-.hero::before,
 .page-hero::before,
 .teacher-hero::before {
   content: '';
@@ -133,7 +130,6 @@ nav::after {
   z-index: 1;
   border-radius: 6px;
 }
-.hero > *,
 .page-hero > *,
 .teacher-hero > * {
   position: relative;
@@ -359,3 +355,4 @@ footer::before {
   .aya-text { font-size: 13px !important; }
   footer::before { font-size: 9px; letter-spacing: 2px; }
 }
+
