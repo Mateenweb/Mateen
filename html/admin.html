@@ -564,6 +564,26 @@
 
 <script src="../js/tour.js"></script>
 
+
+<!-- ══ مودال الأرشيف ══ -->
+<div id="archiveModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1100;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:16px;padding:24px;width:min(600px,95vw);max-height:80vh;overflow-y:auto;position:relative;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+      <h3 style="font-family:Amiri,serif;color:var(--green-dark);margin:0"><i class="ti ti-archive"></i> أرشيف الطالبات المحذوفات</h3>
+      <button onclick="closeArchiveModal()" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--text-mid)">✕</button>
+    </div>
+    <p style="font-size:13px;color:var(--text-mid);margin-bottom:16px">يمكنك استعادة أي طالبة أو حذفها نهائياً من هنا.</p>
+    <table class="pending-table" style="width:100%">
+      <thead><tr>
+        <th>الاسم</th><th>تاريخ الأرشفة</th><th>إجراء</th>
+      </tr></thead>
+      <tbody id="archiveBody">
+        <tr><td colspan="3" class="empty-state">جارٍ التحميل...</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
 </body>
 </html>
 
