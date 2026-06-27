@@ -144,7 +144,14 @@ async function initPage(studentId, user, role) {
     document.getElementById('newSessionWrap').style.display  = 'block';
     document.getElementById('attendanceList').style.display  = 'none';
 
+    // إظهار تبويب الملاحظات مع نموذج كتابة فارغ (بدون عرض القديم)
+    document.getElementById('tabBtn-notes').style.display    = '';   // أعده ظاهر
+    document.getElementById('notesEditWrap').style.display   = 'block';
+    document.getElementById('notesTextarea').value           = '';   // فاضي — مش بيشوف القديم
+    document.getElementById('notesContent').style.display    = 'none'; // إخفاء الملاحظات القديمة
+
     setupSupervisorAttendance(studentId);
+    setupSupervisorNotes(studentId);
     switchTab('attend');
   }
 
