@@ -209,12 +209,12 @@
       <i class="ti ti-arrow-right"></i> رجوع
     </a>
 
-    <!-- صورة الجدول الرسمي -->
+    <!-- Schedule/Table image الرسمي -->
     <div style="text-align:center;padding:16px 0 8px;">
       <img src="../schedule.jpg" alt="جدول متين" style="max-width:100%;width:min(480px,95vw);border-radius:16px;box-shadow:0 4px 20px rgba(0,0,0,0.12);"/>
     </div>
 
-    <!-- جدول الورد والمراجعة -->
+    <!-- Schedule/Table اIfرد  and the مراجعة -->
     <div style="text-align:center;padding:8px 0 16px;">
       <img src="../schedule-wird.jpg" alt="جدول الورد والمراجعة" style="max-width:100%;width:min(480px,95vw);border-radius:16px;box-shadow:0 4px 20px rgba(0,0,0,0.12);"/>
     </div>
@@ -241,7 +241,7 @@ onAuthStateChanged(auth, async user => {
   const role   = snap.data().role   || '';
   const status = snap.data().status || '';
 
-  // بس بنات متين
+  // but/only بنات متين
   if (role !== 'mateen' || status === 'pending' || status === 'suspended') {
     window.location.href = 'home.html'; return;
   }
@@ -266,7 +266,7 @@ onAuthStateChanged(auth, async user => {
 </script>
 
 
-<!-- شركاء الخير Footer -->
+<!-- Khayr Partners Footer -->
 <footer class="shuraka-footer" style="background:#2c1a0e;padding:18px 12px;text-align:center;">
   <img src="../shuraka-logo.png" alt="شركاء الخير" style="height:72px;width:auto;mix-blend-mode:screen;opacity:0.92;display:inline-block;"/>
 </footer>
