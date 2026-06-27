@@ -147,7 +147,7 @@
 .conv-item.unread .conv-name { font-weight: 700; color: var(--green-dark, #1b4332); }
 .conv-item.unread .conv-preview { color: var(--text-dark, #1a1a1a); font-weight: 500; }
 
-/* زرار حذف المحادثة — يظهر عند hover */
+/* Button Delete المحادثة — يظهر عند hover */
 .conv-delete-btn {
   display: none;
   position: absolute;
@@ -647,7 +647,7 @@
 
   .mob-back-btn { display: flex !important; }
 
-  /* إخفاء الـ empty state على الموبايل */
+  /* Hide الـ empty state on Mobile */
   .msg-empty-state { display: none !important; }
 
   .msg-conv-head { padding: 12px 14px; }
@@ -697,7 +697,7 @@
   color: #e74c3c;
   background: #fde8e8;
 }
-/* مقروءة — رمادية ولا تتغير عند hover */
+/* مقروءة — رماthisة ولا تتغير عند hover */
 .msg-delete-btn.seen {
   color: #ddd;
   cursor: not-allowed;
@@ -739,7 +739,7 @@
   font-style: italic;
 }
 
-/* ── Media Buttons (صوت وصورة) ── */
+/* ── Media Buttons (صوت وImage) ── */
 .msg-media-btn {
   width: 36px; height: 36px;
   border-radius: 50%;
@@ -768,7 +768,7 @@
   50%      { opacity: 0; }
 }
 
-/* فقاعة الصورة */
+/* فقاعة الImage */
 .msg-bubble img.msg-img {
   max-width: 220px;
   max-height: 260px;
@@ -786,7 +786,7 @@
 }
 
 
-/* ── view-once tag على رسائل المُرسِل ── */
+/* ── view-once tag على Messages المُرسِل ── */
 .view-once-tag {
   display: inline-flex; align-items: center; gap: 4px;
   font-size: 10px; color: var(--gold); opacity: 0.8;
