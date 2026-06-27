@@ -1,6 +1,6 @@
 // =========================================================
 //  Firebase Cloud Functions — Mateen
-//  بيبعت إشعار FCM لما تيجي رسالة جديدة
+//  بيبعت Notification FCM When تيجي Message جthisدة
 // =========================================================
 const { onDocumentCreated } = require("firebase-functions/v2/firestore");
 const { onCall, HttpsError } = require("firebase-functions/v2/https");
@@ -13,42 +13,42 @@ initializeApp();
 const db = getFirestore();
 
 // =========================================================
-//  حذف حساب من Firebase Authentication (يحتاج صلاحية admin)
-//  السبب: الـ client SDK مينفعش يحذف Auth account لمستخدمة
-//  تانية غير اللي عامل لها login حالياً، ده محتاج Admin SDK
-//  وبالتالي لازم يتنفذ من سيرفر (Cloud Function) زي هنا.
+//  Delete حساب من Firebase Authentication (يحتاج صلاحية admin)
+//  السبب: الـ client SDK مينفعش يDelete Auth account لمستخدمة
+//  تانية غير اللي عامل لها login حالياً، this محتاج Admin SDK
+//  وبالتالي لازم يتنفذ من سيرفر (Cloud Function) زي Here.
 // =========================================================
 exports.deleteAuthUser = onCall(async (request) => {
-  // 1. لازم يكون المستخدم مسجل دخول
+  // 1. لازم يكون User مسجل دخول
   if (!request.auth) {
     throw new HttpsError("unauthenticated", "يجب تسجيل الدخول أولاً");
   }
 
-  // 2. تحقق إن صاحب الطلب admin فعلاً (من Firestore)
+  // 2. تحقق إن صاحب Request admin فعلاً (من Firestore)
   const callerSnap = await db.doc(`users/${request.auth.uid}`).get();
   const callerRole = callerSnap.exists ? callerSnap.data().role : null;
   if (callerRole !== "admin" && callerRole !== "supervisor") {
     throw new HttpsError("permission-denied", "غير مصرح لكِ بحذف الحسابات");
   }
 
-  // 3. تحقق من وجود uid المراد حذفه
+  // 3. تحقق من وجود uid المراد Deleteه
   const targetUid = request.data && request.data.uid;
   if (!targetUid || typeof targetUid !== "string") {
     throw new HttpsError("invalid-argument", "uid المستخدمة المطلوب حذفها غير موجود");
   }
 
-  // 4. امنعي حذف الأدمن لنفسه بالغلط
+  // 4. امنعي Delete Admin لsame style بالغلط
   if (targetUid === request.auth.uid) {
     throw new HttpsError("failed-precondition", "لا يمكنك حذف حسابك الخاص من هنا");
   }
 
-  // 5. الحذف الفعلي من Firebase Authentication
+  // 5. الDelete الفعلي من Firebase Authentication
   try {
     await getAuth().deleteUser(targetUid);
     return { success: true };
   } catch (e) {
     if (e.code === "auth/user-not-found") {
-      // الحساب أصلاً مش موجود في Auth (محذوف قبل كده) — ده مش خطأ
+      // الحساب أصلاً not/don't موجود في Auth (محذوف قبل Like this) — this not/don't Error
       return { success: true, note: "already-deleted" };
     }
     throw new HttpsError("internal", e.message);
@@ -61,7 +61,7 @@ exports.sendMessageNotification = onDocumentCreated(
     const msg   = event.data.data();
     const convId = event.params.convId;
 
-    // جيب المحادثة عشان تعرف المشاركين
+    // جيب المحادثة So that تعرف الnot/don'tاركين
     const convSnap = await db.doc(`conversations/${convId}`).get();
     if (!convSnap.exists) return;
 
@@ -70,7 +70,7 @@ exports.sendMessageNotification = onDocumentCreated(
     const senderName   = msg.senderName || "متين";
     const text         = msg.text || "رسالة جديدة";
 
-    // ابعت إشعار لكل مشارك غير المرسل
+    // ابعت Notification لكل not/don'tارك غير المرسل
     const recipients = participants.filter(uid => uid !== senderId);
 
     for (const uid of recipients) {
