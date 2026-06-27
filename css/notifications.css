@@ -77,7 +77,7 @@
 
 .fcm-toast-close:hover { color: #555; }
 
-/* موبايل */
+/* Mobile */
 @media (max-width: 480px) {
   .fcm-toast {
     left: 12px;
