@@ -160,6 +160,44 @@
   </div>
 </div>
 
+
+<div id="editNewsModal" class="m-overlay z-high">
+  <div class="m-box-news">
+    <div class="m-head-news">
+      <div class="m-title-news">تعديل الخبر</div>
+      <button onclick="document.getElementById('editNewsModal').classList.remove('show')"
+        class="m-close-news">✕</button>
+    </div>
+    <div class="m-body-news">
+      <input id="editTitle" type="text" placeholder="عنوان الخبر أو الإعلان"
+        class="m-input-news"/>
+      <textarea id="editBody" rows="4" placeholder="تفاصيل الخبر..."
+        class="m-textarea-news"></textarea>
+      <div class="m-row-news">
+        <select id="editTag" class="m-select-news">
+          <option value="📢 إعلان">📢 إعلان</option>
+          <option value="📝 خبر">📝 خبر</option>
+          <option value="🎉 مناسبة">🎉 مناسبة</option>
+          <option value="⚠️ تنبيه">⚠️ تنبيه</option>
+          <option value="📅 موعد">📅 موعد</option>
+        </select>
+        <label class="m-pin-label">
+          <input type="checkbox" id="editPinned" class="m-pin-checkbox"/> تثبيت
+        </label>
+      </div>
+      <select id="editVisibility" class="m-select-news">
+        <option value="members">للمسجلات فقط</option>
+        <option value="public">للجميع</option>
+      </select>
+    </div>
+    <div class="m-foot-news">
+      <button onclick="document.getElementById('editNewsModal').classList.remove('show')"
+        class="m-cancel-news">إلغاء</button>
+      <button onclick="submitEditNews()" class="m-submit-news">💾 حفظ التعديلات</button>
+    </div>
+  </div>
+</div>
+
 <script src="../js/nav.js"></script>
 <script type="module">
 import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
@@ -217,7 +255,11 @@ onSnapshot(q, snap => {
             ${n.pinned ? '<div class="news-tag">📌 مثبت</div>' : `<div class="news-tag">${n.tag || '📝 خبر'}</div>`}
             <div class="news-date"><i class="ti ti-calendar"></i> ${date}</div>
           </div>
-          ${isAdmin ? `<button onclick="deleteNews('${d.id}')" class="btn-delete-news"><i class="ti ti-trash"></i> حذف</button>` : ''}
+          ${isAdmin ? `
+            <div class="news-admin-btns">
+              <button onclick="editNews('${d.id}', ${JSON.stringify(n).replace(/`/g,'\`')})" class="btn-edit-news"><i class="ti ti-pencil"></i> تعديل</button>
+              <button onclick="deleteNews('${d.id}')" class="btn-delete-news"><i class="ti ti-trash"></i> حذف</button>
+            </div>` : ''}
         </div>
         <h3>${n.title || ''}</h3>
         <p>${n.body || ''}</p>
@@ -233,6 +275,38 @@ onSnapshot(q, snap => {
 window.deleteNews = async id => {
   if (!confirm('حذف هذا الخبر نهائياً؟')) return;
   await deleteDoc(doc(db, 'news', id));
+};
+
+let _editingId = null;
+
+window.editNews = (id, data) => {
+  _editingId = id;
+  document.getElementById('editTitle').value      = data.title      || '';
+  document.getElementById('editBody').value       = data.body       || '';
+  document.getElementById('editTag').value        = data.tag        || '📝 خبر';
+  document.getElementById('editPinned').checked   = data.pinned     || false;
+  document.getElementById('editVisibility').value = data.visibility || 'members';
+  document.getElementById('editNewsModal').classList.add('show');
+};
+
+window.submitEditNews = async () => {
+  if (!_editingId) return;
+  const title      = document.getElementById('editTitle').value.trim();
+  const body       = document.getElementById('editBody').value.trim();
+  const tag        = document.getElementById('editTag').value;
+  const pinned     = document.getElementById('editPinned').checked;
+  const visibility = document.getElementById('editVisibility').value;
+
+  if (!title) { alert('يرجى إدخال العنوان'); return; }
+
+  const { updateDoc, serverTimestamp: st2 } = await import("https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js");
+  await updateDoc(doc(db, 'news', _editingId), {
+    title, body, tag, pinned, visibility,
+    updatedAt: st2()
+  });
+
+  _editingId = null;
+  document.getElementById('editNewsModal').classList.remove('show');
 };
 
 const { addDoc, serverTimestamp } = await import("https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js");
