@@ -2,7 +2,7 @@
 // ── كشف البيئة ──────────────────────────────────────────────────────────
 const BASE = window.location.hostname.includes('github.io') ? '/Mateen' : '';
 // ═══════════════════════════════════════════════════════
-//  notifications.js — إشعارات فورية بـ Firestore onSnapshot
+//  notifications.js — Notificationات فورية بـ Firestore onSnapshot
 // ═══════════════════════════════════════════════════════
 import { initializeApp, getApps, getApp }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
@@ -20,7 +20,7 @@ const auth = getAuth(app);
 let notifUnsub = null;
 let initialized = false;
 
-// ── صوت إشعار ────────────────────────────────────────────────────────────
+// ── صوت Notification ────────────────────────────────────────────────────────────
 function playSound() {
   try {
     const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -37,7 +37,7 @@ function playSound() {
   } catch(e) {}
 }
 
-// ── كتابة إشعار للـ Service Worker (للموبايل PWA) ───────────────────────
+// ── كتابة Notification for the  Service Worker (للMobile PWA) ───────────────────────
 async function pushToSW(userId, title, body, url) {
   try {
     await addDoc(
@@ -47,7 +47,7 @@ async function pushToSW(userId, title, body, url) {
   } catch(e) { console.warn('[Notif] SW push failed:', e); }
 }
 
-// ── Toast إشعار ──────────────────────────────────────────────────────────
+// ── Toast Notification ──────────────────────────────────────────────────────────
 // container واحد لكل الـ toasts
 function getToastContainer() {
   let c = document.getElementById('mateen-toast-container');
@@ -83,7 +83,7 @@ function showNotifToast(title, body, url) {
     </div>`;
   t.setAttribute('data-notif', '1');
 
-  // إضافة style مرة واحدة
+  // Add style مرة واحدة
   if (!document.getElementById('notif-style')) {
     const s = document.createElement('style');
     s.id = 'notif-style';
@@ -113,13 +113,13 @@ async function showBrowserNotif(title, body) {
   }
 }
 
-// ── الاستماع لرسائل جديدة ────────────────────────────────────────────────
+// ── الاستماع لMessages جthisدة ────────────────────────────────────────────────
 let newsUnsub = null;
 
 function startListening(userId) {
   if (notifUnsub) { notifUnsub(); notifUnsub = null; }
 
-  // ── رسائل ────────────────────────────────────────────
+  // ── Messages ────────────────────────────────────────────
   const q = query(
     collection(db, 'conversations'),
     where('participants', 'array-contains', userId)
@@ -147,11 +147,11 @@ function startListening(userId) {
 
       const lastSenderId = data.lastSenderId || '';
 
-      // إشعار بس لو رسالة جديدة فعلاً ومن حد تاني وعنده محتوى
+      // Notification but/only If Message جthisدة فعلاً ومن حد تاني وعنthis Content
       const isNewMsg   = lastAt > (lastSeen[convId] || 0);
       const notFromMe  = lastSenderId !== '' && lastSenderId !== userId;
       const hasContent = lastMsg.trim() !== '';
-      // تجاهل لو الـ unread بتاع المستخدم اتصفّر (يعني حد فتح الشات بس)
+      // تجاهل If الـ unread بتاع User اتRowّر (يعني حد فتح الشات but/only)
       const isReadEvent = data[`unread.${userId}`] === 0 && !isNewMsg;
 
       if (isNewMsg && notFromMe && hasContent && !isReadEvent) {
@@ -176,7 +176,7 @@ function startListening(userId) {
     });
   });
 
-  // ── أخبار جديدة ───────────────────────────────────────
+  // ── News جthisدة ───────────────────────────────────────
   if (newsUnsub) { newsUnsub(); newsUnsub = null; }
 
   let newsFirstLoad = true;
@@ -191,7 +191,7 @@ function startListening(userId) {
         const n = change.doc.data();
         const onNewsPage = window.location.pathname.includes('news.html');
         playSound();
-        // إشعار للـ SW للموبايل
+        // Notification for the  SW للMobile
         pushToSW(userId, '📢 ' + (n.title || 'خبر جديد'),
           n.body?.slice(0, 80) || '',
           'https://mateenweb.github.io/Mateen/html/news.html');
@@ -208,7 +208,7 @@ function startListening(userId) {
   );
 }
 
-// ── تفعيل تلقائي عند لوجين ───────────────────────────────────────────────
+// ── Enable تلقائي عند Ifجين ───────────────────────────────────────────────
 // unlock audio on first user interaction
 let audioUnlocked = false;
 function unlockAudio() {
@@ -225,7 +225,7 @@ document.addEventListener('touchstart', unlockAudio, { once: true });
 onAuthStateChanged(auth, user => {
   if (user) {
     console.log('[Notif] user logged in:', user.uid);
-    // أرسل الـ UID للـ Service Worker عشان يبدأ يستمع
+    // أرسل الـ UID for the  Service Worker So that يبدأ يستمع
     if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
       navigator.serviceWorker.controller.postMessage({
         type: 'SET_USER', uid: user.uid
@@ -233,11 +233,11 @@ onAuthStateChanged(auth, user => {
     }
     startListening(user.uid);
     showMissedNotifications(user.uid);
-    // ملاحظة: saveFCMToken() وطلب إذن الإشعارات التلقائي عُطّلا مؤقتاً.
+    // ملاحظة: saveFCMToken() وطلب إذن الNotificationات التلقائي عُطّلا مؤقتاً.
     // السبب: VAPID key الحالية placeholder وبتفشل بـ 401 من Firebase،
-    // وطلب الإذن تلقائياً عند تحميل الصفحة مخالف لمعايير الأداء وتجربة المستخدم.
-    // لتفعيلهم مجدداً: ضعي VAPID key حقيقية من Firebase Console، وفعّلي
-    // الإذن فقط عند ضغط المستخدم على زرار صريح (مثلاً "فعّلي الإشعارات").
+    // وطلب الإذن تلقائياً عند Page load مخالف لمعايير الأداء وتجربة User.
+    // لEnableهم مجدداً: ضعي VAPID key حقيقية من Firebase Console، وفعّلي
+    // الإذن only عند ضغط User على Button صريح (مثلاً "فعّلي الNotificationات").
   } else {
     console.log('[Notif] no user');
     if (notifUnsub) { notifUnsub(); notifUnsub = null; }
@@ -248,7 +248,7 @@ onAuthStateChanged(auth, user => {
 // ── حفظ FCM Token في Firestore ───────────────────────────────────────────
 async function saveFCMToken(userId) {
   try {
-    // طلب إذن الإشعارات
+    // طلب إذن الNotificationات
     const permission = await Notification.requestPermission();
     if (permission !== 'granted') return;
 
@@ -279,7 +279,7 @@ async function saveFCMToken(userId) {
   }
 }
 
-// ── إشعارات الفائتة لما يفتح الموقع ─────────────────────────────────────
+// ── Notificationات الفائتة When يفتح الموقع ─────────────────────────────────────
 async function showMissedNotifications(userId) {
   try {
     const pendingSnap = await getDocs(
@@ -291,7 +291,7 @@ async function showMissedNotifications(userId) {
       const n = d.data();
       showNotifToast(n.title || 'إشعار جديد', n.body || '', n.url || '');
       playSound();
-      // امسح بعد العرض
+      // امسح بعد الWidth/Display
       d.ref.delete().catch(() => {});
     });
   } catch(e) {
@@ -299,7 +299,7 @@ async function showMissedNotifications(userId) {
   }
 }
 
-// ── إشعارات الأدمن: حسابات جديدة بانتظار الموافقة ──────────────────────
+// ── Notificationات Admin: حسابات جthisدة بانتظار الموافقة ──────────────────────
 function listenAdminNotifications(userId) {
   const q = query(
     collection(db, 'userNotifications', userId, 'items'),
@@ -318,10 +318,10 @@ function listenAdminNotifications(userId) {
   });
 }
 
-// ── export للاستخدام الخارجي لو محتاج ───────────────────────────────────
+// ── export للاستخدام الخارجي If محتاج ───────────────────────────────────
 export async function initNotifications(userId) {
   if (!userId) return;
-  // افحص role المستخدم
+  // افحص role User
   try {
     const snap = await getDocs(query(collection(db, 'users')));
     // نجيب role من Firestore
