@@ -1173,7 +1173,7 @@ footer {
 
 /* Mobile (≤ 767px) */
 @media (max-width: 767px) {
-  .hero { justify-content: center; }
+  .hero { justify-content: center; aspect-ratio: 3/2; width: calc(100% - 24px); margin: 10px 12px; border-radius: 14px; }
   .hero-text {
     position: absolute;
     right: 50%;
