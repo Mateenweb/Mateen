@@ -1,6 +1,6 @@
 renderNav('news.html')
 
-// ── تحديث "آخر مشاهدة" عند فتح صفحة الأخبار ────────────────
+// ── Update "آخر not/don'tاهدة" عند فتح Page الNews ────────────────
 import { getAuth, onAuthStateChanged as _onAuth }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
 import { getApps, getApp, initializeApp as _init }
