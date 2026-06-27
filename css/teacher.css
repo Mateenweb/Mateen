@@ -1,5 +1,5 @@
 /* ===========================
-   صفحة المعلمة — teacher.css
+   Page Teacher (f) — teacher.css
    =========================== */
 
 .teacher-hero {
@@ -127,7 +127,7 @@ footer { background: var(--green-dark); color: rgba(255,255,255,0.5); padding: 1
 .inbox-dot    { width: 8px; height: 8px; border-radius: 50%; background: var(--green-mid); flex-shrink: 0; }
 .tp-badge     { background: var(--green-dark); color: var(--gold-light); border-radius: 20px; padding: 2px 10px; font-size: 12px; margin-right: 8px; }
 /* ══════════════════════════════════════
-   SCHEDULE — تصميم الجدول الأسبوعي
+   SCHEDULE — Design Schedule/Table الأسبوعي
    ══════════════════════════════════════ */
 
 .schedule-week {
@@ -145,7 +145,7 @@ footer { background: var(--green-dark); color: rgba(255,255,255,0.5); padding: 1
   box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
 
-/* رأس اليوم */
+/* Header اليوم */
 .sched-day-header {
   display: flex;
   align-items: center;
