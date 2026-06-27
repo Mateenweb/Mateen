@@ -20,6 +20,9 @@ window.addEventListener('beforeinstallprompt', (e) => {
 
 function showInstallBanner() {
   if (document.getElementById('installBanner')) return;
+  if (localStorage.getItem('installBannerDismissed')) return;
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+  if (isStandalone) return;
 
   const banner = document.createElement('div');
   banner.id = 'installBanner';
@@ -39,7 +42,7 @@ function showInstallBanner() {
         background:#c9a227; color:#2c1a0e; border:none; border-radius:10px;
         padding:7px 16px; font-family:inherit; font-weight:700; cursor:pointer; font-size:13px;
       ">تثبيت</button>
-      <button onclick="document.getElementById('installBanner').remove()" style="
+      <button onclick="localStorage.setItem('installBannerDismissed','1');document.getElementById('installBanner').remove()" style="
         background:none; border:none; color:rgba(255,255,255,0.5); cursor:pointer; font-size:18px; padding:0 4px;
       ">✕</button>
     </div>
