@@ -143,6 +143,36 @@ window.TOUR_STEPS = {
     { el:'.path-section', title:'المواد العلمية', desc:'اضغطي على أي مادة للاطلاع على محتواها' },
     { el:'.nav-msg-btn[href="messages.html"]', title:'رسائلي', desc:'من هنا تصلين لرسائلك مع المعلمات والإدارة' },
     { el:'#navNewsBtn', title:'الأخبار', desc:'متابعة آخر أخبار وإعلانات البرنامج' },
+    {
+      el:'#installAppBtn',
+      title:'تثبيت التطبيق',
+      desc:'أضيفي متين لشاشتك الرئيسية للوصول السريع بدون متصفح',
+      actionLabel:'📲 تثبيت الآن',
+      action: async () => {
+        if (window.deferredInstallPrompt) {
+          await window.installApp();
+        } else {
+          window.showInstallBanner?.();
+        }
+      }
+    },
+    {
+      el:null,
+      title:'تفعيل الإشعارات',
+      desc:'فعّلي الإشعارات لتصليك أي رسالة أو خبر جديد فوراً',
+      actionLabel:'🔔 تفعيل الإشعارات',
+      action: async () => {
+        if (!('Notification' in window)) {
+          alert('متصفحك لا يدعم الإشعارات');
+          return;
+        }
+        if (Notification.permission === 'granted') return;
+        const perm = await Notification.requestPermission();
+        if (perm === 'granted') {
+          new Notification('متين العلمي 🌿', { body: 'تم تفعيل الإشعارات بنجاح!', icon: '/Mateen/logo.png' });
+        }
+      }
+    },
   ],
 
   messages: [
