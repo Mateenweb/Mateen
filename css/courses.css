@@ -430,7 +430,7 @@ footer {
   .courses-grid { grid-template-columns: 1fr; }
   .page-hero h1 { font-size: 24px; }
 }
-/* ══ مواد جوه المودال ══ */
+/* ══ مواد جوه Modal ══ */
 .modal-mats-section { margin: 8px 0; }
 .mat-card-item {
   background: var(--white);
