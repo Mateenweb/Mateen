@@ -96,27 +96,14 @@ function renderAll(list) {
               ${u.status==='active' ? '✅ نشطة' : u.status==='pending' ? '⏳ معلقة' : '❌ موقوفة'}
             </span>
           </div>
-          <!-- بيانات -->
-          <div style="padding:12px 16px;font-size:12px;color:var(--text-mid);display:flex;flex-direction:column;gap:4px;">
-            ${u.phone ? `<div><i class="ti ti-phone" style="margin-left:4px;"></i>${esc(u.phone)}</div>` : ''}
-            ${u.year  ? `<div><i class="ti ti-calendar" style="margin-left:4px;"></i>${esc(u.year)}</div>` : ''}
-          </div>
-          <!-- Buttons -->
-          <div style="padding:10px 16px;border-top:1px solid var(--border);display:flex;gap:8px;">
+          <!-- زرار الملف فقط -->
+          <div style="padding:10px 16px;border-top:1px solid var(--border);">
             <a href="student.html?id=${u.id}"
-               style="flex:1;padding:8px;background:var(--green-dark);color:white;border:none;border-radius:8px;
-                      font-family:inherit;font-size:12px;cursor:pointer;text-align:center;text-decoration:none;
-                      display:flex;align-items:center;justify-content:center;gap:4px;">
+               style="display:flex;align-items:center;justify-content:center;gap:4px;padding:8px;
+                      background:var(--green-dark);color:white;border-radius:8px;
+                      font-family:inherit;font-size:12px;text-decoration:none;">
               <i class="ti ti-user"></i> الملف والغياب
             </a>
-            <button onclick="suspendUser('${u.id}','${u.status}')"
-               style="padding:8px 12px;border-radius:8px;font-family:inherit;font-size:12px;cursor:pointer;
-                      border:1px solid ${u.status==='suspended'?'var(--green-dark)':'#c0392b'};
-                      background:transparent;
-                      color:${u.status==='suspended'?'var(--green-dark)':'#c0392b'};">
-              <i class="ti ti-${u.status==='suspended'?'check':'ban'}"></i>
-              ${u.status==='suspended'?'تفعيل':'إيقاف'}
-            </button>
           </div>
         </div>`).join('')}
     </div>`;
