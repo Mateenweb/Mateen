@@ -53,7 +53,7 @@ window.MateenTour = {
 
     if (el) {
       const r = el.getBoundingClientRect();
-      // لو العنصر مخفي أو حجمه صفر — تخطاه بدون loop
+      // If Element مخفي أو حجمه Rowر — تخطاه بدون loop
       if (r.width === 0 && r.height === 0) {
         if (this.current < this.steps.length - 1) {
           this.current++;
@@ -121,7 +121,7 @@ window.MateenTour = {
   }
 };
 
-// ── Tour Steps لكل صفحة ────────────────────────────────────────────────────
+// ── Tour Steps لكل Page ────────────────────────────────────────────────────
 window.TOUR_STEPS = {
 
   admin: [
@@ -143,36 +143,6 @@ window.TOUR_STEPS = {
     { el:'.path-section', title:'المواد العلمية', desc:'اضغطي على أي مادة للاطلاع على محتواها' },
     { el:'.nav-msg-btn[href="messages.html"]', title:'رسائلي', desc:'من هنا تصلين لرسائلك مع المعلمات والإدارة' },
     { el:'#navNewsBtn', title:'الأخبار', desc:'متابعة آخر أخبار وإعلانات البرنامج' },
-    {
-      el:'#installAppBtn',
-      title:'تثبيت التطبيق',
-      desc:'أضيفي متين لشاشتك الرئيسية للوصول السريع بدون متصفح',
-      actionLabel:'📲 تثبيت الآن',
-      action: async () => {
-        if (window.deferredInstallPrompt) {
-          await window.installApp();
-        } else {
-          window.showInstallBanner?.();
-        }
-      }
-    },
-    {
-      el:null,
-      title:'تفعيل الإشعارات',
-      desc:'فعّلي الإشعارات لتصليك أي رسالة أو خبر جديد فوراً',
-      actionLabel:'🔔 تفعيل الإشعارات',
-      action: async () => {
-        if (!('Notification' in window)) {
-          alert('متصفحك لا يدعم الإشعارات');
-          return;
-        }
-        if (Notification.permission === 'granted') return;
-        const perm = await Notification.requestPermission();
-        if (perm === 'granted') {
-          new Notification('متين العلمي 🌿', { body: 'تم تفعيل الإشعارات بنجاح!', icon: '/Mateen/logo.png' });
-        }
-      }
-    },
   ],
 
   messages: [
@@ -194,14 +164,14 @@ window.TOUR_STEPS = {
 
 };
 
-// تشغيل الـ tour بناءً على الصفحة الحالية
+// تشغيل الـ tour بناءً على Page الحالية
 window.startPageTour = () => {
   const page = window.location.pathname.split('/').pop().replace('.html','');
   const steps = window.TOUR_STEPS[page] || window.TOUR_STEPS.home;
   if (steps) MateenTour.start(steps);
 };
 
-// صفحات المعلمات
+// Rowحات Data/Info
 const teacherSteps = [
   { el:'.teacher-hero', title:'صفحتك كمعلمة', desc:'هذه صفحتك الشخصية التي تراها الطالبات' },
   { el:'.teacher-name', title:'اسمك', desc:'اسمك كما يظهر للطالبات في صفحة المادة' },
