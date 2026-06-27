@@ -634,3 +634,66 @@ body {
   .stu-stat { min-width: 50%; }
   .notes-students-grid { grid-template-columns: repeat(2, 1fr); }
 }
+
+/* ── Student Name Cell ── */
+.stu-name-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 130px;
+}
+.stu-name-text {
+  font-weight: 600;
+  color: var(--text-dark);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 160px;
+}
+.btn-stu-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  background: rgba(201,162,39,0.12);
+  border: 1px solid rgba(201,162,39,0.3);
+  color: var(--green-dark);
+  text-decoration: none;
+  font-size: 13px;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+.btn-stu-link:hover {
+  background: rgba(201,162,39,0.28);
+}
+
+/* ── Status Badge (classification column) ── */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 11.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  background: rgba(201,162,39,0.12);
+  border: 1px solid rgba(201,162,39,0.3);
+  color: var(--green-dark);
+}
+
+/* ── Level Badge (new column) ── */
+.level-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  background: rgba(45,110,69,0.1);
+  border: 1px solid rgba(45,110,69,0.25);
+  color: var(--green-dark);
+  white-space: nowrap;
+}
