@@ -827,13 +827,48 @@ window.renderAllUsers = () => {
 
     return `<tr>
       <td style="color:var(--text-mid);font-size:12px">${i + 1}</td>
-      <td style="font-weight:600;font-size:13.5px">${esc(u.name || '—')}</td>
-      <td><span style="font-size:12px;background:var(--beige2);padding:2px 8px;border-radius:4px">${roleLabel}</span></td>
-      <td dir="ltr" style="font-size:12px;color:var(--text-mid)">${esc(u.email || '—')}</td>
-      <td dir="ltr" style="font-size:12px">${esc(u.phone || '—')}</td>
-      <td>${yearCell}</td>
+
+      <!-- الاسم — قابل للتعديل -->
+      <td><input type="text" value="${esc(u.name || '')}" placeholder="الاسم"
+        style="border:none;border-bottom:1px solid var(--border);background:transparent;font-family:inherit;font-size:13px;width:100%;min-width:100px;padding:2px 4px;"
+        onchange="userFieldUpdate('${u.id}','name',this.value)"/></td>
+
+      <!-- الدور -->
+      <td><select style="border:1px solid var(--border);border-radius:6px;font-family:inherit;font-size:12px;padding:2px 6px;background:var(--beige);"
+          onchange="userFieldUpdate('${u.id}','role',this.value)">
+        <option value="mateen"  ${u.role==='mateen'  ?'selected':''}>بنت متين</option>
+        <option value="student" ${u.role==='student' ?'selected':''}>طالبة عادية</option>
+        <option value="teacher" ${u.role==='teacher' ?'selected':''}>معلمة</option>
+        <option value="supervisor" ${u.role==='supervisor'?'selected':''}>مشرفة</option>
+        <option value="admin"   ${u.role==='admin'   ?'selected':''}>إدارة</option>
+      </select></td>
+
+      <!-- البريد -->
+      <td><input type="email" value="${esc(u.email || '')}" dir="ltr" placeholder="البريد"
+        style="border:none;border-bottom:1px solid var(--border);background:transparent;font-family:inherit;font-size:12px;width:100%;min-width:130px;padding:2px 4px;color:var(--text-mid);"
+        onchange="userFieldUpdate('${u.id}','email',this.value)"/></td>
+
+      <!-- الجوال -->
+      <td><input type="text" value="${esc(u.phone || '')}" dir="ltr" placeholder="الجوال"
+        style="border:none;border-bottom:1px solid var(--border);background:transparent;font-family:inherit;font-size:12px;width:100%;min-width:90px;padding:2px 4px;"
+        onchange="userFieldUpdate('${u.id}','phone',this.value)"/></td>
+
+      <!-- السنة -->
+      <td><input type="text" value="${esc(u.year || '')}" placeholder="السنة"
+        style="border:none;border-bottom:1px solid var(--border);background:transparent;font-family:inherit;font-size:12px;width:60px;padding:2px 4px;text-align:center;"
+        onchange="userFieldUpdate('${u.id}','year',this.value)"/></td>
+
+      <!-- تاريخ التسجيل — للعرض فقط -->
       <td style="font-size:12px;color:var(--text-mid);white-space:nowrap">${createdAt}</td>
-      <td><span style="font-size:12px;background:${statusBg};color:${statusColor};padding:3px 10px;border-radius:10px;white-space:nowrap">${statusLabel}</span></td>
+
+      <!-- الحالة -->
+      <td><select style="border:1px solid var(--border);border-radius:6px;font-family:inherit;font-size:12px;padding:2px 6px;background:${statusBg};color:${statusColor};"
+          onchange="userFieldUpdate('${u.id}','status',this.value)">
+        <option value="active"    ${u.status==='active'    ?'selected':''}>✅ مفعّلة</option>
+        <option value="pending"   ${u.status==='pending'   ?'selected':''}>⏳ معلقة</option>
+        <option value="suspended" ${u.status==='suspended' ?'selected':''}>🚫 موقوفة</option>
+      </select></td>
+
       <td>${linkCell}</td>
       <td style="white-space:nowrap;min-width:160px">${actionBtns}</td>
     </tr>`;
