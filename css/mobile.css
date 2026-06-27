@@ -1,5 +1,5 @@
 /* ================================================
-   برنامج متين العلمي — mobile.css v2
+   Mateen Academic Program — mobile.css v2
    Responsive rewrite — covers ALL pages
    ================================================ */
 
@@ -18,7 +18,7 @@ html { overflow-x: hidden; }
   * { -webkit-tap-highlight-color: transparent; }
   button { touch-action: manipulation; }
 
-  /* أي عنصر بـ min-width ثابت يكسر التخطيط — نلغيه */
+  /* أي عTextر بـ min-width ثابت يكسر التخطيط — نلغيه */
   .main-wrap,
   .content-area,
   .page-wrap,
@@ -49,7 +49,7 @@ html { overflow-x: hidden; }
   .nav-brand    { font-size: 14px !important; }
   .nav-tagline  { display: none !important; }
 
-  /* روابط الـ nav — مخفية على موبايل */
+  /* روابط the nav — مخفية على Mobile */
   .nav-links    { display: none !important; }
   .nav-links.open {
     display: flex !important;
@@ -79,7 +79,7 @@ html { overflow-x: hidden; }
   .nav-links.open a:hover,
   .nav-links.open a.active { background: rgba(201,162,39,0.15) !important; color: var(--gold-light) !important; }
 
-  /* زرار الهمبرجر */
+  /* Button الهمبرجر */
   .nav-toggle {
     display: flex !important;
     align-items: center !important;
@@ -96,7 +96,7 @@ html { overflow-x: hidden; }
 
   .nav-btns   { display: none !important; }
 
-  /* اسم المستخدم في الـ nav */
+  /* اسم User في the nav */
   .nav-user     { max-width: 110px; overflow: hidden; }
   .nav-user-name { font-size: 13px !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .nav-breadcrumb { font-size: 13px !important; padding: 10px var(--mob-pad) !important; }
@@ -107,7 +107,7 @@ html { overflow-x: hidden; }
 
 /* home.html — Mobile offcanvas sidebar */
 @media (max-width: 991px) {
-  /* الـ offcanvas يفتح من اليمين (RTL) */
+  /* الـ offcanvas يفتح from the Right (RTL) */
   #mainSidebar.offcanvas {
     width: 82% !important;
     max-width: 300px !important;
@@ -115,7 +115,7 @@ html { overflow-x: hidden; }
     left: auto !important;
   }
 
-  /* #sidebar-user يملأ ارتفاع الـ panel */
+  /* #sidebar-user يملأ Height الـ panel */
   #sidebar-user {
     display: none;
     flex-direction: column !important;
@@ -128,7 +128,7 @@ html { overflow-x: hidden; }
     flex-direction: column !important;
   }
 
-  /* الـ nav يتمدد بس بقدر محتواه — logout يظهر تحته مباشرة */
+  /* the nav يتمدد but/only بقدر محتواه — logout يظهر belowه مباشرة */
   #sidebar-user .sidebar-nav {
     flex: 0 0 auto !important;
     overflow-y: visible !important;
@@ -138,7 +138,7 @@ html { overflow-x: hidden; }
   #sidebar-user .sidebar-actions { margin-top: auto !important; padding: 12px 16px !important; flex-shrink: 0 !important; }
   #sidebar-user .sidebar-footer  { flex-shrink: 0 !important; }
 
-  /* زرار "حسابي" */
+  /* Button "حسابي" */
   .sidebar-fab {
     display: flex !important;
     align-items: center !important;
@@ -155,21 +155,21 @@ html { overflow-x: hidden; }
   .sidebar-fab i { font-size: 18px !important; }
 }
 
-/* sidebar-fab ظاهر في كل الأحجام كجزء من الناف بار */
+/* sidebar-fab ظاهر في كل الأحجام كجزء من Navbar */
 
 
 /* ════════════════════════════════════════
    2. PAGE LAYOUT — main-wrap + sidebar
    ════════════════════════════════════════ */
 @media (max-width: 991px) {
-  /* — صفحات الـ common.css / shared.css (teacher, admin, supervisor…) */
+  /* — Rowحات الـ common.css / shared.css (teacher, admin, supervisor…) */
   .main-wrap {
     display: block !important;
     padding: 0 !important;
     width: 100% !important;
   }
 
-  /* الـ sidebar تتحول offcanvas أو تختفي */
+  /* the sidebar تتحول offcanvas أو تختفي */
   .sidebar {
     width: 100% !important;
     border-right: none !important;
@@ -181,7 +181,7 @@ html { overflow-x: hidden; }
     flex-direction: column !important;
   }
 
-  /* sticky sidebar في الصفحات بدون offcanvas */
+  /* sticky sidebar in the Rowحات بدون offcanvas */
   .main-wrap:not(.has-offcanvas) .sidebar {
     display: none !important;
   }
@@ -241,11 +241,11 @@ html { overflow-x: hidden; }
     justify-content: center !important;
     text-align: right !important;
   }
-  /* الصورة تفضل absolute وتغطي كل الهيرو */
+  /* الImage تفضل absolute وتغطي كل Hero section */
   .hero-bg-img {
     object-position: 20% center !important;
   }
-  /* النص absolute على اليمين والوسط */
+  /* الText absolute on the Right واIfسط */
   .hero-text {
     position: absolute !important;
     z-index: 2 !important;
@@ -280,7 +280,7 @@ html { overflow-x: hidden; }
 
 
 /* ════════════════════════════════════════
-   4. GRIDS — شبكات البطاقات
+   4. GRIDS — Card grids
    ════════════════════════════════════════ */
 @media (max-width: 768px) {
   /* 2 أعمدة */
@@ -296,7 +296,7 @@ html { overflow-x: hidden; }
   .reg-role-grid      { grid-template-columns: 1fr 1fr !important; }
   .sup-stats          { grid-template-columns: 1fr 1fr !important; }
 
-  /* عمود واحد */
+  /* Column واحد */
   .ann-grid           { grid-template-columns: 1fr !important; }
   .ann-img            { display: none !important; }
   .charts-grid        { grid-template-columns: 1fr !important; gap: 14px !important; }
@@ -356,7 +356,7 @@ html { overflow-x: hidden; }
 
 
 /* ════════════════════════════════════════
-   6. FILTER & TOPBAR — أشرطة البحث
+   6. FILTER & TOPBAR — أشرطة الSearch
    ════════════════════════════════════════ */
 @media (max-width: 768px) {
   .topbar,
@@ -388,7 +388,7 @@ html { overflow-x: hidden; }
 
 
 /* ════════════════════════════════════════
-   7. CARDS — بطاقات عامة
+   7. CARDS — General cards
    ════════════════════════════════════════ */
 @media (max-width: 768px) {
   .path-card, .teacher-card, .ann-card,
@@ -468,7 +468,7 @@ html { overflow-x: hidden; }
 
 
 /* ════════════════════════════════════════
-   10. MODALS — نوافذ منبثقة
+   10. MODALS — Popup dialogs
    ════════════════════════════════════════ */
 @media (max-width: 768px) {
   .export-modal-box,
@@ -504,7 +504,7 @@ html { overflow-x: hidden; }
     -webkit-overflow-scrolling: touch !important;
     gap: 0 !important;
     border-radius: 0 !important;
-    /* إخفاء شريط التمرير بصرياً */
+    /* Hide شريط التمرير بصرياً */
     scrollbar-width: none !important;
   }
   .page-tabs::-webkit-scrollbar { display: none; }
@@ -563,7 +563,7 @@ html { overflow-x: hidden; }
 
   .profile-avatar { width: 68px !important; height: 68px !important; }
 
-  /* جدول المعلمة */
+  /* Teacher schedule */
   .sched-day-name   { font-size: 15px !important; }
   .sched-time-pill  { font-size: 13px !important; padding: 5px 11px !important; }
   .sched-note-text  { font-size: 13px !important; }
@@ -665,14 +665,14 @@ html { overflow-x: hidden; }
 @media (max-width: 768px) {
   html { scroll-behavior: smooth; }
 
-  /* أداء التمرير على الأجهزة المحمولة */
+  /* أداء التمرير on the أجهزة المحمولة */
   .stu-table-wrap,
   .table-wrapper,
   .table-wrap,
   .page-tabs,
   .msg-sidebar { will-change: transform; }
 
-  /* إلغاء hover effects على اللمس — يمنع التلبّد */
+  /* إلغاء hover effects on the لمس — يمنع التلبّد */
   @media (hover: none) {
     button:hover, .btn:hover, a:hover {
       transform: none !important;
@@ -697,6 +697,6 @@ html { overflow-x: hidden; }
   }
 }
 
-/* ===== شركاء الخير — مخفي على الموبايل (النافبار ضيق) ===== */
+/* ===== Khayr Partners — مخفي on Mobile (النافبار ضيق) ===== */
 @media (max-width: 991px) {
 }
