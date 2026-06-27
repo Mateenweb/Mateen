@@ -57,7 +57,7 @@ async function loadSchedule() {
     const slots = [];
     snap.forEach(d => slots.push({ id: d.id, ...d.data() }));
 
-    // رتّب حسب الأيام ثم الوقت
+    // رتّب حسب الأيام ثم اIfقت
     const byDay = {};
     DAYS_ORDER.forEach(d => byDay[d] = []);
     slots.forEach(s => { if (byDay[s.day]) byDay[s.day].push(s); });
