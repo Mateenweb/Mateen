@@ -26,25 +26,14 @@ window.doLogout = () => signOut(auth).then(() => window.location.href = '../html
 
 function loadData() {
   const mateenQuery = query(collection(db,'users'), where('role','==','mateen'), orderBy('createdAt','desc'));
-  onSnapshot(mateenQuery, async snap => {
+  onSnapshot(mateenQuery, snap => {
     const all     = snap.docs.map(d=>({id:d.id,...d.data()}));
     const pending = all.filter(u=>u.status==='pending');
     const active  = all.filter(u=>u.status==='active');
+    // كل Studentات بغض النظر عن الحالة
     document.getElementById('sPending').textContent = pending.length;
     document.getElementById('sActive').textContent  = active.length;
     document.getElementById('sTotal').textContent   = all.length;
-
-    // جيب students وابني map: userId -> studentId
-    const stuSnap = await getDocs(collection(db,'students'));
-    window._studentLinkMap = {}; // userId -> {studentId, name}
-    stuSnap.forEach(d => {
-      const s = d.data();
-      if (s.userId) window._studentLinkMap[s.userId] = { studentId: d.id, name: s.name||s.fullName||d.id };
-    });
-    window._allStudentsUnlinked = stuSnap.docs
-      .filter(d => !d.data().userId)
-      .map(d => ({ id: d.id, name: d.data().name||d.data().fullName||d.id }));
-
     window._allStudents = all;
     renderPending(pending);
     renderAll(all);
@@ -112,36 +101,14 @@ function renderAll(list) {
             ${u.phone ? `<div><i class="ti ti-phone" style="margin-left:4px;"></i>${esc(u.phone)}</div>` : ''}
             ${u.year  ? `<div><i class="ti ti-calendar" style="margin-left:4px;"></i>${esc(u.year)}</div>` : ''}
           </div>
-          <!-- بادج الربط -->
-          <div style="padding:6px 16px 0;font-size:12px;">
-            ${(window._studentLinkMap||{})[u.id]
-              ? `<span style="color:#2e7d32;background:#e8f5e9;padding:3px 8px;border-radius:8px;font-size:11px;">
-                   ✅ مرتبطة بـ: ${(window._studentLinkMap[u.id]||{}).name||''}
-                 </span>`
-              : `<span style="color:#b45309;background:#fef3c7;padding:3px 8px;border-radius:8px;font-size:11px;">
-                   🔗 غير مرتبطة
-                 </span>`
-            }
-          </div>
           <!-- Buttons -->
-          <div style="padding:10px 16px;border-top:1px solid var(--border);display:flex;gap:8px;flex-wrap:wrap;">
+          <div style="padding:10px 16px;border-top:1px solid var(--border);display:flex;gap:8px;">
             <a href="student.html?id=${u.id}"
                style="flex:1;padding:8px;background:var(--green-dark);color:white;border:none;border-radius:8px;
                       font-family:inherit;font-size:12px;cursor:pointer;text-align:center;text-decoration:none;
                       display:flex;align-items:center;justify-content:center;gap:4px;">
               <i class="ti ti-user"></i> الملف والغياب
             </a>
-            ${!(window._studentLinkMap||{})[u.id] ? `
-            <button onclick="openLinkModal('${u.id}')"
-               style="padding:8px 12px;border-radius:8px;font-family:inherit;font-size:12px;cursor:pointer;
-                      border:1px solid var(--gold);background:transparent;color:var(--gold);">
-              <i class="ti ti-link"></i> ربط
-            </button>` : `
-            <button onclick="unlinkStudent('${u.id}')"
-               style="padding:8px 12px;border-radius:8px;font-family:inherit;font-size:12px;cursor:pointer;
-                      border:1px solid #9ca3af;background:transparent;color:#9ca3af;">
-              <i class="ti ti-unlink"></i> فك
-            </button>`}
             <button onclick="suspendUser('${u.id}','${u.status}')"
                style="padding:8px 12px;border-radius:8px;font-family:inherit;font-size:12px;cursor:pointer;
                       border:1px solid ${u.status==='suspended'?'var(--green-dark)':'#c0392b'};
@@ -197,38 +164,6 @@ window.approveUser = async id => {
     }
   };
   document.getElementById('linkStudentModal').classList.add('show');
-};
-
-window.openLinkModal = async (userId) => {
-  _pendingApproveId = userId;
-  const unlinked = window._allStudentsUnlinked || [];
-  const sel = document.getElementById('linkStudentSelect');
-  sel.innerHTML = '<option value="">— اختاري ملف الطالبة —</option>';
-  unlinked.forEach(s => {
-    const opt = document.createElement('option');
-    opt.value = s.id;
-    opt.textContent = s.name;
-    sel.appendChild(opt);
-  });
-  sel.onchange = () => {
-    const prev = document.getElementById('linkStudentPreview');
-    prev.style.display = sel.value ? 'block' : 'none';
-    if (sel.value) {
-      const chosen = unlinked.find(s=>s.id===sel.value);
-      prev.innerHTML = chosen ? `<b>${chosen.name}</b>` : '';
-    }
-  };
-  document.getElementById('linkStudentPreview').style.display = 'none';
-  document.getElementById('linkStudentModal').classList.add('show');
-};
-
-window.unlinkStudent = async (userId) => {
-  if (!confirm('فك الربط بين هذا الحساب وملف الطالبة؟')) return;
-  const map = window._studentLinkMap || {};
-  const link = map[userId];
-  if (!link) return;
-  await updateDoc(doc(db,'students',link.studentId), { userId: '' });
-  showToast('تم فك الربط');
 };
 
 window.confirmApprove = async (doLink) => {
@@ -543,17 +478,45 @@ window.closeNotesModal = (e) => {
 
 
 // ══════════════════════════════════════════════════════════════
-//  قاعدة بيانات Studentات — نفس Admin (قراءة only للnot/don'tرفة)
+//  قاعدة بيانات الطالبات — نسخة كاملة (تعديل + إضافة + حذف)
 // ══════════════════════════════════════════════════════════════
 let allStudents = [];
 let stuSortAlpha = false;
+let stuDateParts = {};
 
 const MONTHS_HIJRI = ['محرم','صفر','ربيع الأول','ربيع الثاني','جمادى الأولى','جمادى الثانية','رجب','شعبان','رمضان','شوال','ذو القعدة','ذو الحجة'];
 const YEARS_HIJRI  = Array.from({length:11},(_,i)=>1442+i);
 
+function hijriToGregorian(hd,hm,hy) {
+  hd=parseInt(hd); hm=parseInt(hm); hy=parseInt(hy);
+  if(!hd||!hm||!hy) return null;
+  const jdn = Math.floor((11*hy+3)/30)+354*hy+30*hm-Math.floor((hm-1)/2)+hd+1948440-385;
+  let l=jdn+68569;
+  const n=Math.floor((4*l)/146097);
+  l=l-Math.floor((146097*n+3)/4);
+  const ii=Math.floor((4000*(l+1))/1461001);
+  l=l-Math.floor((1461*ii)/4)+31;
+  const j=Math.floor((80*l)/2447);
+  const day=l-Math.floor((2447*j)/80);
+  l=Math.floor(j/11);
+  const month=j+2-12*l;
+  const year=100*(n-49)+ii+l;
+  return {d:String(day).padStart(2,'0'),m:String(month).padStart(2,'0'),y:String(year)};
+}
+
+function parseDateParts(s){if(!s)return{d:'',m:'',y:''};const[d,m,y]=s.split('-');return{d:d||'',m:m||'',y:y||''};}
+
 function makeDatePicker(sid, dateStr) {
-  if (!dateStr) return '—';
-  return dateStr.replace(/-/g, '/');
+  const {d,m,y}=parseDateParts(dateStr||'');
+  const days=Array.from({length:30},(_,i)=>i+1);
+  const dayOpts=days.map(n=>{const v=String(n).padStart(2,'0');return`<option value="${v}"${d===v?' selected':''}>${n}</option>`;}).join('');
+  const monthOpts=MONTHS_HIJRI.map((mn,i)=>{const v=String(i+1).padStart(2,'0');return`<option value="${v}"${m===v?' selected':''}>${mn}</option>`;}).join('');
+  const yearOpts=YEARS_HIJRI.map(yr=>`<option value="${yr}"${y===String(yr)?' selected':''}>${yr}</option>`).join('');
+  return `<div class="arabic-date">
+    <select class="date-day-sel" onchange="stuUpdateDatePart('${sid}','hd',this.value)"><option value="">يوم</option>${dayOpts}</select>
+    <select class="date-month-sel" onchange="stuUpdateDatePart('${sid}','hm',this.value)"><option value="">شهر</option>${monthOpts}</select>
+    <select class="date-year-sel" onchange="stuUpdateDatePart('${sid}','hy',this.value)"><option value="">سنة</option>${yearOpts}</select>
+  </div>`;
 }
 
 const stuQuery2 = query(collection(db,'students'), orderBy('order'));
@@ -561,6 +524,10 @@ onSnapshot(stuQuery2, snap => {
   allStudents = snap.docs.map(d=>({id:d.id,...d.data()}));
   renderStudents(allStudents);
   updateStuStats(allStudents);
+  // تحديث قائمة الغير مرتبطين لـ modal الربط
+  window._allStudentsUnlinked = snap.docs
+    .filter(d => !d.data().userId)
+    .map(d => ({ id: d.id, name: d.data().name||d.data().fullName||d.id }));
 });
 
 function updateStuStats(list) {
@@ -598,61 +565,133 @@ window.selectAllRows = (checked) => {
 };
 
 function renderStudents(list) {
-  const tb = document.getElementById('stuTableBody');
+  const tb   = document.getElementById('stuTableBody');
   if (!tb) return;
+  const isMob = window.innerWidth <= 640;
+
   if (!list.length) {
     tb.innerHTML = `<tr><td colspan="9" class="empty-state"><i class="ti ti-inbox"></i>لا توجد طالبات</td></tr>`;
     return;
   }
-  const isMob = window.innerWidth <= 640;
+
   if (isMob) {
     const wrap = document.getElementById('stu-cards-wrap');
     if (wrap) {
-      wrap.innerHTML = list.map(s => {
-        const intLabel = s.interview==='done'?'✅ تمت':'⏳ لم تتم';
-        let accLabel = '— لم يحدد';
-        if(s.accepted==='accepted') accLabel='✔️ مقبولة';
-        if(s.accepted==='rejected') accLabel='✖️ مرفوضة';
-        const statusLabel = s.status==='mateen'?'📖 بنات متين':s.status==='new'?'✨ مستجدة':'';
+      wrap.innerHTML = list.map((s, i) => {
+        const intClass = s.interview === 'done' ? 'btn-done' : 'btn-pending';
+        const intLabel = s.interview === 'done' ? '✅ تمت' : '⏳ لم تتم';
+        let accClass = 'btn-na', accLabel = '— لم يحدد';
+        if (s.accepted === 'accepted') { accClass = 'btn-accepted'; accLabel = '✔️ مقبولة'; }
+        if (s.accepted === 'rejected') { accClass = 'btn-rejected'; accLabel = '✖️ مرفوضة'; }
+        const statusLabel = s.status === 'mateen' ? '📖 بنات متين' : s.status === 'new' ? '✨ مستجدة' : '';
+        const dayTime = [s.day, s.hour ? `${s.hour} ${s.ampm || ''}` : ''].filter(Boolean).join(' — ');
+        const dateDisplay = s.dateH ? s.dateH.replace(/-/g, '/') : '';
         return `<div class="stu-mob-card">
           <div class="stu-mob-top">
             <div class="stu-mob-name">
               <a class="btn-stu-link" href="student.html?id=${s.id}" target="_blank">👤</a>
-              <span style="font-weight:600">${esc(s.name||'—')}</span>
+              <input type="text" value="${esc(s.name || '')}"
+                oninput="stuAutoName('${s.id}', this.value)"
+                class="stu-mob-name-input"/>
             </div>
-            ${statusLabel ? `<span class="stu-mob-badge">${statusLabel}</span>` : ''}
+            <button class="btn-del-stu" onclick="stuDelete('${s.id}')" title="حذف">
+              <i class="ti ti-trash"></i>
+            </button>
           </div>
-          <div class="stu-mob-row"><span class="stu-mob-label">📅 اليوم</span><span>${s.day||'—'}</span></div>
-          <div class="stu-mob-row"><span class="stu-mob-label">🕐 الوقت</span><span>${s.hour?s.hour+' '+s.ampm:'—'}</span></div>
-          <div class="stu-mob-row"><span class="stu-mob-label">📋 المقابلة</span><span>${intLabel}</span></div>
-          <div class="stu-mob-row"><span class="stu-mob-label">📊 القبول</span><span>${accLabel}</span></div>
+          <div class="stu-mob-row">
+            <select class="stu-mob-sel" onchange="stuField('${s.id}','status',this.value)">
+              <option value=""${!s.status ? ' selected' : ''}>🏷️ التصنيف</option>
+              <option value="mateen"${s.status === 'mateen' ? ' selected' : ''}>📖 بنات متين</option>
+              <option value="new"${s.status === 'new' ? ' selected' : ''}>✨ مستجدات</option>
+            </select>
+            ${s.status ? `<span class="stu-mob-badge">${statusLabel}</span>` : ''}
+          </div>
+          <div class="stu-mob-row">
+            <span class="stu-mob-label">📅 اليوم</span>
+            <select class="stu-mob-sel" onchange="stuField('${s.id}','day',this.value)">
+              <option value="">— اليوم —</option>
+              ${['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'].map(d => `<option${s.day === d ? ' selected' : ''}>${d}</option>`).join('')}
+            </select>
+          </div>
+          <div class="stu-mob-row">
+            <span class="stu-mob-label">📅 التاريخ</span>
+            ${makeDatePicker(s.id, s.dateH)}
+          </div>
+          <div class="stu-mob-row">
+            <span class="stu-mob-label">🕐 الوقت</span>
+            <select class="stu-mob-sel" onchange="stuField('${s.id}','hour',this.value)" style="width:60px">
+              <option value="">—</option>
+              ${[1,2,3,4,5,6,7,8,9,10,11,12].map(h => `<option${s.hour == h ? ' selected' : ''}>${h}</option>`).join('')}
+            </select>
+            <select class="stu-mob-sel" onchange="stuField('${s.id}','ampm',this.value)" style="width:80px">
+              <option value="ص"${s.ampm === 'ص' ? ' selected' : ''}>صباحاً</option>
+              <option value="م"${s.ampm === 'م' ? ' selected' : ''}>مساءً</option>
+            </select>
+          </div>
+          ${s.status === 'new' ? `<div class="stu-mob-row">
+            <span class="stu-mob-label">📊 الدرجة</span>
+            <input type="number" min="0" max="100" value="${s.placementScore ?? ''}"
+              placeholder="0" class="stu-mob-score"
+              onchange="stuField('${s.id}','placementScore',this.value===''?null:Number(this.value))">
+            <span style="font-size:12px;color:#999">/ 100</span>
+          </div>` : ''}
+          <div class="stu-mob-actions">
+            <button class="btn-interview ${intClass}" onclick="stuToggleInterview('${s.id}','${s.interview}')">${intLabel}</button>
+            <button class="btn-accept ${accClass}" onclick="stuToggleAccept('${s.id}','${s.accepted}','${s.interview}')">${accLabel}</button>
+          </div>
         </div>`;
       }).join('');
     }
     tb.innerHTML = '';
     return;
   }
-  tb.innerHTML = list.map((s,i) => {
+
+  tb.innerHTML = list.map((s, i) => {
     const intClass = s.interview==='done'?'btn-done':'btn-pending';
     const intLabel = s.interview==='done'?'✅ تمت':'⏳ لم تتم';
     let accClass='btn-na', accLabel='— لم يحدد';
     if(s.accepted==='accepted'){accClass='btn-accepted';accLabel='✔️ مقبولة';}
     if(s.accepted==='rejected'){accClass='btn-rejected';accLabel='✖️ مرفوضة';}
-    const statusLabel = s.status==='mateen'?'📖 بنات متين':s.status==='new'?'✨ مستجدات':'';
+    const statusSel = `<select class="status-sel" onchange="stuField('${s.id}','status',this.value)">
+      <option value=""${!s.status?' selected':''}>🏷️ التصنيف</option>
+      <option value="mateen"${s.status==='mateen'?' selected':''}>📖 بنات متين</option>
+      <option value="new"${s.status==='new'?' selected':''}>✨ المستجدات</option>
+    </select>`;
+    const daySel=`<select class="day-sel" onchange="stuField('${s.id}','day',this.value)">
+      <option value="">-اليوم-</option>
+      ${['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'].map(d=>`<option${s.day===d?' selected':''}>${d}</option>`).join('')}
+    </select>`;
+    const timeSel=`<div class="time-cell">
+      <select class="time-hour" onchange="stuField('${s.id}','hour',this.value)">
+        <option value="">-</option>${[1,2,3,4,5,6,7,8,9,10,11,12].map(h=>`<option${s.hour==h?' selected':''}>${h}</option>`).join('')}
+      </select>:
+      <select class="time-ampm" onchange="stuField('${s.id}','ampm',this.value)">
+        <option value="ص"${s.ampm==='ص'?' selected':''}>صباحاً</option>
+        <option value="م"${s.ampm==='م'?' selected':''}>مساءً</option>
+      </select>
+    </div>`;
+    const placementCell = s.status === 'new'
+      ? `<div class="placement-wrap">
+           <input type="number" class="placement-input" min="0" max="100"
+             value="${s.placementScore ?? ''}" placeholder="الدرجة"
+             onchange="stuField('${s.id}','placementScore',this.value===''?null:Number(this.value))">
+           <span class="placement-unit">/ 100</span>
+         </div>`
+      : `<span style="color:var(--text-mid);font-size:12px">—</span>`;
     return `<tr>
-      <td><input type="checkbox" class="row-check" data-id="${s.id}"></td>
+      <td><input type="checkbox" class="row-check" data-id="${s.id}" onchange="onRowCheck()"></td>
       <td style="color:var(--text-mid);font-size:12px">${i+1}</td>
       <td><div class="stu-name-cell">
-        <a class="btn-stu-link" href="student.html?id=${s.id}" target="_blank"><i class="ti ti-user"></i></a>
-        <span class="stu-name-text">${esc(s.name||'—')}</span>
+        <a class="btn-stu-link" href="student.html?id=${s.id}" target="_blank" title="صفحة الطالبة">👤</a>
+        <input type="text" value="${esc(s.name||'')}" oninput="stuAutoName('${s.id}',this.value)" style="min-width:100px">
+        ${statusSel}
       </div></td>
-      <td>${statusLabel?`<span class="status-badge">${statusLabel}</span>`:'<span style="color:var(--text-mid)">—</span>'}</td>
-      <td>${s.day||'—'}<br><small style="color:var(--text-mid)">${s.dateH?s.dateH.replace(/-/g,'/'):'—'}</small></td>
-      <td>${s.hour?s.hour+' '+s.ampm:'—'}</td>
-      <td><span class="btn-interview ${intClass}">${intLabel}</span></td>
-      <td><span class="btn-accept ${accClass}">${accLabel}</span></td>
-      <td>${s.placementScore!=null?s.placementScore+'/100':'—'}</td>
-      <td><span class="level-badge">${s.level||'—'}</span></td>
+      <td><div style="display:flex;flex-direction:column;gap:4px">${daySel}${makeDatePicker(s.id,s.dateH)}</div></td>
+      <td>${timeSel}</td>
+      <td><button class="btn-interview ${intClass}" onclick="stuToggleInterview('${s.id}','${s.interview}')">${intLabel}</button></td>
+      <td><button class="btn-accept ${accClass}" onclick="stuToggleAccept('${s.id}','${s.accepted}','${s.interview}')">${accLabel}</button></td>
+      <td>${placementCell}</td>
+      <td><button class="btn-del-stu" onclick="stuDelete('${s.id}')" title="حذف"><i class="ti ti-trash"></i></button></td>
     </tr>`;
   }).join('');
 }
@@ -683,4 +722,91 @@ window.doExport = async (type) => {
 window.doAttExport = async () => {
   showToast('ميزة تصدير الحضور والغياب قيد التطوير قريباً');
   window.closeAttModal();
+};
+
+// ── Student CRUD ──────────────────────────────────────────────
+const stuDefault = () => ({order:Date.now(), name:'طالبة جديدة', status:'', day:'', dateH:'', dateG:'', hour:'', minute:'00', ampm:'ص', interview:'pending', accepted:'na'});
+
+window.addStudentRow = async () => { await addDoc(collection(db,'students'), stuDefault()); };
+
+window.addBulkNames = async () => {
+  const txt = document.getElementById('bulkNames').value;
+  if(!txt.trim()) return;
+  const names = txt.split('\n').filter(n=>n.trim());
+  for(let i=0;i<names.length;i++) await addDoc(collection(db,'students'),{...stuDefault(),order:Date.now()+i,name:names[i].trim()});
+  document.getElementById('bulkNames').value='';
+  showToast('✓ تمت إضافة الأسماء');
+};
+
+window.stuAutoName = async (id,v) => updateDoc(doc(db,'students',id),{name:v});
+window.stuField    = async (id,f,v) => updateDoc(doc(db,'students',id),{[f]:v});
+
+window.stuUpdateDatePart = async (id,key,value) => {
+  const s = allStudents.find(s=>s.id===id)||{};
+  if(!stuDateParts[id]) stuDateParts[id]=parseDateParts(s.dateH||'');
+  const pk={hd:'d',hm:'m',hy:'y'}[key];
+  if(pk) stuDateParts[id][pk]=value;
+  const {d,m,y}=stuDateParts[id];
+  const up={dateH:`${d}-${m}-${y}`};
+  if(d&&m&&y){const gr=hijriToGregorian(d,m,y);if(gr)up.dateG=`${gr.d}-${gr.m}-${gr.y}`;}
+  await updateDoc(doc(db,'students',id),up);
+};
+
+window.stuToggleInterview = async (id,cur) => updateDoc(doc(db,'students',id),{interview:cur==='done'?'pending':'done'});
+
+window.stuToggleAccept = async (id,cur,interview) => {
+  if(interview!=='done'){showToast('يجب إجراء المقابلة أولاً','err');return;}
+  const order=['na','accepted','rejected'];
+  await updateDoc(doc(db,'students',id),{accepted:order[(order.indexOf(cur)+1)%3]});
+};
+
+window.stuDelete = async id => {
+  if(!confirm('حذف الطالبة وكل بياناتها نهائياً؟')) return;
+  await deleteDoc(doc(db,'students',id));
+  showToast('تم الحذف');
+};
+
+window.toggleSelectAll = checked => {
+  document.querySelectorAll('.row-check').forEach(cb=>{
+    cb.checked=checked;
+    cb.closest('tr').classList.toggle('selected-row',checked);
+  });
+  const cnt = document.getElementById('selectedCount');
+  if(cnt) cnt.textContent=(checked?document.querySelectorAll('.row-check').length:0)+' محددة';
+};
+
+window.onRowCheck = () => {
+  const checked=document.querySelectorAll('.row-check:checked');
+  const cnt = document.getElementById('selectedCount');
+  if(cnt) cnt.textContent=checked.length+' محددة';
+  document.querySelectorAll('.row-check').forEach(cb=>cb.closest('tr').classList.toggle('selected-row',cb.checked));
+};
+
+window.applyBulkDateTime = async () => {
+  const checked=document.querySelectorAll('.row-check:checked');
+  if(!checked.length){showToast('اختاري طالبات أولاً','err');return;}
+  const day=document.getElementById('bulkDay').value;
+  const dd=String(document.getElementById('bulkDD').value||'').padStart(2,'0');
+  const mm=document.getElementById('bulkMM').value;
+  const yy=document.getElementById('bulkYY').value;
+  const hour=document.getElementById('bulkHour').value;
+  const ampm=document.getElementById('bulkAmpm').value;
+  const up={};
+  if(day) up.day=day;
+  if(dd&&mm&&yy){up.dateH=`${dd}-${mm}-${yy}`;const gr=hijriToGregorian(dd,mm,yy);if(gr)up.dateG=`${gr.d}-${gr.m}-${gr.y}`;}
+  if(hour) up.hour=hour;
+  if(ampm) up.ampm=ampm;
+  if(!Object.keys(up).length){showToast('حددي بيانات للتطبيق','err');return;}
+  for(const cb of checked) await updateDoc(doc(db,'students',cb.dataset.id),up);
+  showToast(`✓ تم التطبيق على ${checked.length} طالبة`);
+  toggleSelectAll(false);
+};
+
+// زر إضافة طالبة في الهيدر
+document.getElementById('btnAddStudent')?.addEventListener('click', () => window.addStudentRow());
+
+// ── Bulk Grade Modal ──────────────────────────────────────────
+window.openBulkGradeModal = () => {
+  const modal = document.getElementById('bulkGradeModal');
+  if(modal) modal.style.display='flex';
 };
