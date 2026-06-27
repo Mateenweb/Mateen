@@ -133,7 +133,62 @@ window.filterSup = () => {
 };
 
 const ALL_SUBJECTS = ['التفسير', 'الفقه', 'العقيدة', 'الحديث', 'مقرأة متين'];
-window.approveUser = async id => { await updateDoc(doc(db,'users',id),{status:'active', enrolledSubjects: ALL_SUBJECTS}); showToast('✓ تم قبول الحساب والتحاقها بكل المواد'); };
+// ── ربط الطالبة عند القبول ──────────────────────────────────────
+let _pendingApproveId = null;
+
+window.approveUser = async id => {
+  _pendingApproveId = id;
+  // جيب الطلاب الغير مرتبطين
+  const snap = await getDocs(collection(db,'students'));
+  const sel = document.getElementById('linkStudentSelect');
+  sel.innerHTML = '<option value="">— بدون ربط —</option>';
+  snap.forEach(d => {
+    const s = d.data();
+    if (!s.userId) { // فقط الغير مرتبطين
+      const opt = document.createElement('option');
+      opt.value = d.id;
+      opt.textContent = s.name || s.fullName || d.id;
+      sel.appendChild(opt);
+    }
+  });
+  // preview عند الاختيار
+  sel.onchange = () => {
+    const prev = document.getElementById('linkStudentPreview');
+    if (!sel.value) { prev.style.display='none'; return; }
+    const chosen = snap.docs.find(d=>d.id===sel.value)?.data();
+    if (chosen) {
+      prev.style.display='block';
+      prev.innerHTML = `<b>${chosen.name||chosen.fullName||''}</b><br>
+        ${chosen.group ? '👥 ' + chosen.group + '<br>' : ''}
+        ${chosen.phone ? '📞 ' + chosen.phone : ''}`;
+    }
+  };
+  document.getElementById('linkStudentModal').classList.add('show');
+};
+
+window.confirmApprove = async (doLink) => {
+  const id = _pendingApproveId;
+  if (!id) return;
+  const modal = document.getElementById('linkStudentModal');
+  modal.classList.remove('show');
+
+  // فعّل الحساب
+  await updateDoc(doc(db,'users',id), {status:'active', enrolledSubjects: ALL_SUBJECTS});
+
+  // ربط اختياري
+  if (doLink) {
+    const studentId = document.getElementById('linkStudentSelect').value;
+    if (studentId) {
+      await updateDoc(doc(db,'students',studentId), { userId: id });
+      showToast('✓ تم القبول وربط الملف بنجاح');
+    } else {
+      showToast('✓ تم القبول (لم يتم اختيار ملف للربط)');
+    }
+  } else {
+    showToast('✓ تم قبول الحساب بدون ربط');
+  }
+  _pendingApproveId = null;
+};
 window.rejectUser  = async id => { if(!confirm('رفض الحساب وحذفه؟')) return; await fullDeleteUser(id); showToast('تم الرفض'); };
 window.suspendUser = async (id,cur) => {
   const ns = cur==='suspended' ? 'active' : 'suspended';
