@@ -176,7 +176,7 @@ let isAdmin = false;
 
 onAuthStateChanged(auth, async user => {
   if (!user) return;
-  // حدّث lastSeen عشان يصفّر كونتر الأخبار
+  // حدّث lastSeen So that يRowّر كونتر الNews
   localStorage.setItem(`news_last_seen_${user.uid}`, Date.now().toString());
   const { getDoc } = await import("https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js");
   const snap = await getDoc(doc(db, 'users', user.uid));
@@ -188,7 +188,7 @@ onAuthStateChanged(auth, async user => {
   }
 });
 
-// تحميل الأخبار
+// Load الNews
 const q = query(collection(db, 'news'), orderBy('createdAt', 'desc'));
 onSnapshot(q, snap => {
   document.getElementById('newsLoading').classList.add('hidden');
@@ -201,11 +201,11 @@ onSnapshot(q, snap => {
   }
 
   document.getElementById('newsEmpty').classList.add('hidden');
-  // فلتر الأخبار حسب الـ visibility - الأخبار بدون visibility تعتبر للمسجلات
+  // فلتر الNews حسب الـ visibility - الNews بدون visibility تعتبر للمسجلات
   const visibleDocs = snap.docs.filter(d => {
     const v = d.data().visibility;
-    if (!v || v === 'members') return true; // للمسجلات - وهنا في الصفحة المسجلة
-    return true; // public كمان تظهر
+    if (!v || v === 'members') return true; // للمسجلات - وHere في Page المسجلة
+    return true; // public also تظهر
   });
   list.innerHTML = visibleDocs.map(d => {
     const n = d.data();
