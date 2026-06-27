@@ -275,11 +275,11 @@ onAuthStateChanged(auth, async user => {
       document.getElementById('subjectName').textContent    = subjectAr;
     }
 
-    // جلب الطالبات
+    // جلب Studentات
     const snap    = await getDocs(query(collection(db, 'users'), where('role', '==', 'mateen')));
     let   allDocs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
 
-    // المعلمة: فلتر على مادتها فقط
+    // Teacher (f): فلتر على مادتها only
     if (role === 'teacher' && subjectAr) {
       allDocs = allDocs.filter(s =>
         Array.isArray(s.enrolledSubjects) && s.enrolledSubjects.includes(subjectAr)
@@ -288,7 +288,7 @@ onAuthStateChanged(auth, async user => {
 
     allStudents = allDocs;
 
-    // إخفاء loading وإظهار باقي العناصر
+    // Hide loading وShow باقي العناصر
     hide('loadingState');
     document.getElementById('searchInput').style.display = 'block';
     document.getElementById('pageSub').innerHTML =
