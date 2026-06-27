@@ -12,12 +12,12 @@ const auth = getAuth(app);
 const db   = getFirestore(app);
 
 let currentRole = null;
-let allLibMats  = [];   // مكتبة متين (من materials collection)
+let allLibMats  = [];   // Library متين (من materials collection)
 let allLibExtra = {};   // الأقسام الأخرى { enrichment:[], podcast:[], courses:[] }
 
 const isAdmin = () => currentRole === 'admin' || currentRole === 'supervisor';
 
-// ══ أيقونات الأنواع ══
+// ══ أيقونات اBecauseواع ══
 const TYPE_ICONS = { 'فيديو':'🎬','ملف PDF':'📄','مقال':'📝','حلقة صوتية':'🎙️','دورة':'🎓','أخرى':'📎' };
 
 // ══ رسم كارد ══
@@ -48,7 +48,7 @@ function cardHTML(item, section) {
     </div>`;
 }
 
-// ══ رسم مكتبة متين ══
+// ══ رسم Library متين ══
 window.renderLibMats = () => {
   const grid = document.getElementById('libMatsGrid');
   if (!grid) return;
@@ -80,7 +80,7 @@ function renderSection(section) {
 
 // ══ مستمعات Firestore ══
 
-// 1. مكتبة متين — من materials collection
+// 1. Library متين — من materials collection
 onSnapshot(query(collection(db, 'materials'), orderBy('addedAt', 'desc')), snap => {
   allLibMats = snap.docs.map(d => ({ id: d.id, ...d.data() }));
   window.renderLibMats();
@@ -107,7 +107,7 @@ onAuthStateChanged(auth, async user => {
   ['enrichment', 'podcast', 'courses'].forEach(renderSection);
 });
 
-// ══ إضافة محتوى ══
+// ══ Add Content ══
 window.submitAddLib = async () => {
   const section = document.getElementById('addLibSection').value;
   const title   = document.getElementById('addLibTitle').value.trim();
@@ -122,7 +122,7 @@ window.submitAddLib = async () => {
   btn.disabled = true; btn.innerHTML = '<i class="ti ti-loader"></i> جاري الإضافة...';
 
   try {
-    // مكتبة متين تتضاف في materials
+    // Library متين تتضاف في materials
     if (section === 'mateen-lib') {
       await addDoc(collection(db, 'materials'), { title, type, url, notes, course: window.currentLibFilter === 'all' ? '' : window.currentLibFilter, addedAt: Date.now() });
     } else {
@@ -135,7 +135,7 @@ window.submitAddLib = async () => {
   btn.disabled = false; btn.innerHTML = '<i class="ti ti-plus"></i> إضافة';
 };
 
-// ══ تعديل ══
+// ══ Edit ══
 const editCache = {};
 window.openEditLib = async (id, section) => {
   let item = [...allLibMats, ...(allLibExtra.enrichment||[]), ...(allLibExtra.podcast||[]), ...(allLibExtra.courses||[])].find(m => m.id === id);
@@ -173,7 +173,7 @@ window.submitEditLib = async () => {
   btn.disabled = false; btn.innerHTML = '<i class="ti ti-device-floppy"></i> حفظ';
 };
 
-// ══ حذف ══
+// ══ Delete ══
 const deleteCache = {};
 window.openDeleteLib = (id, title, section) => {
   deleteCache.id      = id;
