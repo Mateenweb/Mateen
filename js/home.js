@@ -1,8 +1,8 @@
 // ═══════════════════════════════════════════════════════════════
-//  home.js — ملف مدمج لكل منطق home.html
+//  home.js — File مدمج لكل منطق home.html
 //  (كان مقسّم على: home-1.js, home-2.js, home-3.js, home-4.js, home-msg.js)
 //  تم الدمج لتقليل عدد network requests وتكرار onAuthStateChanged
-//  كل الشروط والمنطق محفوظة بالضبط كما كانت في الملفات الأصلية.
+//  كل الشروط  and the منطق محفوظة بالضبط كما كانت in the Fileات الأصلية.
 // ═══════════════════════════════════════════════════════════════
 
 import { initializeApp, getApps, getApp }
@@ -22,7 +22,7 @@ const db   = getFirestore(app);
 /* ═══════════════════════════════════════════════════════════════
    مستمع واحد موحّد لـ onAuthStateChanged
    (كان فيه 4 مستمعات منفصلة في home-1 + home-2 + home-msg×2)
-   notifications.js له مستمعه الخاص لأنه ملف مشترك بين 23 صفحة
+   notifications.js له مستمعه الخاص Becauseه File not/don'tترك بين 23 Page
    ═══════════════════════════════════════════════════════════════ */
 
 // ── Onboarding ─────────────────────────────────────────────────────────────
@@ -54,7 +54,7 @@ function showOnboarding() {
 
 window.closeOnboarding = () => {
   document.getElementById('onboardingModal')?.remove();
-  // أظهر الأزرار في السايدبار
+  // أظهر Buttons في Sidebar
   showSidebarSetup();
 };
 
@@ -71,7 +71,7 @@ function showSidebarSetup() {
         <i class="ti ti-download"></i> تثبيت التطبيق
       </button>
     </div>`;
-  // لو الإشعارات مفعلة بالفعل
+  // If الNotificationات مفعلة بالفعل
   if (Notification.permission === 'granted') {
     const btn = document.getElementById('sb-notif-btn');
     if (btn) { btn.innerHTML = '<i class="ti ti-check"></i> الإشعارات مفعّلة'; btn.disabled = true; }
@@ -128,13 +128,13 @@ function showLoginPrompt() {
 onAuthStateChanged(auth, async user => {
 
   /* ───────────────────────────────────────────────────────────
-     [من home-1.js] — السايدبار، الروابط حسب الدور، تسجيل الخروج
+     [من home-1.js] — Sidebar، الروابط حسب Role، Logout
      ─────────────────────────────────────────────────────────── */
   const guest   = document.getElementById('sidebar-guest');
   const userDiv = document.getElementById('sidebar-user');
   const layout  = document.querySelector('.page-layout');
 
-  // إخفاء شاشة "جاري التحقق..." فوراً بعد ما Firebase يحدد حالة المستخدم
+  // Hide Screen "جاري Validation..." فوراً بعد ما Firebase يحدد حالة User
   const sidebarLoading = document.getElementById('sidebar-loading');
   if (sidebarLoading) sidebarLoading.style.display = 'none';
 
@@ -171,36 +171,36 @@ onAuthStateChanged(auth, async user => {
 
   if (layout) layout.classList.remove('guest-layout');
 
-  // إخفاء زراير الـ hero لما تسجل دخول
+  // Hide زراير the hero When تسجل دخول
   const heroBtns = document.getElementById('heroBtns');
   if (heroBtns) { heroBtns.classList.remove('d-flex','d-lg-flex'); heroBtns.classList.add('d-none'); }
 
-  // إخفاء زراير الـ navbar
+  // Hide زراير the navbar
   const navBtns = document.getElementById('navBtns');
   if (navBtns) { navBtns.classList.remove('d-flex','d-lg-flex'); navBtns.classList.add('d-none'); }
   const mobNavBtns = document.getElementById('mobNavBtns');
   if (mobNavBtns) { mobNavBtns.classList.remove('d-flex','d-lg-flex'); mobNavBtns.classList.add('d-none'); }
 
-  // إظهار navUserActions (أيقونة البروفايل + رسائلي)
+  // Show navUserActions (أيقونة الProfile + Messagesي)
   const navUserActions = document.getElementById('navUserActions');
   if (navUserActions) { navUserActions.classList.remove('d-none'); navUserActions.classList.add('d-flex'); }
 
-  // إظهار زرار "رسائلي" في النافبار
+  // Show Button "Messagesي" in the نافبار
   const navMsgBtn = document.getElementById('navMsgBtn');
   if (navMsgBtn) navMsgBtn.classList.remove('d-none');
 
-  // مسجلة دخول — اجلب بيانات المستخدمة
+  // مسجلة دخول — اجلب بيانات Userة
   if (guest)   guest.classList.add('d-none');
   if (userDiv) { userDiv.classList.remove('sidebar-user-hidden'); userDiv.classList.add('show-user'); }
 
-  // إخفاء كل الروابط الخاصة فوراً — قبل ما نعرف الدور
+  // Hide كل الروابط الspecific فوراً — قبل ما نعرف Role
   ['profileLink','linkCerts','linkAwards','linkGrades','linkSchedule',
    'linkAdmin','linkNews','linkTeacher'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.classList.add('d-none');
   });
 
-  // تفعيل إشعارات الموقع
+  // Enable Notificationات الموقع
   initNotifications(user.uid);
 
   const snap = await getDoc(doc(db, 'users', user.uid));
@@ -219,17 +219,17 @@ onAuthStateChanged(auth, async user => {
     role === 'teacher'    ? 'معلمة' :
     role === 'mateen'     ? 'بنات متين' : 'الطالبة';
 
-  // ── إظهار الـ links حسب الـ role ──────────────────────────
+  // ── Show الـ links حسب الـ role ──────────────────────────
   function show(id) { const el = document.getElementById(id); if(el) el.classList.remove('d-none'); }
   function hide(id)  { const el = document.getElementById(id); if(el) el.classList.add('d-none'); }
 
-  // روابط خاصة ببنات متين بس — إخفاء لأي دور تاني
+  // روابط specific ببنات متين but/only — Hide لأي دور تاني
   const studentOnlyLinks = ['profileLink','linkCerts','linkAwards','linkGrades','linkSchedule'];
   if (role !== 'mateen') {
     studentOnlyLinks.forEach(hide);
   }
 
-  // روابط طالباتي — تخفى من الأدمن
+  // روابط طالباتي — تخفى من Admin
   if (role === 'admin' || role === 'supervisor') {
     hide('linkTeacher');
   }
@@ -265,11 +265,11 @@ onAuthStateChanged(auth, async user => {
     console.log('✅ Showing links for STUDENT (default)');
   }
 
-  // ── أيقونة البروفايل وملفي الشخصي — بنات متين فقط ──────
+  // ── أيقونة الProfile وFileي الشخصي — بنات متين only ──────
   const profileLink   = document.getElementById('profileLink');
   const navProfileBtn = document.getElementById('navProfileBtn');
 
-  // أيقونة البروفايل — تظهر لكل الأدوار
+  // أيقونة الProfile — تظهر لكل Roles
   const navAvatar = document.getElementById('navProfileAvatar');
   const avatarEmoji =
     role === 'admin'      ? '👑' :
@@ -303,7 +303,7 @@ onAuthStateChanged(auth, async user => {
   }
 
   /* ───────────────────────────────────────────────────────────
-     [من home-2.js] — ملء اسم المستخدمة تلقائياً في نموذج التواصل
+     [من home-2.js] — ملء اسم Userة تلقائياً في Form التواصل
      ─────────────────────────────────────────────────────────── */
   const ctName = document.getElementById('ctName');
   if (ctName) {
@@ -311,7 +311,7 @@ onAuthStateChanged(auth, async user => {
   }
 
   /* ───────────────────────────────────────────────────────────
-     [من home-msg.js] — عداد الرسائل غير المقروءة
+     [من home-msg.js] — عداد الMessages غير المقروءة
      ─────────────────────────────────────────────────────────── */
   const navMsgBadge     = document.getElementById('navMsgBadge');
   const sidebarMsgBadge = document.getElementById('sidebarMsgBadge');
@@ -346,7 +346,7 @@ onAuthStateChanged(auth, async user => {
   }
 
   /* ───────────────────────────────────────────────────────────
-     [من home-msg.js] — عداد الأخبار الجديدة منذ آخر زيارة
+     [من home-msg.js] — عداد الNews الجthisدة منذ آخر زيارة
      ─────────────────────────────────────────────────────────── */
   const navNewsBadge     = document.getElementById('navNewsBadge');
   const sidebarNewsBadge = document.getElementById('sidebarNewsBadge');
@@ -380,16 +380,16 @@ window.doLogout = () =>
 
 
 /* ═══════════════════════════════════════════════════════════════
-   [من home-2.js] — نموذج التواصل: تحميل المستلمين + إرسال الرسالة
+   [من home-2.js] — Form التواصل: Load المستلمين + Send/Submit الMessage
    ═══════════════════════════════════════════════════════════════ */
 
-// ── تحميل المستلمين من Firebase ──────────────
+// ── Load المستلمين من Firebase ──────────────
 async function loadRecipients() {
   const select = document.getElementById('ctRecipient');
   if (!select) return;
 
   try {
-    // جيبي الإدارة والمعلمات النشطين فقط
+    // جيبي الإدارة وData/Info النشطين only
     const [adminSnap, teacherSnap] = await Promise.all([
       getDocs(query(collection(db,'users'), where('role','==','admin'))),
       getDocs(query(collection(db,'users'), where('role','==','teacher'), where('status','==','active')))
@@ -406,7 +406,7 @@ async function loadRecipients() {
       html += '</optgroup>';
     }
 
-    // المعلمات
+    // Data/Info
     if (!teacherSnap.empty) {
       html += '<optgroup label="── المعلمات ──">';
       teacherSnap.forEach(d => {
@@ -427,10 +427,10 @@ async function loadRecipients() {
   }
 }
 
-// تحميل المستلمين عند فتح الصفحة
+// Load المستلمين عند فتح Page
 loadRecipients();
 
-// ── إرسال الرسالة ─────────────────────────────
+// ── Send/Submit الMessage ─────────────────────────────
 window.submitContactNew = async () => {
   const nameEl      = document.getElementById('ctName');
   const recipientEl = document.getElementById('ctRecipient');
@@ -439,7 +439,7 @@ window.submitContactNew = async () => {
   const btn         = document.getElementById('ctBtn');
   const successEl   = document.getElementById('ctSuccess');
 
-  // تحقق من الحقول المطلوبة
+  // تحقق from the حقول المطIfبة
   let valid = true;
   [nameEl, recipientEl, topicEl, bodyEl].forEach(el => {
     if (!el || !el.value.trim()) { if(el) el.style.borderColor='#c0392b'; valid=false; }
@@ -463,7 +463,7 @@ window.submitContactNew = async () => {
       : (nameEl.value.trim() || user.email || '');
     const senderRole = (senderSnap.exists() && senderSnap.data().role) || 'student';
 
-    // إنشاء أو تحديث المحادثة
+    // إنشاء أو Update المحادثة
     const cid = [user.uid, recipientUid].sort().join('__');
     await setDoc(doc(db,'conversations',cid), {
       participants: [user.uid, recipientUid],
@@ -473,7 +473,7 @@ window.submitContactNew = async () => {
       [`unread.${user.uid}`]:     0,
     }, { merge: true });
 
-    // إضافة الرسالة
+    // Add الMessage
     await addDoc(collection(db,'conversations',cid,'messages'), {
       text:       bodyText     || '',
       senderId:   user.uid     || '',
@@ -482,7 +482,7 @@ window.submitContactNew = async () => {
       sentAt:     serverTimestamp(),
     });
 
-    // إشعار Firestore للمستلم
+    // Notification Firestore للمستلم
     if (recipientUid) {
       await addDoc(collection(db,'notifications',recipientUid,'pending'), {
         title:     `💬 ${senderName}`,
@@ -493,12 +493,12 @@ window.submitContactNew = async () => {
       });
     }
 
-    // نجاح
+    // Success
     btn.innerHTML = '<i class="ti ti-check"></i> تم الإرسال بنجاح!';
     btn.style.background = 'var(--green-mid)';
     if (successEl) successEl.style.display = 'block';
     [nameEl, recipientEl, topicEl, bodyEl].forEach(el => { if(el) el.value=''; });
-    // إعادة تحميل الخيارات
+    // إعادة Load الخيارات
     loadRecipients();
 
     setTimeout(() => {
@@ -518,8 +518,8 @@ window.submitContactNew = async () => {
 
 
 /* ═══════════════════════════════════════════════════════════════
-   [من home-3.js] — submitContact (نموذج تواصل قديم — dead code،
-   محتفظ به كما هو لأنه لا يستخدم Firebase ولا يضر بالأداء)
+   [من home-3.js] — submitContact (Form تواصل قthisم — dead code،
+   محتفظ به كما هو Becauseه لا يستخدم Firebase ولا يضر بالأداء)
    ═══════════════════════════════════════════════════════════════ */
 function submitContact(btn) {
   const inputs = btn.closest('.contact-form').querySelectorAll('input, select, textarea');
@@ -541,7 +541,7 @@ function submitContact(btn) {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   [من home-3.js] — submitReg (مودال طلب التسجيل — مستخدمة فعلياً)
+   [من home-3.js] — submitReg (Modal طلب التسجيل — مستخدمة فعلياً)
    ═══════════════════════════════════════════════════════════════ */
 function submitReg(btn) {
   const modal = document.getElementById('reg-modal');
@@ -564,13 +564,13 @@ function submitReg(btn) {
   }, 1500);
 }
 
-// هذه الدوال متاحة عالمياً لأن HTML بينده عليها بـ onclick="..."
+// هذه الد and the  متاحة عالمياً Because HTML بينthis عليها بـ onclick="..."
 window.submitContact = submitContact;
 window.submitReg     = submitReg;
 
 
 /* ═══════════════════════════════════════════════════════════════
-   [من home-4.js] — إغلاق قائمة التنقل عند الضغط على رابط أو خارجها
+   [من home-4.js] — إغلاق List/Menu الNavigation On click على Link أو خارجها
    ═══════════════════════════════════════════════════════════════ */
 document.querySelectorAll(".nav-links a").forEach(function(l){
   l.addEventListener("click",function(){ document.querySelector(".nav-links").classList.remove("open"); });
