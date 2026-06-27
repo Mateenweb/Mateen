@@ -96,15 +96,7 @@ function renderAll(list) {
               ${u.status==='active' ? '✅ نشطة' : u.status==='pending' ? '⏳ معلقة' : '❌ موقوفة'}
             </span>
           </div>
-          <!-- زرار الملف فقط -->
-          <div style="padding:10px 16px;border-top:1px solid var(--border);">
-            <a href="student.html?id=${u.id}"
-               style="display:flex;align-items:center;justify-content:center;gap:4px;padding:8px;
-                      background:var(--green-dark);color:white;border-radius:8px;
-                      font-family:inherit;font-size:12px;text-decoration:none;">
-              <i class="ti ti-user"></i> الملف والغياب
-            </a>
-          </div>
+
         </div>`).join('')}
     </div>`;
 }
