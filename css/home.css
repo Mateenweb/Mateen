@@ -1,5 +1,5 @@
 /* ===========================
-   برنامج متين العلمي — الصفحة الرئيسية
+   Mateen Academic Program — Home Page
    Responsive rewrite with Bootstrap 5 RTL
    =========================== */
 
@@ -22,7 +22,7 @@
 /* ===== FOUC PREVENTION ===== */
 html {
   overflow-x: hidden;
-  visibility: hidden;   /* إخفاء كل حاجة لحد ما CSS يتحمل */
+  visibility: hidden;   /* Hide everything until CSS loads (FOUC prevention) */
 }
 
 html.ready {
@@ -101,8 +101,8 @@ body {
   object-fit: contain;
 }
 
-/* شعار شركاء الخير — خلفية فاتحة لأن الشعار رمادي-أخضر شبه شفاف
-   ولا يظهر بوضوح على الخلفية الغامقة المستخدمة لشعار متين */
+/* Logo needs light background (logo is semi-transparent)
+   ولا يظهر بوضوح على Background الdarkة Userة لشعار متين */
 .logo-circle-shuraka {
   background: #fff;
   border-color: var(--gold);
@@ -124,7 +124,7 @@ body {
 }
 .nav-tagline { color: rgba(255,255,255,0.5); font-size: 11px; }
 
-/* زرار حسابي — جزء من الناف بار */
+/* Account button — part of navbar */
 .sidebar-fab {
   display: flex;
   align-items: center;
@@ -190,7 +190,7 @@ body {
 }
 .btn-outline:hover { background: rgba(201,162,39,0.1); }
 
-/* ===== بروفايل الناف بار ===== */
+/* ===== NAVBAR PROFILE ===== */
 .nav-user-actions {
   display: flex;
   align-items: center;
@@ -385,22 +385,22 @@ body {
   min-height: 100%;
 }
 
-/* السايدبار overlay على كل الشاشات — بيتفتح فوق المحتوى لا بجانبه */
-/* (لا يوجد sticky desktop sidebar — المحتوى يملأ العرض كامل دايماً) */
-/* Bootstrap offcanvas بيتحكم في الـ position/transform بنفسه —
-   لا نضع width:0 أو position:fixed يدوياً هنا لأن هذا كان يمنع
-   الـ offcanvas من الظهور أصلاً حتى لو فُتح بـ data-bs-toggle */
+/* Sidebar overlay on all screens — opens on top of content, not beside it */
+/* (Doesn't exist / None sticky desktop sidebar — Content يملأ الWidth/Display كامل دايماً) */
+/* Bootstrap offcanvas بيتحكم in the ـ position/transform بsame style —
+   لا نضع width:0 أو position:fixed يدوياً Here Because هذا كان يمنع
+   الـ offcanvas from the ظهور أصلاً حتى If فُتح بـ data-bs-toggle */
 
-/* لو guest — أخفي الـ sidebar خالص في كل الأحجام */
+/* If guest — أخفي the sidebar خالص في كل الأحجام */
 .page-layout.guest-layout > aside {
   display: none !important;
 }
 
-/* عرض السايدبار — كل الشاشات (Bootstrap الافتراضي 400px عريض جداً) */
+/* Width/Display Sidebar — كل الشاشات (Bootstrap الافتراضي 400px عريض جداً) */
 #mainSidebar {
   width: 300px !important;
   max-width: 300px !important;
-  /* تغطية كاملة إجبارية — تمنع أي جزء من الصفحة إنه يبين من تحتها */
+  /* تغطية كاملة إجبارية — تمنع أي جزء من Page إنه يبين من belowها */
   position: fixed !important;
   top: 0 !important;
   bottom: 0 !important;
@@ -446,9 +446,9 @@ body {
     margin-top: 0;
     flex-shrink: 0;
   }
-  /* ملاحظة: زرار الإغلاق موجود فعلياً داخل .offcanvas-header
+  /* ملاحظة: Button الإغلاق موجود فعلياً داخل .offcanvas-header
      بتنسيق flex طبيعي (ms-auto) — لا حاجة لفرض position يدوياً
-     هنا، كان هذا يتعارض مع اتجاه فتح السايدبار من اليمين */
+     Here، كان هذا يتعارض مع اتجاه فتح Sidebar from the Right */
 }
 
 .sidebar-guest-logo {
@@ -528,7 +528,7 @@ body {
   padding: 4px 0;
   display: flex !important;
   flex-direction: column !important;
-  justify-content: flex-start !important;   /* تكدّس فوق، مش توزيع بمسافات متساوية */
+  justify-content: flex-start !important;   /* تكدّس above، not/don't توزيع بمسافات متساوية */
   gap: 0 !important;
 }
 .sidebar-nav a {
@@ -624,7 +624,7 @@ body {
   border: 1px solid rgba(201,162,39,0.25);
 }
 
-/* الصورة تغطي كل الهيرو */
+/* Image covers the full hero section */
 .hero-bg-img {
   position: absolute;
   inset: 0;
@@ -635,8 +635,8 @@ body {
   display: block;
 }
 
-/* النص على اليمين، فلازم التعتيم يكون خفيف/شفاف من الشمال (تبان الصورة)
-   ويزيد تدريجياً لليمين (خلف النص) عشان يكون مقروءاً بوضوح */
+/* Text on right — overlay is transparent on the left (image visible)
+   and increases toward the right (behind text) for readability */
 .hero-overlay {
   z-index: 1;
   background: linear-gradient(
@@ -670,7 +670,7 @@ body {
   box-shadow: 0 4px 14px rgba(0,0,0,0.18);
 }
 
-/* اللوجوهات جنب بعض في الهيرو */
+/* Logos side by side in hero */
 .hero-logos {
   display: flex;
   align-items: center;
@@ -1137,9 +1137,9 @@ footer {
 }
 
 
-/* Grid columns — تم حذف قاعدة clamp() الخاطئة هنا
-   (كانت min=50% و max=20% وهو تناقض رياضي يكسر العرض)
-   التعريف الأساسي لـ .col-xl-2dot4 موجود فوق + media queries تحت */
+/* Grid columns — removed incorrect clamp() rule
+   (was min=50% and max=20%, a mathematical contradiction that broke layout)
+   Base .col-xl-2dot4 defined above + media queries below */
 
 /* Tablet (768–1199px) */
 @media (max-width: 1199px) {
@@ -1156,17 +1156,17 @@ footer {
 }
 
 /* Laptop (768px — 1440px) */
-/* تابلت (768px - 1024px) */
+/* Tablet (768px - 1024px) */
 @media (min-width: 768px) and (max-width: 1024px) {
   .hero { aspect-ratio: 2 / 1; width: calc(100% - 32px); margin: 12px 16px; }
 }
 
-/* لاب (1024px - 1440px) */
+/* Laptop (1024px - 1440px) */
 @media (min-width: 1025px) and (max-width: 1440px) {
   .hero { aspect-ratio: 16 / 7; }
 }
 
-/* شاشات كبيرة (> 1440px) */
+/* Large screens (> 1440px) */
 @media (min-width: 1441px) {
   .hero { aspect-ratio: 16 / 7; }
 }
@@ -1205,8 +1205,7 @@ footer {
   .footer-dua { flex: none; }
   .footer-social { justify-content: center; }
 
-  /* الموبايل: إخفاء اسم البرنامج وتكبير شعار شركاء الخير ليبان بوضوح
-     بدلاً من النص — يبقى جنب شعار متين فقط                       */
+  /* Mobile: hide program name, show logo clearly instead ofاً from the Text — يبقى جنب شعار متين only                       */
   .nav-logo .nav-brand,
   .nav-logo .nav-tagline {
     display: none;
@@ -1286,7 +1285,7 @@ footer {
   margin-bottom: 6px;
 }
 
-/* ── شعار شركاء الخير في شريط البسملة ─────────────────────── */
+/* ── شعار Khayr Partners في شريط Basmala ─────────────────────── */
 .basmala-bar { position: relative; }
 @media (max-width: 480px) {
   
@@ -1307,7 +1306,7 @@ footer {
 
 
 
-/* اللوجو قابل للضغط للتثبيت */
+/* الIfجو قابل للضغط للتثبيت */
 .nav-logo:hover .logo-circle {
   border-color: var(--gold-light);
   box-shadow: 0 0 0 3px rgba(201,162,39,0.3);
