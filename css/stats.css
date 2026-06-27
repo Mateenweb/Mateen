@@ -1,5 +1,5 @@
 /* ===========================
-   صفحة الإحصائيات — تصميم إسلامي
+   Page الStatistics — Design إسلامي
    =========================== */
 
 @import url("https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;500;600;700&family=Amiri:wght@400;700&display=swap");
@@ -347,7 +347,7 @@ body {
 }
 .filter-row select:focus { border-color: var(--gold); }
 
-/* ── موبايل شامل ── */
+/* ── Mobile شامل ── */
 @media (max-width: 768px) {
   .stats-wrap         { padding: 12px !important; }
   .summary-bar        { grid-template-columns: 1fr 1fr !important; gap: 8px !important; }
