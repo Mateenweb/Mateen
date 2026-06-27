@@ -365,8 +365,8 @@ function renderSessions(sessions) {
     const present  = keys.filter(k => subjects[k] === 'present').length;
     const subjRows = keys.map(k => {
       const v = subjects[k];
-      const chip = v === 'present' ? 'present' : v === 'absent' ? 'absent' : 'empty';
-      const label = v === 'present' ? 'حاضرة' : v === 'absent' ? 'غائبة' : '—';
+      const chip = v === 'present' ? 'present' : v === 'absent' ? 'absent' : v === 'excused' ? 'excused' : 'empty';
+      const label = v === 'present' ? 'حاضرة' : v === 'absent' ? 'غائبة' : v === 'excused' ? 'بعذر' : '—';
       return `<div class="subj-row">
         <span class="subj-name">${k}</span>
         <span class="att-chip ${chip}">${label}</span>
