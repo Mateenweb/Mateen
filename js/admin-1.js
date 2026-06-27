@@ -150,7 +150,7 @@ function icHtml(t){ return {youtube:'<i class="ti ti-brand-youtube"></i>',drive:
 function fmtDate(ts){ if(!ts)return'—'; return new Date(ts).toLocaleDateString('ar-EG',{year:'numeric',month:'short',day:'numeric'}); }
 function esc(s){ return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 // ══════════════════════════════════════
-//  الحسابات المعلقة (admin فقط)
+//  الحسابات المعلقة (admin only)
 // ══════════════════════════════════════
 
 const ROLE_LABELS = {
@@ -162,7 +162,7 @@ const ROLE_LABELS = {
 };
 
 function loadPendingAccounts() {
-  // الأدمن يشوف كل الحسابات المعلقة (معلمات + مشرفات + طالبات متين)
+  // Admin يشوف كل الحسابات المعلقة (معWhenت + not/don'tرفات + طالبات متين)
   onSnapshot(
     query(collection(db, 'users'), orderBy('createdAt', 'desc')),
     snap => {
@@ -187,7 +187,7 @@ function renderPending(list) {
   badge.style.display = 'inline';
   badge.textContent   = list.length;
 
-  // فصل: طالبات متين (موافقة مشرفة) والباقي (موافقة أدمن)
+  // فصل: طالبات متين (موافقة not/don'tرفة)  and the باقي (موافقة أدمن)
   const mateen = list.filter(u => u.role === 'mateen');
   const others = list.filter(u => u.role !== 'mateen');
 
@@ -229,9 +229,9 @@ function renderPending(list) {
   cont.innerHTML = html;
 }
 
-// ── مودال الربط ───────────────────────────────────────────
-let _pendingApproveId   = null;   // uid المستخدمة المنتظرة للموافقة
-window._selectedLinkId  = null;   // id الطالبة المختارة في الجدول
+// ── Modal الربط ───────────────────────────────────────────
+let _pendingApproveId   = null;   // uid Userة المنتظرة للموافقة
+window._selectedLinkId  = null;   // id Student (f) المختارة in the Schedule/Table
 
 window.approveUser = async id => {
   const snap = await getDoc(doc(db, 'users', id));
@@ -240,7 +240,7 @@ window.approveUser = async id => {
   const role = userData.role || '';
   const name = userData.name || userData.email || id;
 
-  // غير بنات متين → قبول مباشر بدون مودال
+  // غير بنات متين → قبول مباشر بدون Modal
   if (role !== 'mateen') {
     if (!confirm(`قبول حساب "${name}"؟`)) return;
     await updateDoc(doc(db, 'users', id), { status: 'active' });
@@ -248,7 +248,7 @@ window.approveUser = async id => {
     return;
   }
 
-  // بنات متين → افتح مودال الربط
+  // بنات متين → افتح Modal الربط
   _pendingApproveId      = id;
   window._selectedLinkId = null;
 
@@ -298,7 +298,7 @@ function renderLinkList(list) {
 }
 
 window.selectLinkStudent = id => {
-  // أزل تحديد القديم
+  // أزل تحthisد القthisم
   if (window._selectedLinkId) {
     const prev = document.getElementById('linkItem_' + window._selectedLinkId);
     const prevCheck = document.getElementById('linkCheck_' + window._selectedLinkId);
@@ -316,26 +316,26 @@ window.selectLinkStudent = id => {
   btn.style.opacity = '1';
 };
 
-// كل المواد العلمية — تتسجل فيها بنت متين أوتوماتيك بعد القبول
+// كل Academic subjects — تتسجل فيها بنت متين أوتوماتيك بعد القبول
 const ALL_SUBJECTS = ['التفسير', 'الفقه', 'العقيدة', 'الحديث', 'مقرأة متين'];
 
 window.confirmLinkModal = async (studentId) => {
   if (!_pendingApproveId) return;
   const uid = _pendingApproveId;
 
-  // أغلق المودال أولاً
+  // أغلق Modal أولاً
   document.getElementById('linkModal').classList.remove('show');
   _pendingApproveId = null;
   window._selectedLinkId = null;
 
-  // فعّل الحساب + التحاق تلقائي بكل المواد العلمية
+  // فعّل الحساب + التحاق تلقائي بكل Academic subjects
   await updateDoc(doc(db, 'users', uid), {
     status: 'active',
     enrolledSubjects: ALL_SUBJECTS,
     ...(studentId ? { linkedStudentId: studentId } : {})
   });
 
-  // لو في ربط، حفظ uid في سجل الطالبة في الجدول
+  // If في ربط، حفظ uid في سجل Student (f) in the Schedule/Table
   if (studentId) {
     await updateDoc(doc(db, 'students', studentId), { uid });
     showToast('✓ تم قبول الحساب، وربطه بالطالبة، والتحاقها بكل المواد');
@@ -351,7 +351,7 @@ window.rejectUser = async id => {
 };
 
 // ══════════════════════════════════════
-//  قاعدة بيانات الطالبات والمقابلات
+//  قاعدة بيانات Studentات  and the مقابلات
 // ══════════════════════════════════════
 
 let allStudents = [];
@@ -443,7 +443,7 @@ window.closeExportModal = () => {
   if (m) { m.classList.remove('show'); }
 };
 
-// ── مودال تصدير الحضور والغياب ──────────────────────────────
+// ── Modal تصthisر Attendance  and the غياب ──────────────────────────────
 window.openAttModal = () => {
   const m = document.getElementById('attModal');
   if (m) { m.classList.add('show'); }
@@ -490,8 +490,8 @@ function renderStudents(list) {
   }
 
   if (isMob) {
-    // ── MOBILE: بطاقة لكل طالبة ──────────────────────────────
-    // نخرج من tbody ونبني cards في wrapper منفصل
+    // ── MOBILE: Card لكل طالبة ──────────────────────────────
+    // نخرج من tbody ونdark brown cards في wrapper منفصل
     const wrap = document.getElementById('stu-cards-wrap');
     if (wrap) {
       wrap.innerHTML = list.map((s, i) => {
@@ -567,11 +567,11 @@ function renderStudents(list) {
         </div>`;
       }).join('');
     }
-    tb.innerHTML = '';  // الجدول فاضي على الموبايل
+    tb.innerHTML = '';  // Schedule/Table فاضي on Mobile
     return;
   }
 
-  // ── DESKTOP: الجدول العادي ────────────────────────────────
+  // ── DESKTOP: Schedule/Table العاthis ────────────────────────────────
   tb.innerHTML = list.map((s, i) => {
     const intClass = s.interview==='done'?'btn-done':'btn-pending';
     const intLabel = s.interview==='done'?'✅ تمت':'⏳ لم تتم';
@@ -705,7 +705,7 @@ function showToast(msg,err=false){ const t=document.getElementById('toast'); t.t
 function showErr(msg){ showToast(msg, true); }
 
 // ══════════════════════════════════════
-//  جميع الحسابات المسجلة (admin فقط)
+//  جميع الحسابات المسجلة (admin only)
 // ══════════════════════════════════════
 
 let allUsersData = [];
@@ -867,7 +867,7 @@ window.deleteUserAccount = async (id, name) => {
 
 
 
-// إعادة render عند تغيير حجم الشاشة (موبايل ↔ ديسكتوب)
+// إعادة render عند تغيير حجم الScreen (Mobile ↔ Desktop)
 window.addEventListener("resize", () => {
   if (allStudents.length) renderStudents(allStudents);
 });
@@ -878,7 +878,7 @@ window.addEventListener("resize", () => {
 
 
 // ══════════════════════════════════════════════════════════════
-//  إضافة اختبار جماعي
+//  Add اختبار جماعي
 // ══════════════════════════════════════════════════════════════
 window.openBulkGradeModal = () => {
   const modal = document.getElementById('bulkGradeModal');
