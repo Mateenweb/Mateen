@@ -32,31 +32,31 @@ onAuthStateChanged(auth, async user => {
 
   if (layout) layout.classList.remove('guest-layout');
 
-  // إخفاء زراير الـ hero لما تسجل دخول
+  // Hide زراير the hero When تسجل دخول
   const heroBtns = document.getElementById('heroBtns');
   if (heroBtns) { heroBtns.classList.remove('d-flex','d-lg-flex'); heroBtns.classList.add('d-none'); }
 
-  // إخفاء زراير الـ navbar
+  // Hide زراير the navbar
   const navBtns = document.getElementById('navBtns');
   if (navBtns) { navBtns.classList.remove('d-flex','d-lg-flex'); navBtns.classList.add('d-none'); }
   const mobNavBtns = document.getElementById('mobNavBtns');
   if (mobNavBtns) { mobNavBtns.classList.remove('d-flex','d-lg-flex'); mobNavBtns.classList.add('d-none'); }
 
-  // إظهار navUserActions (أيقونة البروفايل + رسائلي)
+  // Show navUserActions (أيقونة الProfile + Messagesي)
   const navUserActions = document.getElementById('navUserActions');
   if (navUserActions) { navUserActions.classList.remove('d-none'); navUserActions.classList.add('d-flex'); }
 
-  // إظهار زرار "رسائلي" في النافبار
+  // Show Button "Messagesي" in the نافبار
   const navMsgBtn = document.getElementById('navMsgBtn');
   if (navMsgBtn) navMsgBtn.classList.remove('d-none');
 
-  // أيقونة البروفايل — هتتحدد بعد ما نجيب الـ role
+  // أيقونة الProfile — هتتحدد بعد ما نجيب الـ role
 
-  // مسجلة دخول — اجلب بيانات المستخدمة
+  // مسجلة دخول — اجلب بيانات Userة
   guest.classList.add('d-none');
   userDiv.classList.remove('sidebar-user-hidden'); userDiv.classList.add('show-user');
 
-  // تفعيل إشعارات الموقع
+  // Enable Notificationات الموقع
   initNotifications(user.uid);
 
   const snap   = await getDoc(doc(db, 'users', user.uid));
@@ -72,11 +72,11 @@ onAuthStateChanged(auth, async user => {
     role === 'teacher'    ? 'معلمة' :
     role === 'mateen'     ? 'بنات متين' : 'الطالبة';
 
-  // ── إظهار الـ links حسب الـ role ──────────────────────────
+  // ── Show الـ links حسب الـ role ──────────────────────────
   function show(id) { const el = document.getElementById(id); if(el) el.classList.remove('d-none'); }
   function hide(id)  { const el = document.getElementById(id); if(el) el.classList.add('d-none'); }
 
-  // روابط خاصة ببنات متين بس — إخفاء لأي دور تاني
+  // روابط specific ببنات متين but/only — Hide لأي دور تاني
   if (role !== 'mateen') {
     hide('profileLink');
     hide('linkCerts');
@@ -85,7 +85,7 @@ onAuthStateChanged(auth, async user => {
     hide('linkSchedule');
   }
 
-  // طالباتي — تخفى من الأدمن والمشرفة
+  // طالباتي — تخفى من Admin  and the not/don'tرفة
   if (role === 'admin' || role === 'supervisor') {
     hide('linkTeacher');
   }
@@ -111,9 +111,9 @@ onAuthStateChanged(auth, async user => {
     show('linkSchedule');
     show('linkNews');
   }
-  // student: الرئيسية ورسائلي بس
+  // student: الرئيسية وMessagesي but/only
 
-  // ── أيقونة البروفايل وملفي الشخصي — تظهر فقط بعد تفعيل الحساب ──
+  // ── أيقونة الProfile وFileي الشخصي — تظهر only بعد Enable الحساب ──
   const profileLink   = document.getElementById('profileLink');
   const navProfileBtn = document.getElementById('navProfileBtn');
 
@@ -122,7 +122,7 @@ onAuthStateChanged(auth, async user => {
     if (profileLink)   profileLink.classList.add('d-none');
     if (navProfileBtn) navProfileBtn.classList.add('d-none');
   } else {
-    // أيقونة البروفايل — تظهر لكل الأدوار المفعّلة
+    // أيقونة الProfile — تظهر لكل Roles المفعّلة
     const navAvatar = document.getElementById('navProfileAvatar');
     const avatarEmoji =
       role === 'admin'      ? '👑' :
