@@ -1,25 +1,25 @@
 /* ===========================
-   برنامج متين العلمي — shared styles
+   Mateen Academic Program — shared styles
    =========================== */
 
 @import url("https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;500;600;700&family=Amiri:wght@400;700&display=swap");
 
 :root {
-  /* بني للـ nav/footer/basmala فقط */
+  /* Dark brown — nav/footer/basmala only */
   --green-dark:  #5c3d2e;
-  /* بني متوسط للأزرار والـ hover */
+  /* Dark brown centered — buttons and hover */
   --green-mid:   #8a5e3c;
-  /* بني فاتح للحدود والتفاصيل */
+  /* Light brown — borders and details */
   --green-light: #b8966e;
-  /* ذهبي */
+  /* gold */
   --gold:        #c9a227;
   --gold-light:  #e8c96a;
-  /* تدرج البيج من فاتح لغامق */
-  --beige:       #f7efe3;   /* خلفية الصفحة */
-  --beige2:      #ede0cc;   /* البطاقات والـ sidebar */
-  --beige3:      #d6c4a8;   /* حدود، section-head، hover */
+  /* Beige gradient from light to dark */
+  --beige:       #f7efe3;   /* Page background */
+  --beige2:      #ede0cc;   /* Cards and sidebar */
+  --beige3:      #d6c4a8;   /* Borders, section headers, hover states */
   --white:       #fff;
-  /* النصوص */
+  /* Text colors */
   --text-dark:   #2c1a0e;
   --text-mid:    #8a6a52;
   --border:      #b8966e44;
@@ -33,7 +33,7 @@ body {
   background: var(--beige);
   color: var(--text-dark);
   font-size: 13px;
-  /* overflow-x على الـ html بدل body عشان لا يكسر position:fixed على iOS */
+  /* overflow-x on the ـ html instead of body So that لا يكسر position:fixed على iOS */
 }
 html { overflow-x: hidden; }
 
@@ -89,7 +89,7 @@ nav {
   object-fit: cover;
 }
 
-/* ── شعار شركاء الخير في الـ navbar (نفس تصميم logo-circle) ── */
+/* ── شعار Khayr Partners في the navbar (نفس Design logo-circle) ── */
 .logo-circle-shuraka {
   background: var(--green-dark, #1a4a2e);
   margin-inline-start: 8px;
@@ -100,8 +100,8 @@ nav {
   mix-blend-mode: screen;
 }
 
-/* ── شعار شركاء الخير يظهر تلقائياً في كل شريط بسملة عبر الموقع ──
-   حل CSS فقط بدون الحاجة لتعديل كل ملف HTML على حدة            */
+/* ── شعار Khayr Partners يظهر تلقائياً في كل شريط but/onlyملة عبر الموقع ──
+   حل CSS only بدون الحاجة لEdit كل File HTML على حدة            */
 .basmala-bar {
   position: relative;
 }
@@ -301,11 +301,11 @@ box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 }
 
 /* ════════════════════════════════════════════════
-   توازن الألوان — الفاتح هو الغالب
-   اللون الغامق فقط في: nav, footer, basmala
+   Color balance — light is الغالب
+   الIfن الdark only في: nav, footer, basmala
    ════════════════════════════════════════════════ */
 
-/* page-hero — فاتح بدل غامق */
+/* page-hero — light instead of dark */
 .page-hero {
   background: linear-gradient(135deg, var(--beige2) 0%, var(--beige) 100%) !important;
   border-bottom: 3px solid var(--gold) !important;
@@ -318,7 +318,7 @@ box-shadow: 0 4px 12px rgba(0,0,0,0.3);
   color: var(--green-dark) !important;
 }
 
-/* section-head / card-head / t-section-head — بيج ذهبي بدل غامق */
+/* section-head / card-head / t-section-head — beige gold instead of dark */
 .section-head,
 .card-head,
 .t-section-head,
@@ -332,7 +332,7 @@ box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 .card-head *,
 .t-section-head * { color: var(--green-dark) !important; }
 
-/* teacher-hero — بيج ذهبي */
+/* teacher-hero — beige gold */
 .teacher-hero {
   background: linear-gradient(135deg, var(--beige2) 0%, var(--beige) 100%) !important;
   border-bottom: 3px solid var(--gold) !important;
@@ -346,7 +346,7 @@ box-shadow: 0 4px 12px rgba(0,0,0,0.3);
   border-color: rgba(92,61,46,0.25) !important;
 }
 
-/* sidebar header — بيج */
+/* sidebar header — beige */
 .sidebar-header { background: var(--beige3) !important;
 }
 .sidebar { background: var(--beige2) !important; border-left: 2px solid var(--gold) !important; }
@@ -381,7 +381,7 @@ box-shadow: 0 4px 12px rgba(0,0,0,0.3);
   color: var(--gold-light) !important;
 }
 
-/* tabs في teacher / stats  */
+/* tabs in teacher / stats pages  */
 .page-tab.active,
 .tab.active {
   background: var(--beige) !important;
@@ -394,13 +394,13 @@ box-shadow: 0 4px 12px rgba(0,0,0,0.3);
   color: var(--text-mid) !important;
 }
 
-/* page-tabs bar نفسه */
+/* page-tabs bar (same style) */
 .page-tabs {
   background: var(--white) !important;
   border-bottom: 2px solid var(--gold) !important;
 }
 
-/* msg-modal-head — بيج */
+/* msg-modal-head — beige */
 .msg-modal-head {
   background: linear-gradient(to left, var(--beige2), var(--beige)) !important;
   border-bottom: 2px solid var(--gold) !important;
@@ -430,7 +430,7 @@ box-shadow: 0 4px 12px rgba(0,0,0,0.3);
   background: var(--accent-green, #3a7a4a) !important;
 }
 
-/* أزرار submit عامة  */
+/* General submit buttons  */
 .btn-solid,
 .t-submit,
 .reg-next,
@@ -462,13 +462,13 @@ box-shadow: 0 4px 12px rgba(0,0,0,0.3);
   font-weight: 700 !important;
 }
 
-/* hero الرئيسية */
+/* Home hero */
 /* hero styles handled in home.css */
 
-/* basmala تبقى غامقة — nav + basmala هم فقط الغامقين */
+/* basmala تبقى darkة — nav + basmala هم only الdarkين */
 .basmala-bar { background: linear-gradient(135deg, var(--green-dark), var(--green-mid)) !important; }
 
-/* aya-banner — بيج ذهبي بدل غامق */
+/* aya-banner — beige gold instead of dark */
 .aya-banner {
   background: linear-gradient(135deg, var(--beige2) 0%, #fff9ee 100%) !important;
   border-top: 2px solid var(--gold) !important;
@@ -479,7 +479,7 @@ box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 .aya-banner::before { opacity: 0.06 !important; }
 .aya-banner::after  { color: rgba(92,61,46,0.3) !important; }
 
-/* nav links dropdown موبايل يبقى غامق — ok */
+/* nav links dropdown Mobile يبقى dark — ok */
 
 /* ════════════════════════════════════════
    MOBILE RESPONSIVE — تحسينات إضافية
@@ -502,19 +502,19 @@ box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 
   .alert, .notification { padding: 10px 12px !important; font-size: 12px !important; }
 }
-/* يفتح اللون شوية على النافبار الداكن */
+/* يفتح الIfن شوية on the نافبار الداكن */
 }
 
-/* ===== شركاء الخير — navbar ===== */
+/* ===== Khayr Partners — NAVBAR ===== */
 .nav-shuraka {
   display: flex;
   align-items: center;
   margin-inline-start: 10px;
   padding-inline-start: 12px;
-  border-inline-start: 1px solid rgba(201,162,39,0.35);  /* فاصل ذهبي خفيف */
+  border-inline-start: 1px solid rgba(201,162,39,0.35);  /* فاصل gold خفيف */
 }
 .nav-shuraka-img {
-  height: 46px;       /* أكبر من لوجو متين (44px) وواضح */
+  height: 46px;       /* أكبر من Ifجو متين (44px) وواضح */
   width: auto;
   display: block;
   object-fit: contain;
@@ -523,7 +523,7 @@ box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 @media (max-width: 991px) {
   .nav-shuraka {
     flex: 1;                    /* يملأ المساحة الفاضية */
-    justify-content: center;    /* يتوسط */
+    justify-content: center;    /* يتCenter */
     border-inline-start: none;
     margin-inline-start: 0;
     padding-inline-start: 0;
@@ -534,7 +534,7 @@ box-shadow: 0 4px 12px rgba(0,0,0,0.3);
   }
 }
 
-/* ══ زرار الخروج في الناف بار ══ */
+/* ══ Button الخروج في Navbar ══ */
 .nav-logout-btn {
   display: flex;
   align-items: center;
