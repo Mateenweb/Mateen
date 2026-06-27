@@ -131,13 +131,20 @@ async function initPage(studentId, user, role) {
 
   // الnot/don'tرفة: تشوف but/only تبويبي "حضوري" و"Notes" — وتقدر تسجل حضور وتكتب Notes
   if (role === 'supervisor') {
+    // إخفاء الإحصائيات
+    const statsBar = document.getElementById('statsBar');
+    if (statsBar) statsBar.style.display = 'none';
+
+    // إخفاء كل التبويبات إلا "حضوري"
     document.getElementById('tabBtn-info')?.remove();
     document.getElementById('tabBtn-grades')?.remove();
-    document.getElementById('newSessionWrap').style.display = 'block';
-    document.getElementById('notesEditWrap').style.display  = 'block';
-    document.getElementById('notesTextarea').value = s.notes || '';
+    document.getElementById('tabBtn-notes')?.remove();
+
+    // إظهار نموذج إضافة جلسة فقط — بدون قايمة الجلسات القديمة
+    document.getElementById('newSessionWrap').style.display  = 'block';
+    document.getElementById('attendanceList').style.display  = 'none';
+
     setupSupervisorAttendance(studentId);
-    setupSupervisorNotes(studentId);
     switchTab('attend');
   }
 
