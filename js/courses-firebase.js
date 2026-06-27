@@ -11,7 +11,7 @@ const auth = getAuth(app);
 const db   = getFirestore(app);
 
 // ═══════════════════════════════════════════════════════
-// Seed: أضف المواد الأساسية لـ Firebase لو مش موجودة
+// Seed: أضف Subjects الأساسية لـ Firebase If not/don't موجودة
 // ═══════════════════════════════════════════════════════
 const SEED_SUBJECTS = [
   { id:'tafseer', name:'التفسير', icon:'📖', color:'linear-gradient(135deg,#5c3d2e,#8a5e3c)', desc:'دراسة معاني كتاب الله وفهم آياته والاستنباط منها وفق منهج السلف الصالح.', meetings:'٣ لقاءات أسبوعياً', weeks:'٦ أسابيع', level:'المستوى الثاني', topics:['مقدمات في علم التفسير','أسباب النزول','الناسخ والمنسوخ','تفسير المفردات','الاستنباط الفقهي','التدبر والتطبيق'], addedAt:1000 },
@@ -55,7 +55,7 @@ const LINK_LABELS = { youtube: '▶️ يوتيوب', drive: '📁 درايف', 
 
 const isAdmin = () => currentUserRole === 'admin' || currentUserRole === 'supervisor';
 
-// المعلمة تقدر تعدل/تحذف مواد مادتها بس
+// Teacher (f) تقدر تعدل/تDelete مواد مادتها but/only
 const canEditMat = (m) => {
   if (isAdmin()) return true;
   if (currentUserRole === 'teacher') {
@@ -127,7 +127,7 @@ function renderModalMats() {
   };
 
   Object.entries(modalMap).forEach(([subj, { id: modalId }]) => {
-    // ── أزرار تعديل/حذف المادة الرئيسية (للأدمن فقط) ──
+    // ── Buttons Edit/Delete اWhenدة الرئيسية (للأدمن only) ──
     const adminActionsEl = document.getElementById('modal-admin-actions-' + modalId);
     if (adminActionsEl) {
       if (isAdmin()) {
@@ -143,7 +143,7 @@ function renderModalMats() {
       }
     }
 
-    // ── المواد المضافة من Firebase ──
+    // ── Subjects المضافة من Firebase ──
     const el = document.getElementById('modal-mats-' + modalId);
     if (!el) return;
     const subjMats = allMats.filter(m => m.course === subj);
@@ -179,7 +179,7 @@ window.filterMats = () => {
   renderMats(val ? mats.filter(m => m.course === val) : mats);
 };
 
-// ===== تعديل المواد الثابتة (التفسير، الفقه، إلخ) =====
+// ===== Edit Subjects الثابتة (التفسير، الفقه، إلخ) =====
 const STATIC_SUBJECTS_DATA = {
   'التفسير':    { modalId: 'tafseer',  bannerClass: 'banner-tafseer'  },
   'الفقه':      { modalId: 'fiqh',     bannerClass: 'banner-fiqh'     },
@@ -189,7 +189,7 @@ const STATIC_SUBJECTS_DATA = {
 };
 
 window.openEditStaticSubject = (subj) => {
-  // اجمع البيانات الحالية من المودال
+  // اجمع Data الحالية من Modal
   const { modalId } = STATIC_SUBJECTS_DATA[subj];
   const modalEl = document.getElementById('modal-' + modalId);
   const title    = modalEl.querySelector('.modal-title')?.textContent || subj;
@@ -198,7 +198,7 @@ window.openEditStaticSubject = (subj) => {
   const topicsEls = modalEl.querySelectorAll('.topics-list li');
   const topics   = Array.from(topicsEls).map(li => li.textContent).join('\n');
 
-  // ابني مودال التعديل
+  // اdark brown Modal الEdit
   const old = document.getElementById('editStaticModal');
   if (old) old.remove();
 
@@ -261,7 +261,7 @@ window.saveStaticSubject = async (subj) => {
     const { setDoc, doc: fsDoc } = await import("https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js");
     await setDoc(fsDoc(db, 'staticSubjects', modalId), { subj, subtitle, desc, topics, updatedAt: Date.now() }, { merge: true });
 
-    // حدّث المودال مباشرة بدون reload
+    // حدّث Modal مباشرة بدون reload
     const modalEl = document.getElementById('modal-' + modalId);
     if (modalEl.querySelector('.modal-subtitle')) modalEl.querySelector('.modal-subtitle').textContent = subtitle;
     if (modalEl.querySelector('.modal-desc'))     modalEl.querySelector('.modal-desc').textContent = desc;
@@ -277,7 +277,7 @@ window.saveStaticSubject = async (subj) => {
   btn.innerHTML = '<i class="ti ti-device-floppy"></i> حفظ التعديلات';
 };
 
-// تحميل تعديلات المواد الثابتة من Firestore عند فتح الصفحة
+// Load Editات Subjects الثابتة من Firestore عند فتح Page
 onSnapshot(collection(db, 'staticSubjects'), snap => {
   snap.docs.forEach(d => {
     const data = d.data();
@@ -292,7 +292,7 @@ onSnapshot(collection(db, 'staticSubjects'), snap => {
   });
 });
 
-// ===== تعديل المادة (materials) =====
+// ===== Edit اWHENدة (MATERIALS) =====
 window.openEditModal = (id) => {
   const m = allMats.find(x => x.id === id);
   if (!m) return;
@@ -339,7 +339,7 @@ window.submitEditCourse = async () => {
   btn.innerHTML = '<i class="ti ti-device-floppy"></i> حفظ التعديلات';
 };
 
-// ===== حذف المادة =====
+// ===== Delete اWHENدة =====
 window.confirmDeleteMat = (id, title) => {
   document.getElementById('deleteMatId').value = id;
   document.getElementById('deleteMatTitle').textContent = title;
@@ -363,7 +363,7 @@ window.executeDeleteMat = async () => {
   btn.innerHTML = '<i class="ti ti-trash"></i> تأكيد الحذف';
 };
 
-// تحديد دور المستخدمة
+// تحthisد دور Userة
 onAuthStateChanged(auth, async user => {
   if (!user) {
     currentUserRole = null;
@@ -395,7 +395,7 @@ onAuthStateChanged(auth, async user => {
   window.filterMats();
   renderModalMats();
 
-  // لو الـ snapshot وصل قبل الـ auth — اعمل render تاني
+  // If الـ snapshot وصل قبل الـ auth — اعمل render تاني
   if (pendingRender) {
     pendingRender = false;
     window.filterMats();
@@ -496,7 +496,7 @@ onSnapshot(query(collection(db, 'materials'), orderBy('addedAt', 'desc')), snap 
 });
 
 // =============================================
-// إدارة المواد الرئيسية (subjects collection)
+// إدارة Subjects الرئيسية (subjects collection)
 // =============================================
 
 let allSubjects = [];
@@ -548,12 +548,12 @@ function renderSubjects() {
   grid.innerHTML = allSubjects.map(subjectCardHTML).join('');
 }
 
-// فتح مودال ديناميكي للمادة الرئيسية
+// فتح Modal thisناميكي لWhenدة الرئيسية
 window.openDynModal = (id) => {
   const s = allSubjects.find(x => x.id === id);
   if (!s) return;
 
-  // احذف أي مودال قديم
+  // اDelete أي Modal قthisم
   const old = document.getElementById('dynModal-' + id);
   if (old) old.remove();
 
@@ -615,7 +615,7 @@ window.openDynModal = (id) => {
   document.body.appendChild(modal);
 };
 
-// إضافة مادة رئيسية
+// Add مادة رئيسية
 window.submitNewSubject = async () => {
   const name  = document.getElementById('sbjName').value.trim();
   const desc  = document.getElementById('sbjDesc').value.trim();
@@ -660,7 +660,7 @@ window.submitNewSubject = async () => {
   btn.innerHTML = '<i class="ti ti-circle-plus"></i> إضافة المادة';
 };
 
-// تعديل مادة رئيسية
+// Edit مادة رئيسية
 window.openEditSubjectModal = (id) => {
   const s = allSubjects.find(x => x.id === id);
   if (!s) return;
@@ -668,13 +668,13 @@ window.openEditSubjectModal = (id) => {
   document.getElementById('editSbjName').value = s.name;
   document.getElementById('editSbjIconUrl').value = s.iconUrl || '';
   document.getElementById('editSbjIconData').value = s.iconData || '';
-  // عرض الصورة الحالية
+  // Width/Display الImage الحالية
   const editPrev = document.getElementById('editSbjIconPreview');
   const imgSrc = s.iconData || s.iconUrl;
   editPrev.innerHTML = imgSrc
     ? `<img src="${imgSrc}" style="width:100%;height:100%;object-fit:cover;">`
     : '<i class="ti ti-photo" style="font-size:24px;color:var(--text-mid);"></i>';
-  // ضبط الألوان
+  // ضبط Colors
   const colorMatch = (s.color || '').match(/#[0-9a-fA-F]{6}/g);
   if (colorMatch && colorMatch.length >= 2) {
     document.getElementById('editSbjColor1').value = colorMatch[0];
@@ -725,7 +725,7 @@ window.submitEditSubject = async () => {
   btn.innerHTML = '<i class="ti ti-device-floppy"></i> حفظ التعديلات';
 };
 
-// حذف مادة رئيسية
+// Delete مادة رئيسية
 window.confirmDeleteSubject = (id, name) => {
   document.getElementById('deleteSbjId').value = id;
   document.getElementById('deleteSbjTitle').textContent = name;
@@ -739,10 +739,10 @@ window.executeDeleteSubject = async () => {
   btn.disabled = true;
   btn.innerHTML = '<i class="ti ti-loader"></i> جاري الحذف...';
   try {
-    // 1. احذف المادة الرئيسية
+    // 1. اDelete اWhenدة الرئيسية
     await deleteDoc(doc(db, 'subjects', id));
 
-    // 2. احذف كل المحتوى المرتبط بها من materials collection
+    // 2. اDelete كل Content المرتبط بها من materials collection
     const matsSnap = await getDocs(query(
       collection(db, 'materials'),
       where('course', '==', subjectName)
@@ -760,13 +760,13 @@ window.executeDeleteSubject = async () => {
   btn.innerHTML = '<i class="ti ti-trash"></i> تأكيد الحذف';
 };
 
-// تحميل المواد الرئيسية من Firebase
+// Load Subjects الرئيسية من Firebase
 onSnapshot(query(collection(db, 'subjects'), orderBy('addedAt', 'asc')), snap => {
   allSubjects = snap.docs.map(d => ({ id: d.id, ...d.data() }));
   renderSubjects();
 });
 
-// إظهار أزرار الأدمن
+// Show Buttons Admin
 function showAdminBtns() {
   const btns = document.getElementById('adminBtns');
   if (btns && isAdmin()) btns.style.display = 'flex';
