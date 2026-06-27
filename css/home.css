@@ -98,7 +98,7 @@ body {
 .logo-circle img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
 }
 
 /* شعار شركاء الخير — خلفية فاتحة لأن الشعار رمادي-أخضر شبه شفاف
@@ -459,7 +459,7 @@ body {
   width: 60px;
   height: 60px;
   border-radius: 50%;
-  object-fit: cover;
+  object-fit: contain;
   border: 2px solid var(--gold);
   background: #1a4a2e;
   box-shadow: 0 0 0 1px rgba(201,162,39,0.25);
@@ -593,7 +593,7 @@ body {
 }
 .sidebar-foot-img {
   width: 32px; height: 32px;
-  border-radius: 50%; object-fit: cover;
+  border-radius: 50%; object-fit: contain;
   border: 1.5px solid var(--gold);
   background: #1a4a2e;
 }
@@ -619,7 +619,7 @@ body {
   border-radius: 20px;
   overflow: hidden;
   background-color: var(--beige, #f7efe3);
-  aspect-ratio: 16 / 6;
+  aspect-ratio: 16 / 9;
   box-shadow: 0 6px 32px rgba(92,61,46,0.13);
   border: 1px solid rgba(201,162,39,0.25);
 }
@@ -630,8 +630,8 @@ body {
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  object-position: 30% center;
+  object-fit: contain;
+  object-position: left center;
   display: block;
 }
 
@@ -662,7 +662,7 @@ body {
 
 .hero-logo-mobile {
   width: 56px; height: 56px;
-  border-radius: 50%; object-fit: cover;
+  border-radius: 50%; object-fit: contain;
   border: 2px solid var(--gold);
   background: #2c1a0e;
   margin-bottom: 14px;
@@ -681,7 +681,7 @@ body {
 .hero-logos .hero-logo-desktop {
   width: 64px; height: 64px;
   border-radius: 50%;
-  object-fit: cover;
+  object-fit: contain;
   border: 2px solid var(--gold);
   background: #2c1a0e;
   flex-shrink: 0;
@@ -1163,12 +1163,12 @@ footer {
 
 /* لاب (1024px - 1440px) */
 @media (min-width: 1025px) and (max-width: 1440px) {
-  .hero { aspect-ratio: 16 / 6; }
+  .hero { aspect-ratio: 16 / 9; }
 }
 
 /* شاشات كبيرة (> 1440px) */
 @media (min-width: 1441px) {
-  .hero { aspect-ratio: 21 / 7; }
+  .hero { aspect-ratio: 16 / 9; }
 }
 
 /* Mobile (≤ 767px) */
@@ -1276,7 +1276,7 @@ footer {
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  object-fit: cover;
+  object-fit: contain;
   border: 1.5px solid var(--gold);
   background: #1a4a2e;
 }
