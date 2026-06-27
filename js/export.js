@@ -245,10 +245,10 @@ function chipAtt(v) {
  * studentsData = [
  *   { name, sessions: [ { date, day, subjects:{قرآن:'present'|'absent'|'',...} } ] }
  * ]
- * mode: 'perStudent' = صفحة لكل طالبة | 'combined' = جدول مشترك
+ * mode: 'perStudent' = Page لكل طالبة | 'combined' = Schedule/Table not/don'tترك
  */
 function buildAttPages(studentsData, mode) {
-  // اجمع كل المواد الموجودة
+  // اجمع كل Subjects الموجودة
   const allSubjects = new Set();
   studentsData.forEach(st =>
     st.sessions.forEach(se =>
@@ -258,7 +258,7 @@ function buildAttPages(studentsData, mode) {
   const subjects = [...allSubjects];
 
   if (mode === 'perStudent') {
-    // ── صفحة لكل طالبة ──────────────────────────────
+    // ── Page لكل طالبة ──────────────────────────────
     return studentsData.map(st => {
       const sessions = [...(st.sessions || [])].sort((a,b) => (a.date||'') < (b.date||'') ? -1 : 1);
       const subjs = subjects.length ? subjects : [...new Set(sessions.flatMap(se => Object.keys(se.subjects||{})))];
@@ -287,7 +287,7 @@ function buildAttPages(studentsData, mode) {
     }).join('');
 
   } else {
-    // ── جدول مشترك — عمود لكل طالبة ─────────────────
+    // ── Schedule/Table not/don'tترك — Column لكل طالبة ─────────────────
     // نجمع كل الجلسات (date+day) المميزة
     const dateMap = {};
     studentsData.forEach(st =>
