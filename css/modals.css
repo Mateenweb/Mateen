@@ -1,9 +1,9 @@
 /* ════════════════════════════════════════════════════════════
-   modals.css — أنماط الـ modals والعناصر المتولّدة من JS
+   modals.css — أنماط the modals  and the عناصر المتولّدة من JS
    مستخرجة من inline styles لمنع تعارضات الـ override
    ════════════════════════════════════════════════════════════ */
 
-/* ── Overlay عام لكل المودالز ── */
+/* ── Overlay عام لكل Modalز ── */
 .m-overlay {
   display: none;
   position: fixed;
@@ -18,7 +18,7 @@
 .m-overlay.z-high { z-index: 9999; }
 .m-overlay.show   { display: flex; }
 
-/* ── صندوق المودال ── */
+/* ── صندوق Modal ── */
 .m-box {
   background: #fff;
   border-radius: 14px;
@@ -95,7 +95,7 @@
 }
 .m-foot-light { border-top-color: #e8e0d0; }
 
-/* ── عناصر داخل المودال ── */
+/* ── عناصر داخل Modal ── */
 .m-block { margin-bottom: 14px; }
 .m-label-row {
   font-size: 13px;
@@ -155,7 +155,7 @@
 }
 .m-group-options.show { display: block; }
 
-/* ── أزرار تحديد الكل/إلغاء الكل ── */
+/* ── Buttons تحthisد الكل/إلغاء الكل ── */
 .m-select-row {
   display: flex;
   gap: 8px;
@@ -181,7 +181,7 @@
   color: #b71c1c;
 }
 
-/* ── قائمة طالبات (scrollable) ── */
+/* ── List/Menu طالبات (scrollable) ── */
 .m-student-list {
   display: flex;
   flex-direction: column;
@@ -192,7 +192,7 @@
 .m-student-list-sm { max-height: 200px; }
 .m-student-list-lg { max-height: 280px; }
 
-/* ── أزرار التصدير / الإجراء النهائي ── */
+/* ── Buttons التصthisر / الإجراء النهائي ── */
 .m-btn-word {
   padding: 9px 20px;
   border: none;
@@ -249,7 +249,7 @@
   cursor: not-allowed;
 }
 
-/* ── حقل بحث داخل المودال ── */
+/* ── Field Search داخل Modal ── */
 .m-search-wrap {
   padding: 12px 16px;
   border-bottom: 1px solid #f0ebe0;
@@ -265,7 +265,7 @@
   box-sizing: border-box;
 }
 
-/* ── قائمة طالبات قابلة للتمرير دون padding علوي ── */
+/* ── List/Menu طالبات قابلة للتمرير دون padding عIfي ── */
 .m-list-flex {
   overflow-y: auto;
   flex: 1;
@@ -462,7 +462,7 @@
   font-size: 12px;
 }
 
-/* ── حقول نموذج إضافة خبر (تستخدم m-* الموجودة + إضافات) ── */
+/* ── حقول Form Add خبر (تستخدم m-* الموجودة + إضافات) ── */
 .m-form-stack {
   display: flex;
   flex-direction: column;
