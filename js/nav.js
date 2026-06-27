@@ -1,4 +1,4 @@
-// nav.js — يحمّل Navigation bar في جميع الRowحات
+// nav.js — loads Navigation bar across all pages
 
 function renderNav(activePage) {
   const links = [
@@ -9,6 +9,9 @@ function renderNav(activePage) {
     { href: 'news.html',    label: 'الأخبار' },
     { href: '#contact',     label: 'تواصل معنا' },
   ];
+
+  // Check if user is logged in via Firebase localStorage key
+  const isLoggedIn = _navIsLoggedIn();
 
   const navHTML = `
 <nav>
@@ -23,21 +26,35 @@ function renderNav(activePage) {
   <ul class="nav-links">
     ${links.map(l => `<li><a href="${l.href}"${activePage === l.href ? ' class="active"' : ''}>${l.label}</a></li>`).join('\n    ')}
   </ul>
-  <div class="nav-btns">
+  <div class="nav-btns"${isLoggedIn ? ' style="display:none"' : ''} id="navBtnsRendered">
     <a href="login.html" class="btn-admin"><i class="ti ti-dashboard"></i> لوحة الإدارة</a>
     <a href="login.html" class="btn-outline"><i class="ti ti-user"></i> تسجيل الدخول</a>
-    <button class="btn-solid">التسجيل في البرنامج</button>
+    <button class="btn-solid" onclick="document.getElementById('reg-modal')?.classList.add('open')">التسجيل في البرنامج</button>
   </div>
-  <button class="nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')">
+  <button class="nav-toggle" aria-label="Open sidebar menu" onclick="document.querySelector('.nav-links').classList.toggle('open')">
     <i class="ti ti-menu-2"></i>
   </button>
 </nav>`;
 
-  // Support both nav-placeholder div and direct injection at top of body
   const placeholder = document.getElementById('nav-placeholder');
   if (placeholder) {
     placeholder.outerHTML = navHTML;
   }
+}
+
+function _navIsLoggedIn() {
+  // Firebase stores auth session in localStorage with key matching firebaseLocalStorage
+  // Key pattern: "firebase:authUser:<API_KEY>:[DEFAULT]"
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith('firebase:authUser:')) {
+        const val = localStorage.getItem(key);
+        if (val && val !== 'null') return true;
+      }
+    }
+  } catch(e) {}
+  return false;
 }
 
 // Auto-run if nav-placeholder exists and renderNav isn't called manually
