@@ -20,9 +20,6 @@ window.addEventListener('beforeinstallprompt', (e) => {
 
 function showInstallBanner() {
   if (document.getElementById('installBanner')) return;
-  if (localStorage.getItem('installBannerDismissed')) return;
-  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-  if (isStandalone) return;
 
   const banner = document.createElement('div');
   banner.id = 'installBanner';
@@ -42,7 +39,7 @@ function showInstallBanner() {
         background:#c9a227; color:#2c1a0e; border:none; border-radius:10px;
         padding:7px 16px; font-family:inherit; font-weight:700; cursor:pointer; font-size:13px;
       ">تثبيت</button>
-      <button onclick="localStorage.setItem('installBannerDismissed','1');document.getElementById('installBanner').remove()" style="
+      <button onclick="document.getElementById('installBanner').remove()" style="
         background:none; border:none; color:rgba(255,255,255,0.5); cursor:pointer; font-size:18px; padding:0 4px;
       ">✕</button>
     </div>
@@ -63,15 +60,15 @@ window.installApp = async () => {
   if (banner) banner.remove();
 };
 
-// ── طلب إذن الإشعارات ────────────────────────────────────────────────────
+// ── طلب إذن الNotificationات ────────────────────────────────────────────────────
 window.addEventListener('load', () => {
-  // انتظر 5 ثواني بعد التحميل
+  // انتظر 5 ثواني بعد Loading
   setTimeout(async () => {
     if (!('Notification' in window)) return;
     if (Notification.permission === 'granted') return;
     if (Notification.permission === 'denied') return;
 
-    // فقط لو المستخدم مسجّل دخول (وجود firebase auth)
+    // only If User مسجّل دخول (وجود firebase auth)
     const isLoggedIn = document.cookie.includes('loggedIn') ||
       localStorage.getItem('mateenUser');
     if (!isLoggedIn) return;
@@ -82,7 +79,7 @@ window.addEventListener('load', () => {
 
 function showNotifBanner() {
   if (document.getElementById('notifBanner')) return;
-  if (document.getElementById('installBanner')) return; // لا تعرض الاثنين معاً
+  if (document.getElementById('installBanner')) return; // لا تWidth/Display الاثنين معاً
 
   const banner = document.createElement('div');
   banner.id = 'notifBanner';
@@ -133,7 +130,7 @@ window.addEventListener('load', () => {
   const visitCount = parseInt(localStorage.getItem('visitCount') || '0') + 1;
   localStorage.setItem('visitCount', visitCount);
 
-  // اعرض البانر من الزيارة الثانية فصاعداً لو مش مضافة ولو ما اتعملش dismiss
+  // اWidth/Display البانر from the زيارة الثانية فصاعداً If not/don't مضافة وIf ما اتعملش dismiss
   if (!isIOS || !isSafari || isStandalone || dismissed) return;
   if (visitCount < 2) return;
 
