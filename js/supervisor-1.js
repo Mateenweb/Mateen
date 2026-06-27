@@ -573,9 +573,7 @@ function renderStudents(list) {
                 oninput="stuAutoName('${s.id}', this.value)"
                 class="stu-mob-name-input"/>
             </div>
-            <button class="btn-del-stu" onclick="stuDelete('${s.id}')" title="حذف">
-              <i class="ti ti-trash"></i>
-            </button>
+
           </div>
           <div class="stu-mob-row">
             <select class="stu-mob-sel" onchange="stuField('${s.id}','status',this.value)">
@@ -670,7 +668,7 @@ function renderStudents(list) {
       <td><button class="btn-interview ${intClass}" onclick="stuToggleInterview('${s.id}','${s.interview}')">${intLabel}</button></td>
       <td><button class="btn-accept ${accClass}" onclick="stuToggleAccept('${s.id}','${s.accepted}','${s.interview}')">${accLabel}</button></td>
       <td>${placementCell}</td>
-      <td><button class="btn-del-stu" onclick="stuDelete('${s.id}')" title="حذف"><i class="ti ti-trash"></i></button></td>
+
     </tr>`;
   }).join('');
 }
