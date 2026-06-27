@@ -1,5 +1,5 @@
 // ===========================
-//  صفحة الطالبة — عرض فقط
+//  Student page — Width/Display only
 // ===========================
 
 import { initializeApp }
@@ -29,7 +29,7 @@ onAuthStateChanged(auth, async user => {
     window.location.href = '../html/home.html'; return;
   }
 
-  // الإدارة والمشرفة: تشوف الكل
+  // الإدارة  and the not/don'tرفة: تشوف الكل
   if (role === 'admin' || role === 'supervisor') {
     document.getElementById('authGate').style.display    = 'none';
     document.getElementById('mainContent').style.display = 'block';
@@ -37,7 +37,7 @@ onAuthStateChanged(auth, async user => {
     return;
   }
 
-  // المعلمة: بس طالباتها — التحقق يتم جوه initStudentView بعد ما يتحمّل الـ student
+  // Teacher (f): but/only طالباتها — Validation يتم جوه initStudentView بعد ما يتحمّل الـ student
   if (role === 'teacher') {
     document.getElementById('authGate').style.display    = 'none';
     document.getElementById('mainContent').style.display = 'block';
@@ -45,7 +45,7 @@ onAuthStateChanged(auth, async user => {
     return;
   }
 
-  // الطالبات وأي حد تاني — ممنوع
+  // Studentات وأي حد تاني — ممنوع
   window.location.href = '../html/home.html';
 });
 
@@ -55,7 +55,7 @@ function initStudentView(userData = {}) {
 const hashParams = new URLSearchParams(location.hash.replace(/^#/, ''));
 const params     = new URLSearchParams(location.search);
 const studentNum = parseInt(hashParams.get('n') || params.get('n'));
-const studentDocId = params.get('id') || hashParams.get('id'); // دعم ?id= من لوحة الإدارة
+const studentDocId = params.get('id') || hashParams.get('id'); // دعم ?id= من Ifحة الإدارة
 
 function showError(msg = 'الرابط غير صحيح') {
   document.body.innerHTML = `
@@ -74,11 +74,11 @@ async function loadAll() {
   let studentId;
 
   if (studentDocId) {
-    // فتح مباشرة بالـ document ID (من لوحة الإدارة)
+    // فتح مباشرة بالـ document ID (من Ifحة الإدارة)
     studentId = studentDocId;
     history.replaceState(null, '', location.pathname);
   } else {
-    // فتح بالرقم الترتيبي (الطريقة القديمة)
+    // فتح بالرقم الSortي (الطريقة القthisمة)
     const allSnap = await getDocs(query(collection(db, 'students'), orderBy('order')));
     if (allSnap.empty || studentNum > allSnap.docs.length) { showError(); return; }
     studentId = allSnap.docs[studentNum - 1].id;
@@ -92,7 +92,7 @@ async function loadAll() {
     getDocs(query(collection(db, 'students', studentId, 'grades'),   orderBy('createdAt', 'desc'))).catch(()=>({docs:[]}))
   ]);
 
-  // المعلمة: تشوف بس طالباتها فقط
+  // Teacher (f): تشوف but/only طالباتها only
   if (userData.role === 'teacher') {
     const teacherSubject = userData.subject || '';
     if (!snap.exists() || snap.data().teacherId !== teacherSubject) {
@@ -102,7 +102,7 @@ async function loadAll() {
   }
 
   if (!snap.exists()) {
-    // الطالبة غير مربوطة بعد — نجيب بياناتها من users collection
+    // Student (f) غير مربوطة بعد — نجيب بياناتها من users collection
     if (studentDocId) {
       const userSnap = await getDoc(doc(db, 'users', studentId));
       if (userSnap.exists()) {
@@ -131,7 +131,7 @@ async function loadAll() {
   const sessions = sessSnap.docs.map(d => ({ id: d.id, ...d.data() }));
   const grades   = gradeSnap.docs.map(d => ({ id: d.id, ...d.data() }));
 
-  // Name & status - مخفية (البيانات الشخصية لا تظهر للمشرفة)
+  // Name & status - مخفية (Data الشخصية لا تظهر للnot/don'tرفة)
   document.title = 'سجل الطالبة — برنامج متين';
 
   // Notes
