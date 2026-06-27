@@ -13,12 +13,13 @@
 
 /* ── News Cards ── */
 .news-card {
-  background: var(--white);
+  background: #ffffff;
   border-radius: 14px;
-  border: 1px solid var(--border);
+  border: 1px solid rgba(92,61,46,0.15);
   padding: 22px 24px;
   margin-bottom: 16px;
   transition: box-shadow 0.2s, transform 0.2s;
+  box-shadow: 0 2px 12px rgba(92,61,46,0.08);
 }
 .news-card:hover {
   box-shadow: 0 6px 24px rgba(92,61,46,0.1);

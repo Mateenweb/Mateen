@@ -272,6 +272,21 @@ onSnapshot(q, snap => {
   }
 });
 
+window.editNews = async id => {
+  const snap = await getDoc(doc(db, 'news', id));
+  if (!snap.exists()) return;
+  const n = snap.data();
+  document.getElementById('newsTitle').value  = n.title || '';
+  document.getElementById('newsBody').value   = n.body  || '';
+  document.getElementById('newsTag').value    = n.tag   || '';
+  document.getElementById('newsVisibility').value = n.visibility || 'all';
+  document.getElementById('newsPinned').checked   = n.pinned || false;
+  // حفظ الـ id للتعديل
+  document.getElementById('newsSubmitBtn').dataset.editId = id;
+  document.getElementById('newsSubmitBtn').textContent = '💾 حفظ التعديلات';
+  document.getElementById('addNewsModal').style.display = 'flex';
+};
+
 window.deleteNews = async id => {
   if (!confirm('حذف هذا الخبر نهائياً؟')) return;
   await deleteDoc(doc(db, 'news', id));
@@ -317,13 +332,22 @@ window.submitNews = async () => {
   const tag        = document.getElementById('newsTag').value;
   const pinned     = document.getElementById('newsPinned').checked;
   const visibility = document.getElementById('newsVisibility').value;
+  const editId     = document.getElementById('newsSubmitBtn').dataset.editId;
 
   if (!title) { alert('يرجى إدخال العنوان'); return; }
 
-  await addDoc(collection(db, 'news'), {
-    title, body, tag, pinned, visibility,
-    createdAt: serverTimestamp()
-  });
+  if (editId) {
+    // تعديل خبر موجود
+    await updateDoc(doc(db, 'news', editId), { title, body, tag, pinned, visibility });
+    delete document.getElementById('newsSubmitBtn').dataset.editId;
+    document.getElementById('newsSubmitBtn').textContent = '📤 نشر الخبر';
+  } else {
+    // إضافة خبر جديد
+    await addDoc(collection(db, 'news'), {
+      title, body, tag, pinned, visibility,
+      createdAt: serverTimestamp()
+    });
+  }
 
   // Reset form
   document.getElementById('newsTitle').value  = '';
