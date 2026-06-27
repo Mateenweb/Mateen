@@ -30,7 +30,7 @@ function loadData() {
     const all     = snap.docs.map(d=>({id:d.id,...d.data()}));
     const pending = all.filter(u=>u.status==='pending');
     const active  = all.filter(u=>u.status==='active');
-    // كل الطالبات بغض النظر عن الحالة
+    // كل Studentات بغض النظر عن الحالة
     document.getElementById('sPending').textContent = pending.length;
     document.getElementById('sActive').textContent  = active.length;
     document.getElementById('sTotal').textContent   = all.length;
@@ -64,7 +64,7 @@ function renderAll(list) {
   const c = document.getElementById('allContainer');
   if (!list.length) { c.innerHTML = '<div class="empty-state"><i class="ti ti-inbox"></i>لا توجد طالبات</div>'; return; }
 
-  // بحث
+  // Search
   const searchVal = (document.getElementById('supSearch')?.value || '').toLowerCase();
   const filtered  = searchVal ? list.filter(u => (u.name||'').toLowerCase().includes(searchVal)) : list;
 
@@ -96,8 +96,12 @@ function renderAll(list) {
               ${u.status==='active' ? '✅ نشطة' : u.status==='pending' ? '⏳ معلقة' : '❌ موقوفة'}
             </span>
           </div>
-
-          <!-- أزرار -->
+          <!-- بيانات -->
+          <div style="padding:12px 16px;font-size:12px;color:var(--text-mid);display:flex;flex-direction:column;gap:4px;">
+            ${u.phone ? `<div><i class="ti ti-phone" style="margin-left:4px;"></i>${esc(u.phone)}</div>` : ''}
+            ${u.year  ? `<div><i class="ti ti-calendar" style="margin-left:4px;"></i>${esc(u.year)}</div>` : ''}
+          </div>
+          <!-- Buttons -->
           <div style="padding:10px 16px;border-top:1px solid var(--border);display:flex;gap:8px;">
             <a href="student.html?id=${u.id}"
                style="flex:1;padding:8px;background:var(--green-dark);color:white;border:none;border-radius:8px;
@@ -123,7 +127,7 @@ window.filterSup = () => {
   const list = window._allStudents || [];
   const filtered = val ? list.filter(u => (u.name||'').toLowerCase().includes(val)) : list;
   renderAll(filtered);
-  // حافظ على قيمة البحث
+  // حافظ على قيمة الSearch
   const inp = document.getElementById('supSearch');
   if (inp) { inp.value = val; inp.focus(); }
 };
@@ -174,7 +178,7 @@ async function loadMateenUsers() {
 }
 
 // ══════════════════════════════════════════════════════════════
-//  الغياب — بناءً على الجدول
+//  الغياب — بناءً on the Schedule/Table
 // ══════════════════════════════════════════════════════════════
 window.loadAttendance = async () => {
   const dateVal = document.getElementById('attDate').value;
@@ -191,14 +195,14 @@ window.loadAttendance = async () => {
   attSessions = [];
   attData     = {};
 
-  // جيبي كل الطالبات
+  // جيبي كل Studentات
   const studentsSnap = await getDocs(query(collection(db,'students'), orderBy('order')));
   const todayStudents = studentsSnap.docs
     .map(d => ({ id: d.id, ...d.data() }))
     .filter(s => s.name && s.name.trim() && s.name !== 'طالبة جديدة');
 
   if (todayStudents.length > 0) {
-    // جيبي المواد اللي عندها جدول في هذا اليوم من teachers collection
+    // جيبي Subjects اللي عنthisا Schedule/Table في هذا اليوم من teachers collection
     await Promise.all(SUBJECTS_MAP.map(async subj => {
       const snap = await getDocs(collection(db, 'teachers', subj.id, 'schedule'));
       const hasDay = snap.docs.some(d => d.data().day === dayAr);
@@ -208,7 +212,7 @@ window.loadAttendance = async () => {
       }
     }));
 
-    // لو مفيش جدول لأي مادة، اعرض كل المواد
+    // If مفيش Schedule/Table لأي مادة، اWidth/Display كل Subjects
     if (attSessions.length === 0) {
       SUBJECTS_MAP.forEach(subj => {
         attSessions.push({ subjectId: subj.id, subjectAr: subj.ar, students: todayStudents });
@@ -298,12 +302,12 @@ window.saveAttendance = async () => {
   btn.innerHTML = '<i class="ti ti-loader spin"></i> جارٍ الحفظ...';
 
   try {
-    // احذفي السجلات القديمة لهذا التاريخ
+    // اDeleteي السجلات القthisمة لهذا التاريخ
     const oldQ = query(collection(db,'attendance'), where('date','==',dateVal));
     const oldSnap = await getDocs(oldQ);
     await Promise.all(oldSnap.docs.map(d => deleteDoc(doc(db,'attendance',d.id))));
 
-    // احفظي الجديدة
+    // احفظي الجthisدة
     const writes = [];
     attSessions.forEach(sess => {
       sess.students.forEach(u => {
@@ -419,7 +423,7 @@ window.closeNotesModal = (e) => {
 
 
 // ══════════════════════════════════════════════════════════════
-//  قاعدة بيانات الطالبات — نفس الأدمن (قراءة فقط للمشرفة)
+//  قاعدة بيانات Studentات — نفس Admin (قراءة only للnot/don'tرفة)
 // ══════════════════════════════════════════════════════════════
 let allStudents = [];
 let stuSortAlpha = false;
@@ -528,64 +532,10 @@ function renderStudents(list) {
       <td><span class="btn-interview ${intClass}">${intLabel}</span></td>
       <td><span class="btn-accept ${accClass}">${accLabel}</span></td>
       <td>${s.placementScore!=null?s.placementScore+'/100':'—'}</td>
-      <td><button onclick="editAbsence('${s.id}','${esc(s.name||'')}')" title="تعديل الغياب" style="background:none;border:1px solid var(--gold);border-radius:6px;padding:4px 8px;cursor:pointer;color:var(--green-dark);font-size:12px;"><i class="ti ti-calendar-stats"></i></button></td>
+      <td><a class="btn-stu-link" href="student.html?id=${s.id}" target="_blank"><i class="ti ti-eye"></i></a></td>
     </tr>`;
   }).join('');
 }
-
-// ── تعديل الغياب الفردي ──────────────────────────────────────
-window.editAbsence = async (uid, name) => {
-  // جيب سجلات الغياب لهذه الطالبة
-  const snap = await getDocs(query(collection(db,'attendance'), where('uid','==',uid)));
-  const records = snap.docs.map(d => ({id:d.id,...d.data()})).sort((a,b)=>a.date>b.date?-1:1);
-
-  const modal = document.createElement('div');
-  modal.id = 'editAbsModal';
-  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;';
-  modal.innerHTML = `
-    <div style="background:white;border-radius:16px;padding:24px;max-width:480px;width:95%;max-height:80vh;overflow-y:auto;direction:rtl;">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-        <div style="font-family:Amiri,serif;font-size:18px;color:var(--green-dark);font-weight:700;">غياب: ${name}</div>
-        <button onclick="document.getElementById('editAbsModal').remove()" style="background:none;border:none;font-size:20px;cursor:pointer;">✕</button>
-      </div>
-      ${records.length === 0 ? '<p style="text-align:center;color:var(--text-mid);">لا يوجد سجل غياب لهذه الطالبة</p>' : `
-      <table style="width:100%;border-collapse:collapse;font-size:13px;">
-        <thead><tr style="background:var(--beige);">
-          <th style="padding:8px;text-align:right;border-bottom:1px solid var(--border);">التاريخ</th>
-          <th style="padding:8px;text-align:center;border-bottom:1px solid var(--border);">الحالة</th>
-          <th style="padding:8px;text-align:center;border-bottom:1px solid var(--border);">تعديل</th>
-        </tr></thead>
-        <tbody>
-          ${records.map(r => `<tr>
-            <td style="padding:8px;border-bottom:1px solid var(--border);">${r.date||'—'}</td>
-            <td style="padding:8px;text-align:center;border-bottom:1px solid var(--border);">
-              <span style="padding:3px 10px;border-radius:10px;font-size:12px;background:${r.status==='absent'?'#fee2e2':r.status==='excused'?'#fef3c7':'#d1fae5'};color:${r.status==='absent'?'#991b1b':r.status==='excused'?'#92400e':'#065f46'}">
-                ${r.status==='absent'?'غائبة':r.status==='excused'?'بعذر':'حاضرة'}
-              </span>
-            </td>
-            <td style="padding:8px;text-align:center;border-bottom:1px solid var(--border);">
-              <select onchange="updateAbsRecord('${r.id}',this.value)" style="font-size:12px;padding:3px 6px;border:1px solid var(--border);border-radius:6px;font-family:inherit;">
-                <option value="present" ${r.status==='present'?'selected':''}>حاضرة</option>
-                <option value="absent"  ${r.status==='absent'?'selected':''}>غائبة</option>
-                <option value="excused" ${r.status==='excused'?'selected':''}>بعذر</option>
-              </select>
-            </td>
-          </tr>`).join('')}
-        </tbody>
-      </table>`}
-    </div>`;
-  document.body.appendChild(modal);
-  modal.addEventListener('click', e => { if(e.target===modal) modal.remove(); });
-};
-
-window.updateAbsRecord = async (docId, newStatus) => {
-  try {
-    await updateDoc(doc(db,'attendance',docId), { status: newStatus });
-    showToast('✅ تم تعديل الغياب');
-  } catch(e) {
-    showToast('❌ حدث خطأ');
-  }
-};
 
 // ── Export ──────────────────────────────────────────────────
 window.openExportModal = () => document.getElementById('exportModal')?.classList.add('show');
