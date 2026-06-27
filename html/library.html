@@ -65,14 +65,14 @@
     </button>
   </div>
 
-  <!-- ══ 1. مكتبة متين (المواد من Firebase) ══ -->
+  <!-- ══ 1. Library متين (Subjects من Firebase) ══ -->
   <div class="lib-section active" id="section-mateen-lib">
     <div class="section-header">
       <div class="section-title"><i class="ti ti-books"></i> مكتبة متين</div>
       <div class="section-desc">المواد العلمية المضافة من قِبل الأدمن والمعلمات</div>
     </div>
 
-    <!-- فلتر المادة -->
+    <!-- فلتر اWhenدة -->
     <div class="lib-filters">
       <button class="lib-btn active" onclick="filterLibMats(this,'all')">الكل</button>
       <button class="lib-btn" onclick="filterLibMats(this,'التفسير')">التفسير</button>
@@ -86,7 +86,7 @@
       <div class="lib-empty"><i class="ti ti-loader" style="font-size:28px;"></i><div>جاري التحميل...</div></div>
     </div>
 
-    <!-- زرار إضافة للأدمن -->
+    <!-- Button Add للأدمن -->
     <div id="libAddBtn" style="display:none;margin-top:16px;">
       <button onclick="document.getElementById('addCourseModal') && document.getElementById('addCourseModal').style ? document.getElementById('addCourseModal').style.display='flex' : null"
         class="btn-add-lib">
@@ -151,7 +151,7 @@
 
 </div><!-- /main-wrap -->
 
-<!-- ══ مودال إضافة محتوى ══ -->
+<!-- ══ Modal Add Content ══ -->
 <div id="addLibModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9999;align-items:center;justify-content:center;">
   <div style="background:white;border-radius:16px;padding:28px;width:90%;max-width:480px;direction:rtl;max-height:90vh;overflow-y:auto;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
@@ -187,7 +187,7 @@
   </div>
 </div>
 
-<!-- مودال تعديل -->
+<!-- Modal Edit -->
 <div id="editLibModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9999;align-items:center;justify-content:center;">
   <div style="background:white;border-radius:16px;padding:28px;width:90%;max-width:480px;direction:rtl;max-height:90vh;overflow-y:auto;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
@@ -223,7 +223,7 @@
   </div>
 </div>
 
-<!-- مودال تأكيد الحذف -->
+<!-- Modal تأكيد الDelete -->
 <div id="deleteLibModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9999;align-items:center;justify-content:center;">
   <div style="background:white;border-radius:16px;padding:28px;width:90%;max-width:400px;direction:rtl;text-align:center;">
     <div style="font-size:40px;margin-bottom:12px;">🗑️</div>
