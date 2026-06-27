@@ -13,10 +13,10 @@ const app  = initializeApp(FIREBASE_CONFIG);
 const auth = getAuth(app);
 const db   = getFirestore(app);
 
-// ضمان حفظ الجلسة في localStorage
+// ضمان حفظ Session في localStorage
 setPersistence(auth, browserLocalPersistence);
 
-// لو المستخدمة مسجلة دخول بالفعل — حوّليها بعيداً عن صفحة الدخول
+// If Userة مسجلة دخول بالفعل — حوّليها بعيداً عن Page الدخول
 onAuthStateChanged(auth, async user => {
   if (!user) return;
   if (window.location.hash === '#noredirect') return;
@@ -24,7 +24,7 @@ onAuthStateChanged(auth, async user => {
     const snap = await getDoc(doc(db, 'users', user.uid));
     const data = snap.exists() ? snap.data() : {};
     const status = data.status || 'active';
-    // لو الحساب معلق — لا تعمل redirect (بيتم signOut تلقائي في doRegister)
+    // If الحساب معلق — لا تعمل redirect (بيتم signOut تلقائي في doRegister)
     if (status === 'pending') return;
     const role = data.role || 'student';
     let redirect = 'home.html';
@@ -38,7 +38,7 @@ onAuthStateChanged(auth, async user => {
       redirect = 'home.html';
     }
 
-    // وجّهيه للـ onboarding دايماً بعد تسجيل الدخول
+    // وجّهيه for the  onboarding دايماً بعد Login
     localStorage.setItem('userRole', role);
     localStorage.setItem('userSubject', data.subject || '');
     localStorage.setItem('ob_redirect', redirect);
@@ -53,7 +53,7 @@ let regRole   = 'mateen';
 
 /* ── إعدادات كل Role ── */
 const ROLE_CONFIG = {
-  // معطّل مؤقتاً: حساب "أصدقاء متين" (student) — لا يُسمح بالتسجيل بهذا الدور حالياً
+  // معطّل مؤقتاً: حساب "أصدقاء متين" (student) — لا يُسمح بالتسجيل بهذا Role حالياً
   // student:    { redirect: 'home.html', status: 'active',  needsApproval: false },
   mateen:     { redirect: 'home.html', status: 'pending', needsApproval: true,  approvedBy: 'supervisor' },
   teacher:    { redirect: 'home.html', status: 'pending', needsApproval: true,  approvedBy: 'admin' },
@@ -124,7 +124,7 @@ window.selectRegRole = (role, btn) => {
   regRole = role;
   document.querySelectorAll('.reg-role-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-  // إظهار حقل المادة فقط للمعلمة
+  // Show Field اWhenدة only للمعلمة
   document.getElementById('regSubjectGroup').style.display = role === 'teacher' ? 'flex' : 'none';
   document.getElementById('regYearGroup').style.display = role === 'mateen' ? 'block' : 'none';
 };
@@ -139,7 +139,7 @@ window.togglePass = (inputId, iconId) => {
 };
 
 /* ══════════════════════════════════════
-   تسجيل الدخول
+   Login
 ══════════════════════════════════════ */
 window.doLogin = async () => {
   hideError();
@@ -162,7 +162,7 @@ window.doLogin = async () => {
     const role   = data.role   || 'student';
     const status = data.status || 'active';
 
-    /* التحقق إن الصفة المختارة تطابق الـ role الفعلي */
+    /* Validation إن الRowة المختارة تطابق الـ role الفعلي */
     if (loginRole !== role) {
       await auth.signOut();
       const roleNames = { student:'أصدقاء متين', mateen:'بنات متين', teacher:'معلمة', supervisor:'مشرفة', admin:'إدارة' };
@@ -171,7 +171,7 @@ window.doLogin = async () => {
       return;
     }
 
-    /* التحقق من حالة الحساب */
+    /* Validation من حالة الحساب */
     if (status === 'pending') {
       await auth.signOut();
       showError('حسابك قيد المراجعة، انتظري الموافقة من الإدارة');
@@ -194,7 +194,7 @@ window.doLogin = async () => {
     /* التوجيه حسب الـ role */
     let redirect = ROLE_CONFIG[role]?.redirect || 'home.html';
 
-    /* الطالبة العادية (student): ابحث عنها في students collection */
+    /* Student (f) العاthisة (student): اSearch عنها في students collection */
     if (role === 'student') {
       const fullName  = (data.name || '').trim();
       const firstName = fullName.split(/\s+/)[0].toLowerCase();
@@ -211,7 +211,7 @@ window.doLogin = async () => {
       }
     }
 
-    /* المعلمة: توجيه لصفحتها بناءً على subject المحفوظ */
+    /* Teacher (f): توجيه لRowحتها بناءً على subject المحفوظ */
     if (role === 'teacher') {
       const subjectId = data.subject || '';
       redirect = subjectId ? `teacher-${subjectId}.html` : 'home.html';
@@ -270,7 +270,7 @@ window.doRegister = async () => {
       createdAt: serverTimestamp(),
     });
 
-    /* إرسال إشعار لكل الأدمن والمشرفات لو الحساب محتاج موافقة */
+    /* Send/Submit Notification لكل Admin وSupervisors If الحساب محتاج موافقة */
     if (cfg.needsApproval) {
       try {
         const roleLabelsNotif = { mateen:'بنت متين', teacher:'معلمة', supervisor:'مشرفة' };
@@ -292,8 +292,8 @@ window.doRegister = async () => {
       } catch(e) { console.warn('إشعار الأدمن فشل:', e); }
     }
 
-    /* ملحوظة: الالتحاق بالمواد لبنات متين بيحصل أوتوماتيك
-       لما المشرفة توافق على الحساب وتربطها بسجل الطالبة (admin-1.js) */
+    /* ملحوظة: الالتحاق بSubjects لبنات متين بيحصل أوتوماتيك
+       When الnot/don'tرفة توافق on the حساب وتربطها but/onlyجل Student (f) (admin-1.js) */
 
     /* تسجيل خروج تلقائي للحسابات المعلقة */
     if (cfg.needsApproval) {
@@ -339,7 +339,7 @@ window.doReset = async () => {
 
 
 /* ══════════════════════════════════════
-   حذف الحساب من صفحة الدخول
+   Delete الحساب من Page الدخول
 ══════════════════════════════════════ */
 window.doDeleteAccount = async () => {
   hideError();
@@ -356,15 +356,15 @@ window.doDeleteAccount = async () => {
 
   setLoading('deleteAccountBtn', true);
   try {
-    // تسجيل الدخول أولاً للتحقق من الهوية
+    // Login أولاً للتحقق from the هوية
     const cred = await signInWithEmailAndPassword(auth, email, pass);
     const uid  = cred.user.uid;
     const db2  = getFirestore(app);
 
-    // حذف بيانات المستخدم من Firestore
+    // Delete بيانات User من Firestore
     await deleteDoc(doc(db2, 'users', uid));
 
-    // حذف الحساب من Firebase Auth
+    // Delete الحساب من Firebase Auth
     await deleteUser(cred.user);
 
     showSuccess('تم الحذف ✅', 'تم حذف حسابك بنجاح.');
@@ -390,7 +390,7 @@ document.addEventListener('keydown', e => {
   if (ff && ff.style.display !== 'none') window.doReset();
 });
 
-/* ── فتح تبويب التسجيل تلقائياً لو الرابط فيه #register ── */
+/* ── فتح تبويب التسجيل تلقائياً If الLink فيه #register ── */
 if (window.location.hash === '#register') {
   window.switchTab('register');
 }
