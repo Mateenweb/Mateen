@@ -124,3 +124,49 @@
   }
   .news-sidebar .card { position: static; }
 }
+
+/* ===== NEWS ADMIN BUTTONS ===== */
+.news-admin-btns {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.btn-edit-news {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  border-radius: 8px;
+  border: 1.5px solid var(--gold);
+  background: transparent;
+  color: var(--gold);
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.18s, color 0.18s;
+}
+.btn-edit-news:hover {
+  background: var(--gold);
+  color: #fff;
+}
+
+.btn-delete-news {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  border-radius: 8px;
+  border: 1.5px solid #c0392b;
+  background: transparent;
+  color: #c0392b;
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.18s, color 0.18s;
+}
+.btn-delete-news:hover {
+  background: #c0392b;
+  color: #fff;
+}
