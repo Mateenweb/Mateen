@@ -619,7 +619,7 @@ body {
   border-radius: 20px;
   overflow: hidden;
   background-color: var(--beige, #f7efe3);
-  aspect-ratio: 16 / 9;
+  aspect-ratio: 16 / 7;
   box-shadow: 0 6px 32px rgba(92,61,46,0.13);
   border: 1px solid rgba(201,162,39,0.25);
 }
@@ -630,7 +630,7 @@ body {
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  object-fit: cover;
   object-position: left center;
   display: block;
 }
@@ -1163,12 +1163,12 @@ footer {
 
 /* لاب (1024px - 1440px) */
 @media (min-width: 1025px) and (max-width: 1440px) {
-  .hero { aspect-ratio: 16 / 9; }
+  .hero { aspect-ratio: 16 / 7; }
 }
 
 /* شاشات كبيرة (> 1440px) */
 @media (min-width: 1441px) {
-  .hero { aspect-ratio: 16 / 9; }
+  .hero { aspect-ratio: 16 / 7; }
 }
 
 /* Mobile (≤ 767px) */
@@ -1315,3 +1315,25 @@ footer {
   transition: all 0.2s;
 }
 .logo-circle { transition: all 0.2s; }
+
+/* ===== HERO ANIMATIONS ===== */
+@keyframes heroFadeUp {
+  from { opacity: 0; transform: translateY(28px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes heroFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes heroScaleIn {
+  from { opacity: 0; transform: scale(0.85); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.hero-anim-logo   { opacity:0; animation: heroScaleIn 0.7s cubic-bezier(.22,.68,0,1.2) 0.1s forwards; }
+.hero-anim-name   { opacity:0; animation: heroFadeUp  0.6s ease 0.35s forwards; }
+.hero-anim-orn    { opacity:0; animation: heroFadeIn  0.5s ease 0.55s forwards; }
+.hero-anim-h1     { opacity:0; animation: heroFadeUp  0.7s cubic-bezier(.22,.68,0,1.1) 0.7s forwards; }
+.hero-anim-p      { opacity:0; animation: heroFadeUp  0.6s ease 0.95s forwards; }
+.hero-anim-btns   { opacity:0; animation: heroFadeUp  0.6s ease 1.15s forwards; }
+
