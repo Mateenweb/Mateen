@@ -1,6 +1,6 @@
 /**
  * admin-news.js
- * إدارة الأخبار + إشعارات فورية للمستخدمين
+ * إدارة الNews + Notificationات فورية للمستخدمين
  */
 
 import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
@@ -15,23 +15,23 @@ const app  = getApps().length ? getApp() : initializeApp(FIREBASE_CONFIG);
 const db   = getFirestore(app);
 const auth = getAuth(app);
 
-// ── تحقق من الإدارة ──────────────────────────────────────────
+// ── تحقق from the إدارة ──────────────────────────────────────────
 onAuthStateChanged(auth, async user => {
   if (!user) return;
   const snap = await import("https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js")
     .then(m => m.getDoc(doc(db,'users',user.uid)));
   if (!snap.exists() || !['admin','supervisor','teacher'].includes(snap.data().role)) return;
 
-  // أضيف زرار الأخبار في الأدمن
+  // أضيف Button الNews في Admin
   addNewsButton();
   loadAdminNews();
 });
 
 function addNewsButton() {
-  // الزرار موجود في الـ navbar — مش محتاجين floating button
+  // Button موجود في the navbar — not/don't محتاجين floating button
 }
 
-// ── تحميل قائمة الأخبار في الأدمن ───────────────────────────
+// ── Load List/Menu الNews في Admin ───────────────────────────
 function loadAdminNews() {
   const q = query(collection(db, 'news'), orderBy('createdAt', 'desc'));
   onSnapshot(q, snap => {
@@ -60,7 +60,7 @@ function loadAdminNews() {
   });
 }
 
-// ── إضافة خبر جديد + إشعار فوري ─────────────────────────────
+// ── Add خبر جthisد + Notification فوري ─────────────────────────────
 window.addNews = async () => {
   const title   = document.getElementById('newsTitle').value.trim();
   const body    = document.getElementById('newsBody').value.trim();
@@ -83,7 +83,7 @@ window.addNews = async () => {
       createdAt: serverTimestamp(),
     });
 
-    // أبعت إشعار فوري لكل المستخدمين النشطين
+    // أبعت Notification فوري لكل Userين النشطين
     await sendNewsNotification(title, body);
 
     // مسح الحقول
@@ -107,12 +107,12 @@ window.addNews = async () => {
   }
 };
 
-// ── إرسال إشعار فوري لكل المستخدمين ─────────────────────────
-// (يشتغل لما الموقع مفتوح عندهم — foreground)
+// ── Send/Submit Notification فوري لكل Userين ─────────────────────────
+// (يشتغل When الموقع مفتوح عنthisم — foreground)
 async function sendNewsNotification(title, body) {
   try {
-    // خزّن الإشعار في notifications collection
-    // كل مستخدم يشوفه لما يفتح الموقع
+    // خزّن الNotification في notifications collection
+    // كل مستخدم يشوفه When يفتح الموقع
     await addDoc(collection(db, 'notifications'), {
       type:      'news',
       title:     `📢 ${title}`,
@@ -126,7 +126,7 @@ async function sendNewsNotification(title, body) {
   }
 }
 
-// ── حذف خبر ──────────────────────────────────────────────────
+// ── Delete خبر ──────────────────────────────────────────────────
 window.deleteAdminNews = async id => {
   if (!confirm('حذف هذا الخبر نهائياً؟')) return;
   await deleteDoc(doc(db, 'news', id));
