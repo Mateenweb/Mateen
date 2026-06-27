@@ -192,6 +192,36 @@
 <script src="../js/supervisor-1.js" type="module"></script>
   <script type="module" src="../js/notifications.js"></script>
   <script src="../js/sw-register.js"></script>
+
+<!-- Modal ربط الطالبة عند القبول -->
+<div id="linkStudentModal" class="modal-overlay" onclick="if(event.target===this)this.classList.remove('show')">
+  <div class="modal-box" style="width:min(92vw,480px)">
+    <div class="modal-head">
+      <span class="m-title">🔗 ربط الحساب بملف طالبة</span>
+      <button class="m-close" onclick="document.getElementById('linkStudentModal').classList.remove('show')">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:13px;color:var(--text-mid);margin-bottom:16px;line-height:1.7">
+        اختاري ملف الطالبة من قاعدة البيانات لربطه بهذا الحساب،
+        أو اضغطي <b>قبول بدون ربط</b> لتفعيل الحساب فقط.
+      </p>
+      <div style="margin-bottom:14px">
+        <label style="font-size:12px;color:var(--text-mid);font-weight:600;display:block;margin-bottom:6px">اسم الطالبة في قاعدة البيانات</label>
+        <select id="linkStudentSelect" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:13px;background:var(--beige);color:var(--text-dark)">
+          <option value="">— بدون ربط —</option>
+        </select>
+      </div>
+      <div id="linkStudentPreview" style="display:none;background:var(--beige);border:1px solid var(--border);border-radius:8px;padding:12px;font-size:13px;margin-bottom:14px"></div>
+    </div>
+    <div class="modal-body" style="border-top:1px solid var(--border);padding-top:14px;display:flex;gap:10px;justify-content:flex-end">
+      <button class="m-btn" style="background:var(--beige);color:var(--text-dark);border:1px solid var(--border)"
+        onclick="confirmApprove(false)">قبول بدون ربط</button>
+      <button class="m-btn" onclick="confirmApprove(true)">
+        <i class="ti ti-link"></i> قبول وربط
+      </button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
 
