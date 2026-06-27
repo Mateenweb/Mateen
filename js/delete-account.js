@@ -1,8 +1,8 @@
 /**
  * delete-account.js
- * حذف حساب كامل من Firestore + Firebase Authentication
+ * Delete حساب كامل من Firestore + Firebase Authentication
  * يشمل: users doc, students doc + subcollections, conversations,
- * وكمان حساب Authentication نفسه (عشان الإيميل يترفع/يتحرر)
+ * وalso حساب Authentication same style (So that الإيميل يترفع/يتحرر)
  */
 
 import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
@@ -25,7 +25,7 @@ async function deleteSubcollection(parentRef, subcollName) {
 
 /**
  * fullDeleteUser(uid)
- * يمسح كل بيانات المستخدم من Firestore + حساب Authentication
+ * يمسح كل بيانات User من Firestore + حساب Authentication
  */
 export async function fullDeleteUser(uid) {
   const errors = [];
@@ -56,9 +56,9 @@ export async function fullDeleteUser(uid) {
     }));
   } catch(e) { errors.push('conversations: ' + e.message); }
 
-  // 4. حذف الحساب من Firebase Authentication (يحرر الإيميل لإعادة الاستخدام)
-  //    لازم يتم عن طريق Cloud Function لأن الـ client SDK مينفعش
-  //    يحذف Auth account لمستخدمة تانية غير اللي مسجلة دخولها حالياً.
+  // 4. Delete الحساب من Firebase Authentication (يحرر الإيميل لإعادة الاستخدام)
+  //    لازم يتم عن طريق Cloud Function Because الـ client SDK مينفعش
+  //    يDelete Auth account لمستخدمة تانية غير اللي مسجلة دخولها حالياً.
   try {
     await deleteAuthUserFn({ uid });
   } catch(e) { errors.push('auth: ' + e.message); }
