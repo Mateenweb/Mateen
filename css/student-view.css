@@ -1,5 +1,5 @@
 /* ===========================
-   صفحة الطالبة — تصميم جديد حيوي
+   Student page — Design جthisد حيوي
    =========================== */
 
 @import url("https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;500;600;700&family=Amiri:wght@400;700&display=swap");
@@ -60,7 +60,7 @@ body {
   padding: 20px 16px 40px;
 }
 
-/* ── Header بطاقة الطالبة ── */
+/* ── Header Card Student (f) ── */
 .sv-header {
   background: linear-gradient(135deg, #2c1a0e 0%, #5c3d2e 40%, #8a5e3c 100%);
   border-radius: 20px;
@@ -214,7 +214,7 @@ body {
 }
 .tab-content { padding: 20px; }
 
-/* ── بطاقات البيانات ── */
+/* ── بطاقات Data ── */
 .info-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -242,7 +242,7 @@ body {
 .info-label { font-size: 11px; color: var(--text-mid); margin-bottom: 2px; }
 .info-val   { font-size: 14px; font-weight: 600; color: var(--text-dark); }
 
-/* ── الحضور ── */
+/* ── Attendance ── */
 .attendance-list { display: flex; flex-direction: column; gap: 10px; }
 .session-item {
   border: 1px solid var(--border);
@@ -290,7 +290,7 @@ body {
 .att-badge.absent  { background: #fdf0ee; color: #c0392b; border: 1px solid rgba(192,57,43,0.2); }
 .att-badge.unknown { background: var(--beige2); color: #9b8470; }
 
-/* ── الدرجات ── */
+/* ── Grades ── */
 .grades-list { display: flex; flex-direction: column; gap: 8px; }
 .grade-item {
   display: flex;
@@ -316,7 +316,7 @@ body {
 .grade-pct.mid  { background: rgba(201,162,39,0.12); color: #7a5c2e; border: 1px solid rgba(201,162,39,0.25); }
 .grade-pct.low  { background: #fdf0ee; color: #c0392b; border: 1px solid rgba(192,57,43,0.2); }
 
-/* ── الملاحظات ── */
+/* ── الNotes ── */
 .notes-content {
   font-size: 13px;
   color: var(--text-mid);
