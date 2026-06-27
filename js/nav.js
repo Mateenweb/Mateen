@@ -23,10 +23,9 @@ function renderNav(activePage) {
   <ul class="nav-links">
     ${links.map(l => `<li><a href="${l.href}"${activePage === l.href ? ' class="active"' : ''}>${l.label}</a></li>`).join('\n    ')}
   </ul>
-  <div class="nav-btns">
-    <a href="login.html" class="btn-admin"><i class="ti ti-dashboard"></i> لوحة الإدارة</a>
+  <div class="nav-btns" id="navBtns">
     <a href="login.html" class="btn-outline"><i class="ti ti-user"></i> تسجيل الدخول</a>
-    <button class="btn-solid">التسجيل في البرنامج</button>
+    <button class="btn-solid" onclick="document.getElementById('reg-modal')?.classList.add('open')">التسجيل في البرنامج</button>
   </div>
   <button class="nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')">
     <i class="ti ti-menu-2"></i>
