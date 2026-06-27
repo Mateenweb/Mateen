@@ -96,11 +96,7 @@ function renderAll(list) {
               ${u.status==='active' ? '✅ نشطة' : u.status==='pending' ? '⏳ معلقة' : '❌ موقوفة'}
             </span>
           </div>
-          <!-- بيانات -->
-          <div style="padding:12px 16px;font-size:12px;color:var(--text-mid);display:flex;flex-direction:column;gap:4px;">
-            ${u.phone ? `<div><i class="ti ti-phone" style="margin-left:4px;"></i>${esc(u.phone)}</div>` : ''}
-            ${u.year  ? `<div><i class="ti ti-calendar" style="margin-left:4px;"></i>${esc(u.year)}</div>` : ''}
-          </div>
+
           <!-- أزرار -->
           <div style="padding:10px 16px;border-top:1px solid var(--border);display:flex;gap:8px;">
             <a href="student.html?id=${u.id}"
