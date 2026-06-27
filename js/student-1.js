@@ -1,5 +1,5 @@
 // ===========================
-//  ملف الطالبة — student-1.js
+//  Student file — student-1.js
 // ===========================
 import { initializeApp, getApps, getApp }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
@@ -40,11 +40,11 @@ onAuthStateChanged(auth, async user => {
     window.location.href = '../html/home.html'; return;
   }
 
-  // تحديد studentId
+  // تحthisد studentId
   let studentId = new URLSearchParams(location.search).get('id');
 
   if (role === 'student' || role === 'mateen') {
-    // الطالبة تشوف بس صفحتها — نجيب linkedStudentId من users doc
+    // Student (f) تشوف but/only Rowحتها — نجيب linkedStudentId من users doc
     studentId = userData.linkedStudentId || null;
     if (!studentId) {
       showNoData();
@@ -124,12 +124,12 @@ async function initPage(studentId, user, role) {
     updateGradeAvg(grades);
   });
 
-  // إخفاء زرار حذف الحساب للأدمن/المعلمة/المشرفة
+  // Hide Button Delete الحساب للأدمن/Teacher (f)/الnot/don'tرفة
   if (role !== 'student' && role !== 'mateen') {
     document.getElementById('deleteAccBtn')?.closest('.delete-acc-section')?.remove();
   }
 
-  // المشرفة: تشوف بس تبويبي "حضوري" و"ملاحظات" — وتقدر تسجل حضور وتكتب ملاحظات
+  // الnot/don'tرفة: تشوف but/only تبويبي "حضوري" و"Notes" — وتقدر تسجل حضور وتكتب Notes
   if (role === 'supervisor') {
     document.getElementById('tabBtn-info')?.remove();
     document.getElementById('tabBtn-grades')?.remove();
@@ -141,7 +141,7 @@ async function initPage(studentId, user, role) {
     switchTab('attend');
   }
 
-  // الإدارة: صلاحية كاملة — تشوف كل التبويبات وتقدر تعدّل حضور + درجات + ملاحظات
+  // الإدارة: صلاحية كاملة — تشوف كل التبويبات وتقدر تعدّل حضور + Grades + Notes
   if (role === 'admin') {
     document.getElementById('newSessionWrap').style.display = 'block';
     document.getElementById('newGradeWrap').style.display   = 'block';
@@ -160,7 +160,7 @@ async function initPage(studentId, user, role) {
   setupDeleteAccount(user);
 }
 
-// ── المشرفة: تسجيل حضور جديد ──────────────────
+// ── الnot/don'tرفة: تسجيل حضور جthisد ──────────────────
 // مواد كل يوم — من student.js
 const DAY_SUBJECTS_MAP = {
   'الأحد':    ['الفقه', 'التفسير', 'مقرأة متين'],
@@ -185,7 +185,7 @@ function setupSupervisorAttendance(studentId) {
 
   function updateDayFromDate(dateStr) {
     if (!dateStr) return;
-    // نضيف T00:00:00 عشان نتجنب مشكلة timezone
+    // نضيف T00:00:00 So that نتجنب not/don'tكلة timezone
     const d = new Date(dateStr + 'T00:00:00');
     dayInput.value = dayNames[d.getDay()];
   }
@@ -194,13 +194,13 @@ function setupSupervisorAttendance(studentId) {
   dateInput.value = todayISO;
   updateDayFromDate(todayISO);
 
-  // لما تغيري التاريخ — اسم اليوم يتحدث تلقائياً
+  // When تغيري التاريخ — اسم اليوم يتحدث تلقائياً
   dateInput.addEventListener('change', () => {
     updateDayFromDate(dateInput.value);
     renderSubjRow();
   });
 
-  // حالة كل مادة (present/absent) — افتراضياً غائبة لحد ما تتحدد
+  // حالة كل مادة (present/absent) — افتراضياً غائبة until تتحدد
   const subjState = {};
   getSupervisorSubjects(dayInput.value).forEach(s => subjState[s] = null);
 
@@ -217,7 +217,7 @@ function setupSupervisorAttendance(studentId) {
       color:${active ? '#fff' : color};`;
 
     subjWrap.innerHTML = `
-      <!-- أزرار تحديد الكل -->
+      <!-- Buttons تحthisد الكل -->
       <div style="display:flex;gap:6px;margin-bottom:10px;padding-bottom:10px;border-bottom:2px solid var(--border)">
         <button type="button" onclick="setAllSubj('present')"  style="${btnStyle(allPresent,'#1a6a3a')}">✓ كل حاضرة</button>
         <button type="button" onclick="setAllSubj('absent')"   style="${btnStyle(allAbsent,'#c0392b')}">✗ كل غائبة</button>
@@ -252,7 +252,7 @@ function setupSupervisorAttendance(studentId) {
 
   window.setAllSubj = (val) => { getSupervisorSubjects(dayInput.value).forEach(s => subjState[s] = val); renderSubjRow(); };
 
-  // افتراضياً: كل المواد حاضرة
+  // افتراضياً: كل Subjects حاضرة
   getSupervisorSubjects(dayInput.value).forEach(s => subjState[s] = 'present');
   renderSubjRow();
 
@@ -289,7 +289,7 @@ function setupSupervisorAttendance(studentId) {
   };
 }
 
-// ── الإدارة: إضافة درجة جديدة ──────────────────
+// ── الإدارة: Add درجة جthisدة ──────────────────
 function setupAdminGrades(studentId) {
   const toggleBtn = document.getElementById('newGradeBtn');
   const form       = document.getElementById('newGradeForm');
@@ -329,7 +329,7 @@ function setupAdminGrades(studentId) {
   };
 }
 
-// ── المشرفة: كتابة/تعديل الملاحظات ────────────
+// ── الnot/don'tرفة: كتابة/Edit الNotes ────────────
 function setupSupervisorNotes(studentId) {
   document.getElementById('saveNotesBtn').onclick = async () => {
     const val = document.getElementById('notesTextarea').value.trim();
@@ -365,8 +365,8 @@ function renderSessions(sessions) {
     const present  = keys.filter(k => subjects[k] === 'present').length;
     const subjRows = keys.map(k => {
       const v = subjects[k];
-      const chip = v === 'present' ? 'present' : v === 'absent' ? 'absent' : v === 'excused' ? 'excused' : 'empty';
-      const label = v === 'present' ? 'حاضرة' : v === 'absent' ? 'غائبة' : v === 'excused' ? 'بعذر' : '—';
+      const chip = v === 'present' ? 'present' : v === 'absent' ? 'absent' : 'empty';
+      const label = v === 'present' ? 'حاضرة' : v === 'absent' ? 'غائبة' : '—';
       return `<div class="subj-row">
         <span class="subj-name">${k}</span>
         <span class="att-chip ${chip}">${label}</span>
@@ -500,7 +500,7 @@ function formatTime(hour, ampm) {
 }
 
 
-// ── حذف درجة (أدمن فقط) ────────────────────────────────────
+// ── Delete درجة (أدمن only) ────────────────────────────────────
 window.deleteGrade = async (studentId, gradeId) => {
   if (!confirm('حذف هذه الدرجة؟')) return;
   try {
