@@ -91,7 +91,7 @@ body { background:var(--beige); min-height:100vh; display:flex; flex-direction:c
 .btn-save-att:disabled { opacity: 0.6; cursor: not-allowed; }
 
 /* ════════════════════════════════════════
-   النوتس — بطاقات الطالبات
+   النوتس — بطاقات Studentات
    ════════════════════════════════════════ */
 .notes-students-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px; padding: 20px; }
 .notes-student-card {
@@ -104,7 +104,7 @@ body { background:var(--beige); min-height:100vh; display:flex; flex-direction:c
 .nsc-action { font-size: 11px; color: var(--text-mid); display: flex; align-items: center; justify-content: center; gap: 4px; }
 
 /* ════════════════════════════════════════
-   مودال النوتس
+   Modal النوتس
    ════════════════════════════════════════ */
 .notes-modal-overlay {
   position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 999;
