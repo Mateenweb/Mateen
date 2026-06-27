@@ -39,6 +39,53 @@ onAuthStateChanged(auth, async user => {
   loadMats();
 });
 
+
+// ── عرض الأرشيف ────────────────────────────────────────
+window.showArchive = async () => {
+  const snap = await getDocs(query(
+    collection(db, 'students'),
+    where('archived', '==', true),
+    orderBy('archivedAt', 'desc')
+  ));
+
+  if (snap.empty) {
+    alert('لا توجد طالبات في الأرشيف');
+    return;
+  }
+
+  const rows = snap.docs.map(d => {
+    const s = { id: d.id, ...d.data() };
+    const arDate = s.archivedAt ? new Date(s.archivedAt.seconds*1000).toLocaleDateString('ar-EG') : '—';
+    return `<tr>
+      <td style="font-weight:600">${esc(s.name||'—')}</td>
+      <td style="font-size:12px;color:var(--text-mid)">${arDate}</td>
+      <td>
+        <button onclick="restoreStudent('${s.id}')"
+          style="background:var(--green-dark);color:#e8c96a;border:none;border-radius:6px;padding:5px 12px;font-family:inherit;cursor:pointer;font-size:12px">
+          <i class="ti ti-restore"></i> استعادة
+        </button>
+        <button onclick="stuDeletePermanent('${s.id}')"
+          style="background:#fff0f0;color:#c0392b;border:1px solid #f5c6c6;border-radius:6px;padding:5px 12px;font-family:inherit;cursor:pointer;font-size:12px;margin-right:6px">
+          <i class="ti ti-trash"></i> حذف نهائي
+        </button>
+      </td>
+    </tr>`;
+  }).join('');
+
+  const archiveModal = document.getElementById('archiveModal');
+  document.getElementById('archiveBody').innerHTML = rows;
+  archiveModal.style.display = 'flex';
+};
+
+window.restoreStudent = async id => {
+  await updateDoc(doc(db, 'students', id), { archived: false, archivedAt: null });
+  showToast('✅ تمت استعادة الطالبة');
+  document.getElementById('archiveModal').style.display = 'none';
+};
+
+window.closeArchiveModal = () => {
+  document.getElementById('archiveModal').style.display = 'none';
+};
 window.doLogout = () => signOut(auth).then(() => window.location.href = '../html/login.html');
 
 // ── ADD ───────────────────────────────────────────────
@@ -481,6 +528,8 @@ window.doExport = async (type) => {
 };
 
 function renderStudents(list) {
+  // استثناء المؤرشفين من العرض الافتراضي
+  list = list.filter(s => !s.archived);
   const tb   = document.getElementById('stuTableBody');
   const isMob = window.innerWidth <= 640;
 
@@ -658,9 +707,19 @@ window.stuToggleAccept = async (id,cur,interview) => {
 };
 
 window.stuDelete = async id => {
-  if(!confirm('حذف الطالبة وكل بياناتها نهائياً؟')) return;
+  // أرشفة بدل الحذف النهائي — لحماية البيانات من الحذف الخطأ
+  if(!confirm('هل تريدين أرشفة هذه الطالبة؟\nيمكن استعادتها لاحقاً من قسم الأرشيف.')) return;
+  await updateDoc(doc(db, 'students', id), { archived: true, archivedAt: serverTimestamp() });
+  showToast('✅ تمت الأرشفة — يمكن الاستعادة من الأرشيف');
+};
+
+// حذف نهائي (للإدارة العليا فقط — من الأرشيف)
+window.stuDeletePermanent = async id => {
+  if(!confirm('⚠️ حذف نهائي لا يمكن التراجع عنه!
+هل أنتِ متأكدة؟')) return;
+  if(!confirm('تأكيد أخير: سيتم حذف كل بيانات الطالبة نهائياً.')) return;
   await fullDeleteUser(id);
-  showToast('تم الحذف الكامل');
+  showToast('تم الحذف النهائي');
 };
 
 window.toggleSelectAll = checked => {
