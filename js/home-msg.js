@@ -46,7 +46,7 @@ onAuthStateChanged(auth, async user => {
   }
 });
 
-// ── أيقونة الأخبار — عد الأخبار الجديدة منذ آخر زيارة ──────
+// ── أيقونة الNews — عد الNews الجthisدة منذ آخر زيارة ──────
 onAuthStateChanged(auth, async user => {
   if (!user) return;
   const navBadge     = document.getElementById('navNewsBadge');
