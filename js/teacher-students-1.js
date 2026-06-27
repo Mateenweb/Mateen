@@ -11,7 +11,7 @@ const app  = getApps().length ? getApp() : initializeApp(FIREBASE_CONFIG);
 const auth = getAuth(app);
 const db   = getFirestore(app);
 
-// كود المادة (من حساب المعلمة) → اسم المادة العربي (المستخدم في enrolledSubjects)
+// كود اWhenدة (من حساب Teacher (f)) → اسم اWhenدة العربي (User في enrolledSubjects)
 const SUBJ_LABELS = {
   quran1: 'مقرأة متين',
   quran2: 'مقرأة متين',
