@@ -614,12 +614,16 @@ body {
 /* ===== HERO ===== */
 .hero {
   position: relative;
-  width: 100%;
-  aspect-ratio: 16 / 9;   /* نفس نسبة الصورة الأصلية — يمنع القص على أي حجم شاشة */
-  min-height: 280px;
-  max-height: 760px;
+  width: calc(100% - 48px);
+  margin: 16px 24px;
+  border-radius: 20px;
   overflow: hidden;
   background-color: var(--beige, #f7efe3);
+  aspect-ratio: 16 / 6;
+  min-height: 220px;
+  max-height: 600px;
+  box-shadow: 0 6px 32px rgba(92,61,46,0.13);
+  border: 1px solid rgba(201,162,39,0.25);
 }
 
 /* الصورة تغطي كل الهيرو */
