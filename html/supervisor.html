@@ -74,69 +74,114 @@
 </div>
 
 
-<!-- ══ Section قاعدة بيانات Studentات ══ -->
+<!-- ══ Section قاعدة بيانات الطالبات ══ -->
 <div class="section" id="studentsSection">
 <div class="section-head">
-  <div class="section-head-title"><i class="ti ti-users"></i> قاعدة بيانات الطالبات والمقابلات</div>
-  <div class="section-head-actions">
-    <button class="btn-add-row btn-export-word" onclick="openExportModal()"><i class="ti ti-download"></i> تصدير Word / PDF</button>
-    <button class="btn-add-row btn-export-att" onclick="openAttModal()"><i class="ti ti-clipboard-list"></i> تصدير الحضور والغياب</button>
-  </div>
+<div class="section-head-title"><i class="ti ti-users"></i> قاعدة بيانات الطالبات والمقابلات</div>
+<button class="btn-add-student" id="btnAddStudent"><i class="ti ti-user-plus"></i> إضافة طالبة</button>
 </div>
-
-<!-- إحصاء -->
-<div class="stu-stats-bar">
-  <div class="stu-stat"><span id="stuTotal">0</span><small>الإجمالي</small></div>
-  <div class="stu-stat"><span id="stuDone">0</span><small>أُجريت مقابلتهن</small></div>
-  <div class="stu-stat"><span id="stuPending">0</span><small>في الانتظار</small></div>
-  <div class="stu-stat"><span id="stuAccepted">0</span><small>مقبولات</small></div>
-  <div class="stu-stat"><span id="stuRejected">0</span><small>مرفوضات</small></div>
+<!-- Stats bar -->
+<div class="stu-stats-row">
+<div class="stu-stat"><span id="stuTotal">0</span><small>الإجمالي</small></div>
+<div class="stu-stat done"><span id="stuDone">0</span><small>تمت المقابلة</small></div>
+<div class="stu-stat pending"><span id="stuPending">0</span><small>لم تتم</small></div>
+<div class="stu-stat accepted"><span id="stuAccepted">0</span><small>مقبولة</small></div>
+<div class="stu-stat rejected"><span id="stuRejected">0</span><small>غير مقبولة</small></div>
 </div>
-
-<!-- فلاتر -->
-<div class="stu-filters">
-  <input type="text" id="stuSearch" placeholder="🔍 ابحثي باسم الطالبة..." oninput="applyStudentFilters()"/>
-  <select id="stuFilterInterview" onchange="applyStudentFilters()">
-    <option value="all">📋 كل المقابلات</option>
-    <option value="done">✅ أُجريت</option>
-    <option value="pending">⏳ لم تُجرَ</option>
-  </select>
-  <select id="stuFilterResult" onchange="applyStudentFilters()">
-    <option value="all">📊 كل النتائج</option>
-    <option value="accepted">✔️ مقبولة</option>
-    <option value="rejected">✖️ مرفوضة</option>
-    <option value="na">— لم يحدد</option>
-  </select>
-  <select id="stuFilterStatus" onchange="applyStudentFilters()">
-    <option value="all">📖 كل الطالبات</option>
-    <option value="mateen">📖 بنات متين</option>
-    <option value="new">✨ مستجدات</option>
-  </select>
-  <button id="sortAlphaBtn" class="btn-add-row" onclick="toggleAlphaSort()" title="ترتيب أبجدي"><i class="ti ti-sort-ascending-letters"></i></button>
+<!-- Bulk add -->
+<div class="stu-bulk-area">
+<textarea id="bulkNames" placeholder="أضيفي عدة أسماء دفعة واحدة — كل اسم في سطر"></textarea>
+<button class="btn-bulk-add" onclick="addBulkNames()"><i class="ti ti-list-check"></i> إضافة الكل</button>
 </div>
-
-<!-- Schedule/Table Studentات -->
-<div class="table-wrap">
-  <div id="stu-cards-wrap"></div>
-  <table class="pending-table" id="stuTable">
-    <thead>
-      <tr>
-        <th><input type="checkbox" onchange="selectAllRows(this.checked)"></th>
-        <th>#</th>
-        <th>الاسم</th>
-        <th>التصنيف</th>
-        <th>اليوم والتاريخ</th>
-        <th>الوقت</th>
-        <th>المقابلة</th>
-        <th>القبول</th>
-        <th>الاختبار</th>
-        <th>المستوى</th>
-      </tr>
-    </thead>
-    <tbody id="stuTableBody">
-      <tr><td colspan="10" class="empty-state"><i class="ti ti-loader spin"></i></td></tr>
-    </tbody>
-  </table>
+<!-- Filters -->
+<div class="stu-filter-bar">
+<input id="stuSearch" oninput="applyStudentFilters()" placeholder="🔎 ابحثي عن طالبة..." type="text"/>
+<select id="stuFilterInterview" onchange="applyStudentFilters()">
+<option value="all">🎙️ كل المقابلات</option>
+<option value="done">✅ تمت</option>
+<option value="pending">⏳ لم تتم</option>
+</select>
+<select id="stuFilterResult" onchange="applyStudentFilters()">
+<option value="all">📊 كل النتائج</option>
+<option value="accepted">✔️ المقبولات</option>
+<option value="rejected">✖️ غير المقبولات</option>
+<option value="na">⏳ لم يحدد</option>
+</select>
+<select id="stuFilterStatus" onchange="applyStudentFilters()">
+<option value="all">📖 كل الطالبات</option>
+<option value="mateen">📖 بنات متين</option>
+<option value="new">✨ المستجدات</option>
+</select>
+<button id="sortAlphaBtn" class="sort-alpha-btn" onclick="toggleAlphaSort()">🔤 أبجدي</button>
+</div>
+<!-- Bulk apply bar -->
+<div class="stu-bulk-bar">
+<div class="stu-bulk-info">
+<input id="selectAll" onchange="toggleSelectAll(this.checked)" type="checkbox"/>
+<label for="selectAll">تحديد الكل</label>
+<span class="selected-badge" id="selectedCount">0 محددة</span>
+</div>
+<div class="stu-bulk-fields">
+<select class="bulk-sel" id="bulkDay">
+<option value="">-اليوم-</option>
+<option>الأحد</option><option>الاثنين</option><option>الثلاثاء</option>
+<option>الأربعاء</option><option>الخميس</option><option>الجمعة</option><option>السبت</option>
+</select>
+<input class="bulk-num" id="bulkDD" max="30" min="1" placeholder="يوم" type="number"/>
+<select class="bulk-sel" id="bulkMM">
+<option value="">-الشهر-</option>
+<option value="01">محرم</option><option value="02">صفر</option>
+<option value="03">ربيع الأول</option><option value="04">ربيع الثاني</option>
+<option value="05">جمادى الأولى</option><option value="06">جمادى الثانية</option>
+<option value="07">رجب</option><option value="08">شعبان</option>
+<option value="09">رمضان</option><option value="10">شوال</option>
+<option value="11">ذو القعدة</option><option value="12">ذو الحجة</option>
+</select>
+<input class="bulk-num bulk-num-narrow" id="bulkYY" placeholder="سنة" type="number"/>
+<span class="bulk-divider">|</span>
+<select class="bulk-sel bulk-sel-hour" id="bulkHour">
+<option value="">-الساعة-</option>
+<option>1</option><option>2</option><option>3</option><option>4</option>
+<option>5</option><option>6</option><option>7</option><option>8</option>
+<option>9</option><option>10</option><option>11</option><option>12</option>
+</select>
+<select class="bulk-sel bulk-sel-ampm" id="bulkAmpm">
+<option value="">-ص/م-</option>
+<option value="ص">صباحاً</option>
+<option value="م">مساءً</option>
+</select>
+<button class="bulk-apply-btn" onclick="applyBulkDateTime()">✅ تطبيق</button>
+</div>
+</div>
+<!-- Mobile cards -->
+<div id="stu-cards-wrap" class="stu-cards-wrap-base"></div>
+<!-- Table desktop -->
+<div class="stu-table-wrap">
+<table class="stu-table">
+<thead>
+<tr>
+<th class="col-narrow"></th>
+<th>#</th>
+<th>اسم الطالبة</th>
+<th>اليوم والتاريخ</th>
+<th>الوقت</th>
+<th>المقابلة</th>
+<th>القبول</th>
+<th>درجة الاختبار</th>
+<th></th>
+</tr>
+</thead>
+<tbody id="stuTableBody">
+<tr><td colspan="9" class="table-loader-cell-lg"><i class="ti ti-loader spin loader-spin-lg"></i></td></tr>
+</tbody>
+</table>
+</div>
+<div class="foot-actions-row">
+<button class="btn-add-row" onclick="addStudentRow()"><i class="ti ti-plus"></i> إضافة طالبة</button>
+<button class="btn-add-row" style="background:linear-gradient(135deg,#2c1a0e,#5c3d2e);color:#e8c96a;border:none;" onclick="openBulkGradeModal()"><i class="ti ti-plus"></i> إضافة اختبار جماعي</button>
+<button class="btn-add-row btn-export-word" onclick="openExportModal()"><i class="ti ti-download"></i> تصدير Word / PDF</button>
+<button class="btn-add-row btn-export-att" onclick="openAttModal()"><i class="ti ti-clipboard-list"></i> تصدير الحضور والغياب</button>
+<a href="stats.html" class="btn-add-row btn-export-stats"><i class="ti ti-chart-bar"></i> الإحصائيات</a>
 </div>
 </div>
 
