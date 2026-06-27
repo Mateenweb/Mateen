@@ -5,15 +5,15 @@ import { getFirestore, doc, getDoc, getDocs, addDoc, setDoc,
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 import { FIREBASE_CONFIG } from "./config.js";
 
-// ملاحظة: منطق السايدبار (auth state, روابط الأدمن، الخروج) بالكامل
-// أصبح في home-1.js فقط — هذا الملف مسؤول عن نموذج التواصل فقط
-// لمنع التكرار وتعارض عرض السايدبار.
+// ملاحظة: منطق Sidebar (auth state, روابط Admin، الخروج) بالكامل
+// أصبح في home-1.js only — هذا الFile مسؤول عن Form التواصل only
+// لمنع التكرار وتعارض Width/Display Sidebar.
 
 const app  = getApps().length ? getApp() : initializeApp(FIREBASE_CONFIG);
 const auth = getAuth(app);
 const db   = getFirestore(app);
 
-// ملء اسم المستخدمة تلقائياً في نموذج التواصل (لو مسجلة دخول)
+// ملء اسم Userة تلقائياً في Form التواصل (If مسجلة دخول)
 auth.onAuthStateChanged(async user => {
   if (!user) return;
   const ctName = document.getElementById('ctName');
@@ -23,13 +23,13 @@ auth.onAuthStateChanged(async user => {
   ctName.value = (snap.exists() && snap.data().name) ? snap.data().name : name;
 });
 
-// ── تحميل المستلمين من Firebase ──────────────
+// ── Load المستلمين من Firebase ──────────────
 async function loadRecipients() {
   const select = document.getElementById('ctRecipient');
   if (!select) return;
 
   try {
-    // جيبي الإدارة والمعلمات النشطين فقط
+    // جيبي الإدارة وData/Info النشطين only
     const [adminSnap, teacherSnap] = await Promise.all([
       getDocs(query(collection(db,'users'), where('role','==','admin'))),
       getDocs(query(collection(db,'users'), where('role','==','teacher'), where('status','==','active')))
@@ -46,7 +46,7 @@ async function loadRecipients() {
       html += '</optgroup>';
     }
 
-    // المعلمات
+    // Data/Info
     if (!teacherSnap.empty) {
       html += '<optgroup label="── المعلمات ──">';
       teacherSnap.forEach(d => {
@@ -67,10 +67,10 @@ async function loadRecipients() {
   }
 }
 
-// تحميل المستلمين عند فتح الصفحة
+// Load المستلمين عند فتح Page
 loadRecipients();
 
-// ── إرسال الرسالة ─────────────────────────────
+// ── Send/Submit الMessage ─────────────────────────────
 window.submitContactNew = async () => {
   const nameEl      = document.getElementById('ctName');
   const recipientEl = document.getElementById('ctRecipient');
@@ -79,7 +79,7 @@ window.submitContactNew = async () => {
   const btn         = document.getElementById('ctBtn');
   const successEl   = document.getElementById('ctSuccess');
 
-  // تحقق من الحقول المطلوبة
+  // تحقق from the حقول المطIfبة
   let valid = true;
   [nameEl, recipientEl, topicEl, bodyEl].forEach(el => {
     if (!el || !el.value.trim()) { if(el) el.style.borderColor='#c0392b'; valid=false; }
@@ -103,7 +103,7 @@ window.submitContactNew = async () => {
       : (nameEl.value.trim() || user.email || '');
     const senderRole = (senderSnap.exists() && senderSnap.data().role) || 'student';
 
-    // إنشاء أو تحديث المحادثة
+    // إنشاء أو Update المحادثة
     const cid = [user.uid, recipientUid].sort().join('__');
     await setDoc(doc(db,'conversations',cid), {
       participants: [user.uid, recipientUid],
@@ -113,7 +113,7 @@ window.submitContactNew = async () => {
       [`unread.${user.uid}`]:     0,
     }, { merge: true });
 
-    // إضافة الرسالة
+    // Add الMessage
     await addDoc(collection(db,'conversations',cid,'messages'), {
       text:       bodyText     || '',
       senderId:   user.uid     || '',
@@ -122,7 +122,7 @@ window.submitContactNew = async () => {
       sentAt:     serverTimestamp(),
     });
 
-    // إشعار Firestore للمستلم
+    // Notification Firestore للمستلم
     if (recipientUid) {
       await addDoc(collection(db,'notifications',recipientUid,'pending'), {
         title:     `💬 ${senderName}`,
@@ -133,12 +133,12 @@ window.submitContactNew = async () => {
       });
     }
 
-    // نجاح
+    // Success
     btn.innerHTML = '<i class="ti ti-check"></i> تم الإرسال بنجاح!';
     btn.style.background = 'var(--green-mid)';
     if (successEl) successEl.style.display = 'block';
     [nameEl, recipientEl, topicEl, bodyEl].forEach(el => { if(el) el.value=''; });
-    // إعادة تحميل الخيارات
+    // إعادة Load الخيارات
     loadRecipients();
 
     setTimeout(() => {
