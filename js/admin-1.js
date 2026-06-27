@@ -767,7 +767,7 @@ window.renderAllUsers = () => {
   if (!tbody) return;
 
   if (!list.length) {
-    tbody.innerHTML = `<tr><td colspan="8" class="empty-state"><i class="ti ti-user-off"></i> لا توجد نتائج</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="10" class="empty-state"><i class="ti ti-user-off"></i> لا توجد نتائج</td></tr>`;
     return;
   }
 
@@ -801,17 +801,58 @@ window.renderAllUsers = () => {
        </button>
      </div>`;
 
+    // السنة
+    const yearCell = u.year
+      ? `<span style="font-size:12px;background:#e8f5e9;color:#2e7d32;padding:2px 8px;border-radius:8px">${esc(u.year)}</span>`
+      : `<span style="color:var(--text-mid);font-size:12px">—</span>`;
+
+    // الربط
+    const linkMap = {};
+    allStudents.forEach(s => { if (s.uid) linkMap[s.uid] = { studentId: s.id, name: s.name || '—' }; });
+    const linked = linkMap[u.id];
+    const linkCell = linked
+      ? `<div style="display:flex;align-items:center;gap:5px;white-space:nowrap">
+           <span style="font-size:11px;background:#d8f3dc;color:#1a4a2e;padding:2px 8px;border-radius:10px">✅ ${esc(linked.name)}</span>
+           <button onclick="adminUnlinkStudent('${u.id}','${linked.studentId}')"
+             style="padding:2px 7px;font-size:11px;background:#fff0f0;color:#c0392b;border:1px solid #f5c6c6;border-radius:6px;cursor:pointer">
+             <i class="ti ti-unlink"></i>
+           </button>
+         </div>`
+      : u.role === 'mateen'
+        ? `<button onclick="adminOpenLinkModal('${u.id}','${(u.name||'').replace(/'/g,"\'")}') "
+             style="padding:3px 10px;font-size:11px;background:transparent;color:var(--gold);border:1px solid var(--gold);border-radius:6px;cursor:pointer">
+             <i class="ti ti-link"></i> ربط
+           </button>`
+        : `<span style="color:var(--text-mid);font-size:12px">—</span>`;
+
     return `<tr>
       <td style="color:var(--text-mid);font-size:12px">${i + 1}</td>
       <td style="font-weight:600;font-size:13.5px">${esc(u.name || '—')}</td>
       <td><span style="font-size:12px;background:var(--beige2);padding:2px 8px;border-radius:4px">${roleLabel}</span></td>
       <td dir="ltr" style="font-size:12px;color:var(--text-mid)">${esc(u.email || '—')}</td>
       <td dir="ltr" style="font-size:12px">${esc(u.phone || '—')}</td>
+      <td>${yearCell}</td>
       <td style="font-size:12px;color:var(--text-mid);white-space:nowrap">${createdAt}</td>
       <td><span style="font-size:12px;background:${statusBg};color:${statusColor};padding:3px 10px;border-radius:10px;white-space:nowrap">${statusLabel}</span></td>
+      <td>${linkCell}</td>
       <td style="white-space:nowrap;min-width:160px">${actionBtns}</td>
     </tr>`;
   }).join('');
+};
+
+window.adminOpenLinkModal = async (userId, userName) => {
+  _pendingApproveId = userId;
+  window._selectedLinkId = null;
+  document.getElementById('linkModalSubtitle').textContent = 'اختاري طالبة لربطها بحساب: ' + userName;
+  document.getElementById('linkSearch').value = '';
+  renderLinkList(allStudents);
+  document.getElementById('linkModal').classList.add('show');
+};
+
+window.adminUnlinkStudent = async (userId, studentId) => {
+  if (!confirm('فك الربط بين هذا الحساب وملف الطالبة؟')) return;
+  await updateDoc(doc(db, 'students', studentId), { uid: '' });
+  showToast('تم فك الربط');
 };
 
 window.suspendUser = async id => {
