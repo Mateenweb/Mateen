@@ -7,7 +7,7 @@ const app  = initializeApp(FIREBASE_CONFIG);
 const db   = getFirestore(app);
 const auth = getAuth(app);
 
-// ── Cloudinary upload بدل Firebase Storage ──
+// ── Cloudinary upload instead of Firebase Storage ──
 const CLOUD_NAME    = 'dqqtznoqt';
 const UPLOAD_PRESET = 'mateen_uploads';
 
@@ -65,7 +65,7 @@ let currentUser     = null;
 let currentUserData = null;
 let activeConvId    = null;
 let msgUnsub        = null;
-let convUnsub       = null;   // unsubscribe للـ conversations listener
+let convUnsub       = null;   // unsubscribe for the  conversations listener
 let allUsers        = [];
 let allConvs        = [];
 const readConvIds   = new Set(); // المحادثات اللي اتقرأت locally
@@ -99,7 +99,7 @@ onAuthStateChanged(auth, async user => {
   const myNameEl = document.getElementById('myName');
   if (myNameEl) myNameEl.textContent = data.name || currentUser.email;
 
-  // إظهار أزرار الصورة والتسجيل — للكل ما عدا الطالبة
+  // Show Buttons الImage  and the تسجيل — للكل ما عدا Student (f)
   const mediaButtons = document.getElementById('mediaButtons');
   if (mediaButtons) {
     const canMedia = !['student', 'mateen'].includes(data.role);
@@ -108,12 +108,12 @@ onAuthStateChanged(auth, async user => {
   if (convUnsub) { convUnsub(); convUnsub = null; }
   if (msgUnsub)  { msgUnsub();  msgUnsub  = null; }
   activeConvId = null;
-  // لا تمسح allConvs عشان تفضل القائمة ظاهرة أثناء إعادة التحميل
+  // لا تمسح allConvs So that تفضل Menu/List ظاهرة أثناء إعادة Loading
 
   loadConversations();
   loadAllUsers();
 
-  // فتح مودال "رسالة جديدة" لو جاية من الهوم بـ ?compose=1
+  // فتح Modal "Message جthisدة" If جاية from the هوم بـ ?compose=1
   const params = new URLSearchParams(window.location.search);
   if (params.get('compose') === '1') {
     setTimeout(() => window.showNewConv && window.showNewConv(), 600);
@@ -175,8 +175,8 @@ async function loadAllUsers() {
 
 // ── Load conversations ─────────────────────────────────────────────────────
 function loadConversations() {
-  // بدون orderBy عشان مش محتاجين composite index في Firestore
-  // الترتيب بيتعمل في الـ client بعد ما البيانات ترجع
+  // بدون orderBy So that not/don't محتاجين composite index في Firestore
+  // الSort بيتعمل in the ـ client بعد ما Data ترجع
   const q = query(
     collection(db, 'conversations'),
     where('participants', 'array-contains', currentUser.uid)
@@ -184,7 +184,7 @@ function loadConversations() {
 
   convUnsub = onSnapshot(q, async snap => {
     if (snap.empty) {
-      // لو القائمة فاضية بس عندنا محادثات - ممكن لسه بيتحمّل
+      // If Menu/List فاضية but/only عندنا محادثات - ممكن لسه بيتحمّل
       if (allConvs.length === 0) {
         allConvs = [];
         renderConvList([]);
@@ -209,7 +209,7 @@ function loadConversations() {
           if (existing.unread) existing.unread[currentUser.uid] = 0;
         }
       } else {
-        // محادثة جديدة — اجيب بيانات الطرف الآخر
+        // محادثة جthisدة — اجيب بيانات الطرف الآخر
         let otherName = 'الإدارة';
         let otherRole = '';
         try {
@@ -225,7 +225,7 @@ function loadConversations() {
 
     await Promise.all(promises);
 
-    // حذف المحادثات المخفية
+    // Delete المحادثات المخفية
     allConvs = allConvs.filter(cv => {
       const d = snap.docs.find(x => x.id === cv.id);
       if (!d) return false;
@@ -233,14 +233,14 @@ function loadConversations() {
       return !(data.hiddenBy?.[currentUser.uid] && cv.id !== activeConvId);
     });
 
-    // ترتيب من الأحدث للأقدم
+    // Sort from the أحدث للأقدم
     allConvs.sort((a, b) => (b.lastAt?.seconds || 0) - (a.lastAt?.seconds || 0));
 
     window._debug_convs = allConvs;
     console.log("[DEBUG] allConvs:", allConvs.map(cv => ({id:cv.id.slice(0,8), unread:cv.unread, flat:cv[`unread.${currentUser?.uid}`]})));
     renderConvList(allConvs);
 
-    // لا تفتح محادثة أوتوماتيك - المستخدم يختار بنفسه
+    // لا تفتح محادثة أوتوماتيك - User يختار بsame style
   }, err => {
     console.error('conversations query error:', err);
     document.getElementById('convList').innerHTML = `
@@ -322,7 +322,7 @@ window.openConv = async (cid, otherId, otherName, otherRole) => {
   document.getElementById('convRole').textContent  = ROLE_LABELS[otherRole] || otherRole;
   document.getElementById('convRole').style.color  = ROLE_COLORS[otherRole] || 'var(--text-mid)';
 
-  // Mark as read - فوراً في الـ local state + Firestore
+  // Mark as read - فوراً in the ـ local state + Firestore
   readConvIds.add(cid); // علّم المحادثة كمقروءة locally
   const convInList = allConvs.find(cv => cv.id === cid);
   if (convInList) {
@@ -330,10 +330,10 @@ window.openConv = async (cid, otherId, otherName, otherRole) => {
     if (convInList.unread) convInList.unread[currentUser.uid] = 0;
     renderConvList(allConvs);
   }
-  // صفّر flat field
+  // Rowّر flat field
   await updateDoc(doc(db, 'conversations', cid), { [`unread.${currentUser.uid}`]: 0 });
 
-  // علّم رسائل الطرف الثاني كمقروءة (عشان يعرف المرسل إن رسالته اتقرأت)
+  // علّم Messages الطرف الثاني كمقروءة (So that يعرف المرسل إن رسالته اتقرأت)
   const allMsgsSnap = await getDocs(collection(db, 'conversations', cid, 'messages'));
   const toMark = allMsgsSnap.docs.filter(d => d.data().senderId !== currentUser.uid && !d.data().read);
   await Promise.all(toMark.map(d => updateDoc(d.ref, { read: true })));
@@ -341,18 +341,18 @@ window.openConv = async (cid, otherId, otherName, otherRole) => {
   // Listen to messages
   const q = query(collection(db, 'conversations', cid, 'messages'));
 
-  // جيبي وقت الحذف من Firestore عشان نفلتر الرسائل القديمة
+  // جيبي وقت الDelete من Firestore So that نفلتر الMessages القthisمة
   const convForDelete = await getDoc(doc(db, 'conversations', cid));
   const deletedAtSec  = convForDelete.exists()
     ? (convForDelete.data().deletedAt?.[currentUser.uid]?.seconds || 0)
     : 0;
 
   msgUnsub = onSnapshot(q, snap => {
-    // ترتيب الرسائل بالوقت في الـ client
+    // Sort الMessages باIfقت in the ـ client
     const sorted = snap.docs
       .map(d => ({ id: d.id, ...d.data() }))
-      .filter(m => !m.deletedBy?.[currentUser.uid])          // اخفِ الرسائل المحذوفة منك
-      .filter(m => (m.sentAt?.seconds || 0) > deletedAtSec)  // اخفِ الرسائل قبل وقت الحذف
+      .filter(m => !m.deletedBy?.[currentUser.uid])          // اخفِ الMessages المحذوفة منك
+      .filter(m => (m.sentAt?.seconds || 0) > deletedAtSec)  // اخفِ الMessages قبل وقت الDelete
       .sort((a, b) => (a.sentAt?.seconds || 0) - (b.sentAt?.seconds || 0));
     const bubbles = document.getElementById('msgBubbles');
 
@@ -374,7 +374,7 @@ window.openConv = async (cid, otherId, otherName, otherRole) => {
         dayDivider = `<div class="msg-day-divider"><span>${dayStr}</span></div>`;
       }
 
-      // تحقق من حالة القراءة: الرسالة مقروءة لو فيها read:true أو لو المستلم فتح المحادثة
+      // تحقق من حالة القراءة: الMessage مقروءة If فيها read:true أو If المستلم فتح المحادثة
       const seen = !mine ? false : (m.read === true);
 
       return `${dayDivider}
@@ -431,7 +431,7 @@ window.sendMsg = async () => {
     sentAt:     serverTimestamp(),
   });
 
-  // اجلب unread الحالي من Firestore مباشرة عشان نضمن الدقة
+  // اجلب unread الحالي من Firestore مباشرة So that نضfrom the دقة
   const convSnap = await getDoc(doc(db, 'conversations', activeConvId));
   const currentUnread = convSnap.exists()
     ? (convSnap.data()[`unread.${otherId}`] ?? convSnap.data().unread?.[otherId] ?? 0)
@@ -535,7 +535,7 @@ function escapeAttr(str) {
   return String(str).replace(/'/g,"\\'").replace(/"/g,'\\"');
 }
 
-// ── حذف رسالة من عند المستخدم فقط ───────────────────────────
+// ── Delete Message من عند User only ───────────────────────────
 window.deleteMsg = async (convId, msgId, seen) => {
   if (seen) {
     alert('لا يمكن حذف هذه الرسالة — تمت قراءتها بالفعل');
@@ -549,7 +549,7 @@ window.deleteMsg = async (convId, msgId, seen) => {
 };
 
 
-// ── حذف المحادثة من عند المستخدم فقط ────────────────────────
+// ── Delete المحادثة من عند User only ────────────────────────
 window.unhideConv = async (cid) => {
   await updateDoc(doc(db, 'conversations', cid), {
     [`hiddenBy.${currentUser.uid}`]: false
@@ -576,11 +576,11 @@ window.deleteConv = async (cid) => {
 };
 
 
-// ── إرسال صورة ───────────────────────────────────────────────────────────
+// ── Send/Submit Image ───────────────────────────────────────────────────────────
 
 // ── View Once Open ─────────────────────────────────────────────────────────
 window.viewOnceOpen = async (convId, msgId, url, type) => {
-  // افتح الميديا
+  // افتح الميthisا
   if (type === 'image') {
     window.open(url, '_blank');
   } else {
@@ -599,11 +599,11 @@ window.viewOnceOpen = async (convId, msgId, url, type) => {
     document.body.appendChild(overlay);
   }
 
-  // احذف الرسالة من عند الطالبة بعد ثانية
+  // اDelete الMessage من عند Student (f) بعد ثانية
   setTimeout(async () => {
     try {
       const { deleteDoc, doc: fsDoc } = await import('https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js');
-      // مش بنحذف الرسالة كلها، بنحط viewOnceViewed عشان تختفي بس من عند الطالبة
+      // not/don't بنDelete الMessage كلها، بنحط viewOnceViewed So that تختفي but/only من عند Student (f)
       const { updateDoc } = await import('https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js');
       await updateDoc(fsDoc(db, 'conversations', convId, 'messages', msgId), {
         [`viewOnceViewedBy.${currentUser.uid}`]: true
