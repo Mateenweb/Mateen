@@ -523,16 +523,16 @@ function renderStudents(list) {
       <td><input type="checkbox" class="row-check" data-id="${s.id}"></td>
       <td style="color:var(--text-mid);font-size:12px">${i+1}</td>
       <td><div class="stu-name-cell">
-        <a class="btn-stu-link" href="student.html?id=${s.id}" target="_blank">👤</a>
-        <span>${esc(s.name||'—')}</span>
-        ${statusLabel?`<span class="status-badge">${statusLabel}</span>`:''}
+        <a class="btn-stu-link" href="student.html?id=${s.id}" target="_blank"><i class="ti ti-user"></i></a>
+        <span class="stu-name-text">${esc(s.name||'—')}</span>
       </div></td>
+      <td>${statusLabel?`<span class="status-badge">${statusLabel}</span>`:'<span style="color:var(--text-mid)">—</span>'}</td>
       <td>${s.day||'—'}<br><small style="color:var(--text-mid)">${s.dateH?s.dateH.replace(/-/g,'/'):'—'}</small></td>
       <td>${s.hour?s.hour+' '+s.ampm:'—'}</td>
       <td><span class="btn-interview ${intClass}">${intLabel}</span></td>
       <td><span class="btn-accept ${accClass}">${accLabel}</span></td>
       <td>${s.placementScore!=null?s.placementScore+'/100':'—'}</td>
-      <td><a class="btn-stu-link" href="student.html?id=${s.id}" target="_blank"><i class="ti ti-eye"></i></a></td>
+      <td><span class="level-badge">${s.level||'—'}</span></td>
     </tr>`;
   }).join('');
 }
