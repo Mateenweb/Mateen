@@ -615,6 +615,7 @@
   .msg-layout {
     height: calc(100vh - 58px);
     position: relative;
+    overflow: hidden;
   }
 
   .msg-sidebar {
