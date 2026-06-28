@@ -661,7 +661,7 @@ body {
 }
 
 .hero-logo-mobile {
-  width: 56px; height: 56px;
+  width: 76px; height: 76px;
   border-radius: 50%; object-fit: contain;
   border: 2px solid var(--gold);
   background: #2c1a0e;
@@ -679,7 +679,7 @@ body {
   margin-bottom: 16px;
 }
 .hero-logos .hero-logo-desktop {
-  width: 64px; height: 64px;
+  width: 90px; height: 90px;
   border-radius: 50%;
   object-fit: contain;
   border: 2px solid var(--gold);
