@@ -1002,6 +1002,197 @@ window.deleteUserAccount = async (id, name) => {
 
 
 
+// ══════════════════════════════════════════════════════
+//  إدارة الأخبار والمواعيد — Admin Panel
+// ══════════════════════════════════════════════════════
+let _editingNewsId  = null;
+let _editingEventId = null;
+let _currentNewsTab = 'news';
+
+// ── تحميل الأخبار ──────────────────────────────────────
+onSnapshot(query(collection(db,'news'), orderBy('createdAt','desc')), snap => {
+  const el = document.getElementById('newsAdminList');
+  if (!el) return;
+  if (snap.empty) {
+    el.innerHTML = '<div style="text-align:center;color:var(--text-mid);padding:24px;font-size:13px">لا توجد أخبار</div>';
+    return;
+  }
+  el.innerHTML = snap.docs.map(d => {
+    const n = d.data();
+    const date = n.createdAt?.toDate?.()?.toLocaleDateString('ar-EG',{day:'numeric',month:'short',year:'numeric'}) || '';
+    const vis = n.visibility === 'public'
+      ? '<span style="background:#dcfce7;color:#15803d;font-size:11px;padding:2px 8px;border-radius:8px">🌐 للجميع</span>'
+      : '<span style="background:#f1f5f9;color:#64748b;font-size:11px;padding:2px 8px;border-radius:8px">🔒 للمسجلات</span>';
+    const pinBadge = n.pinned ? '<span style="background:#fef9c3;color:#854d0e;font-size:11px;padding:2px 8px;border-radius:8px">📌 مثبت</span>' : '';
+    return `<div style="background:var(--white);border:1px solid var(--border);border-radius:10px;padding:12px 14px">
+      <div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:6px">
+        <div style="flex:1">
+          <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:4px">
+            <span style="font-size:12px;background:var(--beige2);padding:2px 8px;border-radius:6px">${n.tag||'خبر'}</span>
+            ${vis} ${pinBadge}
+            <span style="font-size:11px;color:var(--text-mid);margin-right:auto">${date}</span>
+          </div>
+          <div style="font-weight:600;font-size:14px;color:var(--text-dark)">${n.title||''}</div>
+          <div style="font-size:12.5px;color:var(--text-mid);margin-top:4px;line-height:1.6">${n.body||''}</div>
+        </div>
+        <div style="display:flex;gap:6px;flex-shrink:0">
+          <button onclick="openEditNewsModal('${d.id}')"
+            style="padding:5px 10px;font-size:12px;background:transparent;border:1px solid var(--gold);color:var(--gold);border-radius:6px;cursor:pointer">
+            <i class="ti ti-pencil"></i>
+          </button>
+          <button onclick="deleteAdminNews('${d.id}')"
+            style="padding:5px 10px;font-size:12px;background:#fff0f0;color:#c0392b;border:1px solid #f5c6c6;border-radius:6px;cursor:pointer">
+            <i class="ti ti-trash"></i>
+          </button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+});
+
+// ── تحميل المواعيد ────────────────────────────────────
+onSnapshot(query(collection(db,'events'), orderBy('order')), snap => {
+  const el = document.getElementById('eventsAdminList');
+  if (!el) return;
+  if (snap.empty) {
+    el.innerHTML = '<div style="text-align:center;color:var(--text-mid);padding:24px;font-size:13px">لا توجد مواعيد</div>';
+    return;
+  }
+  el.innerHTML = snap.docs.map((d,i) => {
+    const e = d.data();
+    const dotColor = e.highlight ? '#c9a227' : '#2d6e45';
+    return `<div style="display:flex;align-items:center;gap:10px;background:var(--white);border:1px solid var(--border);border-radius:10px;padding:10px 14px">
+      <div style="width:12px;height:12px;border-radius:50%;background:${dotColor};flex-shrink:0"></div>
+      <div style="flex:1">
+        <div style="font-weight:600;font-size:13.5px">${e.label||''}</div>
+        <div style="font-size:12px;color:var(--text-mid)">${e.date||''}</div>
+      </div>
+      <div style="display:flex;gap:6px">
+        <button onclick="openEditEventModal('${d.id}')"
+          style="padding:4px 9px;font-size:12px;background:transparent;border:1px solid var(--gold);color:var(--gold);border-radius:6px;cursor:pointer">
+          <i class="ti ti-pencil"></i>
+        </button>
+        <button onclick="deleteAdminEvent('${d.id}')"
+          style="padding:4px 9px;font-size:12px;background:#fff0f0;color:#c0392b;border:1px solid #f5c6c6;border-radius:6px;cursor:pointer">
+          <i class="ti ti-trash"></i>
+        </button>
+      </div>
+    </div>`;
+  }).join('');
+});
+
+// ── تبديل التابز ──────────────────────────────────────
+window.switchNewsTab = tab => {
+  _currentNewsTab = tab;
+  document.getElementById('newsTabContent').style.display   = tab === 'news'   ? '' : 'none';
+  document.getElementById('eventsTabContent').style.display = tab === 'events' ? '' : 'none';
+  const nb = document.getElementById('newsTabBtn');
+  const eb = document.getElementById('eventsTabBtn');
+  nb.style.color       = tab==='news'   ? 'var(--green-dark)' : 'var(--text-mid)';
+  nb.style.borderBottom= tab==='news'   ? '2px solid var(--green-dark)' : '2px solid transparent';
+  eb.style.color       = tab==='events' ? 'var(--green-dark)' : 'var(--text-mid)';
+  eb.style.borderBottom= tab==='events' ? '2px solid var(--green-dark)' : '2px solid transparent';
+};
+
+// ── Modals فتح ────────────────────────────────────────
+window.openAddNewsModal = () => {
+  _editingNewsId = null;
+  document.getElementById('adminNewsModalTitle').textContent = 'خبر جديد';
+  document.getElementById('anTitle').value = '';
+  document.getElementById('anBody').value  = '';
+  document.getElementById('anTag').value   = '📢 إعلان';
+  document.getElementById('anVisibility').value = 'public';
+  document.getElementById('anPinned').checked   = false;
+  document.getElementById('adminNewsModal').classList.add('show');
+};
+
+window.openEditNewsModal = async id => {
+  const snap = await getDoc(doc(db,'news',id));
+  if (!snap.exists()) return;
+  const n = snap.data();
+  _editingNewsId = id;
+  document.getElementById('adminNewsModalTitle').textContent = 'تعديل الخبر';
+  document.getElementById('anTitle').value       = n.title      || '';
+  document.getElementById('anBody').value        = n.body       || '';
+  document.getElementById('anTag').value         = n.tag        || '📢 إعلان';
+  document.getElementById('anVisibility').value  = n.visibility || 'public';
+  document.getElementById('anPinned').checked    = n.pinned     || false;
+  document.getElementById('adminNewsModal').classList.add('show');
+};
+
+window.submitAdminNews = async () => {
+  const title      = document.getElementById('anTitle').value.trim();
+  const body       = document.getElementById('anBody').value.trim();
+  const tag        = document.getElementById('anTag').value;
+  const visibility = document.getElementById('anVisibility').value;
+  const pinned     = document.getElementById('anPinned').checked;
+  if (!title) { showToast('أدخلي عنوان الخبر','err'); return; }
+  if (_editingNewsId) {
+    await updateDoc(doc(db,'news',_editingNewsId), {title,body,tag,visibility,pinned});
+    showToast('✅ تم تحديث الخبر');
+  } else {
+    await addDoc(collection(db,'news'), {title,body,tag,visibility,pinned, createdAt: serverTimestamp()});
+    showToast('✅ تم نشر الخبر');
+  }
+  document.getElementById('adminNewsModal').classList.remove('show');
+};
+
+window.deleteAdminNews = async id => {
+  if (!confirm('حذف هذا الخبر نهائياً؟')) return;
+  await deleteDoc(doc(db,'news',id));
+  showToast('تم الحذف');
+};
+
+// ── Events CRUD ───────────────────────────────────────
+window.openAddEventModal = () => {
+  _editingEventId = null;
+  document.getElementById('adminEventModalTitle').textContent = 'موعد مهم جديد';
+  document.getElementById('aeName').value      = '';
+  document.getElementById('aeDate').value      = '';
+  document.getElementById('aeHighlight').checked = false;
+  document.getElementById('adminEventModal').classList.add('show');
+};
+
+window.openEditEventModal = async id => {
+  const snap = await getDoc(doc(db,'events',id));
+  if (!snap.exists()) return;
+  const e = snap.data();
+  _editingEventId = id;
+  document.getElementById('adminEventModalTitle').textContent = 'تعديل الموعد';
+  document.getElementById('aeName').value        = e.label     || '';
+  document.getElementById('aeDate').value        = e.date      || '';
+  document.getElementById('aeHighlight').checked = e.highlight || false;
+  document.getElementById('adminEventModal').classList.add('show');
+};
+
+window.submitAdminEvent = async () => {
+  const label     = document.getElementById('aeName').value.trim();
+  const date      = document.getElementById('aeDate').value.trim();
+  const highlight = document.getElementById('aeHighlight').checked;
+  if (!label) { showToast('أدخلي اسم الموعد','err'); return; }
+  if (_editingEventId) {
+    await updateDoc(doc(db,'events',_editingEventId), {label,date,highlight});
+    showToast('✅ تم تحديث الموعد');
+  } else {
+    const snap = await getDocs(collection(db,'events'));
+    await addDoc(collection(db,'events'), {label,date,highlight, order: snap.size});
+    showToast('✅ تمت إضافة الموعد');
+  }
+  document.getElementById('adminEventModal').classList.remove('show');
+};
+
+window.deleteAdminEvent = async id => {
+  if (!confirm('حذف هذا الموعد؟')) return;
+  await deleteDoc(doc(db,'events',id));
+  showToast('تم الحذف');
+};
+
+// ── تفعيل قسم الأخبار عند الفتح ─────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  const newsHead = document.querySelector('#newsSection .section-head');
+  if (newsHead) newsHead.style.cursor = 'pointer';
+});
+
 // إعادة render عند تغيير حجم الScreen (Mobile ↔ Desktop)
 window.addEventListener("resize", () => {
   if (allStudents.length) renderStudents(allStudents);
