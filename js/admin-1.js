@@ -23,7 +23,7 @@ onAuthStateChanged(auth, async user => {
   if (role !== 'admin') {
     window.location.href = '../html/home.html'; return;
   }
-  document.getElementById('navUserName').textContent  = user.displayName || user.email.split('@')[0];
+  document.getElementById('navUserName').textContent  = user.displayName || 'الإدارة';
   document.getElementById('authGate').style.display   = 'none';
   document.getElementById('mainContent').style.display = 'flex';
 
@@ -285,7 +285,7 @@ window.approveUser = async id => {
   if (!snap.exists()) return;
   const userData = snap.data();
   const role = userData.role || '';
-  const name = userData.name || userData.email || id;
+  const name = userData.name || 'مستخدم';
 
   // غير بنات متين → قبول مباشر بدون Modal
   if (role !== 'mateen') {
