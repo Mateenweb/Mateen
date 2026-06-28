@@ -97,7 +97,7 @@ onAuthStateChanged(auth, async user => {
     roleBadge.style.color = ROLE_COLORS[data.role] || '#333';
   }
   const myNameEl = document.getElementById('myName');
-  if (myNameEl) myNameEl.textContent = data.name || currentUser.email;
+  if (myNameEl) myNameEl.textContent = data.name || '';
 
   // Show Buttons الImage  and the تسجيل — للكل ما عدا Student (f)
   const mediaButtons = document.getElementById('mediaButtons');
@@ -426,7 +426,7 @@ window.sendMsg = async () => {
   await addDoc(collection(db, 'conversations', activeConvId, 'messages'), {
     text,
     senderId:   currentUser.uid,
-    senderName: currentUserData?.role === 'admin' ? 'إدارة متين' : (currentUserData?.name || currentUser.email || ''),
+    senderName: currentUserData?.role === 'admin' ? 'إدارة متين' : (currentUserData?.name || ''),
     senderRole: currentUserData?.role  || '',
     sentAt:     serverTimestamp(),
   });
@@ -499,10 +499,10 @@ window.searchUsers = () => {
     .map(r => `
       <div class="user-group-label">${ROLE_LABELS[r] || r}</div>
       ${groups[r].map(u => `
-        <div class="user-result-item" onclick="startConv('${u.id}','${escapeAttr(u.name || u.email || 'مستخدم')}','${u.role}')">
-          ${avatarHtml(u.name || u.email || 'مستخدم', u.role, 38)}
+        <div class="user-result-item" onclick="startConv('${u.id}','${escapeAttr(u.name || 'مستخدم')}','${u.role}')">
+          ${avatarHtml(u.name || 'مستخدم', u.role, 38)}
           <div>
-            <div class="user-result-name">${u.name || u.email || 'مستخدم'}</div>
+            <div class="user-result-name">${u.name || 'مستخدم'}</div>
             <div class="user-result-role" style="color:${ROLE_COLORS[u.role]||'#888'}">${ROLE_LABELS[u.role] || ''}</div>
           </div>
         </div>`).join('')}
@@ -634,7 +634,7 @@ window.sendImage = async (input) => {
   await addDoc(collection(db, 'conversations', activeConvId, 'messages'), {
     type: 'image', url, text: '📷 صورة',
     senderId: currentUser.uid,
-    senderName: currentUserData?.role === 'admin' ? 'إدارة متين' : (currentUserData?.name || currentUser.email || ''),
+    senderName: currentUserData?.role === 'admin' ? 'إدارة متين' : (currentUserData?.name || ''),
     senderRole: currentUserData?.role || '',
     sentAt: serverTimestamp(),
     viewOnce: viewOnceMode,
@@ -690,7 +690,7 @@ window.toggleRecording = async () => {
       await addDoc(collection(db, 'conversations', activeConvId, 'messages'), {
         type: 'audio', url, text: '🎙️ رسالة صوتية',
         senderId: currentUser.uid,
-        senderName: currentUserData?.role === 'admin' ? 'إدارة متين' : (currentUserData?.name || currentUser.email || ''),
+        senderName: currentUserData?.role === 'admin' ? 'إدارة متين' : (currentUserData?.name || ''),
         senderRole: currentUserData?.role || '',
         sentAt: serverTimestamp(),
         viewOnce: viewOnceMode,
