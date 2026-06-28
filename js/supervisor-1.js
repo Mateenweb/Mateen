@@ -570,9 +570,9 @@ function renderStudents(list) {
           <div class="stu-mob-top">
             <div class="stu-mob-name">
               <a class="btn-stu-link" href="student.html?id=${s.id}" target="_blank">👤</a>
-              <input type="text" value="${esc(s.name || '')}"
-                oninput="stuAutoName('${s.id}', this.value)"
-                class="stu-mob-name-input"/>
+              ${window._userRole==='admin'
+                ? `<input type="text" value="${esc(s.name||'')}" oninput="stuAutoName('${s.id}',this.value)" class="stu-mob-name-input"/>`
+                : `<span class="stu-mob-name-input" style="padding:4px 0">${esc(s.name||'—')}</span>`}
             </div>
 
           </div>
@@ -586,10 +586,12 @@ function renderStudents(list) {
           </div>
           <div class="stu-mob-row">
             <span class="stu-mob-label">📅 اليوم</span>
-            <select class="stu-mob-sel" onchange="stuField('${s.id}','day',this.value)">
-              <option value="">— اليوم —</option>
-              ${['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'].map(d => `<option${s.day === d ? ' selected' : ''}>${d}</option>`).join('')}
-            </select>
+            ${window._userRole==='admin'
+              ? `<select class="stu-mob-sel" onchange="stuField('${s.id}','day',this.value)">
+                  <option value="">— اليوم —</option>
+                  ${['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'].map(d=>`<option${s.day===d?' selected':''}>${d}</option>`).join('')}
+                </select>`
+              : `<span>${s.day||'—'}</span>`}
           </div>
           <div class="stu-mob-row">
             <span class="stu-mob-label">📅 التاريخ</span>
@@ -597,20 +599,22 @@ function renderStudents(list) {
           </div>
           <div class="stu-mob-row">
             <span class="stu-mob-label">🕐 الوقت</span>
-            <select class="stu-mob-sel" onchange="stuField('${s.id}','hour',this.value)" style="width:60px">
-              <option value="">—</option>
-              ${[1,2,3,4,5,6,7,8,9,10,11,12].map(h => `<option${s.hour == h ? ' selected' : ''}>${h}</option>`).join('')}
-            </select>
-            <select class="stu-mob-sel" onchange="stuField('${s.id}','ampm',this.value)" style="width:80px">
-              <option value="ص"${s.ampm === 'ص' ? ' selected' : ''}>صباحاً</option>
-              <option value="م"${s.ampm === 'م' ? ' selected' : ''}>مساءً</option>
-            </select>
+            ${window._userRole==='admin'
+              ? `<select class="stu-mob-sel" onchange="stuField('${s.id}','hour',this.value)" style="width:60px">
+                  <option value="">—</option>
+                  ${[1,2,3,4,5,6,7,8,9,10,11,12].map(h=>`<option${s.hour==h?' selected':''}>${h}</option>`).join('')}
+                </select>
+                <select class="stu-mob-sel" onchange="stuField('${s.id}','ampm',this.value)" style="width:80px">
+                  <option value="ص"${s.ampm==='ص'?' selected':''}>صباحاً</option>
+                  <option value="م"${s.ampm==='م'?' selected':''}>مساءً</option>
+                </select>`
+              : `<span>${s.hour||'—'} ${s.ampm||''}</span>`}
           </div>
           ${s.status === 'new' ? `<div class="stu-mob-row">
             <span class="stu-mob-label">📊 الدرجة</span>
-            <input type="number" min="0" max="100" value="${s.placementScore ?? ''}"
-              placeholder="0" class="stu-mob-score"
-              onchange="stuField('${s.id}','placementScore',this.value===''?null:Number(this.value))">
+            ${window._userRole==='admin'
+              ? `<input type="number" min="0" max="100" value="${s.placementScore??''}" placeholder="0" class="stu-mob-score" onchange="stuField('${s.id}','placementScore',this.value===''?null:Number(this.value))">`
+              : `<span>${s.placementScore!=null?s.placementScore+'/100':'—'}</span>`}
             <span style="font-size:12px;color:#999">/ 100</span>
           </div>` : ''}
           <div class="stu-mob-actions">
@@ -630,39 +634,49 @@ function renderStudents(list) {
     let accClass='btn-na', accLabel='— لم يحدد';
     if(s.accepted==='accepted'){accClass='btn-accepted';accLabel='✔️ مقبولة';}
     if(s.accepted==='rejected'){accClass='btn-rejected';accLabel='✖️ مرفوضة';}
-    const statusSel = `<select class="status-sel" onchange="stuField('${s.id}','status',this.value)">
-      <option value=""${!s.status?' selected':''}>🏷️ التصنيف</option>
-      <option value="mateen"${s.status==='mateen'?' selected':''}>📖 بنات متين</option>
-      <option value="new"${s.status==='new'?' selected':''}>✨ المستجدات</option>
-    </select>`;
-    const daySel=`<select class="day-sel" onchange="stuField('${s.id}','day',this.value)">
-      <option value="">-اليوم-</option>
-      ${['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'].map(d=>`<option${s.day===d?' selected':''}>${d}</option>`).join('')}
-    </select>`;
-    const timeSel=`<div class="time-cell">
-      <select class="time-hour" onchange="stuField('${s.id}','hour',this.value)">
-        <option value="">-</option>${[1,2,3,4,5,6,7,8,9,10,11,12].map(h=>`<option${s.hour==h?' selected':''}>${h}</option>`).join('')}
-      </select>:
-      <select class="time-ampm" onchange="stuField('${s.id}','ampm',this.value)">
-        <option value="ص"${s.ampm==='ص'?' selected':''}>صباحاً</option>
-        <option value="م"${s.ampm==='م'?' selected':''}>مساءً</option>
-      </select>
-    </div>`;
-    const placementCell = s.status === 'new'
-      ? `<div class="placement-wrap">
-           <input type="number" class="placement-input" min="0" max="100"
-             value="${s.placementScore ?? ''}" placeholder="الدرجة"
-             onchange="stuField('${s.id}','placementScore',this.value===''?null:Number(this.value))">
-           <span class="placement-unit">/ 100</span>
-         </div>`
-      : `<span style="color:var(--text-mid);font-size:12px">—</span>`;
+    const statusLabel2 = s.status==='mateen'?'📖 بنات متين':s.status==='new'?'✨ مستجدة':'—';
+    const statusSel = window._userRole==='admin'
+      ? `<select class="status-sel" onchange="stuField('${s.id}','status',this.value)">
+          <option value=""${!s.status?' selected':''}>🏷️ التصنيف</option>
+          <option value="mateen"${s.status==='mateen'?' selected':''}>📖 بنات متين</option>
+          <option value="new"${s.status==='new'?' selected':''}>✨ المستجدات</option>
+        </select>`
+      : `<span class="status-badge">${statusLabel2}</span>`;
+    const daySel = window._userRole==='admin'
+      ? `<select class="day-sel" onchange="stuField('${s.id}','day',this.value)">
+          <option value="">-اليوم-</option>
+          ${['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'].map(d=>`<option${s.day===d?' selected':''}>${d}</option>`).join('')}
+        </select>`
+      : `<span>${s.day||'—'}</span>`;
+    const timeSel = window._userRole==='admin'
+      ? `<div class="time-cell">
+          <select class="time-hour" onchange="stuField('${s.id}','hour',this.value)">
+            <option value="">-</option>${[1,2,3,4,5,6,7,8,9,10,11,12].map(h=>`<option${s.hour==h?' selected':''}>${h}</option>`).join('')}
+          </select>:
+          <select class="time-ampm" onchange="stuField('${s.id}','ampm',this.value)">
+            <option value="ص"${s.ampm==='ص'?' selected':''}>صباحاً</option>
+            <option value="م"${s.ampm==='م'?' selected':''}>مساءً</option>
+          </select>
+        </div>`
+      : `<span>${s.hour||'—'} ${s.ampm||''}</span>`;
+    const placementCell = s.status !== 'new'
+      ? `<span style="color:var(--text-mid);font-size:12px">—</span>`
+      : window._userRole==='admin'
+        ? `<div class="placement-wrap">
+             <input type="number" class="placement-input" min="0" max="100"
+               value="${s.placementScore ?? ''}" placeholder="الدرجة"
+               onchange="stuField('${s.id}','placementScore',this.value===''?null:Number(this.value))">
+             <span class="placement-unit">/ 100</span>
+           </div>`
+        : `<span>${s.placementScore != null ? s.placementScore+'/100' : '—'}</span>`;
     return `<tr>
       <td><input type="checkbox" class="row-check" data-id="${s.id}" onchange="onRowCheck()"></td>
       <td style="color:var(--text-mid);font-size:12px">${i+1}</td>
       <td><div class="stu-name-cell">
         <a class="btn-stu-link" href="student.html?id=${s.id}" target="_blank" title="صفحة الطالبة">👤</a>
-        <input type="text" value="${esc(s.name||'')}" oninput="stuAutoName('${s.id}',this.value)" style="min-width:100px">
-        ${statusSel}
+        ${window._userRole==='admin'
+          ? `<input type="text" value="${esc(s.name||'')}" oninput="stuAutoName('${s.id}',this.value)" style="min-width:100px">`
+          : `<span class="stu-name-text">${esc(s.name||'—')}</span>`}
       </div></td>
       <td><div style="display:flex;flex-direction:column;gap:4px">${daySel}${makeDatePicker(s.id,s.dateH)}</div></td>
       <td>${timeSel}</td>
