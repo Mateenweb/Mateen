@@ -14,6 +14,7 @@ onAuthStateChanged(auth, async user => {
   if (!user) { window.location.href = '../html/login.html'; return; }
   const snap = await getDoc(doc(db, 'users', user.uid));
   const role = snap.exists() ? snap.data().role : '';
+  window._userRole = role;
   if (role !== 'supervisor' && role !== 'admin') { window.location.href = '../html/login.html'; return; }
   document.getElementById('navUserName').textContent   = snap.data().name || user.email.split('@')[0];
   document.getElementById('authGate').style.display    = 'none';
@@ -704,7 +705,7 @@ window.doAttExport = async () => {
 // ── Student CRUD ──────────────────────────────────────────────
 const stuDefault = () => ({order:Date.now(), name:'طالبة جديدة', status:'', day:'', dateH:'', dateG:'', hour:'', minute:'00', ampm:'ص', interview:'pending', accepted:'na'});
 
-window.addStudentRow = async () => { await addDoc(collection(db,'students'), stuDefault()); };
+window.addStudentRow = async () => { if (window._userRole !== 'admin') return; await addDoc(collection(db,'students'), stuDefault()); };
 
 window.addBulkNames = async () => {
   const txt = document.getElementById('bulkNames').value;
@@ -715,10 +716,11 @@ window.addBulkNames = async () => {
   showToast('✓ تمت إضافة الأسماء');
 };
 
-window.stuAutoName = async (id,v) => updateDoc(doc(db,'students',id),{name:v});
-window.stuField    = async (id,f,v) => updateDoc(doc(db,'students',id),{[f]:v});
+window.stuAutoName = async (id,v) => { if (window._userRole !== 'admin') return; await updateDoc(doc(db,'students',id),{name:v}); };
+window.stuField    = async (id,f,v) => { if (window._userRole !== 'admin') return; await updateDoc(doc(db,'students',id),{[f]:v}); };
 
 window.stuUpdateDatePart = async (id,key,value) => {
+  if (window._userRole !== 'admin') return;
   const s = allStudents.find(s=>s.id===id)||{};
   if(!stuDateParts[id]) stuDateParts[id]=parseDateParts(s.dateH||'');
   const pk={hd:'d',hm:'m',hy:'y'}[key];
