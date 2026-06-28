@@ -135,20 +135,20 @@ async function initPage(studentId, user, role) {
     const statsBar = document.getElementById('statsBar');
     if (statsBar) statsBar.style.display = 'none';
 
-    // إخفاء كل التبويبات إلا "حضوري"
-    document.getElementById('tabBtn-info')?.remove();
-    document.getElementById('tabBtn-grades')?.remove();
-    document.getElementById('tabBtn-notes')?.remove();
+    // إخفاء تبويبي "بياناتي" و"درجاتي" فقط — بس مش نشيلهم (hide مش remove)
+    const tabInfo   = document.getElementById('tabBtn-info');
+    const tabGrades = document.getElementById('tabBtn-grades');
+    if (tabInfo)   tabInfo.style.display   = 'none';
+    if (tabGrades) tabGrades.style.display = 'none';
 
-    // إظهار نموذج إضافة جلسة فقط — بدون قايمة الجلسات القديمة
-    document.getElementById('newSessionWrap').style.display  = 'block';
-    document.getElementById('attendanceList').style.display  = 'none';
+    // إظهار نموذج تسجيل حضور جديد — بدون قايمة الجلسات القديمة
+    document.getElementById('newSessionWrap').style.display = 'block';
+    document.getElementById('attendanceList').style.display = 'none';
 
-    // إظهار تبويب الملاحظات مع نموذج كتابة فارغ (بدون عرض القديم)
-    document.getElementById('tabBtn-notes').style.display    = '';   // أعده ظاهر
-    document.getElementById('notesEditWrap').style.display   = 'block';
-    document.getElementById('notesTextarea').value           = '';   // فاضي — مش بيشوف القديم
-    document.getElementById('notesContent').style.display    = 'none'; // إخفاء الملاحظات القديمة
+    // تبويب الملاحظات — نموذج فاضي بدون عرض الملاحظات القديمة
+    document.getElementById('notesEditWrap').style.display  = 'block';
+    document.getElementById('notesTextarea').value          = '';
+    document.getElementById('notesContent').style.display   = 'none';
 
     setupSupervisorAttendance(studentId);
     setupSupervisorNotes(studentId);
