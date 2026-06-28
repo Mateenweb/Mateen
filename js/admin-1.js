@@ -4,7 +4,7 @@ import { initializeApp, getApps, getApp }
 import { getAuth, onAuthStateChanged, signOut }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
 import { getFirestore, collection, addDoc, deleteDoc, doc,
-         onSnapshot, query, orderBy, where, getDoc, updateDoc, getDocs }
+         onSnapshot, query, orderBy, where, getDoc, updateDoc, getDocs, serverTimestamp }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 import { FIREBASE_CONFIG } from "./config.js";
 import { exportWord, exportPdf } from "./export.js";
