@@ -164,6 +164,50 @@ window.TOUR_STEPS = {
 
 };
 
+// steps صفحة التسجيل
+window.TOUR_STEPS['login'] = [
+  {
+    el: '#tabRegister',
+    title: 'إنشاء حساب جديد',
+    desc: 'اضغطي هنا أولاً للانتقال لنموذج التسجيل',
+    actionLabel: '📝 انتقلي للتسجيل',
+    action: async () => {
+      document.getElementById('tabRegister')?.click();
+      await new Promise(r => setTimeout(r, 400));
+    }
+  },
+  {
+    el: '#regName',
+    title: 'الاسم الثلاثي',
+    desc: 'اكتبي اسمك الكامل كما في وثيقة الهوية',
+  },
+  {
+    el: '#regPhone',
+    title: 'رقم الجوال',
+    desc: 'أدخلي رقم الجوال للتواصل معك',
+  },
+  {
+    el: '#regEmail',
+    title: 'البريد الإلكتروني',
+    desc: 'سيُستخدم للدخول لحسابك لاحقاً',
+  },
+  {
+    el: '#regPass',
+    title: 'كلمة المرور',
+    desc: 'اختاري كلمة مرور قوية لا تقل عن ٦ أحرف',
+  },
+  {
+    el: '#regPass2',
+    title: 'تأكيد كلمة المرور',
+    desc: 'أعيدي كتابة كلمة المرور للتأكد منها',
+  },
+  {
+    el: '#registerBtn',
+    title: 'إنشاء الحساب',
+    desc: 'بعد ملء البيانات اضغطي هنا — سيتم إرسال طلبك للإدارة للمراجعة والتفعيل',
+  },
+];
+
 // تشغيل الـ tour بناءً على Page الحالية
 window.startPageTour = () => {
   const page = window.location.pathname.split('/').pop().replace('.html','');
