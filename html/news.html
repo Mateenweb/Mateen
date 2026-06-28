@@ -80,11 +80,8 @@
     <div class="news-sidebar">
       <div class="card">
         <div class="sidebar-sec-title">📅 المواعيد المهمة</div>
-        <div class="timeline">
-          <div class="tl-item"><div class="tl-dot"></div><div><div class="tl-label">بداية الإجازة للمراجعة</div><div class="tl-date">١١ صفر — ١٨ صفر</div></div></div>
-          <div class="tl-item"><div class="tl-dot gold"></div><div><div class="tl-label">بدء الاختبارات</div><div class="tl-date">الأحد ١٩ صفر</div></div></div>
-          <div class="tl-item"><div class="tl-dot"></div><div><div class="tl-label">انتهاء الاختبارات</div><div class="tl-date">٢٩ صفر — ١٢ أغسطس</div></div></div>
-          <div class="tl-item"><div class="tl-dot gold"></div><div><div class="tl-label">حفل التخرج</div><div class="tl-date">الأربعاء ٦ ربيع الأول</div></div></div>
+        <div class="timeline" id="eventsList">
+          <div class="tl-item"><div class="tl-dot"></div><div><div class="tl-label" style="color:#aaa;font-size:13px">جارٍ التحميل...</div></div></div>
         </div>
       </div>
     </div>
@@ -201,7 +198,7 @@
 <script src="../js/nav.js"></script>
 <script type="module">
 import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
-import { getFirestore, collection, query, orderBy, onSnapshot, deleteDoc, doc }
+import { getFirestore, collection, query, orderBy, onSnapshot, deleteDoc, doc, getDoc }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
 import { FIREBASE_CONFIG } from "../js/config.js";
@@ -210,41 +207,47 @@ const app  = getApps().length ? getApp() : initializeApp(FIREBASE_CONFIG);
 const db   = getFirestore(app);
 const auth = getAuth(app);
 
-let isAdmin = false;
+let isAdmin   = false;
+let isMember  = false; // مسجلة (أي دور)
 
-onAuthStateChanged(auth, async user => {
-  if (!user) return;
-  // حدّث lastSeen So that يRowّر كونتر الNews
-  localStorage.setItem(`news_last_seen_${user.uid}`, Date.now().toString());
-  const { getDoc } = await import("https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js");
-  const snap = await getDoc(doc(db, 'users', user.uid));
-  const role = snap.exists() ? snap.data().role : '';
-  if (['admin', 'supervisor', 'teacher'].includes(role)) {
-    isAdmin = true;
-    const btn = document.getElementById('addNewsBtn');
-    if (btn) btn.classList.add('show');
-  }
+// ── تحميل المواعيد المهمة (للجميع بدون login) ──────────────
+onSnapshot(query(collection(db,'events'), orderBy('order')), snap => {
+  const el = document.getElementById('eventsList');
+  if (!el) return;
+  if (snap.empty) { el.innerHTML = '<div class="tl-item"><div class="tl-dot"></div><div><div class="tl-label" style="color:#aaa">لا توجد مواعيد</div></div></div>'; return; }
+  el.innerHTML = snap.docs.map(d => {
+    const e = d.data();
+    return \`<div class="tl-item">
+      <div class="tl-dot \${e.highlight ? 'gold' : ''}"></div>
+      <div>
+        <div class="tl-label">\${e.label||''}</div>
+        <div class="tl-date">\${e.date||''}</div>
+      </div>
+    </div>\`;
+  }).join('');
 });
 
-// Load الNews
-const q = query(collection(db, 'news'), orderBy('createdAt', 'desc'));
-onSnapshot(q, snap => {
-  document.getElementById('newsLoading').classList.add('hidden');
-  const list = document.getElementById('newsList');
+// ── تحميل الأخبار (public للجميع، members للمسجلات) ──────────
+function loadNews(showAll) {
+  const q = query(collection(db, 'news'), orderBy('createdAt', 'desc'));
+  onSnapshot(q, snap => {
+    document.getElementById('newsLoading').classList.add('hidden');
+    const list = document.getElementById('newsList');
 
-  if (snap.empty) {
-    document.getElementById('newsEmpty').classList.remove('hidden');
-    list.innerHTML = '';
-    return;
-  }
+    const visibleDocs = snap.docs.filter(d => {
+      const v = d.data().visibility;
+      if (v === 'public') return true;       // للجميع دائماً
+      if (!v || v === 'members') return showAll; // للمسجلات فقط
+      return showAll;
+    });
 
-  document.getElementById('newsEmpty').classList.add('hidden');
-  // فلتر الNews حسب الـ visibility - الNews بدون visibility تعتبر للمسجلات
-  const visibleDocs = snap.docs.filter(d => {
-    const v = d.data().visibility;
-    if (!v || v === 'members') return true; // للمسجلات - وHere في Page المسجلة
-    return true; // public also تظهر
-  });
+    if (!visibleDocs.length) {
+      document.getElementById('newsEmpty').classList.remove('hidden');
+      list.innerHTML = '';
+      return;
+    }
+
+    document.getElementById('newsEmpty').classList.add('hidden');
   list.innerHTML = visibleDocs.map(d => {
     const n = d.data();
     const date = n.createdAt?.toDate?.()?.toLocaleDateString('ar', { day:'numeric', month:'long', year:'numeric' }) || '';
@@ -266,9 +269,29 @@ onSnapshot(q, snap => {
       </div>`;
   }).join('');
 
-  if (visibleDocs.length === 0) {
-    document.getElementById('newsEmpty').classList.remove('hidden');
-    list.innerHTML = '';
+    if (!visibleDocs.length) {
+      document.getElementById('newsEmpty').classList.remove('hidden');
+      list.innerHTML = '';
+    }
+  });
+}
+
+// ── Auth ───────────────────────────────────────────────────────
+// حمّل public news أولاً بدون انتظار login
+loadNews(false);
+
+onAuthStateChanged(auth, async user => {
+  if (user) {
+    localStorage.setItem(`news_last_seen_${user.uid}`, Date.now().toString());
+    const snap = await getDoc(doc(db, 'users', user.uid));
+    const role = snap.exists() ? snap.data().role : '';
+    isMember = true;
+    if (['admin', 'supervisor', 'teacher'].includes(role)) {
+      isAdmin = true;
+      document.getElementById('addNewsBtn')?.classList.add('show');
+    }
+    // أعد التحميل لتضمين members-only posts
+    loadNews(true);
   }
 });
 
