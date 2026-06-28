@@ -21,6 +21,7 @@ onAuthStateChanged(auth, async user => {
   document.getElementById('mainContent').style.display = 'flex';
   loadData();
   initSupervisorFeatures();
+  initStudentsSnapshot();
 });
 
 window.doLogout = () => signOut(auth).then(() => window.location.href = '../html/login.html');
@@ -499,16 +500,17 @@ function makeDatePicker(sid, dateStr) {
   </div>`;
 }
 
-const stuQuery2 = query(collection(db,'students'), orderBy('order'));
-onSnapshot(stuQuery2, snap => {
-  allStudents = snap.docs.map(d=>({id:d.id,...d.data()}));
-  renderStudents(allStudents);
-  updateStuStats(allStudents);
-  // تحديث قائمة الغير مرتبطين لـ modal الربط
-  window._allStudentsUnlinked = snap.docs
-    .filter(d => !d.data().userId)
-    .map(d => ({ id: d.id, name: d.data().name||d.data().fullName||d.id }));
+function initStudentsSnapshot() {
+  const stuQuery2 = query(collection(db,'students'), orderBy('order'));
+  onSnapshot(stuQuery2, snap => {
+    allStudents = snap.docs.map(d=>({id:d.id,...d.data()}));
+    renderStudents(allStudents);
+    updateStuStats(allStudents);
+    window._allStudentsUnlinked = snap.docs
+      .filter(d => !d.data().userId)
+      .map(d => ({ id: d.id, name: d.data().name||d.data().fullName||d.id }));
 });
+}
 
 function updateStuStats(list) {
   const el = id => document.getElementById(id);
