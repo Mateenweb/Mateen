@@ -488,6 +488,12 @@ function hijriToGregorian(hd,hm,hy) {
 function parseDateParts(s){if(!s)return{d:'',m:'',y:''};const[d,m,y]=s.split('-');return{d:d||'',m:m||'',y:y||''};}
 
 function makeDatePicker(sid, dateStr) {
+  if (window._userRole !== 'admin') {
+    const {d,m,y}=parseDateParts(dateStr||'');
+    const monthName = m ? (MONTHS_HIJRI[parseInt(m,10)-1]||'') : '—';
+    const display = dateStr ? `${parseInt(d,10)} ${monthName} ${y}` : '—';
+    return `<span style="font-size:12px;color:var(--text-dark)">${display}</span>`;
+  }
   const {d,m,y}=parseDateParts(dateStr||'');
   const days=Array.from({length:30},(_,i)=>i+1);
   const dayOpts=days.map(n=>{const v=String(n).padStart(2,'0');return`<option value="${v}"${d===v?' selected':''}>${n}</option>`;}).join('');
@@ -579,12 +585,13 @@ function renderStudents(list) {
 
           </div>
           <div class="stu-mob-row">
-            <select class="stu-mob-sel" onchange="stuField('${s.id}','status',this.value)">
-              <option value=""${!s.status ? ' selected' : ''}>🏷️ التصنيف</option>
-              <option value="mateen"${s.status === 'mateen' ? ' selected' : ''}>📖 بنات متين</option>
-              <option value="new"${s.status === 'new' ? ' selected' : ''}>✨ مستجدات</option>
-            </select>
-            ${s.status ? `<span class="stu-mob-badge">${statusLabel}</span>` : ''}
+            ${window._userRole==='admin'
+              ? `<select class="stu-mob-sel" onchange="stuField('${s.id}','status',this.value)">
+                  <option value=""${!s.status?' selected':''}>🏷️ التصنيف</option>
+                  <option value="mateen"${s.status==='mateen'?' selected':''}>📖 بنات متين</option>
+                  <option value="new"${s.status==='new'?' selected':''}>✨ مستجدات</option>
+                </select>`
+              : `<span class="status-badge">${statusLabel||'—'}</span>`}
           </div>
           <div class="stu-mob-row">
             <span class="stu-mob-label">📅 اليوم</span>
@@ -747,9 +754,10 @@ window.stuUpdateDatePart = async (id,key,value) => {
   await updateDoc(doc(db,'students',id),up);
 };
 
-window.stuToggleInterview = async (id,cur) => updateDoc(doc(db,'students',id),{interview:cur==='done'?'pending':'done'});
+window.stuToggleInterview = async (id,cur) => { if(window._userRole!=='admin') return; await updateDoc(doc(db,'students',id),{interview:cur==='done'?'pending':'done'}); };
 
 window.stuToggleAccept = async (id,cur,interview) => {
+  if(window._userRole!=='admin') return;
   if(interview!=='done'){showToast('يجب إجراء المقابلة أولاً','err');return;}
   const order=['na','accepted','rejected'];
   await updateDoc(doc(db,'students',id),{accepted:order[(order.indexOf(cur)+1)%3]});
