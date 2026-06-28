@@ -354,10 +354,24 @@ footer {
   border-color: rgba(92,61,46,0.25) !important;
 }
 
-/* sidebar header — beige */
-.sidebar-header { background: var(--beige3) !important;
+/* sidebar — override Bootstrap offcanvas dark default */
+#mainSidebar,
+#mainSidebar.offcanvas,
+.sidebar-offcanvas,
+.sidebar { 
+  --bs-offcanvas-bg: var(--white) !important;
+  background: var(--white) !important;
+  background-color: var(--white) !important;
+  border-left: 2px solid var(--gold) !important;
+  color: var(--text-dark) !important;
 }
-.sidebar { background: var(--beige2) !important; border-left: 2px solid var(--gold) !important; }
+#mainSidebar .offcanvas-header,
+.sidebar-header { 
+  background: var(--green-dark) !important;
+}
+#mainSidebar .offcanvas-body {
+  background: var(--white) !important;
+}
 .sidebar-logo-text { color: var(--green-dark) !important; }
 
 .path-btn {
