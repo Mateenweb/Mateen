@@ -31,6 +31,9 @@ function renderNav(activePage) {
     <a href="login.html" class="btn-outline"><i class="ti ti-user"></i> تسجيل الدخول</a>
     <button class="btn-solid" onclick="document.getElementById('reg-modal')?.classList.add('open')">التسجيل في البرنامج</button>
   </div>
+  <button onclick="typeof startPageTour==='function'&&startPageTour()" title="جولة تعريفية"
+    id="navTourBtn"
+    style="background:none;border:none;color:rgba(255,255,255,0.85);font-size:18px;cursor:pointer;padding:6px 8px;display:flex;align-items:center;flex-shrink:0;">❓</button>
   <button class="nav-toggle" aria-label="Open sidebar menu" onclick="document.querySelector('.nav-links').classList.toggle('open')">
     <i class="ti ti-menu-2"></i>
   </button>
@@ -40,6 +43,11 @@ function renderNav(activePage) {
   if (placeholder) {
     placeholder.outerHTML = navHTML;
   }
+  // Hide tour button if page has no tour
+  setTimeout(() => {
+    const tourBtn = document.getElementById('navTourBtn');
+    if (tourBtn && typeof startPageTour !== 'function') tourBtn.style.display = 'none';
+  }, 300);
 }
 
 function _navIsLoggedIn() {
