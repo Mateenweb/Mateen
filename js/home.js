@@ -460,7 +460,7 @@ window.submitContactNew = async () => {
     const senderSnap = await getDoc(doc(db,'users',user.uid));
     const senderName = (senderSnap.exists() && senderSnap.data().name)
       ? senderSnap.data().name
-      : (nameEl.value.trim() || user.email || '');
+      : (nameEl.value.trim() || '');
     const senderRole = (senderSnap.exists() && senderSnap.data().role) || 'student';
 
     // إنشاء أو Update المحادثة
