@@ -426,7 +426,7 @@ window.sendMsg = async () => {
   await addDoc(collection(db, 'conversations', activeConvId, 'messages'), {
     text,
     senderId:   currentUser.uid,
-    senderName: currentUserData?.name  || currentUser.email || '',
+    senderName: currentUserData?.role === 'admin' ? 'إدارة متين' : (currentUserData?.name || currentUser.email || ''),
     senderRole: currentUserData?.role  || '',
     sentAt:     serverTimestamp(),
   });
@@ -634,7 +634,7 @@ window.sendImage = async (input) => {
   await addDoc(collection(db, 'conversations', activeConvId, 'messages'), {
     type: 'image', url, text: '📷 صورة',
     senderId: currentUser.uid,
-    senderName: currentUserData?.name || currentUser.email || '',
+    senderName: currentUserData?.role === 'admin' ? 'إدارة متين' : (currentUserData?.name || currentUser.email || ''),
     senderRole: currentUserData?.role || '',
     sentAt: serverTimestamp(),
     viewOnce: viewOnceMode,
@@ -690,7 +690,7 @@ window.toggleRecording = async () => {
       await addDoc(collection(db, 'conversations', activeConvId, 'messages'), {
         type: 'audio', url, text: '🎙️ رسالة صوتية',
         senderId: currentUser.uid,
-        senderName: currentUserData?.name || currentUser.email || '',
+        senderName: currentUserData?.role === 'admin' ? 'إدارة متين' : (currentUserData?.name || currentUser.email || ''),
         senderRole: currentUserData?.role || '',
         sentAt: serverTimestamp(),
         viewOnce: viewOnceMode,
