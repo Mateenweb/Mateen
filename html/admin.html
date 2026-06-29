@@ -684,10 +684,10 @@
 <!-- ── قسم فحص الموقع (للدعم الفني) ── -->
 <div class="section" id="siteTesterSection">
   <div class="section-head">
-    <div class="section-head-title"><i class="ti ti-radar"></i> فحص الموقع</div>
+    <div class="section-head-title"><i class="ti ti-radar"></i> فحص الموقع الشامل</div>
   </div>
   <div class="section-body" style="padding:20px">
-    <p style="font-size:13px;color:var(--text-mid);margin-bottom:16px">فحص شامل لجميع صفحات الموقع — سرعة، SEO، صور، روابط، وإمكانية الوصول.</p>
+    <p style="font-size:13px;color:var(--text-mid);margin-bottom:16px">فحص شامل لجميع صفحات الموقع — أداء، SEO، صور، روابط، إمكانية الوصول، وأفضل الممارسات.</p>
     <button id="runSiteTestBtn" onclick="runSiteTest()" style="background:linear-gradient(135deg,#2c1a0e,#5c3d2e);color:#e8c96a;border:none;border-radius:10px;padding:10px 24px;font-family:inherit;font-size:14px;cursor:pointer;font-weight:600;">
       <i class="ti ti-player-play"></i> بدء الفحص الشامل
     </button>
@@ -719,40 +719,46 @@ async function runSiteTest() {
   for (const page of SITE_PAGES) {
     const url = base + page;
     const result = await checkPage(url, page);
-    summary[result.status]++;
-    const statusColor = result.status==='ok' ? '#27ae60' : result.status==='slow' ? '#e67e22' : '#e74c3c';
-    const statusText  = result.status==='ok' ? '✅ سليمة' : result.status==='slow' ? '⚠️ بطيئة' : '❌ خطأ';
+    if (result.httpOk === false) summary.err++;
+    else if (result.loadTime > 2000) summary.slow++;
+    else summary.ok++;
+
+    const perfScore = result.perfScore;
+    const perfColor = perfScore >= 90 ? '#27ae60' : perfScore >= 50 ? '#e67e22' : '#e74c3c';
 
     rows += `<tr style="border-bottom:1px solid rgba(0,0,0,0.06)">
-      <td style="padding:10px 12px;font-size:13px;font-weight:600">${page}</td>
-      <td style="padding:10px 12px;font-size:13px;color:${statusColor}">${statusText}</td>
-      <td style="padding:10px 12px;font-size:13px">${result.loadTime} ms</td>
-      <td style="padding:10px 12px;font-size:12px">${result.size}</td>
-      <td style="padding:10px 12px;font-size:12px">${result.title}</td>
-      <td style="padding:10px 12px;font-size:12px;color:${result.seo.color}">${result.seo.text}</td>
-      <td style="padding:10px 12px;font-size:12px;color:${result.images.color}">${result.images.text}</td>
-      <td style="padding:10px 12px;font-size:12px;color:${result.a11y.color}">${result.a11y.text}</td>
-      <td style="padding:10px 12px"><a href="${url}" target="_blank" style="font-size:12px;color:var(--gold-mid)">فتح ↗</a></td>
+      <td style="padding:8px 10px;font-size:12px;font-weight:600">${page}</td>
+      <td style="padding:8px 10px;font-size:12px;color:${result.httpOk?'#27ae60':'#e74c3c'}">${result.httpOk ? '✅ '+result.httpStatus : '❌ '+result.httpStatus}</td>
+      <td style="padding:8px 10px;font-size:12px">${result.loadTime} ms</td>
+      <td style="padding:8px 10px;font-size:12px">${result.size}</td>
+      <td style="padding:8px 10px;font-size:12px;color:${perfColor};font-weight:700">${perfScore}</td>
+      <td style="padding:8px 10px;font-size:12px;color:${result.seo.color}">${result.seo.text}</td>
+      <td style="padding:8px 10px;font-size:12px;color:${result.a11y.color}">${result.a11y.text}</td>
+      <td style="padding:8px 10px;font-size:12px;color:${result.bp.color}">${result.bp.text}</td>
+      <td style="padding:8px 10px;font-size:12px;color:${result.images.color}">${result.images.text}</td>
+      <td style="padding:8px 10px"><a href="${url}" target="_blank" style="font-size:12px;color:var(--gold-mid)">فتح ↗</a></td>
     </tr>`;
 
     results.innerHTML = `
-      <div style="display:flex;gap:20px;margin-bottom:16px;flex-wrap:wrap">
+      <div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap">
         <span style="background:#e8f5e9;color:#27ae60;padding:6px 14px;border-radius:20px;font-size:13px;font-weight:600">✅ سليمة: ${summary.ok}</span>
         <span style="background:#fff3e0;color:#e67e22;padding:6px 14px;border-radius:20px;font-size:13px;font-weight:600">⚠️ بطيئة: ${summary.slow}</span>
         <span style="background:#ffebee;color:#e74c3c;padding:6px 14px;border-radius:20px;font-size:13px;font-weight:600">❌ أخطاء: ${summary.err}</span>
+        <span style="background:#f3f3f3;color:#666;padding:6px 14px;border-radius:20px;font-size:12px">تم فحص ${summary.ok+summary.slow+summary.err} / ${SITE_PAGES.length}</span>
       </div>
       <div style="overflow-x:auto">
-      <table style="width:100%;border-collapse:collapse;min-width:800px">
+      <table style="width:100%;border-collapse:collapse;min-width:900px">
         <thead><tr style="background:rgba(92,61,46,0.08)">
-          <th style="padding:10px 12px;text-align:right;font-size:12px">الصفحة</th>
-          <th style="padding:10px 12px;text-align:right;font-size:12px">الحالة</th>
-          <th style="padding:10px 12px;text-align:right;font-size:12px">وقت التحميل</th>
-          <th style="padding:10px 12px;text-align:right;font-size:12px">الحجم</th>
-          <th style="padding:10px 12px;text-align:right;font-size:12px">العنوان</th>
-          <th style="padding:10px 12px;text-align:right;font-size:12px">SEO</th>
-          <th style="padding:10px 12px;text-align:right;font-size:12px">الصور</th>
-          <th style="padding:10px 12px;text-align:right;font-size:12px">إمكانية الوصول</th>
-          <th style="padding:10px 12px;text-align:right;font-size:12px">رابط</th>
+          <th style="padding:8px 10px;text-align:right;font-size:11px">الصفحة</th>
+          <th style="padding:8px 10px;text-align:right;font-size:11px">HTTP</th>
+          <th style="padding:8px 10px;text-align:right;font-size:11px">وقت التحميل</th>
+          <th style="padding:8px 10px;text-align:right;font-size:11px">الحجم</th>
+          <th style="padding:8px 10px;text-align:right;font-size:11px">الأداء 🏎️</th>
+          <th style="padding:8px 10px;text-align:right;font-size:11px">SEO 🔍</th>
+          <th style="padding:8px 10px;text-align:right;font-size:11px">إمكانية الوصول ♿</th>
+          <th style="padding:8px 10px;text-align:right;font-size:11px">أفضل الممارسات ✨</th>
+          <th style="padding:8px 10px;text-align:right;font-size:11px">الصور 🖼️</th>
+          <th style="padding:8px 10px;text-align:right;font-size:11px">رابط</th>
         </tr></thead>
         <tbody>${rows}</tbody>
       </table>
@@ -770,52 +776,99 @@ async function checkPage(url, page) {
     const loadTime = Math.round(performance.now() - start);
     const html = await res.text();
     const size = formatSize(new Blob([html]).size);
-
-    // parse
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, 'text/html');
 
-    // title
-    const title = doc.querySelector('title')?.textContent?.trim() || '—';
+    // ── Performance Score ──
+    let perfDeductions = 0;
+    if (loadTime > 3000) perfDeductions += 40;
+    else if (loadTime > 2000) perfDeductions += 25;
+    else if (loadTime > 1000) perfDeductions += 10;
+    const scripts = doc.querySelectorAll('script[src]').length;
+    const styles = doc.querySelectorAll('link[rel="stylesheet"]').length;
+    if (scripts > 10) perfDeductions += 10;
+    if (styles > 5) perfDeductions += 5;
+    const imgs = doc.querySelectorAll('img');
+    const largeImgs = [...imgs].filter(i => {
+      const w = parseInt(i.getAttribute('width')||'0');
+      return w > 800;
+    }).length;
+    if (largeImgs > 0) perfDeductions += largeImgs * 5;
+    const hasViewport = !!doc.querySelector('meta[name="viewport"]');
+    if (!hasViewport) perfDeductions += 10;
+    const perfScore = Math.max(0, 100 - perfDeductions);
 
-    // SEO checks
+    // ── SEO ──
     const metaDesc = doc.querySelector('meta[name="description"]');
     const h1 = doc.querySelector('h1');
+    const title = doc.querySelector('title')?.textContent?.trim() || '';
+    const canonical = doc.querySelector('link[rel="canonical"]');
+    const robots = doc.querySelector('meta[name="robots"]');
+    const ogTitle = doc.querySelector('meta[property="og:title"]');
     let seoIssues = [];
     if (!metaDesc) seoIssues.push('لا يوجد meta description');
     if (!h1) seoIssues.push('لا يوجد H1');
     if (title.length < 10) seoIssues.push('العنوان قصير');
-    const seo = seoIssues.length === 0
-      ? { text: '✅ جيد', color: '#27ae60' }
-      : { text: '⚠️ ' + seoIssues[0], color: '#e67e22' };
+    if (!canonical) seoIssues.push('لا يوجد canonical');
+    if (!ogTitle) seoIssues.push('لا يوجد Open Graph');
+    const seoScore = Math.round((1 - seoIssues.length/5) * 100);
+    const seo = { 
+      text: seoIssues.length === 0 ? '✅ '+seoScore : '⚠️ '+seoScore+' — '+seoIssues[0],
+      color: seoScore >= 80 ? '#27ae60' : seoScore >= 50 ? '#e67e22' : '#e74c3c'
+    };
 
-    // Images alt check
-    const imgs = doc.querySelectorAll('img');
-    const missingAlt = [...imgs].filter(i => !i.getAttribute('alt')).length;
-    const images = missingAlt === 0
-      ? { text: imgs.length > 0 ? `✅ ${imgs.length} صورة` : '—', color: '#27ae60' }
-      : { text: `⚠️ ${missingAlt} بدون alt`, color: '#e67e22' };
-
-    // Accessibility: lang, buttons without text
+    // ── Accessibility ──
     const lang = doc.documentElement.getAttribute('lang');
     const btnsNoText = [...doc.querySelectorAll('button')].filter(b => !b.textContent.trim() && !b.getAttribute('aria-label')).length;
+    const inputsNoLabel = [...doc.querySelectorAll('input,textarea,select')].filter(el => {
+      const id = el.getAttribute('id');
+      return !el.getAttribute('aria-label') && !el.getAttribute('aria-labelledby') && !(id && doc.querySelector(`label[for="${id}"]`));
+    }).length;
+    const linksNoText = [...doc.querySelectorAll('a')].filter(a => !a.textContent.trim() && !a.getAttribute('aria-label')).length;
     let a11yIssues = [];
     if (!lang) a11yIssues.push('لا يوجد lang');
     if (btnsNoText > 0) a11yIssues.push(`${btnsNoText} زرار بدون نص`);
-    const a11y = a11yIssues.length === 0
-      ? { text: '✅ جيد', color: '#27ae60' }
-      : { text: '⚠️ ' + a11yIssues[0], color: '#e67e22' };
+    if (inputsNoLabel > 0) a11yIssues.push(`${inputsNoLabel} حقل بدون label`);
+    if (linksNoText > 0) a11yIssues.push(`${linksNoText} رابط بدون نص`);
+    const a11yScore = Math.round((1 - a11yIssues.length/4) * 100);
+    const a11y = {
+      text: a11yIssues.length === 0 ? '✅ '+a11yScore : '⚠️ '+a11yScore+' — '+a11yIssues[0],
+      color: a11yScore >= 80 ? '#27ae60' : a11yScore >= 50 ? '#e67e22' : '#e74c3c'
+    };
 
-    const status = !res.ok ? 'err' : loadTime > 2000 ? 'slow' : 'ok';
-    return { status, loadTime, size, title: title.slice(0,30), seo, images, a11y };
+    // ── Best Practices ──
+    const isHttps = url.startsWith('https://');
+    const viewportMeta = doc.querySelector('meta[name="viewport"]');
+    const charsetMeta = doc.querySelector('meta[charset]');
+    const faviconLink = doc.querySelector('link[rel*="icon"]');
+    let bpIssues = [];
+    if (!isHttps) bpIssues.push('ليس HTTPS');
+    if (!viewportMeta) bpIssues.push('لا يوجد viewport');
+    if (!charsetMeta) bpIssues.push('لا يوجد charset');
+    if (!faviconLink) bpIssues.push('لا يوجد favicon');
+    const bpScore = Math.round((1 - bpIssues.length/4) * 100);
+    const bp = {
+      text: bpIssues.length === 0 ? '✅ '+bpScore : '⚠️ '+bpScore+' — '+bpIssues[0],
+      color: bpScore >= 80 ? '#27ae60' : bpScore >= 50 ? '#e67e22' : '#e74c3c'
+    };
+
+    // ── Images ──
+    const missingAlt = [...imgs].filter(i => !i.getAttribute('alt')).length;
+    const images = {
+      text: missingAlt === 0 ? (imgs.length > 0 ? `✅ ${imgs.length} صورة` : '—') : `⚠️ ${missingAlt} بدون alt`,
+      color: missingAlt === 0 ? '#27ae60' : '#e67e22'
+    };
+
+    return { httpOk: res.ok, httpStatus: res.status, loadTime, size, perfScore, seo, a11y, bp, images };
 
   } catch(e) {
     const loadTime = Math.round(performance.now() - start);
     return {
-      status: 'err', loadTime, size: '—', title: '—',
+      httpOk: false, httpStatus: 'خطأ', loadTime, size: '—', perfScore: 0,
       seo: { text: '—', color: '#aaa' },
-      images: { text: '—', color: '#aaa' },
-      a11y: { text: '—', color: '#aaa' }
+      a11y: { text: '—', color: '#aaa' },
+      bp: { text: '—', color: '#aaa' },
+      images: { text: '—', color: '#aaa' }
     };
   }
 }
@@ -828,8 +881,3 @@ function formatSize(bytes) {
 </script>
 
 </body>
-</html>
-
-
-
-
