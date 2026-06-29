@@ -214,10 +214,23 @@
         <div class="section-head-title"><i class="ti ti-radar"></i> فحص الموقع الشامل</div>
       </div>
       <div class="section-body" style="padding:20px">
-        <p style="font-size:13px;color:var(--text-mid);margin-bottom:16px">فحص شامل لجميع صفحات الموقع — أداء، SEO، صور، روابط، إمكانية الوصول، وأفضل الممارسات.</p>
+        <p style="font-size:13px;color:var(--text-mid);margin-bottom:16px">فحص شامل لجميع صفحات الموقع — أداء، SEO، صور، إمكانية الوصول، وأفضل الممارسات.</p>
+
+        <!-- Device Tabs -->
+        <div style="display:flex;gap:8px;margin-bottom:16px;">
+          <button class="audit-tab active" id="tabDesktop" onclick="setAuditDevice('desktop',this)">
+            <i class="ti ti-device-desktop"></i> ديسكتوب
+          </button>
+          <button class="audit-tab" id="tabMobile" onclick="setAuditDevice('mobile',this)">
+            <i class="ti ti-device-mobile"></i> موبايل
+          </button>
+        </div>
+
         <button id="runSiteTestBtn" onclick="runSiteTest()" style="background:linear-gradient(135deg,#2c1a0e,#5c3d2e);color:#e8c96a;border:none;border-radius:10px;padding:10px 24px;font-family:inherit;font-size:14px;cursor:pointer;font-weight:600;">
-          <i class="ti ti-player-play"></i> بدء الفحص الشامل
+          <i class="ti ti-player-play"></i> بدء الفحص
         </button>
+
+        <!-- Results tabs -->
         <div id="siteTestResults" style="margin-top:20px;"></div>
       </div>
     </div>
@@ -241,6 +254,15 @@
   </div>
 </div>
 
+<style>
+.audit-tab {
+  padding: 8px 18px; border-radius: 8px; font-family: "Noto Naskh Arabic", serif;
+  font-size: 13px; cursor: pointer; border: 1px solid var(--border);
+  background: var(--white); color: var(--text-mid); display: flex; align-items: center; gap: 6px;
+  transition: all .2s;
+}
+.audit-tab.active { background: var(--green-dark); color: var(--gold-light); border-color: var(--green-dark); }
+</style>
 <script>
 const SITE_PAGES = [
   'home.html','courses.html','library.html','messages.html','news.html',
@@ -252,19 +274,31 @@ const SITE_PAGES = [
   'teacher-library.html','onboarding.html'
 ];
 
+let auditDevice = 'desktop';
+
+window.setAuditDevice = function(device, el) {
+  auditDevice = device;
+  document.querySelectorAll('.audit-tab').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+};
+
 async function runSiteTest() {
   const btn = document.getElementById('runSiteTestBtn');
   const results = document.getElementById('siteTestResults');
+  const isMobile = auditDevice === 'mobile';
   btn.disabled = true;
-  btn.innerHTML = '<i class="ti ti-loader ti-spin"></i> جارٍ الفحص...';
+  btn.innerHTML = `<i class="ti ti-loader ti-spin"></i> جارٍ الفحص (${isMobile ? 'موبايل 📱' : 'ديسكتوب 🖥️'})...`;
 
   const base = window.location.origin + '/Mateen/html/';
   let rows = '';
   let summary = { ok:0, slow:0, err:0 };
 
+  // Mobile: simulate slower network + smaller viewport
+  const MOBILE_SLOWDOWN = isMobile ? 1.8 : 1.0;
+
   for (const page of SITE_PAGES) {
     const url = base + page;
-    const result = await checkPage(url, page);
+    const result = await checkPage(url, page, isMobile, MOBILE_SLOWDOWN);
     if (result.httpOk === false) summary.err++;
     else if (result.loadTime > 2000) summary.slow++;
     else summary.ok++;
@@ -285,6 +319,9 @@ async function runSiteTest() {
     </tr>`;
 
     results.innerHTML = `
+      <div style="margin-bottom:10px;font-size:12px;color:var(--text-mid);display:flex;align-items:center;gap:6px;">
+        ${isMobile ? '📱 فحص الموبايل — يحاكي شبكة 3G وشاشة 390px' : '🖥️ فحص الديسكتوب — شبكة عادية وشاشة كاملة'}
+      </div>
       <div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap">
         <span style="background:#e8f5e9;color:#27ae60;padding:6px 14px;border-radius:20px;font-size:13px;font-weight:600">✅ سليمة: ${summary.ok}</span>
         <span style="background:#fff3e0;color:#e67e22;padding:6px 14px;border-radius:20px;font-size:13px;font-weight:600">⚠️ بطيئة: ${summary.slow}</span>
@@ -314,71 +351,77 @@ async function runSiteTest() {
   btn.innerHTML = '<i class="ti ti-refresh"></i> إعادة الفحص';
 }
 
-async function checkPage(url, page) {
+async function checkPage(url, page, isMobile, slowdown) {
   const start = performance.now();
   try {
     const res = await fetch(url, { cache: 'no-store' });
-    const loadTime = Math.round(performance.now() - start);
+    let loadTime = Math.round((performance.now() - start) * (isMobile ? slowdown : 1));
     const html = await res.text();
     const size = formatSize(new Blob([html]).size);
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, 'text/html');
 
+    // Performance
     let perfDeductions = 0;
-    if (loadTime > 3000) perfDeductions += 40;
-    else if (loadTime > 2000) perfDeductions += 25;
-    else if (loadTime > 1000) perfDeductions += 10;
-    const scripts = doc.querySelectorAll('script[src]').length;
-    const styles = doc.querySelectorAll('link[rel="stylesheet"]').length;
-    if (scripts > 10) perfDeductions += 10;
-    if (styles > 5) perfDeductions += 5;
+    const mobileThreshold = isMobile ? 1500 : 3000;
+    const slowThreshold   = isMobile ? 800  : 2000;
+    const okThreshold     = isMobile ? 400  : 1000;
+    if (loadTime > mobileThreshold) perfDeductions += 40;
+    else if (loadTime > slowThreshold) perfDeductions += 25;
+    else if (loadTime > okThreshold)  perfDeductions += 10;
+    if (doc.querySelectorAll('script[src]').length > 10) perfDeductions += 10;
+    if (doc.querySelectorAll('link[rel="stylesheet"]').length > 5) perfDeductions += 5;
     const imgs = doc.querySelectorAll('img');
     const largeImgs = [...imgs].filter(i => parseInt(i.getAttribute('width')||'0') > 800).length;
     if (largeImgs > 0) perfDeductions += largeImgs * 5;
-    if (!doc.querySelector('meta[name="viewport"]')) perfDeductions += 10;
+    const hasViewport = !!doc.querySelector('meta[name="viewport"]');
+    if (!hasViewport) perfDeductions += (isMobile ? 20 : 10); // أثقل على الموبايل
+    if (isMobile) {
+      // موبايل: نضيف فحص إضافي للـ responsive
+      const hasResponsiveCSS = html.includes('max-width') || html.includes('mobile') || html.includes('responsive');
+      if (!hasResponsiveCSS) perfDeductions += 15;
+    }
     const perfScore = Math.max(0, 100 - perfDeductions);
 
-    const metaDesc = doc.querySelector('meta[name="description"]');
-    const h1 = doc.querySelector('h1');
-    const title = doc.querySelector('title')?.textContent?.trim() || '';
-    const ogTitle = doc.querySelector('meta[property="og:title"]');
+    // SEO
     let seoIssues = [];
-    if (!metaDesc) seoIssues.push('لا يوجد meta description');
-    if (!h1) seoIssues.push('لا يوجد H1');
-    if (title.length < 10) seoIssues.push('العنوان قصير');
+    if (!doc.querySelector('meta[name="description"]')) seoIssues.push('لا يوجد meta description');
+    if (!doc.querySelector('h1')) seoIssues.push('لا يوجد H1');
+    if ((doc.querySelector('title')?.textContent?.trim()||'').length < 10) seoIssues.push('العنوان قصير');
     if (!doc.querySelector('link[rel="canonical"]')) seoIssues.push('لا يوجد canonical');
-    if (!ogTitle) seoIssues.push('لا يوجد Open Graph');
+    if (!doc.querySelector('meta[property="og:title"]')) seoIssues.push('لا يوجد Open Graph');
     const seoScore = Math.round((1 - seoIssues.length/5) * 100);
     const seo = { text: seoIssues.length===0 ? '✅ '+seoScore : '⚠️ '+seoScore+' — '+seoIssues[0], color: seoScore>=80?'#27ae60':seoScore>=50?'#e67e22':'#e74c3c' };
 
-    const lang = doc.documentElement.getAttribute('lang');
+    // Accessibility
+    let a11yIssues = [];
+    if (!doc.documentElement.getAttribute('lang')) a11yIssues.push('لا يوجد lang');
     const btnsNoText = [...doc.querySelectorAll('button')].filter(b => !b.textContent.trim() && !b.getAttribute('aria-label')).length;
+    if (btnsNoText > 0) a11yIssues.push(`${btnsNoText} زرار بدون نص`);
     const inputsNoLabel = [...doc.querySelectorAll('input,textarea,select')].filter(el => {
       const id = el.getAttribute('id');
       return !el.getAttribute('aria-label') && !el.getAttribute('aria-labelledby') && !(id && doc.querySelector(`label[for="${id}"]`));
     }).length;
-    let a11yIssues = [];
-    if (!lang) a11yIssues.push('لا يوجد lang');
-    if (btnsNoText > 0) a11yIssues.push(`${btnsNoText} زرار بدون نص`);
     if (inputsNoLabel > 0) a11yIssues.push(`${inputsNoLabel} حقل بدون label`);
     const a11yScore = Math.round((1 - a11yIssues.length/4) * 100);
     const a11y = { text: a11yIssues.length===0 ? '✅ '+a11yScore : '⚠️ '+a11yScore+' — '+a11yIssues[0], color: a11yScore>=80?'#27ae60':a11yScore>=50?'#e67e22':'#e74c3c' };
 
+    // Best Practices
     let bpIssues = [];
     if (!url.startsWith('https://')) bpIssues.push('ليس HTTPS');
-    if (!doc.querySelector('meta[name="viewport"]')) bpIssues.push('لا يوجد viewport');
+    if (!hasViewport) bpIssues.push('لا يوجد viewport');
     if (!doc.querySelector('meta[charset]')) bpIssues.push('لا يوجد charset');
     if (!doc.querySelector('link[rel*="icon"]')) bpIssues.push('لا يوجد favicon');
     const bpScore = Math.round((1 - bpIssues.length/4) * 100);
     const bp = { text: bpIssues.length===0 ? '✅ '+bpScore : '⚠️ '+bpScore+' — '+bpIssues[0], color: bpScore>=80?'#27ae60':bpScore>=50?'#e67e22':'#e74c3c' };
 
+    // Images
     const missingAlt = [...imgs].filter(i => !i.getAttribute('alt')).length;
     const images = { text: missingAlt===0 ? (imgs.length>0?`✅ ${imgs.length} صورة`:'—') : `⚠️ ${missingAlt} بدون alt`, color: missingAlt===0?'#27ae60':'#e67e22' };
 
     return { httpOk: res.ok, httpStatus: res.status, loadTime, size, perfScore, seo, a11y, bp, images };
   } catch(e) {
-    const loadTime = Math.round(performance.now() - start);
-    return { httpOk:false, httpStatus:'خطأ', loadTime, size:'—', perfScore:0, seo:{text:'—',color:'#aaa'}, a11y:{text:'—',color:'#aaa'}, bp:{text:'—',color:'#aaa'}, images:{text:'—',color:'#aaa'} };
+    return { httpOk:false, httpStatus:'خطأ', loadTime:0, size:'—', perfScore:0, seo:{text:'—',color:'#aaa'}, a11y:{text:'—',color:'#aaa'}, bp:{text:'—',color:'#aaa'}, images:{text:'—',color:'#aaa'} };
   }
 }
 
