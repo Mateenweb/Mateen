@@ -11,7 +11,7 @@ import { getAuth, onAuthStateChanged, signOut }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
 import { initNotifications } from "./notifications.js";
 import { getFirestore, doc, getDoc, getDocs, addDoc, setDoc,
-         collection, query, where, orderBy, serverTimestamp }
+         collection, query, where, orderBy, serverTimestamp, onSnapshot }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 import { FIREBASE_CONFIG } from "./config.js";
 
@@ -58,7 +58,7 @@ window.closeOnboarding = () => {
   showSidebarSetup();
 };
 
-window.showSidebarSetup = function showSidebarSetup() {
+function showSidebarSetup() {
   const wrap = document.getElementById('notifBtnWrap');
   if (!wrap) return;
   wrap.classList.remove('d-none');
@@ -202,7 +202,6 @@ onAuthStateChanged(auth, async user => {
 
   // Enable Notificationات الموقع
   initNotifications(user.uid);
-  showSidebarSetup();
 
   const snap = await getDoc(doc(db, 'users', user.uid));
   const role    = snap.exists() ? snap.data().role    : 'student';
@@ -324,8 +323,6 @@ onAuthStateChanged(auth, async user => {
     ctName.value = ctRole === 'admin' ? 'إدارة متين' : ((snap.exists() && snap.data().name) ? snap.data().name : name);
     ctName.readOnly = ctRole === 'admin';
   }
-
-  // badge الرسائل — يتحكم فيه home-msg.js
 
   /* ───────────────────────────────────────────────────────────
      [من home-msg.js] — عداد الNews الجthisدة منذ آخر زيارة

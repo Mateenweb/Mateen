@@ -128,21 +128,16 @@ function startListening(userId) {
   let firstLoad = true;
   const lastSeen = {};
 
-  // ── تحديث badge الرسائل في الناف ─────────────────────
+  // ── تحديث دوت الرسائل في الناف ─────────────────────
   function updateMsgBadge(snap) {
-    const total = snap.docs.reduce((sum, d) => {
+    const hasUnread = snap.docs.some(d => {
       const unread = d.data()[`unread.${userId}`] ?? d.data().unread?.[userId] ?? 0;
-      return sum + Number(unread);
-    }, 0);
+      return Number(unread) > 0;
+    });
     ['navMsgBadge','sidebarMsgBadge'].forEach(id => {
       const el = document.getElementById(id);
       if (!el) return;
-      if (total > 0) {
-        el.textContent = total > 9 ? '9+' : total;
-        el.classList.remove('d-none');
-      } else {
-        el.classList.add('d-none');
-      }
+      hasUnread ? el.classList.remove('d-none') : el.classList.add('d-none');
     });
   }
 
