@@ -208,6 +208,9 @@ window.TOUR_STEPS['login'] = [
   },
 ];
 
+// steps الدعم الفني = نفس الأدمن
+window.TOUR_STEPS['support'] = window.TOUR_STEPS.admin;
+
 // تشغيل الـ tour بناءً على Page الحالية
 window.startPageTour = () => {
   const page = window.location.pathname.split('/').pop().replace('.html','');
