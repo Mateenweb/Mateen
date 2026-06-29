@@ -307,7 +307,9 @@ onAuthStateChanged(auth, async user => {
      ─────────────────────────────────────────────────────────── */
   const ctName = document.getElementById('ctName');
   if (ctName) {
-    ctName.value = (snap.exists() && snap.data().name) ? snap.data().name : name;
+    const ctRole = snap.exists() ? snap.data().role : '';
+    ctName.value = ctRole === 'admin' ? 'إدارة متين' : ((snap.exists() && snap.data().name) ? snap.data().name : name);
+    ctName.readOnly = ctRole === 'admin';
   }
 
   /* ───────────────────────────────────────────────────────────
