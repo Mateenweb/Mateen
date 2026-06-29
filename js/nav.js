@@ -7,7 +7,7 @@ function renderNav(activePage) {
     { href: 'courses.html', label: 'المسارات العلمية' },
     { href: 'library.html', label: 'المكتبة' },
     { href: 'news.html',    label: 'الأخبار' },
-    { href: '#contact',     label: 'تواصل معنا' },
+    { href: 'home.html#contact', label: 'تواصل معنا' },
   ];
 
   // Check if user is logged in via Firebase localStorage key
