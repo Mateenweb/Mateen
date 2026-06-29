@@ -235,26 +235,27 @@ body {
   text-decoration: none;
 }
 .nav-msg-badge {
-  min-width: 18px;
-  height: 18px;
-  padding: 0 4px;
-  border-radius: 999px;
+  min-width: 10px;
+  height: 10px;
+  padding: 0;
+  border-radius: 50%;
   background: #d9534f;
-  color: #fff;
-  font-size: 11px;
-  font-weight: 700;
+  border: 2px solid var(--green-dark);
   display: flex;
   align-items: center;
   justify-content: center;
   line-height: 1;
+  font-size: 0;
 }
 .nav-msg-btn .nav-msg-badge {
   position: absolute;
-  top: -6px;
-  right: -8px;
+  top: -3px;
+  right: -3px;
 }
 .sidebar-nav a .nav-msg-badge {
   margin-inline-start: auto;
+  min-width: 10px;
+  height: 10px;
 }
 @media (min-width: 992px) {
   .nav-msg-btn {

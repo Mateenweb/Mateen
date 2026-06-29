@@ -325,38 +325,33 @@ onAuthStateChanged(auth, async user => {
   }
 
   /* ───────────────────────────────────────────────────────────
-     [من home-msg.js] — عداد الMessages غير المقروءة (real-time)
+     عداد الرسائل — دوت بسيط يتحدث كل 30 ثانية
      ─────────────────────────────────────────────────────────── */
   const navMsgBadge     = document.getElementById('navMsgBadge');
   const sidebarMsgBadge = document.getElementById('sidebarMsgBadge');
-  if (navMsgBadge || sidebarMsgBadge) {
+
+  async function updateMsgDot() {
     try {
       const q = query(
         collection(db, 'conversations'),
         where('participants', 'array-contains', user.uid)
       );
-      onSnapshot(q, (convSnap) => {
-        let total = 0;
-        convSnap.forEach(d => {
-          const data   = d.data();
-          const unread = data.unread && data.unread[user.uid] ? data.unread[user.uid] : 0;
-          total += unread;
-        });
-
-        [navMsgBadge, sidebarMsgBadge].forEach(badge => {
-          if (!badge) return;
-          if (total > 0) {
-            badge.textContent = total > 99 ? '99+' : String(total);
-            badge.classList.remove('d-none');
-          } else {
-            badge.classList.add('d-none');
-          }
-        });
+      const convSnap = await getDocs(q);
+      let hasUnread = false;
+      convSnap.forEach(d => {
+        const unread = d.data()?.unread?.[user.uid] || 0;
+        if (unread > 0) hasUnread = true;
       });
+      [navMsgBadge, sidebarMsgBadge].forEach(badge => {
+        if (!badge) return;
+        hasUnread ? badge.classList.remove('d-none') : badge.classList.add('d-none');
+      });
+    } catch(err) { console.error('msg-dot:', err); }
+  }
 
-    } catch (err) {
-      console.error('home-msg:', err);
-    }
+  if (navMsgBadge || sidebarMsgBadge) {
+    updateMsgDot();
+    setInterval(updateMsgDot, 30000);
   }
 
   /* ───────────────────────────────────────────────────────────
