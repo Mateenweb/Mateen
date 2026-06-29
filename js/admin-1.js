@@ -715,8 +715,7 @@ window.stuDelete = async id => {
 
 // حذف نهائي (للإدارة العليا فقط — من الأرشيف)
 window.stuDeletePermanent = async id => {
-  if(!confirm('⚠️ حذف نهائي لا يمكن التراجع عنه!
-هل أنتِ متأكدة؟')) return;
+  if(!confirm('⚠️ حذف نهائي لا يمكن التراجع عنه!\nهل أنتِ متأكدة؟')) return;
   if(!confirm('تأكيد أخير: سيتم حذف كل بيانات الطالبة نهائياً.')) return;
   await fullDeleteUser(id);
   showToast('تم الحذف النهائي');
@@ -1263,3 +1262,4 @@ window.saveBulkGrades = async () => {
     if (btn) { btn.disabled = false; btn.innerHTML = '<i class="ti ti-device-floppy"></i> حفظ الدرجات'; }
   }
 };
+
