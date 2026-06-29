@@ -13,14 +13,10 @@ const app  = getApps().length ? getApp() : initializeApp(FIREBASE_CONFIG);
 const auth = getAuth(app);
 const db   = getFirestore(app);
 
-// ملء اسم Userة تلقائياً في Form التواصل (If مسجلة دخول)
-auth.onAuthStateChanged(async user => {
-  if (!user) return;
+// ملء اسم المُرسَل إليه تلقائياً — ثابت "الإدارة العامة"
+document.addEventListener('DOMContentLoaded', () => {
   const ctName = document.getElementById('ctName');
-  if (!ctName) return;
-  const snap = await getDoc(doc(db, 'users', user.uid));
-  const name = user.displayName || user.email.split('@')[0];
-  ctName.value = (snap.exists() && snap.data().name) ? snap.data().name : name;
+  if (ctName) ctName.value = 'الإدارة العامة';
 });
 
 // ── Load المستلمين من Firebase ──────────────
