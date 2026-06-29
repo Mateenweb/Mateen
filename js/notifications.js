@@ -91,13 +91,8 @@ function showNotifToast(title, body, url) {
     document.head.appendChild(s);
   }
 
+  t.dataset.convUrl = url || '';
   container.appendChild(t);
-
-  // إخفاء الـ toast تلقائياً بعد 15 ثانية
-  setTimeout(() => {
-    t.style.opacity = '0';
-    setTimeout(() => t.remove(), 300);
-  }, 15000);
 }
 
 // ── Browser Notification ─────────────────────────────────────────────────
@@ -198,20 +193,6 @@ function startListening(userId) {
         if (!onMsgsPage) {
           showNotifToast(notifTitle, lastMsg, BASE + '/html/messages.html');
           showBrowserNotif(notifTitle, lastMsg);
-        } else {
-          // في صفحة الرسائل — اعمل indicator على المحادثة في القايمة
-          const convEl = document.querySelector(`.conv-item[data-cid="${convId}"]`);
-          if (convEl && window.activeConvId !== convId) {
-            convEl.classList.add('has-new-msg');
-            const dot = convEl.querySelector('.conv-new-dot') || (() => {
-              const d = document.createElement('span');
-              d.className = 'conv-new-dot';
-              d.style.cssText = 'width:8px;height:8px;background:#c9a227;border-radius:50%;display:inline-block;margin-right:4px;animation:pulse 1s infinite';
-              return d;
-            })();
-            const nameEl = convEl.querySelector('.conv-name');
-            if (nameEl && !nameEl.querySelector('.conv-new-dot')) nameEl.prepend(dot);
-          }
         }
       }
     });
@@ -377,6 +358,16 @@ export async function initAdminNotifications(userId, role) {
 }
 
 export { showNotifToast as showToast };
+
+// تتنادى لما المستخدم يفتح شات معين — تشيل الـ toast المرتبط بيه
+export function dismissToastForConv(url) {
+  document.querySelectorAll('[data-notif][data-conv-url]').forEach(t => {
+    if (t.dataset.convUrl && t.dataset.convUrl.includes(url)) {
+      t.style.opacity = '0';
+      setTimeout(() => t.remove(), 300);
+    }
+  });
+}
 
 
 
