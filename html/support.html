@@ -226,9 +226,14 @@
           </button>
         </div>
 
-        <button id="runSiteTestBtn" onclick="runSiteTest()" style="background:linear-gradient(135deg,#2c1a0e,#5c3d2e);color:#e8c96a;border:none;border-radius:10px;padding:10px 24px;font-family:inherit;font-size:14px;cursor:pointer;font-weight:600;">
-          <i class="ti ti-player-play"></i> بدء الفحص
-        </button>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+          <button id="runSiteTestBtn" onclick="runSiteTest()" style="background:linear-gradient(135deg,#2c1a0e,#5c3d2e);color:#e8c96a;border:none;border-radius:10px;padding:10px 24px;font-family:inherit;font-size:14px;cursor:pointer;font-weight:600;">
+            <i class="ti ti-player-play"></i> بدء الفحص
+          </button>
+          <button id="downloadPdfBtn" onclick="downloadAuditPDF()" style="display:none;background:var(--beige2);color:var(--green-dark);border:1.5px solid var(--border);border-radius:10px;padding:10px 20px;font-family:inherit;font-size:14px;cursor:pointer;font-weight:600;">
+            <i class="ti ti-file-type-pdf"></i> تحميل PDF
+          </button>
+        </div>
 
         <!-- Results tabs -->
         <div id="siteTestResults" style="margin-top:20px;"></div>
@@ -433,6 +438,68 @@ function formatSize(bytes) {
 </script>
 <script type="module" src="../js/support-1.js"></script>
 <script type="module" src="../js/notifications.js"></script>
-<script src="../js/sw-register.js"></script>
+<script src="../js/sw-register.js">
+// ── تحميل نتائج الفحص كـ PDF ──────────────────────────
+function downloadAuditPDF() {
+  const resultsEl = document.getElementById('siteTestResults');
+  if (!resultsEl || !resultsEl.innerHTML.trim()) {
+    alert('لا توجد نتائج للتحميل — قومي بالفحص أولاً');
+    return;
+  }
+
+  // بناء محتوى HTML للطباعة
+  const device = document.getElementById('tabMobile')?.classList.contains('active') ? 'موبايل' : 'ديسكتوب';
+  const now = new Date().toLocaleString('ar-EG');
+
+  const printContent = `
+    <!DOCTYPE html>
+    <html dir="rtl" lang="ar">
+    <head>
+      <meta charset="utf-8"/>
+      <title>تقرير فحص متين — ${device}</title>
+      <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family: 'Arial', sans-serif; background:#fff; color:#2c1a0e; padding:24px; direction:rtl; }
+        h1 { font-size:20px; margin-bottom:4px; color:#5c3d2e; }
+        .meta { font-size:12px; color:#8a6a52; margin-bottom:20px; }
+        table { width:100%; border-collapse:collapse; font-size:12px; }
+        th { background:#5c3d2e; color:#e8c96a; padding:8px 10px; text-align:right; }
+        td { padding:7px 10px; border-bottom:1px solid #ede0cc; }
+        tr:nth-child(even) { background:#f7efe3; }
+        .ok { color:#1a7a3c; font-weight:700; }
+        .warn { color:#c9a227; font-weight:700; }
+        .err { color:#c0392b; font-weight:700; }
+        .badge { display:inline-block; padding:2px 8px; border-radius:10px; font-size:11px; }
+        @media print {
+          body { padding:10px; }
+          button { display:none; }
+        }
+      </style>
+    </head>
+    <body>
+      <h1>🔍 تقرير فحص موقع متين العلمي</h1>
+      <div class="meta">الجهاز: ${device} &nbsp;|&nbsp; التاريخ: ${now}</div>
+      ${resultsEl.outerHTML}
+    </body>
+    </html>`;
+
+  const win = window.open('', '_blank', 'width=900,height=700');
+  win.document.write(printContent);
+  win.document.close();
+  win.focus();
+  setTimeout(() => { win.print(); }, 500);
+}
+
+// إظهار زرار التحميل بعد اكتمال الفحص
+const _origRunSiteTest = window.runSiteTest;
+if (typeof runSiteTest === 'function') {
+  const __orig = runSiteTest;
+  window.runSiteTest = async function() {
+    await __orig();
+    document.getElementById('downloadPdfBtn').style.display = '';
+  };
+}
+
+</script>
 </body>
 </html>
