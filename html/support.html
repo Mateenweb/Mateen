@@ -442,7 +442,7 @@ function formatSize(bytes) {
 <script type="module" src="../js/notifications.js"></script>
 <script src="../js/sw-register.js">
 // ── تحميل نتائج الفحص كـ PDF ──────────────────────────
-function downloadAuditPDF() {
+window.downloadAuditPDF = function downloadAuditPDF() {
   const resultsEl = document.getElementById('siteTestResults');
   if (!resultsEl || !resultsEl.innerHTML.trim()) {
     alert('لا توجد نتائج للتحميل — قومي بالفحص أولاً');
