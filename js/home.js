@@ -341,7 +341,9 @@ onAuthStateChanged(auth, async user => {
       let total = 0;
       convSnap.forEach(d => {
         const data   = d.data();
-        const unread = data.unread && data.unread[user.uid] ? data.unread[user.uid] : 0;
+        const nested = data.unread?.[user.uid];
+        const flat   = data[`unread.${user.uid}`];
+        const unread = Math.max(Number(nested || 0), Number(flat || 0));
         total += unread;
       });
 
