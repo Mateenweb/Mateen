@@ -222,6 +222,7 @@ function loadConversations() {
       let conv = { id: d.id, ...data, otherId, otherName, otherRole };
       if (readConvIds.has(d.id)) {
         conv[`unread.${currentUser.uid}`] = 0;
+        if (conv.unread) conv.unread[currentUser.uid] = 0;
       }
       return conv;
     });
