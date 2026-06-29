@@ -71,6 +71,7 @@ let convUnsub       = null;   // unsubscribe for the  conversations listener
 let allUsers        = [];
 let allConvs        = [];
 const readConvIds   = new Set(); // المحادثات اللي اتقرأت locally
+window._readConvIds = readConvIds;
 let viewOnceMode    = false;
 
 // ── Auth ───────────────────────────────────────────────────────────────────
