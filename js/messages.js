@@ -537,11 +537,9 @@ window.deleteMsg = async (convId, msgId, seen) => {
     alert('لا يمكن حذف هذه الرسالة — تمت قراءتها بالفعل');
     return;
   }
-  if (!confirm('هل تريدين حذف هذه الرسالة؟\nستختفي منك فقط ولن تظهر مرة أخرى.')) return;
+  if (!confirm('هل تريدين حذف هذه الرسالة؟\nستختفي من عند الاثنين نهائياً.')) return;
 
-  await updateDoc(doc(db, 'conversations', convId, 'messages', msgId), {
-    [`deletedBy.${currentUser.uid}`]: true
-  });
+  await deleteDoc(doc(db, 'conversations', convId, 'messages', msgId));
 };
 
 
