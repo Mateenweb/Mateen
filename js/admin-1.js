@@ -1053,7 +1053,7 @@ onSnapshot(query(collection(db,'news'), orderBy('createdAt','desc')), snap => {
 });
 
 // ── تحميل المواعيد ────────────────────────────────────
-onSnapshot(query(collection(db,'events'), orderBy('order')), snap => {
+onSnapshot(query(collection(db,'events'), orderBy('createdAt','desc')), snap => {
   const el = document.getElementById('eventsAdminList');
   if (!el) return;
   if (snap.empty) {
@@ -1066,7 +1066,7 @@ onSnapshot(query(collection(db,'events'), orderBy('order')), snap => {
     return `<div style="display:flex;align-items:center;gap:10px;background:var(--white);border:1px solid var(--border);border-radius:10px;padding:10px 14px">
       <div style="width:12px;height:12px;border-radius:50%;background:${dotColor};flex-shrink:0"></div>
       <div style="flex:1">
-        <div style="font-weight:600;font-size:13.5px">${e.label||''}</div>
+        <div style="font-weight:600;font-size:13.5px">${e.label||e.title||''}</div>
         <div style="font-size:12px;color:var(--text-mid)">${e.date||''}</div>
       </div>
       <div style="display:flex;gap:6px">
