@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
-import { getFirestore, collection, doc, getDoc, getDocs, addDoc, deleteDoc, query, where, orderBy, onSnapshot, serverTimestamp, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
+import { getFirestore, collection, doc, getDoc, getDocs, addDoc, deleteDoc, query, where, orderBy, onSnapshot, serverTimestamp, updateDoc, setDoc, deleteField } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
 import { FIREBASE_CONFIG } from "./config.js";
 
@@ -332,7 +332,21 @@ window.openConv = async (cid, otherId, otherName, otherRole) => {
   markConvRead(cid);
   await updateDoc(doc(db, 'conversations', cid), {
     [`unread.${currentUser.uid}`]: 0,
+    [`unread`]: deleteField(),
   }).catch(() => {});
+  // أعد كتابة الـ unread map بدون الـ uid الحالي
+  try {
+    const convSnap = await getDoc(doc(db, 'conversations', cid));
+    if (convSnap.exists()) {
+      const data = convSnap.data();
+      const otherId = data.participants?.find(p => p !== currentUser.uid);
+      const otherUnread = data[`unread.${otherId}`] ?? data.unread?.[otherId] ?? 0;
+      await updateDoc(doc(db, 'conversations', cid), {
+        [`unread.${currentUser.uid}`]: 0,
+        ...(otherId ? { [`unread.${otherId}`]: otherUnread } : {})
+      });
+    }
+  } catch(e) {}
 
   // بعدين حدّث الـ local state والـ UI
   const convInList = allConvs.find(cv => cv.id === cid);
