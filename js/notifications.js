@@ -234,6 +234,12 @@ function startListening(userId) {
         if (!onMsgsPage) {
           showNotifToast(notifTitle, lastMsg, BASE + '/html/messages.html');
           showBrowserNotif(notifTitle, lastMsg);
+          // صوت إشعار رسالة جديدة
+          try {
+            const snd = new Audio('https://assets.mixkit.co/active_storage/sfx/2354/2354-preview.mp3');
+            snd.volume = 0.4;
+            snd.play().catch(()=>{});
+          } catch(e) {}
         }
       }
     });
