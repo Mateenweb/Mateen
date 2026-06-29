@@ -319,28 +319,19 @@ window.openConv = async (cid, otherId, otherName, otherRole) => {
   document.getElementById('convRole').textContent  = ROLE_LABELS[otherRole] || otherRole;
   document.getElementById('convRole').style.color  = ROLE_COLORS[otherRole] || 'var(--text-mid)';
 
-  // Mark as read - فوراً in the ـ local state + Firestore
-  readConvIds.add(cid); // علّم المحادثة كمقروءة locally
+  // Mark as read - صفّر فوراً في Firestore أولاً عشان onSnapshot ييجي بقيمة 0
+  readConvIds.add(cid);
+  await updateDoc(doc(db, 'conversations', cid), {
+    [`unread.${currentUser.uid}`]: 0,
+  }).catch(() => {});
+
+  // بعدين حدّث الـ local state والـ UI
   const convInList = allConvs.find(cv => cv.id === cid);
   if (convInList) {
     convInList[`unread.${currentUser.uid}`] = 0;
     if (convInList.unread) convInList.unread[currentUser.uid] = 0;
     renderConvList(allConvs);
   }
-  // صفّر الـ unread في الـ flat و nested عشان نضمن التحديث
-  await updateDoc(doc(db, 'conversations', cid), {
-    [`unread.${currentUser.uid}`]: 0,
-  });
-  // صفّر الـ nested map كمان لو موجود
-  try {
-    const convSnap2 = await getDoc(doc(db, 'conversations', cid));
-    if (convSnap2.exists() && convSnap2.data().unread?.[currentUser.uid]) {
-      await updateDoc(doc(db, 'conversations', cid), {
-        [`unread.${currentUser.uid}`]: 0,
-        unread: { ...convSnap2.data().unread, [currentUser.uid]: 0 }
-      });
-    }
-  } catch(e) {}
 
   // علّم Messages الطرف الثاني كمقروءة (So that يعرف المرسل إن رسالته اتقرأت)
   const allMsgsSnap = await getDocs(collection(db, 'conversations', cid, 'messages'));
