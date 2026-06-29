@@ -92,7 +92,29 @@ function showNotifToast(title, body, url) {
   }
 
   t.dataset.convUrl = url || '';
+  t.dataset.toastId = Date.now().toString();
   container.appendChild(t);
+
+  // احفظ في localStorage عشان يرجع بعد refresh
+  const stored = JSON.parse(localStorage.getItem('pendingToasts') || '[]');
+  stored.push({ title, body, url, id: t.dataset.toastId });
+  localStorage.setItem('pendingToasts', JSON.stringify(stored));
+
+  // لما يتقفل بالـ ✕ — امسحه من localStorage
+  t.querySelector('button').addEventListener('click', () => {
+    removePendingToast(t.dataset.toastId);
+  });
+}
+
+function removePendingToast(id) {
+  const stored = JSON.parse(localStorage.getItem('pendingToasts') || '[]');
+  localStorage.setItem('pendingToasts', JSON.stringify(stored.filter(t => t.id !== id)));
+}
+
+// أعرض الـ toasts المحفوظة لما الصفحة تتحمل
+function restorePendingToasts() {
+  const stored = JSON.parse(localStorage.getItem('pendingToasts') || '[]');
+  stored.forEach(t => showNotifToast(t.title, t.body, t.url));
 }
 
 // ── Browser Notification ─────────────────────────────────────────────────
@@ -342,6 +364,7 @@ function listenAdminNotifications(userId) {
 
 // ── export للاستخدام الخارجي If محتاج ───────────────────────────────────
 export async function initNotifications(userId) {
+  restorePendingToasts();
   if (!userId) return;
   // افحص role User
   try {
@@ -363,10 +386,14 @@ export { showNotifToast as showToast };
 export function dismissToastForConv(url) {
   document.querySelectorAll('[data-notif][data-conv-url]').forEach(t => {
     if (t.dataset.convUrl && t.dataset.convUrl.includes(url)) {
+      removePendingToast(t.dataset.toastId);
       t.style.opacity = '0';
       setTimeout(() => t.remove(), 300);
     }
   });
+  // امسح كل الـ toasts المرتبطة بالـ URL ده من localStorage
+  const stored = JSON.parse(localStorage.getItem('pendingToasts') || '[]');
+  localStorage.setItem('pendingToasts', JSON.stringify(stored.filter(t => !t.url.includes(url))));
 }
 
 
