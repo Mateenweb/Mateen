@@ -25,7 +25,6 @@ onAuthStateChanged(auth, async user => {
   // أضيف Button الNews في Admin
   addNewsButton();
   loadAdminNews();
-  loadAdminEvents();
 });
 
 function addNewsButton() {
@@ -269,6 +268,6 @@ window.addEvent = async () => {
   const date      = document.getElementById('eventDate').value.trim();
   const highlight = document.getElementById('eventHighlight').checked;
   if (!title) { alert('أدخلي اسم الموعد'); return; }
-  await addDoc(collection(db, 'events'), { title, date, highlight, createdAt: serverTimestamp() });
+  await addDoc(collection(db, 'events'), { label: title, date, highlight, order: Date.now(), createdAt: serverTimestamp() });
   document.getElementById('addEventModalAdmin').classList.remove('show');
 };
