@@ -208,6 +208,20 @@
       </div>
     </div>
 
+    <!-- AUDIT SECTION -->
+    <div class="section">
+      <div class="section-head">
+        <div class="section-head-title"><i class="ti ti-radar"></i> فحص الموقع الشامل</div>
+      </div>
+      <div class="section-body" style="padding:20px">
+        <p style="font-size:13px;color:var(--text-mid);margin-bottom:16px">فحص شامل لجميع صفحات الموقع — أداء، SEO، صور، روابط، إمكانية الوصول، وأفضل الممارسات.</p>
+        <button id="runSiteTestBtn" onclick="runSiteTest()" style="background:linear-gradient(135deg,#2c1a0e,#5c3d2e);color:#e8c96a;border:none;border-radius:10px;padding:10px 24px;font-family:inherit;font-size:14px;cursor:pointer;font-weight:600;">
+          <i class="ti ti-player-play"></i> بدء الفحص الشامل
+        </button>
+        <div id="siteTestResults" style="margin-top:20px;"></div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -227,6 +241,153 @@
   </div>
 </div>
 
+<script>
+const SITE_PAGES = [
+  'home.html','courses.html','library.html','messages.html','news.html',
+  'schedule.html','student.html','admin.html','supervisor.html','about.html',
+  'stats.html','student-general.html','student-view.html','support.html',
+  'teacher-quran1.html','teacher-quran2.html','teacher-aqeedah.html',
+  'teacher-fiqh.html','teacher-hadeeth.html','teacher-tafseer.html',
+  'teacher-profile.html','teacher-schedule.html','teacher-students.html',
+  'teacher-library.html','onboarding.html'
+];
+
+async function runSiteTest() {
+  const btn = document.getElementById('runSiteTestBtn');
+  const results = document.getElementById('siteTestResults');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="ti ti-loader ti-spin"></i> جارٍ الفحص...';
+
+  const base = window.location.origin + '/Mateen/html/';
+  let rows = '';
+  let summary = { ok:0, slow:0, err:0 };
+
+  for (const page of SITE_PAGES) {
+    const url = base + page;
+    const result = await checkPage(url, page);
+    if (result.httpOk === false) summary.err++;
+    else if (result.loadTime > 2000) summary.slow++;
+    else summary.ok++;
+
+    const perfColor = result.perfScore >= 90 ? '#27ae60' : result.perfScore >= 50 ? '#e67e22' : '#e74c3c';
+
+    rows += `<tr style="border-bottom:1px solid rgba(0,0,0,0.06)">
+      <td style="padding:8px 10px;font-size:12px;font-weight:600">${page}</td>
+      <td style="padding:8px 10px;font-size:12px;color:${result.httpOk?'#27ae60':'#e74c3c'}">${result.httpOk ? '✅ '+result.httpStatus : '❌ '+result.httpStatus}</td>
+      <td style="padding:8px 10px;font-size:12px">${result.loadTime} ms</td>
+      <td style="padding:8px 10px;font-size:12px">${result.size}</td>
+      <td style="padding:8px 10px;font-size:12px;color:${perfColor};font-weight:700">${result.perfScore}</td>
+      <td style="padding:8px 10px;font-size:12px;color:${result.seo.color}">${result.seo.text}</td>
+      <td style="padding:8px 10px;font-size:12px;color:${result.a11y.color}">${result.a11y.text}</td>
+      <td style="padding:8px 10px;font-size:12px;color:${result.bp.color}">${result.bp.text}</td>
+      <td style="padding:8px 10px;font-size:12px;color:${result.images.color}">${result.images.text}</td>
+      <td style="padding:8px 10px"><a href="${url}" target="_blank" style="font-size:12px;color:var(--gold-mid)">فتح ↗</a></td>
+    </tr>`;
+
+    results.innerHTML = `
+      <div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap">
+        <span style="background:#e8f5e9;color:#27ae60;padding:6px 14px;border-radius:20px;font-size:13px;font-weight:600">✅ سليمة: ${summary.ok}</span>
+        <span style="background:#fff3e0;color:#e67e22;padding:6px 14px;border-radius:20px;font-size:13px;font-weight:600">⚠️ بطيئة: ${summary.slow}</span>
+        <span style="background:#ffebee;color:#e74c3c;padding:6px 14px;border-radius:20px;font-size:13px;font-weight:600">❌ أخطاء: ${summary.err}</span>
+        <span style="background:#f3f3f3;color:#666;padding:6px 14px;border-radius:20px;font-size:12px">تم فحص ${summary.ok+summary.slow+summary.err} / ${SITE_PAGES.length}</span>
+      </div>
+      <div style="overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse;min-width:900px">
+        <thead><tr style="background:rgba(92,61,46,0.08)">
+          <th style="padding:8px 10px;text-align:right;font-size:11px">الصفحة</th>
+          <th style="padding:8px 10px;text-align:right;font-size:11px">HTTP</th>
+          <th style="padding:8px 10px;text-align:right;font-size:11px">وقت التحميل</th>
+          <th style="padding:8px 10px;text-align:right;font-size:11px">الحجم</th>
+          <th style="padding:8px 10px;text-align:right;font-size:11px">الأداء 🏎️</th>
+          <th style="padding:8px 10px;text-align:right;font-size:11px">SEO 🔍</th>
+          <th style="padding:8px 10px;text-align:right;font-size:11px">إمكانية الوصول ♿</th>
+          <th style="padding:8px 10px;text-align:right;font-size:11px">أفضل الممارسات ✨</th>
+          <th style="padding:8px 10px;text-align:right;font-size:11px">الصور 🖼️</th>
+          <th style="padding:8px 10px;text-align:right;font-size:11px">رابط</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+      </div>`;
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = '<i class="ti ti-refresh"></i> إعادة الفحص';
+}
+
+async function checkPage(url, page) {
+  const start = performance.now();
+  try {
+    const res = await fetch(url, { cache: 'no-store' });
+    const loadTime = Math.round(performance.now() - start);
+    const html = await res.text();
+    const size = formatSize(new Blob([html]).size);
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+
+    let perfDeductions = 0;
+    if (loadTime > 3000) perfDeductions += 40;
+    else if (loadTime > 2000) perfDeductions += 25;
+    else if (loadTime > 1000) perfDeductions += 10;
+    const scripts = doc.querySelectorAll('script[src]').length;
+    const styles = doc.querySelectorAll('link[rel="stylesheet"]').length;
+    if (scripts > 10) perfDeductions += 10;
+    if (styles > 5) perfDeductions += 5;
+    const imgs = doc.querySelectorAll('img');
+    const largeImgs = [...imgs].filter(i => parseInt(i.getAttribute('width')||'0') > 800).length;
+    if (largeImgs > 0) perfDeductions += largeImgs * 5;
+    if (!doc.querySelector('meta[name="viewport"]')) perfDeductions += 10;
+    const perfScore = Math.max(0, 100 - perfDeductions);
+
+    const metaDesc = doc.querySelector('meta[name="description"]');
+    const h1 = doc.querySelector('h1');
+    const title = doc.querySelector('title')?.textContent?.trim() || '';
+    const ogTitle = doc.querySelector('meta[property="og:title"]');
+    let seoIssues = [];
+    if (!metaDesc) seoIssues.push('لا يوجد meta description');
+    if (!h1) seoIssues.push('لا يوجد H1');
+    if (title.length < 10) seoIssues.push('العنوان قصير');
+    if (!doc.querySelector('link[rel="canonical"]')) seoIssues.push('لا يوجد canonical');
+    if (!ogTitle) seoIssues.push('لا يوجد Open Graph');
+    const seoScore = Math.round((1 - seoIssues.length/5) * 100);
+    const seo = { text: seoIssues.length===0 ? '✅ '+seoScore : '⚠️ '+seoScore+' — '+seoIssues[0], color: seoScore>=80?'#27ae60':seoScore>=50?'#e67e22':'#e74c3c' };
+
+    const lang = doc.documentElement.getAttribute('lang');
+    const btnsNoText = [...doc.querySelectorAll('button')].filter(b => !b.textContent.trim() && !b.getAttribute('aria-label')).length;
+    const inputsNoLabel = [...doc.querySelectorAll('input,textarea,select')].filter(el => {
+      const id = el.getAttribute('id');
+      return !el.getAttribute('aria-label') && !el.getAttribute('aria-labelledby') && !(id && doc.querySelector(`label[for="${id}"]`));
+    }).length;
+    let a11yIssues = [];
+    if (!lang) a11yIssues.push('لا يوجد lang');
+    if (btnsNoText > 0) a11yIssues.push(`${btnsNoText} زرار بدون نص`);
+    if (inputsNoLabel > 0) a11yIssues.push(`${inputsNoLabel} حقل بدون label`);
+    const a11yScore = Math.round((1 - a11yIssues.length/4) * 100);
+    const a11y = { text: a11yIssues.length===0 ? '✅ '+a11yScore : '⚠️ '+a11yScore+' — '+a11yIssues[0], color: a11yScore>=80?'#27ae60':a11yScore>=50?'#e67e22':'#e74c3c' };
+
+    let bpIssues = [];
+    if (!url.startsWith('https://')) bpIssues.push('ليس HTTPS');
+    if (!doc.querySelector('meta[name="viewport"]')) bpIssues.push('لا يوجد viewport');
+    if (!doc.querySelector('meta[charset]')) bpIssues.push('لا يوجد charset');
+    if (!doc.querySelector('link[rel*="icon"]')) bpIssues.push('لا يوجد favicon');
+    const bpScore = Math.round((1 - bpIssues.length/4) * 100);
+    const bp = { text: bpIssues.length===0 ? '✅ '+bpScore : '⚠️ '+bpScore+' — '+bpIssues[0], color: bpScore>=80?'#27ae60':bpScore>=50?'#e67e22':'#e74c3c' };
+
+    const missingAlt = [...imgs].filter(i => !i.getAttribute('alt')).length;
+    const images = { text: missingAlt===0 ? (imgs.length>0?`✅ ${imgs.length} صورة`:'—') : `⚠️ ${missingAlt} بدون alt`, color: missingAlt===0?'#27ae60':'#e67e22' };
+
+    return { httpOk: res.ok, httpStatus: res.status, loadTime, size, perfScore, seo, a11y, bp, images };
+  } catch(e) {
+    const loadTime = Math.round(performance.now() - start);
+    return { httpOk:false, httpStatus:'خطأ', loadTime, size:'—', perfScore:0, seo:{text:'—',color:'#aaa'}, a11y:{text:'—',color:'#aaa'}, bp:{text:'—',color:'#aaa'}, images:{text:'—',color:'#aaa'} };
+  }
+}
+
+function formatSize(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1024*1024) return (bytes/1024).toFixed(1) + ' KB';
+  return (bytes/1024/1024).toFixed(2) + ' MB';
+}
+</script>
 <script type="module" src="../js/support-1.js"></script>
 <script type="module" src="../js/notifications.js"></script>
 <script src="../js/sw-register.js"></script>
