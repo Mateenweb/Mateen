@@ -2,7 +2,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/fireba
 import { getFirestore, collection, doc, getDoc, getDocs, addDoc, deleteDoc, query, where, orderBy, onSnapshot, serverTimestamp, updateDoc, setDoc, deleteField } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
 import { FIREBASE_CONFIG } from "./config.js";
-import { dismissToastForConv } from "./notifications.js";
 
 const app  = initializeApp(FIREBASE_CONFIG);
 const db   = getFirestore(app);
@@ -229,10 +228,6 @@ function loadConversations() {
       }
 
       let conv = { id: d.id, ...data, otherId, otherName, otherRole };
-      if (readConvIds.has(d.id)) {
-        conv[`unread.${currentUser.uid}`] = 0;
-        if (conv.unread) conv.unread[currentUser.uid] = 0;
-      }
       return conv;
     });
 
@@ -273,8 +268,8 @@ function renderConvList(list) {
     const uid = currentUser?.uid || '';
     const fv = c[`unread.${uid}`];
     const nv = c.unread?.[uid];
-    // لو المحادثة اتفتحت محلياً → صفّر الـ unread بغض النظر عن Firestore
-    const unread = readConvIds.has(c.id) ? 0 : (fv !== undefined ? Number(fv) : (nv !== undefined ? Number(nv) : 0));
+    // اخد الـ unread من Firestore مباشرة بدون تدخل readConvIds
+    const unread = fv !== undefined ? Number(fv) : (nv !== undefined ? Number(nv) : 0);
     const roleLabel = ROLE_LABELS[c.otherRole] || '';
     const isActive = activeConvId === c.id;
 
@@ -317,7 +312,6 @@ window.filterConvs = () => {
 // ── Open conversation ──────────────────────────────────────────────────────
 window.openConv = async (cid, otherId, otherName, otherRole) => {
   activeConvId = cid;
-  dismissToastForConv('messages.html');
   if (msgUnsub) msgUnsub();
 
   document.getElementById('msgEmpty').style.display = 'none';
