@@ -79,16 +79,47 @@ window.showSidebarSetup = function showSidebarSetup() {
 }
 
 window.obEnableNotif = async (src) => {
-  const btn = document.getElementById(src === 'sb' ? 'sb-notif-btn' : 'ob-notif-btn');
-  if (!('Notification' in window)) { if(btn) btn.innerHTML = '<i class="ti ti-x"></i> غير مدعوم'; return; }
-  const perm = await Notification.requestPermission();
-  if (perm === 'granted') {
-    if (btn) { btn.innerHTML = '<i class="ti ti-check"></i> تم تفعيل الإشعارات ✅'; btn.disabled = true; }
-    if (window._saveFCMToken) window._saveFCMToken();
-  } else {
-    if (btn) btn.innerHTML = '<i class="ti ti-x"></i> لم يتم السماح';
+  if (!('Notification' in window)) {
+    document.getElementById(src==='sb'?'sb-notif-btn':'ob-notif-btn')?.setAttribute('innerHTML','<i class="ti ti-x"></i> غير مدعوم');
+    return;
   }
+  if (Notification.permission === 'denied') { showNotifDeniedToast(); return; }
+  if (Notification.permission === 'granted') { updateSidebarNotifBtn(); return; }
+  const result = await Notification.requestPermission();
+  if (result === 'granted' && window._saveFCMToken) window._saveFCMToken();
+  updateSidebarNotifBtn();
 };
+
+function showNotifDeniedToast() {
+  document.getElementById('notifDeniedToast')?.remove();
+  const t = document.createElement('div');
+  t.id = 'notifDeniedToast';
+  t.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#2c1a0e;color:#e8c96a;border:1px solid #e8c96a;border-radius:12px;padding:14px 20px;font-size:13px;font-family:inherit;z-index:9999;text-align:center;max-width:320px;box-shadow:0 4px 20px rgba(0,0,0,0.3);direction:rtl;';
+  t.innerHTML = `<div style="margin-bottom:8px;font-weight:600">🔕 الإشعارات محجوبة</div>
+    <div style="font-size:12px;color:rgba(232,201,106,0.8);margin-bottom:12px">لتفعيلها: اضغطي على 🔒 في شريط العنوان ← الإشعارات ← سماح</div>
+    <button onclick="this.closest('#notifDeniedToast').remove()" style="background:#e8c96a;color:#2c1a0e;border:none;border-radius:8px;padding:6px 16px;font-family:inherit;font-size:12px;cursor:pointer;font-weight:600;">حسناً</button>`;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 8000);
+}
+
+function updateSidebarNotifBtn() {
+  const btn = document.getElementById('sb-notif-btn');
+  if (!btn) return;
+  const p = Notification.permission;
+  if (p === 'granted') {
+    btn.innerHTML = '<i class="ti ti-bell-ringing"></i> الإشعارات مفعّلة';
+    btn.style.cssText += 'color:#4ade80;border-color:#4ade80;';
+    btn.disabled = true;
+  } else if (p === 'denied') {
+    btn.innerHTML = '<i class="ti ti-bell-off"></i> الإشعارات محجوبة — اضغطي للمساعدة';
+    btn.style.cssText += 'color:#f87171;border-color:#f87171;';
+    btn.disabled = false;
+  } else {
+    btn.innerHTML = '<i class="ti ti-bell"></i> تفعيل الإشعارات';
+    btn.style.cssText += 'color:#e8c96a;border-color:#e8c96a;';
+    btn.disabled = false;
+  }
+}
 
 window.obInstallApp = async (src) => {
   const btn = src === 'sb'
@@ -203,6 +234,13 @@ onAuthStateChanged(auth, async user => {
   // Enable Notificationات الموقع
   initNotifications(user.uid);
   showSidebarSetup();
+  // طلب إذن الإشعارات تلقائياً عند أول دخول
+  if (Notification.permission === 'default') {
+    setTimeout(() => Notification.requestPermission().then(() => {
+      if (window._saveFCMToken) window._saveFCMToken();
+      updateSidebarNotifBtn();
+    }), 2000);
+  }
 
   const snap = await getDoc(doc(db, 'users', user.uid));
   const role    = snap.exists() ? snap.data().role    : 'student';
