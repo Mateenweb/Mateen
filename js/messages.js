@@ -50,14 +50,15 @@ const ROLE_INITIALS_BG = {
 };
 
 // ── Messaging permissions ──────────────────────────────────────────────────
-// student/mateen → can message: teacher, supervisor, admin, support
-// teacher/supervisor/admin → can message: anyone
+// أدوار الرسائل:
+// teacher/supervisor/admin/support → يراسلوا أي حد
+// mateen → تراسل teacher/supervisor/admin/support فقط
+// student → تراسل teacher/supervisor/admin فقط
 function canMessageRole(myRole, theirRole) {
-  const elevated = ['teacher', 'supervisor', 'admin', 'support'];
-  if (elevated.includes(myRole)) return true;           // staff → anyone
-  if (['student','mateen'].includes(myRole)) {
-    return elevated.includes(theirRole);                // students → staff only
-  }
+  const allStaff = ['teacher', 'supervisor', 'admin', 'support'];
+  if (allStaff.includes(myRole)) return true;
+  if (myRole === 'mateen') return allStaff.includes(theirRole);
+  if (myRole === 'student') return ['teacher', 'supervisor', 'admin'].includes(theirRole);
   return false;
 }
 
@@ -103,7 +104,6 @@ onAuthStateChanged(auth, async user => {
   const mediaButtons = document.getElementById('mediaButtons');
   if (mediaButtons) {
     const canMedia = !['student', 'mateen'].includes(data.role);
-  // mateen can send images to support only — handled dynamically in openConv
     mediaButtons.style.display = canMedia ? 'flex' : 'none';
   }
   if (convUnsub) { convUnsub(); convUnsub = null; }
@@ -310,12 +310,6 @@ window.openConv = async (cid, otherId, otherName, otherRole) => {
   document.getElementById('msgEmpty').style.display = 'none';
   const convEl = document.getElementById('msgConv');
   convEl.style.display = 'flex';
-
-  // إظهار زرار الصورة لـ mateen لما تكون مع support فقط
-  const mediaButtons = document.getElementById('mediaButtons');
-  if (mediaButtons && currentUserData?.role === 'mateen') {
-    mediaButtons.style.display = otherRole === 'support' ? 'flex' : 'none';
-  }
 
   // Header
   document.getElementById('convHeaderAvatar').innerHTML = avatarHtml(otherName, otherRole, 38);
