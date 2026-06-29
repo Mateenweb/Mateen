@@ -14,21 +14,19 @@ const auth = getAuth(app);
 const db   = getFirestore(app);
 
 // ملء اسم المُرسَل إليه تلقائياً — ثابت "الإدارة العامة"
-document.addEventListener('DOMContentLoaded', async () => {
+// ملء اسم المُرسِل تلقائياً حسب الـ role
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
+onAuthStateChanged(auth, async (user) => {
   const ctName = document.getElementById('ctName');
-  if (!ctName) return;
-  const { onAuthStateChanged } = await import("https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js");
-  onAuthStateChanged(auth, async (user) => {
-    if (!user) return;
-    const snap = await getDoc(doc(db, 'users', user.uid));
-    const role = snap.exists() ? snap.data().role : '';
-    if (role === 'admin') {
-      ctName.value = 'إدارة متين';
-      ctName.readOnly = true;
-    } else {
-      ctName.value = (snap.exists() && snap.data().name) ? snap.data().name : '';
-    }
-  });
+  if (!ctName || !user) return;
+  const snap = await getDoc(doc(db, 'users', user.uid));
+  const role = snap.exists() ? snap.data().role : '';
+  if (role === 'admin') {
+    ctName.value = 'إدارة متين';
+    ctName.readOnly = true;
+  } else {
+    ctName.value = (snap.exists() && snap.data().name) ? snap.data().name : '';
+  }
 });
 
 // ── Load المستلمين من Firebase ──────────────
