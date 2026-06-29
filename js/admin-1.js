@@ -22,12 +22,28 @@ onAuthStateChanged(auth, async user => {
   const snap = await getDoc(doc(db, 'users', user.uid));
   const role = snap.exists() ? snap.data().role : 'student';
   currentUserRole = role;
-  if (role !== 'admin') {
+  if (role !== 'admin' && role !== 'support') {
     window.location.href = '../html/home.html'; return;
   }
   document.getElementById('navUserName').textContent  = user.displayName || 'الإدارة';
   document.getElementById('authGate').style.display   = 'none';
   document.getElementById('mainContent').style.display = 'flex';
+
+  // الدعم الفني: يشوف بس قسم الفحص
+  if (role === 'support') {
+    // إخفاء كل الأقسام ما عدا فحص الموقع
+    ['pendingSection','allUsersSection','studentsSection','newsSection'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = 'none';
+    });
+    // إخفاء قسم إضافة مادة والمواد المضافة (أول section وآخر section)
+    document.querySelectorAll('#mainContent > .section').forEach(s => {
+      if (!s.id || s.id !== 'siteTesterSection') s.style.display = 'none';
+    });
+    const tester = document.getElementById('siteTesterSection');
+    if (tester) tester.style.display = 'block';
+    return;
+  }
 
   if (role === 'admin' || role === 'supervisor') {
     document.getElementById('pendingSection').style.display = 'block';
