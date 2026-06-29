@@ -58,7 +58,7 @@ window.closeOnboarding = () => {
   showSidebarSetup();
 };
 
-function showSidebarSetup() {
+window.showSidebarSetup = function showSidebarSetup() {
   const wrap = document.getElementById('notifBtnWrap');
   if (!wrap) return;
   wrap.classList.remove('d-none');
