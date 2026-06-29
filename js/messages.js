@@ -235,7 +235,14 @@ function loadConversations() {
     allConvs = results.filter(Boolean);
 
     // Sort from the أحدث للأقدم
-    allConvs.sort((a, b) => (b.lastAt?.seconds || 0) - (a.lastAt?.seconds || 0));
+    const uid = currentUser?.uid || '';
+    allConvs.sort((a, b) => {
+      const aUnread = a[`unread.${uid}`] ?? a.unread?.[uid] ?? 0;
+      const bUnread = b[`unread.${uid}`] ?? b.unread?.[uid] ?? 0;
+      if (bUnread > 0 && aUnread === 0) return 1;
+      if (aUnread > 0 && bUnread === 0) return -1;
+      return (b.lastAt?.seconds || 0) - (a.lastAt?.seconds || 0);
+    });
 
     window._debug_convs = allConvs;
     console.log("[DEBUG] allConvs:", allConvs.map(cv => ({id:cv.id.slice(0,8), unread:cv.unread, flat:cv[`unread.${currentUser?.uid}`]})));
@@ -418,7 +425,7 @@ window.openConv = async (cid, otherId, otherName, otherRole) => {
       : `<audio controls controlsList="nodownload" src="${m.url}"></audio>`)
   : `<span class="msg-text">${escapeHtml(m.text || '')}</span>`}
                 ${m.viewOnce && mine ? `<span class="view-once-tag"><i class="ti ti-flame"></i> مرة واحدة</span>` : ''}
-                <span class="msg-time">${time}${mine ? ` <i class="ti ti-${seen ? 'checks' : 'check'}" style="color:${seen ? '#4fc3f7' : '#aaa'}"></i>` : ''}</span>
+                <span class="msg-time">${time}${mine ? ` <i class="ti ti-${seen ? 'checks' : 'check'}" style="color:${seen ? 'var(--gold,#c9a227)' : 'rgba(255,255,255,0.6)'};font-size:13px"></i>` : ''}</span>
               </div>
             </div>
           </div>
