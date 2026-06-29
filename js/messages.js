@@ -168,7 +168,7 @@ async function loadAllUsers() {
   allUsers = [];
   snap.forEach(d => {
     const ud = d.data();
-    if (d.id !== currentUser.uid && (ud.status === 'active' || ud.role === 'admin' || ud.role === 'support')) {
+    if (d.id !== currentUser.uid && (ud.status === 'active' || ud.role === 'admin')) {
       allUsers.push({ id: d.id, ...ud });
     }
   });
@@ -488,7 +488,7 @@ window.searchUsers = () => {
     groups[r].push(u);
   });
 
-  const roleOrder = ['admin', 'supervisor', 'teacher', 'mateen', 'student'];
+  const roleOrder = ['admin', 'support', 'supervisor', 'teacher', 'mateen', 'student'];
   el.innerHTML = roleOrder
     .filter(r => groups[r])
     .map(r => `
