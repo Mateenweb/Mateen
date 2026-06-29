@@ -209,7 +209,12 @@
       </div>
 
       <!-- Footer Sidebar -->
-      <div id="notifBtnWrap" class="d-none" style="padding:0 8px 8px"></div>
+      <div id="notifBtnWrap" style="padding:0 8px 8px">
+        <button id="notifToggleBtn" onclick="toggleNotifPermission()" style="width:100%;padding:9px;border:1px solid var(--gold);background:transparent;color:var(--green-dark);border-radius:10px;font-family:inherit;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
+          <i class="ti ti-bell" id="notifBellIcon"></i>
+          <span id="notifBtnText">تفعيل الإشعارات</span>
+        </button>
+      </div>
 
       <div class="sidebar-footer mt-auto">
         <img alt="متين" src="../logo.png" class="sidebar-foot-img"/>
