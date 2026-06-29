@@ -92,44 +92,33 @@ function showNotifToast(title, body, url) {
   }
 
   t.dataset.convUrl = url || '';
-  const toastId = Date.now().toString() + Math.random().toString(36).slice(2);
-  t.dataset.toastId = toastId;
-
-  // احفظ في localStorage (لو مش موجود بالفعل بنفس الـ url+title)
-  const stored = JSON.parse(localStorage.getItem('pendingToasts') || '[]');
-  const isDup = stored.some(s => s.url === url && s.title === title);
-  if (!isDup) {
-    stored.push({ title, body, url, id: toastId });
-    localStorage.setItem('pendingToasts', JSON.stringify(stored));
-  }
-
-  // لما يتقفل بالـ ✕ — امسحه من localStorage
-  t.querySelector('button').addEventListener('click', () => {
-    const arr = JSON.parse(localStorage.getItem('pendingToasts') || '[]');
-    localStorage.setItem('pendingToasts', JSON.stringify(arr.filter(s => s.id !== toastId)));
-  });
-
   container.appendChild(t);
 }
 
-// استعادة الـ toasts بعد refresh بدون إعادة حفظ
-function restorePendingToasts() {
-  const stored = JSON.parse(localStorage.getItem('pendingToasts') || '[]');
-  stored.forEach(item => {
-    const container = getToastContainer();
-    const t = document.createElement('div');
-    t.style.cssText = `background:#1a4a2e;color:#fff;border-radius:12px;padding:12px 16px;min-width:260px;max-width:320px;box-shadow:0 4px 20px rgba(0,0,0,.3);font-family:'Noto Naskh Arabic',serif;direction:rtl;cursor:pointer;animation:notifIn .3s ease;position:relative;transition:opacity .3s ease;`;
-    t.innerHTML = `<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px"><div onclick="window.location.href='${item.url||''}'" style="flex:1"><div style="font-weight:700;font-size:14px;margin-bottom:3px">${item.title}</div><div style="font-size:12.5px;opacity:.85">${item.body}</div></div><button style="background:none;border:none;color:rgba(255,255,255,.6);font-size:16px;cursor:pointer;padding:0;line-height:1;flex-shrink:0" id="close-${item.id}">✕</button></div>`;
-    t.setAttribute('data-notif','1');
-    t.dataset.convUrl = item.url || '';
-    t.dataset.toastId = item.id;
-    container.appendChild(t);
-    document.getElementById('close-'+item.id)?.addEventListener('click', () => {
-      const arr = JSON.parse(localStorage.getItem('pendingToasts')||'[]');
-      localStorage.setItem('pendingToasts', JSON.stringify(arr.filter(s=>s.id!==item.id)));
-      t.remove();
+// استعادة الـ toasts من Firestore لما الصفحة تتحمل
+async function restorePendingToasts(userId) {
+  try {
+    const q = query(
+      collection(db, 'conversations'),
+      where('participants', 'array-contains', userId)
+    );
+    const snap = await getDocs(q);
+    snap.forEach(async d => {
+      const data = d.data();
+      const unread = data[`unread.${userId}`] ?? data.unread?.[userId] ?? 0;
+      if (Number(unread) > 0) {
+        const otherId = data.participants?.find(p => p !== userId);
+        let senderName = 'رسالة جديدة';
+        if (otherId) {
+          try {
+            const uSnap = await getDoc(doc(db, 'users', otherId));
+            if (uSnap.exists()) senderName = uSnap.data().name || senderName;
+          } catch(e) {}
+        }
+        showNotifToast(`💬 ${senderName}`, data.lastMsg || '', BASE + '/html/messages.html');
+      }
     });
-  });
+  } catch(e) { console.error('restorePendingToasts:', e); }
 }
 
 // ── Browser Notification ─────────────────────────────────────────────────
@@ -379,7 +368,7 @@ function listenAdminNotifications(userId) {
 
 // ── export للاستخدام الخارجي If محتاج ───────────────────────────────────
 export async function initNotifications(userId) {
-  restorePendingToasts();
+  restorePendingToasts(userId);
   if (!userId) return;
   // افحص role User
   try {
@@ -405,8 +394,7 @@ export function dismissToastForConv(url) {
       setTimeout(() => t.remove(), 300);
     }
   });
-  const stored = JSON.parse(localStorage.getItem('pendingToasts') || '[]');
-  localStorage.setItem('pendingToasts', JSON.stringify(stored.filter(s => !s.url.includes(url))));
+
 }
 
 
