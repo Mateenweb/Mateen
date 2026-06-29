@@ -131,6 +131,7 @@ function startListening(userId) {
   // ── تحديث دوت الرسائل في الناف ─────────────────────
   function updateMsgBadge(snap) {
     const readIds = new Set(JSON.parse(sessionStorage.getItem('readConvIds') || '[]'));
+    console.log('[Notif] readIds:', [...readIds], '| conv IDs:', snap.docs.map(d => d.id));
     const hasUnread = snap.docs.some(d => {
       if (readIds.has(d.id)) return false;
       const unread = d.data()[`unread.${userId}`] ?? d.data().unread?.[userId] ?? 0;
