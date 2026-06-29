@@ -192,46 +192,40 @@ function loadConversations() {
       return;
     }
 
+    // احتفظ بـ cache للأسماء عشان نتجنب طلبات متكررة
+    const nameCache = {};
+    allConvs.forEach(cv => { if (cv.otherId) nameCache[cv.otherId] = { name: cv.otherName, role: cv.otherRole }; });
+
     const promises = snap.docs.map(async d => {
       const data = d.data();
-
-      if (data.hiddenBy?.[currentUser.uid] && d.id !== activeConvId) return;
-
+      if (data.hiddenBy?.[currentUser.uid] && d.id !== activeConvId) return null;
       const otherId = data.participants?.find(p => p !== currentUser.uid);
-      if (!otherId) return;
+      if (!otherId) return null;
 
-      const existing = allConvs.find(cv => cv.id === d.id);
-      if (existing) {
-        // حدّث بيانات المحادثة الموجودة
-        Object.assign(existing, data);
-        if (readConvIds.has(d.id)) {
-          existing[`unread.${currentUser.uid}`] = 0;
-          if (existing.unread) existing.unread[currentUser.uid] = 0;
-        }
-      } else {
-        // محادثة جthisدة — اجيب بيانات الطرف الآخر
-        let otherName = 'الإدارة';
-        let otherRole = '';
+      // جيب الاسم من الـ cache أو من Firestore
+      let otherName = nameCache[otherId]?.name || 'الإدارة';
+      let otherRole = nameCache[otherId]?.role || '';
+
+      if (!nameCache[otherId]) {
         try {
           const otherSnap = await getDoc(doc(db, 'users', otherId));
           if (otherSnap.exists()) {
             otherName = otherSnap.data().name || 'الإدارة';
             otherRole = otherSnap.data().role  || '';
+            nameCache[otherId] = { name: otherName, role: otherRole };
           }
         } catch(e) {}
-        allConvs.push({ id: d.id, ...data, otherId, otherName, otherRole });
       }
+
+      let conv = { id: d.id, ...data, otherId, otherName, otherRole };
+      if (readConvIds.has(d.id)) {
+        conv[`unread.${currentUser.uid}`] = 0;
+      }
+      return conv;
     });
 
-    await Promise.all(promises);
-
-    // Delete المحادثات المخفية
-    allConvs = allConvs.filter(cv => {
-      const d = snap.docs.find(x => x.id === cv.id);
-      if (!d) return false;
-      const data = d.data();
-      return !(data.hiddenBy?.[currentUser.uid] && cv.id !== activeConvId);
-    });
+    const results = await Promise.all(promises);
+    allConvs = results.filter(Boolean);
 
     // Sort from the أحدث للأقدم
     allConvs.sort((a, b) => (b.lastAt?.seconds || 0) - (a.lastAt?.seconds || 0));
