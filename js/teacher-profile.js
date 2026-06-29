@@ -11,7 +11,7 @@ const SUBJECT_LABELS = {
   aqeedah: 'العقيدة', fiqh: 'الفقه', hadeeth: 'الحديث',
   tafseer: 'التفسير', quran1: 'القرآن (١)', quran2: 'القرآن (٢)',
 };
-const ROLE_AVATARS = { student: '👧', mateen: '🌸', teacher: '👩‍🏫', supervisor: '👩‍💼', admin: '🛡️' };
+const ROLE_AVATARS = { student: '👧', mateen: '🌸', teacher: '🧕‍🏫', supervisor: '🧕‍💼', admin: '🛡️' };
 
 let allMateenStudents = [];
 
