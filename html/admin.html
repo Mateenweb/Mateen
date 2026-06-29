@@ -681,6 +681,84 @@
   </div>
 </div>
 
+<!-- ── قسم فحص الموقع (للدعم الفني) ── -->
+<div class="section" id="siteTesterSection">
+  <div class="section-head">
+    <div class="section-head-title"><i class="ti ti-radar"></i> فحص الموقع</div>
+  </div>
+  <div class="section-body" style="padding:20px">
+    <p style="font-size:13px;color:var(--text-mid);margin-bottom:16px">فحص سرعة تحميل جميع صفحات الموقع واكتشاف الصفحات البطيئة أو المعطلة.</p>
+    <button id="runSiteTestBtn" onclick="runSiteTest()" style="background:linear-gradient(135deg,#2c1a0e,#5c3d2e);color:#e8c96a;border:none;border-radius:10px;padding:10px 24px;font-family:inherit;font-size:14px;cursor:pointer;font-weight:600;">
+      <i class="ti ti-player-play"></i> بدء الفحص
+    </button>
+    <div id="siteTestResults" style="margin-top:20px;"></div>
+  </div>
+</div>
+
+<script>
+const SITE_PAGES = [
+  'home.html','courses.html','library.html','messages.html','news.html',
+  'schedule.html','student.html','admin.html','supervisor.html','about.html',
+  'stats.html','student-general.html','student-view.html',
+  'teacher-quran1.html','teacher-quran2.html','teacher-aqeedah.html',
+  'teacher-fiqh.html','teacher-hadeeth.html','teacher-tafseer.html',
+  'teacher-profile.html','teacher-schedule.html','teacher-students.html',
+  'teacher-library.html','my-students.html','onboarding.html'
+];
+
+async function runSiteTest() {
+  const btn = document.getElementById('runSiteTestBtn');
+  const results = document.getElementById('siteTestResults');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="ti ti-loader ti-spin"></i> جارٍ الفحص...';
+  results.innerHTML = '<div style="color:var(--text-mid);font-size:13px">جارٍ فحص ' + SITE_PAGES.length + ' صفحة...</div>';
+
+  const base = window.location.origin + '/Mateen/html/';
+  let rows = '';
+  let ok = 0, slow = 0, err = 0;
+
+  for (const page of SITE_PAGES) {
+    const url = base + page;
+    const start = performance.now();
+    let status = '', time = 0, color = '', icon = '';
+    try {
+      const res = await fetch(url, { method: 'HEAD', cache: 'no-store' });
+      time = Math.round(performance.now() - start);
+      if (!res.ok) {
+        status = 'خطأ ' + res.status; color = '#e74c3c'; icon = '❌'; err++;
+      } else if (time > 2000) {
+        status = 'بطيئة'; color = '#e67e22'; icon = '⚠️'; slow++;
+      } else {
+        status = 'سليمة'; color = '#27ae60'; icon = '✅'; ok++;
+      }
+    } catch(e) {
+      time = Math.round(performance.now() - start);
+      status = 'تعذر الوصول'; color = '#e74c3c'; icon = '❌'; err++;
+    }
+    rows += `<tr>
+      <td style="padding:8px 12px;font-size:13px">${icon} ${page}</td>
+      <td style="padding:8px 12px;font-size:13px;color:${color};font-weight:600">${status}</td>
+      <td style="padding:8px 12px;font-size:13px;color:var(--text-mid)">${time} ms</td>
+      <td style="padding:8px 12px"><a href="${url}" target="_blank" style="font-size:12px;color:var(--gold-mid)">فتح</a></td>
+    </tr>`;
+    // update live
+    results.innerHTML = `<div style="font-size:13px;color:var(--text-mid);margin-bottom:12px">✅ ${ok} سليمة &nbsp;⚠️ ${slow} بطيئة &nbsp;❌ ${err} خطأ</div>
+      <table style="width:100%;border-collapse:collapse">
+        <thead><tr style="background:rgba(92,61,46,0.08)">
+          <th style="padding:8px 12px;text-align:right;font-size:13px">الصفحة</th>
+          <th style="padding:8px 12px;text-align:right;font-size:13px">الحالة</th>
+          <th style="padding:8px 12px;text-align:right;font-size:13px">الوقت</th>
+          <th style="padding:8px 12px;text-align:right;font-size:13px">رابط</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>`;
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = '<i class="ti ti-refresh"></i> إعادة الفحص';
+}
+</script>
+
 </body>
 </html>
 
