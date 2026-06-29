@@ -217,13 +217,13 @@ onSnapshot(query(collection(db,'events'), orderBy('order')), snap => {
   if (snap.empty) { el.innerHTML = '<div class="tl-item"><div class="tl-dot"></div><div><div class="tl-label" style="color:#aaa">لا توجد مواعيد</div></div></div>'; return; }
   el.innerHTML = snap.docs.map(d => {
     const e = d.data();
-    return \`<div class="tl-item">
-      <div class="tl-dot \${e.highlight ? 'gold' : ''}"></div>
+    return `<div class="tl-item">
+      <div class="tl-dot ${e.highlight ? 'gold' : ''}"></div>
       <div>
-        <div class="tl-label">\${e.label||''}</div>
-        <div class="tl-date">\${e.date||''}</div>
+        <div class="tl-label">${e.label||e.title||''}</div>
+        <div class="tl-date">${e.date||''}</div>
       </div>
-    </div>\`;
+    </div>`;
   }).join('');
 });
 
