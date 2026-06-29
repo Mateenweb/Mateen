@@ -354,6 +354,8 @@ async function runSiteTest() {
 
   btn.disabled = false;
   btn.innerHTML = '<i class="ti ti-refresh"></i> إعادة الفحص';
+  const dlBtn = document.getElementById('downloadPdfBtn');
+  if (dlBtn) dlBtn.style.display = '';
 }
 
 async function checkPage(url, page, isMobile, slowdown) {
@@ -491,16 +493,14 @@ function downloadAuditPDF() {
 }
 
 // إظهار زرار التحميل بعد اكتمال الفحص
-window.addEventListener('load', () => {
-  if (typeof window.runSiteTest === 'function') {
-    const __orig = window.runSiteTest;
-    window.runSiteTest = async function() {
-      await __orig();
-      const btn = document.getElementById('downloadPdfBtn');
-      if (btn) btn.style.display = '';
-    };
-  }
-});
+const _origRunSiteTest = window.runSiteTest;
+if (typeof runSiteTest === 'function') {
+  const __orig = runSiteTest;
+  window.runSiteTest = async function() {
+    await __orig();
+    document.getElementById('downloadPdfBtn').style.display = '';
+  };
+}
 
 </script>
 </body>
