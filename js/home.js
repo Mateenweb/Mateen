@@ -217,6 +217,7 @@ onAuthStateChanged(auth, async user => {
     role === 'admin'      ? 'إدارية' :
     role === 'supervisor' ? 'مشرفة' :
     role === 'teacher'    ? 'معلمة' :
+    role === 'support'    ? 'الدعم الفني' :
     role === 'mateen'     ? 'بنات متين' : 'الطالبة';
 
   // ── Show الـ links حسب الـ role ──────────────────────────
@@ -283,7 +284,8 @@ onAuthStateChanged(auth, async user => {
     role === 'admin'      ? '👑' :
     role === 'supervisor' ? '🎓' :
     role === 'teacher'    ? '📚' :
-    role === 'mateen'     ? '🧕' : '🌸';
+    role === 'mateen'     ? '🧕' :
+    role === 'support'    ? '🛠️' : '🌸';
   if (navAvatar) navAvatar.textContent = avatarEmoji;
 
   if (role === 'mateen') {
