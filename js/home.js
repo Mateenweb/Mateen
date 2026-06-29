@@ -11,7 +11,7 @@ import { getAuth, onAuthStateChanged, signOut }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
 import { initNotifications } from "./notifications.js";
 import { getFirestore, doc, getDoc, getDocs, addDoc, setDoc,
-         collection, query, where, orderBy, serverTimestamp }
+         collection, query, where, orderBy, serverTimestamp, onSnapshot }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 import { FIREBASE_CONFIG } from "./config.js";
 
@@ -58,7 +58,7 @@ window.closeOnboarding = () => {
   showSidebarSetup();
 };
 
-window.showSidebarSetup = function showSidebarSetup() {
+function showSidebarSetup() {
   const wrap = document.getElementById('notifBtnWrap');
   if (!wrap) return;
   wrap.classList.remove('d-none');
@@ -202,7 +202,6 @@ onAuthStateChanged(auth, async user => {
 
   // Enable Notificationات الموقع
   initNotifications(user.uid);
-  showSidebarSetup();
 
   const snap = await getDoc(doc(db, 'users', user.uid));
   const role    = snap.exists() ? snap.data().role    : 'student';
@@ -325,7 +324,40 @@ onAuthStateChanged(auth, async user => {
     ctName.readOnly = ctRole === 'admin';
   }
 
-  // badge الرسائل — يتحكم فيه home-msg.js
+  /* ───────────────────────────────────────────────────────────
+     [من home-msg.js] — عداد الMessages غير المقروءة (real-time)
+     ─────────────────────────────────────────────────────────── */
+  const navMsgBadge     = document.getElementById('navMsgBadge');
+  const sidebarMsgBadge = document.getElementById('sidebarMsgBadge');
+  if (navMsgBadge || sidebarMsgBadge) {
+    try {
+      const q = query(
+        collection(db, 'conversations'),
+        where('participants', 'array-contains', user.uid)
+      );
+      onSnapshot(q, (convSnap) => {
+        let total = 0;
+        convSnap.forEach(d => {
+          const data   = d.data();
+          const unread = data.unread && data.unread[user.uid] ? data.unread[user.uid] : 0;
+          total += unread;
+        });
+
+        [navMsgBadge, sidebarMsgBadge].forEach(badge => {
+          if (!badge) return;
+          if (total > 0) {
+            badge.textContent = total > 99 ? '99+' : String(total);
+            badge.classList.remove('d-none');
+          } else {
+            badge.classList.add('d-none');
+          }
+        });
+      });
+
+    } catch (err) {
+      console.error('home-msg:', err);
+    }
+  }
 
   /* ───────────────────────────────────────────────────────────
      [من home-msg.js] — عداد الNews الجthisدة منذ آخر زيارة
