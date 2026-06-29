@@ -14,12 +14,14 @@ const app  = getApps().length ? getApp() : initializeApp(FIREBASE_CONFIG);
 const auth = getAuth(app);
 const db   = getFirestore(app);
 let allMats = [];
+let currentUserRole = null;
 
 // ── AUTH GUARD ────────────────────────────────────────
 onAuthStateChanged(auth, async user => {
   if (!user) { window.location.href = '../html/login.html'; return; }
   const snap = await getDoc(doc(db, 'users', user.uid));
   const role = snap.exists() ? snap.data().role : 'student';
+  currentUserRole = role;
   if (role !== 'admin') {
     window.location.href = '../html/home.html'; return;
   }
@@ -886,9 +888,10 @@ window.renderAllUsers = () => {
     return `<tr>
       <td style="color:var(--text-mid);font-size:12px">${i + 1}</td>
 
-      <!-- الاسم — قابل للتعديل -->
+      <!-- الاسم — قابل للتعديل للأدمن فقط -->
       <td><input type="text" value="${esc(u.name || '')}" placeholder="الاسم"
         style="border:none;border-bottom:1px solid var(--border);background:transparent;font-family:inherit;font-size:13px;width:100%;min-width:100px;padding:2px 4px;"
+        ${currentUserRole !== 'admin' ? 'readonly disabled style="cursor:not-allowed;opacity:0.7"' : ''}
         onchange="userFieldUpdate('${u.id}','name',this.value)"/></td>
 
       <!-- الدور -->
@@ -1265,6 +1268,11 @@ window.saveBulkGrades = async () => {
 
 // ── تعديل حقل في حساب مستخدم مباشرة من الجدول ────────────
 window.userFieldUpdate = async (uid, field, value) => {
+  // الأدمن فقط يقدر يعدل
+  if (currentUserRole !== 'admin') {
+    console.warn('ليس لديك صلاحية التعديل');
+    return;
+  }
   try {
     await updateDoc(doc(db, 'users', uid), { [field]: value });
     if (field === 'role' || field === 'status') {
