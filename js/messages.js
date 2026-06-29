@@ -2,6 +2,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/fireba
 import { getFirestore, collection, doc, getDoc, getDocs, addDoc, deleteDoc, query, where, orderBy, onSnapshot, serverTimestamp, updateDoc, setDoc, deleteField } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
 import { FIREBASE_CONFIG } from "./config.js";
+import { dismissToastForConv } from "./notifications.js";
 
 const app  = initializeApp(FIREBASE_CONFIG);
 const db   = getFirestore(app);
@@ -316,6 +317,7 @@ window.filterConvs = () => {
 // ── Open conversation ──────────────────────────────────────────────────────
 window.openConv = async (cid, otherId, otherName, otherRole) => {
   activeConvId = cid;
+  dismissToastForConv('messages.html');
   if (msgUnsub) msgUnsub();
 
   document.getElementById('msgEmpty').style.display = 'none';
