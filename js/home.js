@@ -251,7 +251,7 @@ onAuthStateChanged(auth, async user => {
   } else if (role === 'support') {
     const linkAdminEl = document.getElementById('linkAdmin');
     if (linkAdminEl) {
-      linkAdminEl.href = 'admin.html';
+      linkAdminEl.href = 'support.html';
       linkAdminEl.innerHTML = '<i class="ti ti-headset"></i> لوحة الدعم';
     }
     show('linkAdmin');
@@ -301,7 +301,7 @@ onAuthStateChanged(auth, async user => {
   } else if (role === 'supervisor') {
     if (navProfileBtn) { navProfileBtn.href = 'supervisor.html'; navProfileBtn.classList.remove('d-none'); }
   } else if (role === 'support') {
-    if (navProfileBtn) { navProfileBtn.href = 'admin.html'; navProfileBtn.classList.remove('d-none'); }
+    if (navProfileBtn) { navProfileBtn.href = 'support.html'; navProfileBtn.classList.remove('d-none'); }
   } else if (role === 'teacher') {
     const teacherPageMap = {
       'tafseer':'teacher-tafseer.html','fiqh':'teacher-fiqh.html',

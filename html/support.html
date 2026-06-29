@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+<meta charset="utf-8"/>
+<link rel="icon" type="image/x-icon" href="../favicon.ico"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>لوحة الدعم الفني — متين العلمي</title>
+<link href="../libs/fonts/arabic-fonts.css" rel="stylesheet"/>
+<link href="../libs/tabler-icons/tabler-icons.min.css" rel="stylesheet"/>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet"/>
+<link rel="stylesheet" href="../css/common.css"/>
+<link rel="stylesheet" href="../css/admin.css"/>
+<link rel="stylesheet" href="../css/shared.css"/>
+<link rel="stylesheet" href="../css/mobile.css"/>
+<link rel="stylesheet" href="../css/notifications.css"/>
+<link rel="manifest" href="/Mateen/manifest.json">
+<meta name="theme-color" content="#1a4a2e">
+<script>
+  function revealPage() { document.documentElement.classList.add('ready'); }
+  var t = setTimeout(revealPage, 100);
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(function() { clearTimeout(t); revealPage(); });
+  } else { window.addEventListener('load', revealPage); }
+</script>
+<link href="../css/islamic.css" rel="stylesheet"/>
+<style>
+  .user-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    transition: box-shadow .2s;
+    cursor: pointer;
+  }
+  .user-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+  .user-avatar {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    background: var(--beige2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; flex-shrink: 0;
+    border: 2px solid var(--border);
+  }
+  .user-info { flex: 1; min-width: 0; }
+  .user-name { font-size: 14px; font-weight: 600; color: var(--text-dark); margin-bottom: 2px; }
+  .user-email { font-size: 12px; color: var(--text-mid); direction: ltr; text-align: right; }
+  .user-meta { display: flex; gap: 6px; margin-top: 5px; flex-wrap: wrap; }
+  .badge-role {
+    font-size: 11px; padding: 2px 10px; border-radius: 20px;
+    background: rgba(45,110,69,0.1); color: var(--green-dark);
+    border: 1px solid rgba(45,110,69,0.2);
+  }
+  .badge-status-active { background: rgba(39,174,96,0.1); color: #1e8449; border: 1px solid rgba(39,174,96,0.25); }
+  .badge-status-pending { background: rgba(230,126,34,0.1); color: #a04000; border: 1px solid rgba(230,126,34,0.25); }
+  .badge-status-suspended { background: rgba(192,57,43,0.1); color: #922b21; border: 1px solid rgba(192,57,43,0.25); }
+  .users-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+  .search-box {
+    width: 100%; padding: 10px 14px 10px 36px;
+    border: 1px solid var(--border); border-radius: 10px;
+    font-family: "Noto Naskh Arabic", serif; font-size: 13px;
+    background: var(--white); outline: none;
+    transition: border-color .2s;
+  }
+  .search-box:focus { border-color: var(--green-mid); }
+  .search-wrap { position: relative; }
+  .search-wrap i { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--text-mid); pointer-events: none; }
+  .filter-pills { display: flex; gap: 8px; flex-wrap: wrap; }
+  .pill {
+    padding: 5px 14px; border-radius: 20px; font-size: 12px;
+    border: 1px solid var(--border); background: var(--white);
+    color: var(--text-mid); cursor: pointer; transition: all .2s;
+  }
+  .pill.active { background: var(--green-dark); color: var(--gold-light); border-color: var(--green-dark); }
+  .modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.5); z-index: 1000;
+    align-items: center; justify-content: center; padding: 20px;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal-box {
+    background: var(--white); border-radius: 16px;
+    padding: 28px; max-width: 480px; width: 100%;
+    max-height: 90vh; overflow-y: auto;
+  }
+  .modal-title { font-family: Amiri, serif; font-size: 18px; color: var(--green-dark); margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+  .detail-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .detail-row:last-child { border-bottom: none; }
+  .detail-label { color: var(--text-mid); }
+  .detail-value { color: var(--text-dark); font-weight: 500; direction: ltr; }
+  .msg-textarea {
+    width: 100%; padding: 10px 12px; border: 1px solid var(--border);
+    border-radius: 8px; font-family: "Noto Naskh Arabic", serif;
+    font-size: 13px; resize: vertical; min-height: 80px; outline: none;
+  }
+  .msg-textarea:focus { border-color: var(--green-mid); }
+  .btn-send {
+    background: var(--green-dark); color: var(--gold-light);
+    border: none; border-radius: 8px; padding: 10px 22px;
+    font-family: "Noto Naskh Arabic", serif; font-size: 13px;
+    font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px;
+  }
+  .btn-send:hover { background: var(--green-mid); }
+  .btn-send:disabled { opacity: .55; cursor: not-allowed; }
+  .btn-close-modal {
+    background: var(--beige2); color: var(--text-dark);
+    border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 20px; font-family: "Noto Naskh Arabic", serif;
+    font-size: 13px; cursor: pointer;
+  }
+  .empty-state { text-align: center; padding: 48px 20px; color: var(--text-mid); font-size: 14px; }
+  .empty-state i { font-size: 36px; display: block; margin-bottom: 10px; opacity: .4; }
+  .stat-badge { font-size: 11px; background: var(--gold); color: var(--white); border-radius: 20px; padding: 1px 8px; margin-right: 4px; }
+</style>
+</head>
+<body>
+
+<!-- BASMALA -->
+<div class="basmala-bar">
+  <span class="bsm-ornament">❦</span>بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ<span class="bsm-ornament">❦</span>
+</div>
+
+<!-- NAV -->
+<nav class="navbar sticky-top d-flex align-items-center" style="background:var(--green-dark);padding:0 16px;min-height:56px;box-shadow:0 2px 12px rgba(0,0,0,0.3);gap:8px;flex-wrap:nowrap;">
+  <a class="nav-logo navbar-brand p-0 flex-shrink-0" href="home.html">
+    <div class="logo-circle">
+      <img alt="متين" src="../logo.png" class="logo-circle-img"/>
+    </div>
+  </a>
+  <div class="d-none d-sm-flex flex-column" style="line-height:1.2">
+    <div class="nav-brand">برنامج متين العلمي</div>
+    <div class="nav-tagline">لوحة الدعم الفني</div>
+  </div>
+  <ul class="navbar-nav flex-row mx-auto gap-1 admin-nav-links mb-0">
+    <li class="nav-item">
+      <a class="nav-link px-2" href="home.html"><i class="ti ti-home"></i> <span class="d-none d-md-inline">الرئيسية</span></a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link px-2" href="messages.html"><i class="ti ti-message-2"></i> <span class="d-none d-md-inline">الرسائل</span></a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link px-2 active" href="support.html"><i class="ti ti-headset"></i> <span class="d-none d-md-inline">لوحة الدعم</span></a>
+    </li>
+  </ul>
+  <div class="nav-user d-none d-sm-flex">
+    <span style="font-size:18px">🛠️</span>
+    <span class="nav-user-name" id="navUserName">الدعم الفني</span>
+  </div>
+  <button onclick="doLogout()" class="nav-back-btn" aria-label="خروج" title="تسجيل خروج">
+    <i class="ti ti-logout"></i>
+  </button>
+</nav>
+
+<!-- AUTH GATE -->
+<div id="authGate" style="display:flex;align-items:center;justify-content:center;min-height:60vh;flex-direction:column;gap:12px;color:var(--text-mid);">
+  <i class="ti ti-loader ti-spin" style="font-size:32px"></i>
+  <p>جارٍ التحقق من الصلاحيات...</p>
+</div>
+
+<!-- MAIN -->
+<div id="mainContent" class="main-content-hidden">
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-badge">🛠️ الدعم الفني</div>
+    <h1>لوحة الدعم الفني</h1>
+    <p>البحث عن المستخدمين، عرض بياناتهم، والتواصل معهم</p>
+  </div>
+
+  <div class="container">
+
+    <!-- STATS -->
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-num" id="sTotal">0</div><div class="stat-label">إجمالي الحسابات</div></div>
+      <div class="stat-card"><div class="stat-num" id="sActive">0</div><div class="stat-label">حسابات نشطة</div></div>
+      <div class="stat-card"><div class="stat-num" id="sPending">0</div><div class="stat-label">بانتظار الموافقة</div></div>
+      <div class="stat-card"><div class="stat-num" id="sSuspended">0</div><div class="stat-label">موقوفة</div></div>
+    </div>
+
+    <!-- USERS SECTION -->
+    <div class="section">
+      <div class="section-head">
+        <div class="section-head-title"><i class="ti ti-users"></i> المستخدمون</div>
+      </div>
+      <div style="padding:16px 20px;display:flex;flex-direction:column;gap:12px;border-bottom:1px solid var(--border);">
+        <!-- Search -->
+        <div class="search-wrap">
+          <i class="ti ti-search"></i>
+          <input class="search-box" id="searchInput" placeholder="ابحثي بالاسم أو البريد الإلكتروني..." oninput="renderUsers()"/>
+        </div>
+        <!-- Filter pills -->
+        <div class="filter-pills">
+          <div class="pill active" onclick="setFilter('all',this)">الكل</div>
+          <div class="pill" onclick="setFilter('mateen',this)">🧕 بنات متين</div>
+          <div class="pill" onclick="setFilter('teacher',this)">📚 معلمة</div>
+          <div class="pill" onclick="setFilter('supervisor',this)">🎓 مشرفة</div>
+          <div class="pill" onclick="setFilter('active',this)">✅ نشطة</div>
+          <div class="pill" onclick="setFilter('pending',this)">⏳ معلقة</div>
+        </div>
+      </div>
+      <div class="section-body">
+        <div class="users-grid" id="usersGrid">
+          <div class="empty-state"><i class="ti ti-loader ti-spin"></i> جارٍ التحميل...</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- USER DETAIL MODAL -->
+<div class="modal-overlay" id="userModal">
+  <div class="modal-box">
+    <div class="modal-title"><i class="ti ti-user-circle"></i> <span id="modalName">—</span></div>
+    <div id="modalDetails"></div>
+    <div style="margin-top:20px;">
+      <div style="font-size:13px;font-weight:600;color:var(--text-dark);margin-bottom:8px;"><i class="ti ti-message-2"></i> إرسال رسالة</div>
+      <textarea class="msg-textarea" id="msgText" placeholder="اكتبي رسالتك هنا..."></textarea>
+      <div style="display:flex;gap:8px;margin-top:10px;justify-content:flex-end;">
+        <button class="btn-close-modal" onclick="closeModal()">إلغاء</button>
+        <button class="btn-send" id="sendBtn" onclick="sendMessage()"><i class="ti ti-send"></i> إرسال</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="../js/support-1.js"></script>
+<script type="module" src="../js/notifications.js"></script>
+<script src="../js/sw-register.js"></script>
+</body>
+</html>
