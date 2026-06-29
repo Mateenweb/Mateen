@@ -387,62 +387,6 @@
   </div>
 </div>
 
-<!-- Modal إضافة/تعديل خبر (Admin) -->
-<div id="adminNewsModal" class="modal-overlay" onclick="if(event.target===this)this.classList.remove('show')">
-  <div class="modal-box" style="width:min(94vw,520px)">
-    <div class="modal-head">
-      <span class="m-title" id="adminNewsModalTitle">خبر جديد</span>
-      <button class="m-close" onclick="document.getElementById('adminNewsModal').classList.remove('show')">✕</button>
-    </div>
-    <div class="modal-body" style="display:flex;flex-direction:column;gap:12px">
-      <input id="anTitle" type="text" placeholder="عنوان الخبر أو الإعلان" class="m-input-news"/>
-      <textarea id="anBody" rows="4" placeholder="تفاصيل الخبر..." class="m-textarea-news"></textarea>
-      <div style="display:flex;gap:10px;flex-wrap:wrap">
-        <select id="anTag" class="m-select-news" style="flex:1">
-          <option value="📢 إعلان">📢 إعلان</option>
-          <option value="📝 خبر">📝 خبر</option>
-          <option value="🎉 مناسبة">🎉 مناسبة</option>
-          <option value="⚠️ تنبيه">⚠️ تنبيه</option>
-          <option value="📅 موعد">📅 موعد</option>
-        </select>
-        <select id="anVisibility" class="m-select-news" style="flex:1">
-          <option value="public">🌐 للجميع (بدون تسجيل)</option>
-          <option value="members">🔒 للمسجلات فقط</option>
-        </select>
-      </div>
-      <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer">
-        <input type="checkbox" id="anPinned"> تثبيت الخبر في الأعلى
-      </label>
-    </div>
-    <div class="modal-body" style="border-top:1px solid var(--border);padding-top:12px;display:flex;justify-content:flex-end;gap:10px">
-      <button class="m-btn" style="background:var(--beige);color:var(--text-dark);border:1px solid var(--border)"
-        onclick="document.getElementById('adminNewsModal').classList.remove('show')">إلغاء</button>
-      <button class="m-btn" onclick="submitAdminNews()"><i class="ti ti-send"></i> نشر</button>
-    </div>
-  </div>
-</div>
-
-<!-- Modal إضافة/تعديل موعد مهم -->
-<div id="adminEventModal" class="modal-overlay" onclick="if(event.target===this)this.classList.remove('show')">
-  <div class="modal-box" style="width:min(94vw,420px)">
-    <div class="modal-head">
-      <span class="m-title" id="adminEventModalTitle">موعد مهم جديد</span>
-      <button class="m-close" onclick="document.getElementById('adminEventModal').classList.remove('show')">✕</button>
-    </div>
-    <div class="modal-body" style="display:flex;flex-direction:column;gap:12px">
-      <input id="aeName" type="text" placeholder="اسم الموعد / الحدث" class="m-input-news"/>
-      <input id="aeDate" type="text" placeholder="التاريخ (مثال: الأحد ١٩ صفر)" class="m-input-news"/>
-      <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer">
-        <input type="checkbox" id="aeHighlight"> تمييز بالذهبي (حدث مهم)
-      </label>
-    </div>
-    <div class="modal-body" style="border-top:1px solid var(--border);padding-top:12px;display:flex;justify-content:flex-end;gap:10px">
-      <button class="m-btn" style="background:var(--beige);color:var(--text-dark);border:1px solid var(--border)"
-        onclick="document.getElementById('adminEventModal').classList.remove('show')">إلغاء</button>
-      <button class="m-btn" onclick="submitAdminEvent()"><i class="ti ti-calendar-check"></i> حفظ</button>
-    </div>
-  </div>
-</div>
 
 <!-- MATERIALS LIST -->
 <div class="section">
