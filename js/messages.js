@@ -30,7 +30,8 @@ const ROLE_LABELS = {
   mateen:     'طالبة متين',
   teacher:    'معلمة',
   supervisor: 'مشرفة',
-  admin:      'إدارة'
+  admin:      'إدارة',
+  support:    'دعم فني'
 };
 
 const ROLE_COLORS = {
@@ -497,7 +498,7 @@ window.searchUsers = () => {
         <div class="user-result-item" onclick="startConv('${u.id}','${escapeAttr(u.name || 'مستخدم')}','${u.role}')">
           ${avatarHtml(u.name || 'مستخدم', u.role, 38)}
           <div>
-            <div class="user-result-name">${u.name || 'مستخدم'}</div>
+            <div class="user-result-name">${u.role === 'admin' ? 'إدارة متين' : (u.name || 'مستخدم')}</div>
             <div class="user-result-role" style="color:${ROLE_COLORS[u.role]||'#888'}">${ROLE_LABELS[u.role] || ''}</div>
           </div>
         </div>`).join('')}
