@@ -50,10 +50,10 @@ const ROLE_INITIALS_BG = {
 };
 
 // ── Messaging permissions ──────────────────────────────────────────────────
-// student/mateen → can message: teacher, supervisor, admin
+// student/mateen → can message: teacher, supervisor, admin, support
 // teacher/supervisor/admin → can message: anyone
 function canMessageRole(myRole, theirRole) {
-  const elevated = ['teacher', 'supervisor', 'admin'];
+  const elevated = ['teacher', 'supervisor', 'admin', 'support'];
   if (elevated.includes(myRole)) return true;           // staff → anyone
   if (['student','mateen'].includes(myRole)) {
     return elevated.includes(theirRole);                // students → staff only
@@ -103,6 +103,7 @@ onAuthStateChanged(auth, async user => {
   const mediaButtons = document.getElementById('mediaButtons');
   if (mediaButtons) {
     const canMedia = !['student', 'mateen'].includes(data.role);
+  // mateen can send images to support only — handled dynamically in openConv
     mediaButtons.style.display = canMedia ? 'flex' : 'none';
   }
   if (convUnsub) { convUnsub(); convUnsub = null; }
@@ -309,6 +310,12 @@ window.openConv = async (cid, otherId, otherName, otherRole) => {
   document.getElementById('msgEmpty').style.display = 'none';
   const convEl = document.getElementById('msgConv');
   convEl.style.display = 'flex';
+
+  // إظهار زرار الصورة لـ mateen لما تكون مع support فقط
+  const mediaButtons = document.getElementById('mediaButtons');
+  if (mediaButtons && currentUserData?.role === 'mateen') {
+    mediaButtons.style.display = otherRole === 'support' ? 'flex' : 'none';
+  }
 
   // Header
   document.getElementById('convHeaderAvatar').innerHTML = avatarHtml(otherName, otherRole, 38);
