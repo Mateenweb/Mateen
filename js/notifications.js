@@ -162,7 +162,9 @@ function startListening(userId) {
       const convId = change.doc.id;
       const lastMsg = data.lastMsg || '';
       const lastAt  = data.lastAt?.seconds || 0;
-      const unread  = data.unread?.[userId] || 0;
+      const nested  = data.unread?.[userId];
+      const flat    = data[`unread.${userId}`];
+      const unread  = Math.max(Number(nested || 0), Number(flat || 0));
 
       const lastSenderId = data.lastSenderId || '';
 
@@ -171,7 +173,7 @@ function startListening(userId) {
       const notFromMe  = lastSenderId !== '' && lastSenderId !== userId;
       const hasContent = lastMsg.trim() !== '';
       // تجاهل If الـ unread بتاع User اتRowّر (يعني حد فتح الشات but/only)
-      const isReadEvent = data[`unread.${userId}`] === 0 && !isNewMsg;
+      const isReadEvent = (Number(data[`unread.${userId}`] || 0) === 0 && Number(data.unread?.[userId] || 0) === 0) && !isNewMsg;
 
       if (isNewMsg && notFromMe && hasContent && !isReadEvent) {
         lastSeen[convId] = lastAt;
