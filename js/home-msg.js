@@ -2,7 +2,7 @@ import { initializeApp, getApps, getApp }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
 import { getAuth, onAuthStateChanged }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
-import { getFirestore, collection, getDocs, query, where, orderBy }
+import { getFirestore, collection, query, where, orderBy, onSnapshot }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 import { FIREBASE_CONFIG } from "./config.js";
 
@@ -17,23 +17,18 @@ onAuthStateChanged(auth, async user => {
   const sidebarBadge = document.getElementById('sidebarMsgBadge');
   if (!navBadge && !sidebarBadge) return;
 
-  try {
-    const q = query(
-      collection(db, 'conversations'),
-      where('participants', 'array-contains', user.uid)
-    );
-    const convSnap = await getDocs(q);
-
+  const q = query(
+    collection(db, 'conversations'),
+    where('participants', 'array-contains', user.uid)
+  );
+  onSnapshot(q, snap => {
     let total = 0;
-    convSnap.forEach(d => {
-      const data = d.data();
-      // اقرأ من nested object أو flat field
+    snap.forEach(d => {
+      const data   = d.data();
       const nested = data.unread?.[user.uid];
       const flat   = data[`unread.${user.uid}`];
-      const unread = Math.max(Number(nested || 0), Number(flat || 0));
-      total += unread;
+      total += Math.max(Number(nested || 0), Number(flat || 0));
     });
-
     [navBadge, sidebarBadge].forEach(badge => {
       if (!badge) return;
       if (total > 0) {
@@ -43,10 +38,7 @@ onAuthStateChanged(auth, async user => {
         badge.classList.add('d-none');
       }
     });
-
-  } catch (err) {
-    console.error('home-msg:', err);
-  }
+  });
 });
 
 // ── أيقونة الNews — عد الNews الجthisدة منذ آخر زيارة ──────
