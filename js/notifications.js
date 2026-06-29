@@ -92,29 +92,44 @@ function showNotifToast(title, body, url) {
   }
 
   t.dataset.convUrl = url || '';
-  t.dataset.toastId = Date.now().toString();
-  container.appendChild(t);
+  const toastId = Date.now().toString() + Math.random().toString(36).slice(2);
+  t.dataset.toastId = toastId;
 
-  // احفظ في localStorage عشان يرجع بعد refresh
+  // احفظ في localStorage (لو مش موجود بالفعل بنفس الـ url+title)
   const stored = JSON.parse(localStorage.getItem('pendingToasts') || '[]');
-  stored.push({ title, body, url, id: t.dataset.toastId });
-  localStorage.setItem('pendingToasts', JSON.stringify(stored));
+  const isDup = stored.some(s => s.url === url && s.title === title);
+  if (!isDup) {
+    stored.push({ title, body, url, id: toastId });
+    localStorage.setItem('pendingToasts', JSON.stringify(stored));
+  }
 
   // لما يتقفل بالـ ✕ — امسحه من localStorage
   t.querySelector('button').addEventListener('click', () => {
-    removePendingToast(t.dataset.toastId);
+    const arr = JSON.parse(localStorage.getItem('pendingToasts') || '[]');
+    localStorage.setItem('pendingToasts', JSON.stringify(arr.filter(s => s.id !== toastId)));
   });
+
+  container.appendChild(t);
 }
 
-function removePendingToast(id) {
-  const stored = JSON.parse(localStorage.getItem('pendingToasts') || '[]');
-  localStorage.setItem('pendingToasts', JSON.stringify(stored.filter(t => t.id !== id)));
-}
-
-// أعرض الـ toasts المحفوظة لما الصفحة تتحمل
+// استعادة الـ toasts بعد refresh بدون إعادة حفظ
 function restorePendingToasts() {
   const stored = JSON.parse(localStorage.getItem('pendingToasts') || '[]');
-  stored.forEach(t => showNotifToast(t.title, t.body, t.url));
+  stored.forEach(item => {
+    const container = getToastContainer();
+    const t = document.createElement('div');
+    t.style.cssText = `background:#1a4a2e;color:#fff;border-radius:12px;padding:12px 16px;min-width:260px;max-width:320px;box-shadow:0 4px 20px rgba(0,0,0,.3);font-family:'Noto Naskh Arabic',serif;direction:rtl;cursor:pointer;animation:notifIn .3s ease;position:relative;transition:opacity .3s ease;`;
+    t.innerHTML = `<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px"><div onclick="window.location.href='${item.url||''}'" style="flex:1"><div style="font-weight:700;font-size:14px;margin-bottom:3px">${item.title}</div><div style="font-size:12.5px;opacity:.85">${item.body}</div></div><button style="background:none;border:none;color:rgba(255,255,255,.6);font-size:16px;cursor:pointer;padding:0;line-height:1;flex-shrink:0" id="close-${item.id}">✕</button></div>`;
+    t.setAttribute('data-notif','1');
+    t.dataset.convUrl = item.url || '';
+    t.dataset.toastId = item.id;
+    container.appendChild(t);
+    document.getElementById('close-'+item.id)?.addEventListener('click', () => {
+      const arr = JSON.parse(localStorage.getItem('pendingToasts')||'[]');
+      localStorage.setItem('pendingToasts', JSON.stringify(arr.filter(s=>s.id!==item.id)));
+      t.remove();
+    });
+  });
 }
 
 // ── Browser Notification ─────────────────────────────────────────────────
@@ -386,14 +401,12 @@ export { showNotifToast as showToast };
 export function dismissToastForConv(url) {
   document.querySelectorAll('[data-notif][data-conv-url]').forEach(t => {
     if (t.dataset.convUrl && t.dataset.convUrl.includes(url)) {
-      removePendingToast(t.dataset.toastId);
       t.style.opacity = '0';
       setTimeout(() => t.remove(), 300);
     }
   });
-  // امسح كل الـ toasts المرتبطة بالـ URL ده من localStorage
   const stored = JSON.parse(localStorage.getItem('pendingToasts') || '[]');
-  localStorage.setItem('pendingToasts', JSON.stringify(stored.filter(t => !t.url.includes(url))));
+  localStorage.setItem('pendingToasts', JSON.stringify(stored.filter(s => !s.url.includes(url))));
 }
 
 
