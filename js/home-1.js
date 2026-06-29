@@ -70,7 +70,8 @@ onAuthStateChanged(auth, async user => {
     role === 'admin'      ? 'إدارية' :
     role === 'supervisor' ? 'مشرفة' :
     role === 'teacher'    ? 'معلمة' :
-    role === 'mateen'     ? 'بنات متين' : 'الطالبة';
+    role === 'mateen'     ? 'بنات متين' :
+    role === 'support'    ? 'الدعم الفني' : 'الطالبة';
 
   // ── Show الـ links حسب الـ role ──────────────────────────
   function show(id) { const el = document.getElementById(id); if(el) el.classList.remove('d-none'); }
@@ -128,7 +129,8 @@ onAuthStateChanged(auth, async user => {
       role === 'admin'      ? '👑' :
       role === 'supervisor' ? '🎓' :
       role === 'teacher'    ? '📚' :
-      role === 'mateen'     ? '🧕' : '🌸';
+      role === 'mateen'     ? '🧕' :
+      role === 'support'    ? '🛠️' : '🌸';
     if (navAvatar) navAvatar.textContent = avatarEmoji;
 
     if (role === 'mateen') {
