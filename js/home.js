@@ -576,3 +576,7 @@ window.toggleNotifPermission = async function() {
 
 // حدّث حالة الزرار عند التحميل
 document.addEventListener('DOMContentLoaded', updateNotifBtn);
+// تأكد من تشغيل showSidebarSetup بعد تحميل الـ DOM
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => window.showSidebarSetup && window.showSidebarSetup());
+}
