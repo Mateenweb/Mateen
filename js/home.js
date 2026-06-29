@@ -247,6 +247,14 @@ onAuthStateChanged(auth, async user => {
     }
     show('linkAdmin');
     show('linkNews');
+  } else if (role === 'support') {
+    const linkAdminEl = document.getElementById('linkAdmin');
+    if (linkAdminEl) {
+      linkAdminEl.href = 'admin.html';
+      linkAdminEl.innerHTML = '<i class="ti ti-headset"></i> لوحة الدعم';
+    }
+    show('linkAdmin');
+    show('linkNews');
   } else if (role === 'teacher') {
     console.log('✅ Showing links for TEACHER');
     show('linkNews');
