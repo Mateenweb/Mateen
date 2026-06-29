@@ -105,7 +105,7 @@ onAuthStateChanged(auth, async user => {
   } else if (role === 'support') {
     const linkAdminEl = document.getElementById('linkAdmin');
     if (linkAdminEl) {
-      linkAdminEl.href = 'support.html';
+      linkAdminEl.href = 'admin.html';
       linkAdminEl.innerHTML = '<i class="ti ti-headset"></i> لوحة الدعم';
     }
     show('linkAdmin');
