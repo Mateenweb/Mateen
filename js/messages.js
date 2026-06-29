@@ -331,31 +331,16 @@ window.openConv = async (cid, otherId, otherName, otherRole) => {
   document.getElementById('convRole').textContent  = ROLE_LABELS[otherRole] || otherRole;
   document.getElementById('convRole').style.color  = ROLE_COLORS[otherRole] || 'var(--text-mid)';
 
-  // Mark as read - صفّر فوراً في Firestore أولاً عشان onSnapshot ييجي بقيمة 0
+  // Mark as read — صفّر الـ unread في Firestore مباشرة
   markConvRead(cid);
   await updateDoc(doc(db, 'conversations', cid), {
     [`unread.${currentUser.uid}`]: 0,
-    [`unread`]: deleteField(),
   }).catch(() => {});
-  // أعد كتابة الـ unread map بدون الـ uid الحالي
-  try {
-    const convSnap = await getDoc(doc(db, 'conversations', cid));
-    if (convSnap.exists()) {
-      const data = convSnap.data();
-      const otherId = data.participants?.find(p => p !== currentUser.uid);
-      const otherUnread = data[`unread.${otherId}`] ?? data.unread?.[otherId] ?? 0;
-      await updateDoc(doc(db, 'conversations', cid), {
-        [`unread.${currentUser.uid}`]: 0,
-        ...(otherId ? { [`unread.${otherId}`]: otherUnread } : {})
-      });
-    }
-  } catch(e) {}
 
-  // بعدين حدّث الـ local state والـ UI
+  // حدّث الـ local state فوراً
   const convInList = allConvs.find(cv => cv.id === cid);
   if (convInList) {
     convInList[`unread.${currentUser.uid}`] = 0;
-    if (convInList.unread) convInList.unread[currentUser.uid] = 0;
     renderConvList(allConvs);
   }
 
