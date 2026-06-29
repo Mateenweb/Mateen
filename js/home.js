@@ -202,6 +202,7 @@ onAuthStateChanged(auth, async user => {
 
   // Enable Notificationات الموقع
   initNotifications(user.uid);
+  showSidebarSetup();
 
   const snap = await getDoc(doc(db, 'users', user.uid));
   const role    = snap.exists() ? snap.data().role    : 'student';
