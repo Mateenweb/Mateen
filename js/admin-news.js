@@ -131,3 +131,109 @@ window.deleteAdminNews = async id => {
   if (!confirm('حذف هذا الخبر نهائياً؟')) return;
   await deleteDoc(doc(db, 'news', id));
 };
+// ── مودال إضافة خبر جديد ──────────────────────────────────────
+window.openAddNewsModal = () => {
+  // إنشاء المودال لو مش موجود
+  if (!document.getElementById('addNewsModalAdmin')) {
+    const modal = document.createElement('div');
+    modal.id = 'addNewsModalAdmin';
+    modal.className = 'm-overlay';
+    modal.innerHTML = `
+      <div class="m-box-news">
+        <div class="m-head-news">
+          <div class="m-title-news">📰 خبر جديد</div>
+          <button class="m-close-news" onclick="document.getElementById('addNewsModalAdmin').classList.remove('show')">✕</button>
+        </div>
+        <div class="m-form-stack">
+          <div>
+            <label class="m-field-label">العنوان *</label>
+            <input id="newsTitle" type="text" placeholder="عنوان الخبر أو الإعلان" class="m-text-input"/>
+          </div>
+          <div>
+            <label class="m-field-label">التفاصيل</label>
+            <textarea id="newsBody" rows="4" placeholder="تفاصيل الخبر..." class="m-textarea"></textarea>
+          </div>
+          <div class="m-row-gap10">
+            <div class="m-col-flex1">
+              <label class="m-field-label">التصنيف</label>
+              <select id="newsTag" class="m-select-news">
+                <option value="📢 إعلان">📢 إعلان</option>
+                <option value="📝 خبر">📝 خبر</option>
+                <option value="⚠️ تنبيه">⚠️ تنبيه</option>
+                <option value="🎉 مناسبة">🎉 مناسبة</option>
+                <option value="📅 موعد">📅 موعد</option>
+              </select>
+            </div>
+            <div class="m-col-flex1">
+              <label class="m-field-label">الظهور</label>
+              <select id="newsVisibility" class="m-select-news">
+                <option value="public">🌐 للجميع (بدون تسجيل)</option>
+                <option value="members">👥 للمسجلات فقط</option>
+              </select>
+            </div>
+          </div>
+          <div class="m-pin-wrap">
+            <label class="m-pin-label">
+              <input type="checkbox" id="newsPinned" class="m-pin-checkbox"/> 📌 تثبيت الخبر في الأعلى
+            </label>
+          </div>
+          <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px">
+            <button class="m-btn-cancel" onclick="document.getElementById('addNewsModalAdmin').classList.remove('show')">إلغاء</button>
+            <button class="m-btn-pub" onclick="addNews()"><i class="ti ti-send"></i> نشر</button>
+          </div>
+        </div>
+      </div>`;
+    document.body.appendChild(modal);
+  }
+  document.getElementById('addNewsModalAdmin').classList.add('show');
+  document.getElementById('newsTitle').value = '';
+  document.getElementById('newsBody').value  = '';
+};
+
+// ── مودال إضافة موعد مهم ───────────────────────────────────────
+window.openAddEventModal = () => {
+  if (!document.getElementById('addEventModalAdmin')) {
+    const modal = document.createElement('div');
+    modal.id = 'addEventModalAdmin';
+    modal.className = 'm-overlay';
+    modal.innerHTML = `
+      <div class="m-box-news">
+        <div class="m-head-news">
+          <div class="m-title-news">📅 موعد مهم جديد</div>
+          <button class="m-close-news" onclick="document.getElementById('addEventModalAdmin').classList.remove('show')">✕</button>
+        </div>
+        <div class="m-form-stack">
+          <div>
+            <label class="m-field-label">اسم الموعد / الحدث *</label>
+            <input id="eventTitle" type="text" placeholder="مثال: اختبار التفسير" class="m-text-input"/>
+          </div>
+          <div>
+            <label class="m-field-label">التاريخ (مثال: الأحد 19 صفر)</label>
+            <input id="eventDate" type="text" placeholder="مثال: الأحد 19 صفر" class="m-text-input"/>
+          </div>
+          <div class="m-pin-wrap">
+            <label class="m-pin-label">
+              <input type="checkbox" id="eventHighlight" class="m-pin-checkbox"/> 🌟 تمييز بالذهبي (حدث مهم)
+            </label>
+          </div>
+          <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px">
+            <button class="m-btn-cancel" onclick="document.getElementById('addEventModalAdmin').classList.remove('show')">إلغاء</button>
+            <button class="m-btn-pub" onclick="addEvent()"><i class="ti ti-calendar-plus"></i> حفظ</button>
+          </div>
+        </div>
+      </div>`;
+    document.body.appendChild(modal);
+  }
+  document.getElementById('addEventModalAdmin').classList.add('show');
+  document.getElementById('eventTitle').value = '';
+  document.getElementById('eventDate').value  = '';
+};
+
+window.addEvent = async () => {
+  const title     = document.getElementById('eventTitle').value.trim();
+  const date      = document.getElementById('eventDate').value.trim();
+  const highlight = document.getElementById('eventHighlight').checked;
+  if (!title) { alert('أدخلي اسم الموعد'); return; }
+  await addDoc(collection(db, 'events'), { title, date, highlight, createdAt: serverTimestamp() });
+  document.getElementById('addEventModalAdmin').classList.remove('show');
+};
