@@ -532,4 +532,47 @@ document.addEventListener("click",function(e){
   if(nav && !nav.contains(e.target)){ var nl=document.querySelector(".nav-links"); if(nl) nl.classList.remove("open"); }
 });
 
+// ── زرار الجرس — تحكم في إشعارات الموقع ──────────────────────
+async function updateNotifBtn() {
+  const btn  = document.getElementById('notifToggleBtn');
+  const icon = document.getElementById('notifBellIcon');
+  const txt  = document.getElementById('notifBtnText');
+  if (!btn) return;
+  const perm = Notification.permission;
+  if (perm === 'granted') {
+    icon.className = 'ti ti-bell-ringing';
+    txt.textContent = 'الإشعارات مفعّلة';
+    btn.style.color = 'var(--green-dark)';
+    btn.style.borderColor = 'var(--green-dark)';
+  } else if (perm === 'denied') {
+    icon.className = 'ti ti-bell-off';
+    txt.textContent = 'الإشعارات محجوبة';
+    btn.style.color = '#e74c3c';
+    btn.style.borderColor = '#e74c3c';
+  } else {
+    icon.className = 'ti ti-bell';
+    txt.textContent = 'تفعيل الإشعارات';
+    btn.style.color = 'var(--green-dark)';
+    btn.style.borderColor = 'var(--gold)';
+  }
+}
 
+window.toggleNotifPermission = async function() {
+  const perm = Notification.permission;
+  if (perm === 'denied') {
+    alert('الإشعارات محجوبة. افتحي إعدادات المتصفح وأذني الموقع يدوياً.');
+    return;
+  }
+  if (perm === 'granted') {
+    alert('الإشعارات مفعّلة بالفعل!');
+    return;
+  }
+  const result = await Notification.requestPermission();
+  if (result === 'granted' && window._saveFCMToken) {
+    await window._saveFCMToken();
+  }
+  updateNotifBtn();
+};
+
+// حدّث حالة الزرار عند التحميل
+document.addEventListener('DOMContentLoaded', updateNotifBtn);
