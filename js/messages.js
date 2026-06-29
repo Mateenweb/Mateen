@@ -264,7 +264,8 @@ function renderConvList(list) {
     const uid = currentUser?.uid || '';
     const fv = c[`unread.${uid}`];
     const nv = c.unread?.[uid];
-    const unread = fv !== undefined ? Number(fv) : (nv !== undefined ? Number(nv) : 0);
+    // لو المحادثة اتفتحت محلياً → صفّر الـ unread بغض النظر عن Firestore
+    const unread = readConvIds.has(c.id) ? 0 : (fv !== undefined ? Number(fv) : (nv !== undefined ? Number(nv) : 0));
     const roleLabel = ROLE_LABELS[c.otherRole] || '';
     const isActive = activeConvId === c.id;
 
