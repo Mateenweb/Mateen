@@ -335,6 +335,7 @@ window.openConv = async (cid, otherId, otherName, otherRole) => {
   markConvRead(cid);
   await updateDoc(doc(db, 'conversations', cid), {
     [`unread.${currentUser.uid}`]: 0,
+    unread: { ...( (await getDoc(doc(db,'conversations',cid))).data()?.unread || {} ), [currentUser.uid]: 0 },
   }).catch(() => {});
 
   // حدّث الـ local state فوراً
