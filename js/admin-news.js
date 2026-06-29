@@ -25,6 +25,7 @@ onAuthStateChanged(auth, async user => {
   // أضيف Button الNews في Admin
   addNewsButton();
   loadAdminNews();
+  loadAdminEvents();
 });
 
 function addNewsButton() {
@@ -59,6 +60,40 @@ function loadAdminNews() {
     }).join('');
   });
 }
+
+// ── Load List/Menu المواعيد في Admin ─────────────────────────────
+function loadAdminEvents() {
+  const q = query(collection(db, 'events'), orderBy('createdAt', 'desc'));
+  onSnapshot(q, snap => {
+    const list = document.getElementById('eventsAdminList');
+    if (!list) return;
+    if (snap.empty) {
+      list.innerHTML = '<div style="text-align:center;padding:24px;color:#999;font-size:13px">لا توجد مواعيد</div>';
+      return;
+    }
+    list.innerHTML = snap.docs.map(d => {
+      const e = d.data();
+      return `
+        <div style="display:flex;align-items:center;gap:12px;padding:10px 16px;border-bottom:1px solid #f0ebe0">
+          <div style="flex:1;min-width:0">
+            <div style="font-size:13.5px;font-weight:700;color:#2c1a0e">
+              ${e.highlight ? '🌟 ' : '📅 '}${e.title||''}
+            </div>
+            <div style="font-size:11.5px;color:#8a6a52;margin-top:2px">${e.date||''}</div>
+          </div>
+          <button onclick="deleteAdminEvent('${d.id}')"
+            style="background:#fee2e2;border:none;border-radius:8px;padding:5px 10px;color:#8b3a2a;cursor:pointer;font-size:12px;flex-shrink:0">
+            <i class="ti ti-trash"></i>
+          </button>
+        </div>`;
+    }).join('');
+  });
+}
+
+window.deleteAdminEvent = async id => {
+  if (!confirm('حذف هذا الموعد نهائياً؟')) return;
+  await deleteDoc(doc(db, 'events', id));
+};
 
 // ── Add خبر جthisد + Notification فوري ─────────────────────────────
 window.addNews = async () => {
