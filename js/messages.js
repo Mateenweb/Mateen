@@ -326,8 +326,20 @@ window.openConv = async (cid, otherId, otherName, otherRole) => {
     if (convInList.unread) convInList.unread[currentUser.uid] = 0;
     renderConvList(allConvs);
   }
-  // Rowّر flat field
-  await updateDoc(doc(db, 'conversations', cid), { [`unread.${currentUser.uid}`]: 0 });
+  // صفّر الـ unread في الـ flat و nested عشان نضمن التحديث
+  await updateDoc(doc(db, 'conversations', cid), {
+    [`unread.${currentUser.uid}`]: 0,
+  });
+  // صفّر الـ nested map كمان لو موجود
+  try {
+    const convSnap2 = await getDoc(doc(db, 'conversations', cid));
+    if (convSnap2.exists() && convSnap2.data().unread?.[currentUser.uid]) {
+      await updateDoc(doc(db, 'conversations', cid), {
+        [`unread.${currentUser.uid}`]: 0,
+        unread: { ...convSnap2.data().unread, [currentUser.uid]: 0 }
+      });
+    }
+  } catch(e) {}
 
   // علّم Messages الطرف الثاني كمقروءة (So that يعرف المرسل إن رسالته اتقرأت)
   const allMsgsSnap = await getDocs(collection(db, 'conversations', cid, 'messages'));
