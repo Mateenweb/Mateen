@@ -8,6 +8,12 @@
   height: calc(100vh - 58px);
   overflow: hidden;
   background: var(--white, #fff);
+  flex: 1;
+}
+
+/* تأكد إن الـ body والـ wrapper يملأوا الشاشة */
+body:has(.msg-layout) {
+  background: var(--white, #fff) !important;
 }
 
 /* ── Sidebar (conversation list) ─────────── */
