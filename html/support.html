@@ -491,14 +491,16 @@ function downloadAuditPDF() {
 }
 
 // إظهار زرار التحميل بعد اكتمال الفحص
-const _origRunSiteTest = window.runSiteTest;
-if (typeof runSiteTest === 'function') {
-  const __orig = runSiteTest;
-  window.runSiteTest = async function() {
-    await __orig();
-    document.getElementById('downloadPdfBtn').style.display = '';
-  };
-}
+window.addEventListener('load', () => {
+  if (typeof window.runSiteTest === 'function') {
+    const __orig = window.runSiteTest;
+    window.runSiteTest = async function() {
+      await __orig();
+      const btn = document.getElementById('downloadPdfBtn');
+      if (btn) btn.style.display = '';
+    };
+  }
+});
 
 </script>
 </body>
