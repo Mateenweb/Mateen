@@ -11,7 +11,7 @@ import { getAuth, onAuthStateChanged, signOut }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
 import { initNotifications } from "./notifications.js";
 import { getFirestore, doc, getDoc, getDocs, addDoc, setDoc,
-         collection, query, where, orderBy, serverTimestamp, onSnapshot }
+         collection, query, where, orderBy, serverTimestamp }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 import { FIREBASE_CONFIG } from "./config.js";
 
@@ -58,7 +58,7 @@ window.closeOnboarding = () => {
   showSidebarSetup();
 };
 
-function showSidebarSetup() {
+window.showSidebarSetup = function showSidebarSetup() {
   const wrap = document.getElementById('notifBtnWrap');
   if (!wrap) return;
   wrap.classList.remove('d-none');
@@ -202,6 +202,7 @@ onAuthStateChanged(auth, async user => {
 
   // Enable Notificationات الموقع
   initNotifications(user.uid);
+  showSidebarSetup();
 
   const snap = await getDoc(doc(db, 'users', user.uid));
   const role    = snap.exists() ? snap.data().role    : 'student';
@@ -324,35 +325,7 @@ onAuthStateChanged(auth, async user => {
     ctName.readOnly = ctRole === 'admin';
   }
 
-  /* ───────────────────────────────────────────────────────────
-     عداد الرسائل — دوت بسيط يتحدث كل 30 ثانية
-     ─────────────────────────────────────────────────────────── */
-  const navMsgBadge     = document.getElementById('navMsgBadge');
-  const sidebarMsgBadge = document.getElementById('sidebarMsgBadge');
-
-  async function updateMsgDot() {
-    try {
-      const q = query(
-        collection(db, 'conversations'),
-        where('participants', 'array-contains', user.uid)
-      );
-      const convSnap = await getDocs(q);
-      let hasUnread = false;
-      convSnap.forEach(d => {
-        const unread = d.data()?.unread?.[user.uid] || 0;
-        if (unread > 0) hasUnread = true;
-      });
-      [navMsgBadge, sidebarMsgBadge].forEach(badge => {
-        if (!badge) return;
-        hasUnread ? badge.classList.remove('d-none') : badge.classList.add('d-none');
-      });
-    } catch(err) { console.error('msg-dot:', err); }
-  }
-
-  if (navMsgBadge || sidebarMsgBadge) {
-    updateMsgDot();
-    setInterval(updateMsgDot, 30000);
-  }
+  // badge الرسائل — يتحكم فيه home-msg.js
 
   /* ───────────────────────────────────────────────────────────
      [من home-msg.js] — عداد الNews الجthisدة منذ آخر زيارة
