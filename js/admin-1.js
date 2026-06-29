@@ -1263,3 +1263,15 @@ window.saveBulkGrades = async () => {
   }
 };
 
+// ── تعديل حقل في حساب مستخدم مباشرة من الجدول ────────────
+window.userFieldUpdate = async (uid, field, value) => {
+  try {
+    await updateDoc(doc(db, 'users', uid), { [field]: value });
+    if (field === 'role' || field === 'status') {
+      filterUsersTable();
+    }
+  } catch(e) {
+    console.error('userFieldUpdate error:', e);
+    alert('حدث خطأ أثناء الحفظ');
+  }
+};
