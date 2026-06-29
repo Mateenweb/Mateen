@@ -168,7 +168,7 @@ async function loadAllUsers() {
   allUsers = [];
   snap.forEach(d => {
     const ud = d.data();
-    if (d.id !== currentUser.uid && (ud.status === 'active' || ud.role === 'admin')) {
+    if (d.id !== currentUser.uid && (ud.status === 'active' || ud.role === 'admin' || ud.role === 'support')) {
       allUsers.push({ id: d.id, ...ud });
     }
   });
