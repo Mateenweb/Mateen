@@ -135,7 +135,8 @@ function startListening(userId) {
     snap.docs.forEach(d => console.log('[Notif] conv:', d.id.slice(0,8), '| unread flat:', d.data()[`unread.${userId}`], '| unread nested:', d.data().unread?.[userId], '| inReadIds:', readIds.has(d.id)));
     const hasUnread = snap.docs.some(d => {
       if (readIds.has(d.id)) return false;
-      const unread = d.data()[`unread.${userId}`] ?? d.data().unread?.[userId] ?? 0;
+      // اعتمد على الـ nested map فقط — الـ flat field قديم وغير موثوق
+      const unread = d.data().unread?.[userId] ?? 0;
       return Number(unread) > 0;
     });
     ['navMsgBadge','sidebarMsgBadge'].forEach(id => {
