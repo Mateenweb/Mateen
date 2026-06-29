@@ -333,9 +333,13 @@ window.openConv = async (cid, otherId, otherName, otherRole) => {
 
   // Mark as read — صفّر الـ unread في Firestore مباشرة
   markConvRead(cid);
+  // صفّر flat field والـ nested الاتنين
+  const _convSnap2 = await getDoc(doc(db, 'conversations', cid)).catch(()=>null);
+  const _nestedUnread = _convSnap2?.data()?.unread || {};
+  _nestedUnread[currentUser.uid] = 0;
   await updateDoc(doc(db, 'conversations', cid), {
     [`unread.${currentUser.uid}`]: 0,
-    unread: { ...( (await getDoc(doc(db,'conversations',cid))).data()?.unread || {} ), [currentUser.uid]: 0 },
+    unread: _nestedUnread,
   }).catch(() => {});
 
   // حدّث الـ local state فوراً
