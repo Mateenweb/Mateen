@@ -300,6 +300,8 @@ onAuthStateChanged(auth, async user => {
     if (navProfileBtn) { navProfileBtn.href = 'admin.html'; navProfileBtn.classList.remove('d-none'); }
   } else if (role === 'supervisor') {
     if (navProfileBtn) { navProfileBtn.href = 'supervisor.html'; navProfileBtn.classList.remove('d-none'); }
+  } else if (role === 'support') {
+    if (navProfileBtn) { navProfileBtn.href = 'admin.html'; navProfileBtn.classList.remove('d-none'); }
   } else if (role === 'teacher') {
     const teacherPageMap = {
       'tafseer':'teacher-tafseer.html','fiqh':'teacher-fiqh.html',
