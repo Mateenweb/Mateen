@@ -325,42 +325,7 @@ onAuthStateChanged(auth, async user => {
     ctName.readOnly = ctRole === 'admin';
   }
 
-  /* ───────────────────────────────────────────────────────────
-     [من home-msg.js] — عداد الMessages غير المقروءة
-     ─────────────────────────────────────────────────────────── */
-  const navMsgBadge     = document.getElementById('navMsgBadge');
-  const sidebarMsgBadge = document.getElementById('sidebarMsgBadge');
-  if (navMsgBadge || sidebarMsgBadge) {
-    try {
-      const q = query(
-        collection(db, 'conversations'),
-        where('participants', 'array-contains', user.uid)
-      );
-      const convSnap = await getDocs(q);
-
-      let total = 0;
-      convSnap.forEach(d => {
-        const data   = d.data();
-        const nested = data.unread?.[user.uid];
-        const flat   = data[`unread.${user.uid}`];
-        const unread = Math.max(Number(nested || 0), Number(flat || 0));
-        total += unread;
-      });
-
-      [navMsgBadge, sidebarMsgBadge].forEach(badge => {
-        if (!badge) return;
-        if (total > 0) {
-          badge.textContent = total > 99 ? '99+' : String(total);
-          badge.classList.remove('d-none');
-        } else {
-          badge.classList.add('d-none');
-        }
-      });
-
-    } catch (err) {
-      console.error('home-msg:', err);
-    }
-  }
+  // badge الرسائل — يتحكم فيه home-msg.js
 
   /* ───────────────────────────────────────────────────────────
      [من home-msg.js] — عداد الNews الجthisدة منذ آخر زيارة
