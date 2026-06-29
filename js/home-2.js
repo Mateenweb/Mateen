@@ -14,9 +14,21 @@ const auth = getAuth(app);
 const db   = getFirestore(app);
 
 // ملء اسم المُرسَل إليه تلقائياً — ثابت "الإدارة العامة"
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   const ctName = document.getElementById('ctName');
-  if (ctName) ctName.value = 'الإدارة العامة';
+  if (!ctName) return;
+  const { onAuthStateChanged } = await import("https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js");
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) return;
+    const snap = await getDoc(doc(db, 'users', user.uid));
+    const role = snap.exists() ? snap.data().role : '';
+    if (role === 'admin') {
+      ctName.value = 'إدارة متين';
+      ctName.readOnly = true;
+    } else {
+      ctName.value = (snap.exists() && snap.data().name) ? snap.data().name : '';
+    }
+  });
 });
 
 // ── Load المستلمين من Firebase ──────────────
@@ -94,9 +106,12 @@ window.submitContactNew = async () => {
 
     // جيبي اسم المرسلة من Firestore أو استخدمي ما كتبته
     const senderSnap = await getDoc(doc(db,'users',user.uid));
-    const senderName = (senderSnap.exists() && senderSnap.data().name)
-      ? senderSnap.data().name
-      : (nameEl.value.trim() || user.email || '');
+    const senderRole2 = (senderSnap.exists() && senderSnap.data().role) || '';
+    const senderName = senderRole2 === 'admin'
+      ? 'إدارة متين'
+      : (senderSnap.exists() && senderSnap.data().name)
+        ? senderSnap.data().name
+        : (nameEl.value.trim() || user.email || '');
     const senderRole = (senderSnap.exists() && senderSnap.data().role) || 'student';
 
     // إنشاء أو Update المحادثة
