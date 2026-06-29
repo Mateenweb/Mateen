@@ -70,8 +70,15 @@ let msgUnsub        = null;
 let convUnsub       = null;   // unsubscribe for the  conversations listener
 let allUsers        = [];
 let allConvs        = [];
-const readConvIds   = new Set(); // المحادثات اللي اتقرأت locally
+// استرجع المحادثات المقروءة من sessionStorage
+const _storedRead = sessionStorage.getItem('readConvIds');
+const readConvIds = new Set(_storedRead ? JSON.parse(_storedRead) : []);
 window._readConvIds = readConvIds;
+
+function markConvRead(cid) {
+  readConvIds.add(cid);
+  sessionStorage.setItem('readConvIds', JSON.stringify([...readConvIds]));
+}
 let viewOnceMode    = false;
 
 // ── Auth ───────────────────────────────────────────────────────────────────
@@ -322,7 +329,7 @@ window.openConv = async (cid, otherId, otherName, otherRole) => {
   document.getElementById('convRole').style.color  = ROLE_COLORS[otherRole] || 'var(--text-mid)';
 
   // Mark as read - صفّر فوراً في Firestore أولاً عشان onSnapshot ييجي بقيمة 0
-  readConvIds.add(cid);
+  markConvRead(cid);
   await updateDoc(doc(db, 'conversations', cid), {
     [`unread.${currentUser.uid}`]: 0,
   }).catch(() => {});
