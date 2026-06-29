@@ -324,34 +324,7 @@ onAuthStateChanged(auth, async user => {
     ctName.readOnly = ctRole === 'admin';
   }
 
-  /* ───────────────────────────────────────────────────────────
-     [من home-msg.js] — عداد الNews الجthisدة منذ آخر زيارة
-     ─────────────────────────────────────────────────────────── */
-  const navNewsBadge     = document.getElementById('navNewsBadge');
-  const sidebarNewsBadge = document.getElementById('sidebarNewsBadge');
-  if (navNewsBadge || sidebarNewsBadge) {
-    try {
-      const lastSeenKey = `news_last_seen_${user.uid}`;
-      const lastSeen    = parseInt(localStorage.getItem(lastSeenKey) || '0');
-      const newsSnap = await getDocs(
-        query(collection(db, 'news'), orderBy('createdAt', 'desc'))
-      );
-      let count = 0;
-      newsSnap.forEach(d => {
-        const ts = d.data().createdAt;
-        if (ts && ts.toMillis() > lastSeen) count++;
-      });
-      [navNewsBadge, sidebarNewsBadge].forEach(badge => {
-        if (!badge) return;
-        if (count > 0) {
-          badge.textContent = count > 99 ? '99+' : String(count);
-          badge.classList.remove('d-none');
-        } else {
-          badge.classList.add('d-none');
-        }
-      });
-    } catch(e) { console.error('news-badge:', e); }
-  }
+  // عداد الأخبار والرسائل → home-msg.js يتولى الأمر
 });
 
 window.doLogout = () =>
