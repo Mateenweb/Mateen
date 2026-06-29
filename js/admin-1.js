@@ -205,7 +205,7 @@ function esc(s){ return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replac
 const ROLE_LABELS = {
   student:    '🤝 أصدقاء متين',
   mateen:     '📖 بنات متين',
-  teacher:    '👩‍🏫 معلمة',
+  teacher:    '🧕‍🏫 معلمة',
   supervisor: '🛡️ مشرفة',
   admin:      '👑 إدارة',
 };
