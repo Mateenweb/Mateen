@@ -64,17 +64,17 @@ window.showSidebarSetup = function showSidebarSetup() {
   wrap.classList.remove('d-none');
   wrap.innerHTML = `
     <div style="display:flex;flex-direction:column;gap:8px;padding:0 4px 8px;">
-      <button id="sb-notif-btn" onclick="obEnableNotif('sb')" style="width:100%;padding:9px;border:1px solid var(--gold);background:transparent;color:var(--green-dark);border-radius:10px;font-family:inherit;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
+      <button id="sb-notif-btn" onclick="obEnableNotif('sb')" style="width:100%;padding:9px;border:1px solid #e8c96a;background:transparent;color:#e8c96a;border-radius:10px;font-family:inherit;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
         <i class="ti ti-bell"></i> تفعيل الإشعارات
       </button>
-      <button onclick="obInstallApp('sb')" style="width:100%;padding:9px;border:1px solid var(--border);background:transparent;color:var(--text-mid);border-radius:10px;font-family:inherit;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
+      <button onclick="obInstallApp('sb')" style="width:100%;padding:9px;border:1px solid rgba(255,255,255,0.3);background:transparent;color:rgba(255,255,255,0.7);border-radius:10px;font-family:inherit;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
         <i class="ti ti-download"></i> تثبيت التطبيق
       </button>
     </div>`;
   // If الNotificationات مفعلة بالفعل
   if (Notification.permission === 'granted') {
     const btn = document.getElementById('sb-notif-btn');
-    if (btn) { btn.innerHTML = '<i class="ti ti-check"></i> الإشعارات مفعّلة'; btn.disabled = true; }
+    if (btn) { btn.innerHTML = '<i class="ti ti-check"></i> الإشعارات مفعّلة'; btn.style.color='#e8c96a'; btn.style.borderColor='#e8c96a'; btn.disabled = true; }
   }
 }
 
@@ -576,7 +576,3 @@ window.toggleNotifPermission = async function() {
 
 // حدّث حالة الزرار عند التحميل
 document.addEventListener('DOMContentLoaded', updateNotifBtn);
-// تأكد من تشغيل showSidebarSetup بعد تحميل الـ DOM
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => window.showSidebarSetup && window.showSidebarSetup());
-}
