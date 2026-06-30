@@ -207,6 +207,14 @@
           <a href="onboarding.html" style="margin-top:8px;border:1px solid var(--gold);border-radius:10px;justify-content:center;color:var(--green-dark) !important;"><i class="ti ti-sparkles"></i> دليل البرنامج</a>
 
           <div id="notifBtnWrap" class="d-none" style="padding:8px 8px 0"></div>
+
+          <button onclick="doLogout()" style="width:100%;margin-top:10px;padding:10px;border:1.5px solid #c0392b;background:rgba(192,57,43,0.07);color:#c0392b;border-radius:10px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
+            <i class="ti ti-logout"></i> تسجيل الخروج
+          </button>
+
+          <button id="sidebarDeleteAccBtn" onclick="requestAccountDeletion()" style="width:100%;margin-top:8px;padding:10px;border:1.5px solid var(--border);background:transparent;color:var(--text-mid);border-radius:10px;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
+            <i class="ti ti-trash"></i> طلب حذف الحساب
+          </button>
         </nav>
         <hr class="sidebar-divider mx-3 my-1"/>
       </div>
