@@ -110,7 +110,7 @@ window.showSidebarSetup = function showSidebarSetup() {
       <button id="sb-notif-btn" onclick="obEnableNotif('sb')" style="width:100%;padding:10px;border:none;background:var(--gold);color:#2c1a0e;border-radius:10px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
         <i class="ti ti-bell"></i> تفعيل الإشعارات
       </button>
-      <button onclick="obInstallApp('sb')" style="width:100%;padding:10px;border:1.5px solid var(--green-mid);background:var(--white);color:var(--green-dark);border-radius:10px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
+      <button onclick="showInstallChoiceModal()" style="width:100%;padding:10px;border:1.5px solid var(--green-mid);background:var(--white);color:var(--green-dark);border-radius:10px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
         <i class="ti ti-download"></i> تثبيت التطبيق
       </button>
     </div>`;
