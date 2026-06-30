@@ -1370,15 +1370,41 @@ footer {
   }
 }
 
-/* على الموبايل: اخفي زرار التثبيت والجولة لتوفير مساحة لزرار القائمة */
+/* على الموبايل: اسم البرنامج يختفي لتوفير مساحة */
 @media (max-width: 575px) {
   .nav-logo .nav-brand,
   .nav-logo .nav-tagline {
     display: none;
   }
+
+  /* قلل المسافات والـ padding بين كل أزرار الناف بار */
+  .nav-inner {
+    gap: 4px !important;
+    padding: 0 8px !important;
+  }
+  .nav-user-actions {
+    gap: 4px !important;
+  }
   #installAppBtn,
-  #sidebarFab,
-  button[onclick="startPageTour()"] {
-    display: none !important;
+  .sidebar-fab,
+  button[onclick="startPageTour()"],
+  .nav-msg-btn,
+  .nav-logout-btn {
+    padding: 5px 6px !important;
+    font-size: 14px !important;
+    min-width: unset !important;
+  }
+  .nav-profile-avatar {
+    width: 26px !important;
+    height: 26px !important;
+    font-size: 13px !important;
+  }
+  .logo-circle {
+    width: 32px !important;
+    height: 32px !important;
+  }
+  .nav-toggle {
+    padding: 2px !important;
+    font-size: 20px !important;
   }
 }
