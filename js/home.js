@@ -107,10 +107,10 @@ window.showSidebarSetup = function showSidebarSetup() {
   wrap.classList.remove('d-none');
   wrap.innerHTML = `
     <div style="display:flex;flex-direction:column;gap:8px;padding:0 4px 8px;">
-      <button id="sb-notif-btn" onclick="obEnableNotif('sb')" style="width:100%;padding:9px;border:1px solid var(--gold);background:transparent;color:var(--green-dark);border-radius:10px;font-family:inherit;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
+      <button id="sb-notif-btn" onclick="obEnableNotif('sb')" style="width:100%;padding:10px;border:1.5px solid #c9a227;background:#fdf6e3;color:#1a4a2e;border-radius:10px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
         <i class="ti ti-bell"></i> تفعيل الإشعارات
       </button>
-      <button onclick="obInstallApp('sb')" style="width:100%;padding:9px;border:1px solid var(--border);background:transparent;color:var(--text-mid);border-radius:10px;font-family:inherit;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
+      <button onclick="obInstallApp('sb')" style="width:100%;padding:10px;border:1.5px solid #8a6a52;background:#f7efe3;color:#5c3d2e;border-radius:10px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
         <i class="ti ti-download"></i> تثبيت التطبيق
       </button>
     </div>`;
