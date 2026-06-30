@@ -404,134 +404,14 @@
 <div class="section" id="subjectsSection">
   <div class="section-head">
     <div class="section-head-title"><i class="ti ti-books"></i> إدارة المواد الدراسية</div>
-    <button class="btn-add-row" onclick="openAddSubjectModal()"><i class="ti ti-plus"></i> مادة جديدة</button>
   </div>
-  <p style="font-size:12px;color:var(--text-mid);padding:0 16px;margin:8px 0">حددي لكل مادة الأقسام اللي تظهر فيها بالموقع.</p>
-  <div id="subjectsList" style="padding:12px 16px;display:flex;flex-direction:column;gap:8px">
-    <div style="color:var(--text-mid);font-size:13px;padding:20px;text-align:center"><i class="ti ti-loader spin"></i></div>
-  </div>
-</div>
-
-<!-- Modal إضافة/تعديل مادة -->
-<div id="addSubjectModal" class="modal-overlay" onclick="if(event.target===this)this.classList.remove('show')">
-  <div class="modal-box" style="width:min(94vw,420px)">
-    <div class="modal-head">
-      <span class="m-title" id="subjectModalTitle">إضافة مادة جديدة</span>
-      <button class="m-close" onclick="document.getElementById('addSubjectModal').classList.remove('show')">✕</button>
-    </div>
-    <div class="modal-body" style="display:flex;flex-direction:column;gap:14px">
-      <input id="newSubjectName" type="text" placeholder="اسم المادة (مثال: السيرة النبوية)" class="m-input-news"/>
-      <div style="display:flex;flex-direction:column;gap:8px">
-        <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer">
-          <input type="checkbox" id="subjFlagExams" checked style="width:16px;height:16px"/>
-          📝 الاختبارات
-        </label>
-        <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer">
-          <input type="checkbox" id="subjFlagAttendance" checked style="width:16px;height:16px"/>
-          📋 الحضور والغياب
-        </label>
-        <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer">
-          <input type="checkbox" id="subjFlagEnrollment" checked style="width:16px;height:16px"/>
-          👥 تسجيل الطالبات الجدد
-        </label>
-      </div>
-      <button onclick="submitAddSubject()" style="background:linear-gradient(135deg,#2c1a0e,#5c3d2e);color:#e8c96a;border:none;border-radius:10px;padding:10px;font-family:inherit;font-size:14px;cursor:pointer;font-weight:600;">
-        حفظ
-      </button>
-    </div>
+  <div style="padding:20px;text-align:center">
+    <p style="font-size:13px;color:var(--text-mid);margin-bottom:14px">إدارة المواد (الإضافة، الأقسام الظاهرة فيها، الحذف) أصبحت في صفحة المواد العلمية مباشرة.</p>
+    <a href="courses.html" style="display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#2c1a0e,#5c3d2e);color:#e8c96a;text-decoration:none;border-radius:10px;padding:10px 24px;font-size:14px;font-weight:600">
+      <i class="ti ti-external-link"></i> الذهاب لإدارة المواد
+    </a>
   </div>
 </div>
-
-<script type="module">
-import { loadSubjectsWithIds, addSubject, updateSubjectFlags, deleteSubject } from "../js/subjects.js";
-
-let _editingSubjectId = null;
-
-async function renderSubjectsList() {
-  const list = document.getElementById('subjectsList');
-  if (!list) return;
-  list.innerHTML = '<div style="color:var(--text-mid);font-size:13px;padding:20px;text-align:center"><i class="ti ti-loader spin"></i></div>';
-  const subjects = await loadSubjectsWithIds();
-  if (subjects.length === 0) {
-    list.innerHTML = '<div class="empty-state">لا توجد مواد بعد</div>';
-    return;
-  }
-  list.innerHTML = subjects.map(s => {
-    const tags = [];
-    if (s.inExams)      tags.push('📝 اختبارات');
-    if (s.inAttendance) tags.push('📋 حضور');
-    if (s.inEnrollment) tags.push('👥 تسجيل');
-    const tagsHtml = tags.length
-      ? tags.map(t => `<span style="font-size:11px;background:rgba(92,61,46,0.08);padding:2px 8px;border-radius:8px;color:var(--text-mid)">${t}</span>`).join(' ')
-      : '<span style="font-size:11px;color:#e74c3c">لا تظهر في أي قسم</span>';
-    return `
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:rgba(92,61,46,0.05);border-radius:10px;border:1px solid var(--border);gap:10px;flex-wrap:wrap">
-      <div style="display:flex;flex-direction:column;gap:4px;flex:1;min-width:140px">
-        <span style="font-size:14px;font-weight:600">${s.name}</span>
-        <div style="display:flex;gap:4px;flex-wrap:wrap">${tagsHtml}</div>
-      </div>
-      <div style="display:flex;gap:6px">
-        <button onclick="window.editSubject('${s.id}')" style="background:none;border:none;color:var(--gold-mid);cursor:pointer;padding:4px"><i class="ti ti-pencil"></i></button>
-        <button onclick="window.removeSubject('${s.id}')" style="background:none;border:none;color:#e74c3c;cursor:pointer;padding:4px"><i class="ti ti-trash"></i></button>
-      </div>
-    </div>`;
-  }).join('');
-  window._subjectsCacheLocal = subjects;
-}
-
-window.openAddSubjectModal = () => {
-  _editingSubjectId = null;
-  document.getElementById('subjectModalTitle').textContent = 'إضافة مادة جديدة';
-  document.getElementById('newSubjectName').value = '';
-  document.getElementById('subjFlagExams').checked = true;
-  document.getElementById('subjFlagAttendance').checked = true;
-  document.getElementById('subjFlagEnrollment').checked = true;
-  document.getElementById('addSubjectModal').classList.add('show');
-};
-
-window.editSubject = (id) => {
-  const s = (window._subjectsCacheLocal || []).find(x => x.id === id);
-  if (!s) return;
-  _editingSubjectId = id;
-  document.getElementById('subjectModalTitle').textContent = 'تعديل المادة';
-  document.getElementById('newSubjectName').value = s.name;
-  document.getElementById('subjFlagExams').checked = !!s.inExams;
-  document.getElementById('subjFlagAttendance').checked = !!s.inAttendance;
-  document.getElementById('subjFlagEnrollment').checked = !!s.inEnrollment;
-  document.getElementById('addSubjectModal').classList.add('show');
-};
-
-window.submitAddSubject = async () => {
-  const name = document.getElementById('newSubjectName').value.trim();
-  if (!name) { alert('من فضلك اكتبي اسم المادة'); return; }
-  const flags = {
-    inExams: document.getElementById('subjFlagExams').checked,
-    inAttendance: document.getElementById('subjFlagAttendance').checked,
-    inEnrollment: document.getElementById('subjFlagEnrollment').checked,
-  };
-  try {
-    if (_editingSubjectId) {
-      await updateSubjectFlags(_editingSubjectId, flags);
-    } else {
-      await addSubject(name, flags);
-    }
-    document.getElementById('addSubjectModal').classList.remove('show');
-    renderSubjectsList();
-  } catch(e) {
-    alert('حدث خطأ: ' + e.message);
-  }
-};
-
-window.removeSubject = async (id) => {
-  if (!confirm('متأكدة من حذف المادة دي؟')) return;
-  await deleteSubject(id);
-  renderSubjectsList();
-};
-
-document.addEventListener('DOMContentLoaded', () => {
-  setTimeout(renderSubjectsList, 800);
-});
-</script>
 
 <!-- Modal إضافة/تعديل خبر (Admin) -->
 <div id="adminNewsModal" class="modal-overlay" onclick="if(event.target===this)this.classList.remove('show')">
