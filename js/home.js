@@ -107,17 +107,22 @@ window.showSidebarSetup = function showSidebarSetup() {
   wrap.classList.remove('d-none');
   wrap.innerHTML = `
     <div style="display:flex;flex-direction:column;gap:8px;padding:0 4px 8px;">
-      <button id="sb-notif-btn" onclick="obEnableNotif('sb')" style="width:100%;padding:10px;border:1.5px solid #c9a227;background:#fdf6e3;color:#1a4a2e;border-radius:10px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
+      <button id="sb-notif-btn" onclick="obEnableNotif('sb')" style="width:100%;padding:10px;border:none;background:var(--gold);color:#2c1a0e;border-radius:10px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
         <i class="ti ti-bell"></i> تفعيل الإشعارات
       </button>
-      <button onclick="obInstallApp('sb')" style="width:100%;padding:10px;border:1.5px solid #8a6a52;background:#f7efe3;color:#5c3d2e;border-radius:10px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
+      <button onclick="obInstallApp('sb')" style="width:100%;padding:10px;border:1.5px solid var(--gold-light);background:rgba(232,201,106,0.12);color:var(--gold-light);border-radius:10px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
         <i class="ti ti-download"></i> تثبيت التطبيق
       </button>
     </div>`;
   // If الNotificationات مفعلة بالفعل
   if (Notification.permission === 'granted') {
     const btn = document.getElementById('sb-notif-btn');
-    if (btn) { btn.innerHTML = '<i class="ti ti-check"></i> الإشعارات مفعّلة'; btn.disabled = true; }
+    if (btn) {
+      btn.innerHTML = '<i class="ti ti-check"></i> الإشعارات مفعّلة';
+      btn.disabled = true;
+      btn.style.background = 'rgba(255,255,255,0.12)';
+      btn.style.color = '#fff';
+    }
   }
 }
 
