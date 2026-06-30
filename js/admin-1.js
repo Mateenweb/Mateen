@@ -9,7 +9,7 @@ import { getFirestore, collection, addDoc, deleteDoc, doc,
 import { FIREBASE_CONFIG } from "./config.js";
 import { exportWord, exportPdf } from "./export.js";
 import { fullDeleteUser } from "./delete-account.js";
-import { loadSubjects } from "./subjects.js";
+import { loadSubjectsFor } from "./subjects.js";
 
 const app  = getApps().length ? getApp() : initializeApp(FIREBASE_CONFIG);
 const auth = getAuth(app);
@@ -385,7 +385,7 @@ window.confirmLinkModal = async (studentId) => {
   // فعّل الحساب + التحاق تلقائي بكل Academic subjects
   await updateDoc(doc(db, 'users', uid), {
     status: 'active',
-    enrolledSubjects: await loadSubjects(),
+    enrolledSubjects: await loadSubjectsFor('inEnrollment'),
     ...(studentId ? { linkedStudentId: studentId } : {})
   });
 
