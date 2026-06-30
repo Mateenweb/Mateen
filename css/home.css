@@ -418,6 +418,7 @@ body {
 .sidebar-offcanvas {
   background-color: var(--white) !important;
   color: var(--text-dark) !important;
+  width: 300px;
 }
 #mainSidebar .offcanvas-header {
   background: var(--green-dark) !important;
@@ -1275,9 +1276,6 @@ footer {
   border-top: 1px solid var(--border) !important;
 }
 
-.sidebar-offcanvas {
-  width: 280px !important;
-}
 .sidebar-offcanvas .offcanvas-body {
   display: flex !important;
   flex-direction: column !important;
