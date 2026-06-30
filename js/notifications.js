@@ -168,23 +168,17 @@ function startListening(userId) {
 
   // ── تحديث دوت الرسائل في الناف ─────────────────────
   function updateMsgBadge(snap) {
-    let total = 0;
-    snap.docs.forEach(d => {
-      const data = d.data();
-      // اقرأ من flat أولاً، لو مش موجود اقرأ nested
-      const flat   = Number(data[`unread.${userId}`] ?? 0);
-      const nested = Number(data.unread?.[userId] ?? 0);
-      total += Math.max(flat, nested);
+    const readIds = new Set(JSON.parse(sessionStorage.getItem('readConvIds') || '[]'));
+    const hasUnread = snap.docs.some(d => {
+      // لو المحادثة اتفتحت محلياً → صفّر بغض النظر عن Firestore cache
+      if (readIds.has(d.id)) return false;
+      const unread = d.data().unread?.[userId] ?? 0;
+      return Number(unread) > 0;
     });
     ['navMsgBadge','sidebarMsgBadge'].forEach(id => {
       const el = document.getElementById(id);
       if (!el) return;
-      if (total > 0) {
-        el.textContent = total > 9 ? '9+' : total;
-        el.classList.remove('d-none');
-      } else {
-        el.classList.add('d-none');
-      }
+      hasUnread ? el.classList.remove('d-none') : el.classList.add('d-none');
     });
   }
 

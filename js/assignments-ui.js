@@ -22,14 +22,18 @@ let _currentUserRole = null;
 let _currentUserSubjects = [];
 let _currentUserId = null;
 
+let _resolveRoleReady;
+const roleReady = new Promise(res => { _resolveRoleReady = res; });
+
 onAuthStateChanged(auth, async (user) => {
-  if (!user) return;
+  if (!user) { _resolveRoleReady(); return; }
   _currentUserId = user.uid;
   const snap = await getDoc(doc(db, 'users', user.uid));
   if (snap.exists()) {
     _currentUserRole = snap.data().role;
     _currentUserSubjects = snap.data().enrolledSubjects || [];
   }
+  _resolveRoleReady();
 });
 
 function canManageAssignments(course) {
@@ -52,6 +56,7 @@ async function uploadFile(file) {
 
 // ── HTML قسم الواجبات جوه كارت المادة ─────────────────────────
 export async function renderAssignmentsSection(materialId, course, containerId) {
+  await roleReady;
   const container = document.getElementById(containerId);
   if (!container) return;
 
