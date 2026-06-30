@@ -294,7 +294,7 @@ onAuthStateChanged(auth, async user => {
   const role    = snap.exists() ? snap.data().role    : 'student';
   const subject = snap.exists() ? snap.data().subject || '' : '';
   console.log('👤 User Role:', role); // DEBUG
-  const name = user.displayName || user.email.split('@')[0];
+  const name = (snap.exists() && snap.data().name) || user.displayName || user.email.split('@')[0];
 
   const sidebarNameEl = document.getElementById('sidebarName');
   if (sidebarNameEl) sidebarNameEl.textContent = 'مرحباً، ' + name;
