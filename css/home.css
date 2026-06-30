@@ -1369,3 +1369,11 @@ footer {
     justify-content: center;
   }
 }
+
+/* على الموبايل: اخفي اسم البرنامج بالناف بار عشان تتوفر مساحة لزرار القائمة */
+@media (max-width: 575px) {
+  .nav-logo .nav-brand,
+  .nav-logo .nav-tagline {
+    display: none;
+  }
+}
