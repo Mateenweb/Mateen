@@ -9,6 +9,7 @@ import { getFirestore, collection, addDoc, deleteDoc, doc,
 import { FIREBASE_CONFIG } from "./config.js";
 import { exportWord, exportPdf } from "./export.js";
 import { fullDeleteUser } from "./delete-account.js";
+import { loadSubjects } from "./subjects.js";
 
 const app  = getApps().length ? getApp() : initializeApp(FIREBASE_CONFIG);
 const auth = getAuth(app);
@@ -370,8 +371,7 @@ window.selectLinkStudent = id => {
   btn.style.opacity = '1';
 };
 
-// كل Academic subjects — تتسجل فيها بنت متين أوتوماتيك بعد القبول
-const ALL_SUBJECTS = ['التفسير', 'الفقه', 'العقيدة', 'الحديث', 'مقرأة متين'];
+// كل Academic subjects — تتسجل فيها بنت متين أوتوماتيك بعد القبول (Dynamic من Firestore)
 
 window.confirmLinkModal = async (studentId) => {
   if (!_pendingApproveId) return;
@@ -385,7 +385,7 @@ window.confirmLinkModal = async (studentId) => {
   // فعّل الحساب + التحاق تلقائي بكل Academic subjects
   await updateDoc(doc(db, 'users', uid), {
     status: 'active',
-    enrolledSubjects: ALL_SUBJECTS,
+    enrolledSubjects: await loadSubjects(),
     ...(studentId ? { linkedStudentId: studentId } : {})
   });
 
