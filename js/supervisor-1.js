@@ -5,7 +5,7 @@ import { getFirestore, collection, doc, getDoc, getDocs, onSnapshot, query, wher
 import { exportWord, exportPdf } from "./export.js";
 import { FIREBASE_CONFIG } from "./config.js";
 import { fullDeleteUser } from "./delete-account.js";
-import { loadSubjects } from "./subjects.js";
+import { loadSubjectsFor } from "./subjects.js";
 
 const app  = getApps().length ? getApp() : initializeApp(FIREBASE_CONFIG);
 const auth = getAuth(app);
@@ -154,7 +154,7 @@ window.confirmApprove = async (doLink) => {
   modal.classList.remove('show');
 
   // فعّل الحساب
-  await updateDoc(doc(db,'users',id), {status:'active', enrolledSubjects: await loadSubjects()});
+  await updateDoc(doc(db,'users',id), {status:'active', enrolledSubjects: await loadSubjectsFor('inEnrollment')});
 
   // ربط اختياري
   if (doLink) {
