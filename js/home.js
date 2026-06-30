@@ -42,17 +42,11 @@ onSnapshot(query(collection(db, 'events'), orderBy('order')), snap => {
 // ── آخر الإعلانات العامة (تظهر للجميع بدون تسجيل دخول) ──────────────
 onSnapshot(query(collection(db, 'news'), orderBy('createdAt', 'desc'), limit(6)), snap => {
   const section = document.getElementById('publicNewsSection');
-  const divider = document.getElementById('publicNewsDivider');
   const list    = document.getElementById('publicNewsList');
   if (!section || !list) return;
   const publicDocs = snap.docs.filter(d => (d.data().visibility || 'all') !== 'members');
-  if (publicDocs.length === 0) {
-    section.style.display = 'none';
-    if (divider) divider.style.display = 'none';
-    return;
-  }
+  if (publicDocs.length === 0) { section.style.display = 'none'; return; }
   section.style.display = 'block';
-  if (divider) divider.style.display = 'block';
   list.innerHTML = publicDocs.map(d => {
     const n = d.data();
     const date = n.createdAt ? new Date(n.createdAt.seconds * 1000).toLocaleDateString('ar-EG', { year:'numeric', month:'long', day:'numeric' }) : '';
