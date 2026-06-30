@@ -246,6 +246,20 @@
         <label style="font-size:13px;color:var(--text-dark);display:block;margin-bottom:6px">المحاور الرئيسية (سطر لكل محور)</label>
         <textarea id="sbjTopics" placeholder="مقدمات في المادة&#10;الوحدة الأولى&#10;الوحدة الثانية" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:14px;box-sizing:border-box;resize:vertical;height:100px;"></textarea>
       </div>
+      <div>
+        <label style="font-size:13px;color:var(--text-dark);display:block;margin-bottom:6px">تظهر في الأقسام التالية</label>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer">
+            <input type="checkbox" id="sbjFlagExams" checked style="width:16px;height:16px"/> 📝 الاختبارات
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer">
+            <input type="checkbox" id="sbjFlagAttendance" checked style="width:16px;height:16px"/> 📋 الحضور والغياب
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer">
+            <input type="checkbox" id="sbjFlagEnrollment" checked style="width:16px;height:16px"/> 👥 تسجيل الطالبات الجدد
+          </label>
+        </div>
+      </div>
       <div id="addSubjectErr" style="display:none;color:#c0392b;font-size:13px;"></div>
       <button id="addSubjectSubmit" onclick="window.submitNewSubject()" style="background:var(--green-dark);color:white;border:none;padding:12px;border-radius:10px;font-family:inherit;font-size:15px;cursor:pointer;font-weight:700;">
         <i class="ti ti-circle-plus"></i> إضافة المادة
@@ -337,6 +351,20 @@
       <div>
         <label style="font-size:13px;color:var(--text-dark);display:block;margin-bottom:6px">المحاور الرئيسية (سطر لكل محور)</label>
         <textarea id="editSbjTopics" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:14px;box-sizing:border-box;resize:vertical;height:100px;"></textarea>
+      </div>
+      <div>
+        <label style="font-size:13px;color:var(--text-dark);display:block;margin-bottom:6px">تظهر في الأقسام التالية</label>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer">
+            <input type="checkbox" id="editSbjFlagExams" style="width:16px;height:16px"/> 📝 الاختبارات
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer">
+            <input type="checkbox" id="editSbjFlagAttendance" style="width:16px;height:16px"/> 📋 الحضور والغياب
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer">
+            <input type="checkbox" id="editSbjFlagEnrollment" style="width:16px;height:16px"/> 👥 تسجيل الطالبات الجدد
+          </label>
+        </div>
       </div>
       <div id="editSubjectErr" style="display:none;color:#c0392b;font-size:13px;"></div>
       <button id="editSubjectSubmit" onclick="window.submitEditSubject()" style="background:var(--green-dark);color:white;border:none;padding:12px;border-radius:10px;font-family:inherit;font-size:15px;cursor:pointer;font-weight:700;">
