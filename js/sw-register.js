@@ -210,3 +210,86 @@ window.triggerInstall = async () => {
     showInstallBanner();
   }
 };
+
+// ── اختيار نوع الجهاز للتثبيت ──────────────────────────────────────────
+window.showInstallChoiceModal = () => {
+  if (document.getElementById('installChoiceModal')) return;
+
+  const modal = document.createElement('div');
+  modal.id = 'installChoiceModal';
+  modal.innerHTML = `
+    <div style="position:fixed;inset:0;background:rgba(44,26,14,0.6);z-index:10000;display:flex;align-items:center;justify-content:center;"
+      onclick="if(event.target===this) this.remove()">
+      <div style="background:#fdfaf3;border-radius:18px;padding:24px;max-width:340px;width:90vw;
+        box-shadow:0 10px 40px rgba(0,0,0,0.3);font-family:'Noto Naskh Arabic',serif;direction:rtl;border:1.5px solid #d8c9a3;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+          <span style="font-weight:700;font-size:16px;color:#2c1a0e;">تثبيت متين على جهازك</span>
+          <button onclick="document.getElementById('installChoiceModal').remove()" style="background:none;border:none;font-size:18px;color:#999;cursor:pointer;">✕</button>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <button onclick="document.getElementById('installChoiceModal').remove();handleInstallChoice('android')"
+            style="display:flex;align-items:center;gap:10px;background:#f5efe0;border:1px solid #d8c9a3;border-radius:12px;padding:12px 16px;cursor:pointer;font-family:inherit;font-size:14px;color:#2c1a0e;">
+            <span style="font-size:22px;">🤖</span> أندرويد
+          </button>
+          <button onclick="document.getElementById('installChoiceModal').remove();handleInstallChoice('ios')"
+            style="display:flex;align-items:center;gap:10px;background:#f5efe0;border:1px solid #d8c9a3;border-radius:12px;padding:12px 16px;cursor:pointer;font-family:inherit;font-size:14px;color:#2c1a0e;">
+            <span style="font-size:22px;">🍎</span> آيفون
+          </button>
+          <button onclick="document.getElementById('installChoiceModal').remove();handleInstallChoice('desktop')"
+            style="display:flex;align-items:center;gap:10px;background:#f5efe0;border:1px solid #d8c9a3;border-radius:12px;padding:12px 16px;cursor:pointer;font-family:inherit;font-size:14px;color:#2c1a0e;">
+            <span style="font-size:22px;">💻</span> كمبيوتر
+          </button>
+        </div>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+};
+
+window.handleInstallChoice = (type) => {
+  if (type === 'ios') {
+    showIOSBanner();
+    return;
+  }
+  // android / desktop
+  if (deferredInstallPrompt) {
+    window.installApp();
+  } else {
+    showManualInstallSteps(type);
+  }
+};
+
+function showManualInstallSteps(type) {
+  if (document.getElementById('manualInstallBanner')) return;
+  const steps = type === 'android'
+    ? [
+        ['⋮', 'اضغطي على القائمة (⋮) أعلى المتصفح'],
+        ['➕', 'اختاري "تثبيت التطبيق" أو "إضافة إلى الشاشة الرئيسية"'],
+        ['✅', 'اضغطي "تثبيت" وتم!']
+      ]
+    : [
+        ['⋮', 'اضغطي على القائمة (⋮) أو أيقونة التثبيت بجانب شريط العنوان'],
+        ['➕', 'اختاري "تثبيت متين العلمي"'],
+        ['✅', 'اضغطي "تثبيت" وتم!']
+      ];
+
+  const banner = document.createElement('div');
+  banner.id = 'manualInstallBanner';
+  banner.innerHTML = `
+    <div style="position:fixed;bottom:0;left:0;right:0;background:linear-gradient(135deg,#2c1a0e,#5c3d2e);
+      color:#e8c96a;border-top:2px solid #c9a227;padding:16px 20px 24px;box-shadow:0 -6px 30px rgba(0,0,0,0.4);
+      z-index:9999;font-family:'Noto Naskh Arabic',serif;direction:rtl;">
+      <button onclick="document.getElementById('manualInstallBanner').remove()" style="position:absolute;top:10px;left:14px;background:none;border:none;color:rgba(255,255,255,0.5);cursor:pointer;font-size:20px;line-height:1;">✕</button>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+        <img src="/Mateen/logo.png" style="width:40px;height:40px;border-radius:50%;border:1.5px solid #c9a227;">
+        <div style="font-weight:700;font-size:15px;">أضيفي متين لشاشتك الرئيسية</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        ${steps.map(([icon,text]) => `
+          <div style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,0.07);border-radius:10px;padding:10px 12px;">
+            <span style="font-size:22px;">${icon}</span>
+            <span style="font-size:13px;">${text}</span>
+          </div>`).join('')}
+      </div>
+    </div>`;
+  document.body.appendChild(banner);
+}
