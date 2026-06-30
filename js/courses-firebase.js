@@ -652,6 +652,9 @@ window.submitNewSubject = async () => {
     await addDoc(collection(db, 'subjects'), {
       name, iconData, iconUrl, color: colorVal, desc, meetings, weeks, level,
       topics: topics.split('\n').filter(Boolean),
+      inExams: document.getElementById('sbjFlagExams').checked,
+      inAttendance: document.getElementById('sbjFlagAttendance').checked,
+      inEnrollment: document.getElementById('sbjFlagEnrollment').checked,
       addedAt: Date.now(),
       addedBy: auth.currentUser.email,
     });
@@ -697,6 +700,9 @@ window.openEditSubjectModal = (id) => {
   document.getElementById('editSbjLevel').value = s.level || '';
   const topics = Array.isArray(s.topics) ? s.topics.join('\n') : (s.topics || '');
   document.getElementById('editSbjTopics').value = topics;
+  document.getElementById('editSbjFlagExams').checked = s.inExams !== false;
+  document.getElementById('editSbjFlagAttendance').checked = s.inAttendance !== false;
+  document.getElementById('editSbjFlagEnrollment').checked = s.inEnrollment !== false;
   document.getElementById('editSubjectErr').style.display = 'none';
   document.getElementById('editSubjectModal').style.display = 'flex';
 };
@@ -725,6 +731,9 @@ window.submitEditSubject = async () => {
     await updateDoc(doc(db, 'subjects', id), {
       name, iconData, iconUrl, color: colorVal, desc, meetings, weeks, level,
       topics: topics.split('\n').filter(Boolean),
+      inExams: document.getElementById('editSbjFlagExams').checked,
+      inAttendance: document.getElementById('editSbjFlagAttendance').checked,
+      inEnrollment: document.getElementById('editSbjFlagEnrollment').checked,
     });
     document.getElementById('editSubjectModal').style.display = 'none';
   } catch(e) {
