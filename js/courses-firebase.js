@@ -5,6 +5,12 @@ import { getAuth, onAuthStateChanged }
 import { getFirestore, collection, query, orderBy, onSnapshot, addDoc, getDoc, doc, updateDoc, deleteDoc, arrayUnion, getDocs, setDoc }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 import { FIREBASE_CONFIG } from "./config.js";
+import { renderAssignmentsSection } from "./assignments-ui.js";
+window.refreshAssignmentsFor = (materialId, course) => {
+  document.querySelectorAll(`[data-asg-container="${materialId}"]`).forEach(el => {
+    renderAssignmentsSection(materialId, course, el.id);
+  });
+};
 
 const app  = getApps().length ? getApp() : initializeApp(FIREBASE_CONFIG);
 const auth = getAuth(app);
@@ -92,6 +98,7 @@ function matCardHTML(m) {
           <div style="font-size:12px;color:var(--gold-dark)">${LINK_LABELS[detectLinkType(m.url)]}</div>
         </a>
         ${editBtns}
+        <div id="asg-${m.id}" data-asg-container="${m.id}"></div>
       </div>
     </div>`;
 }
@@ -114,6 +121,7 @@ function renderMats(mats) {
   } else {
     section.style.display = 'block';
     container.innerHTML = mats.map(matCardHTML).join('');
+    mats.forEach(m => renderAssignmentsSection(m.id, m.course, 'asg-' + m.id));
   }
 }
 
@@ -165,6 +173,7 @@ function renderModalMats() {
       <div style="display:flex;flex-direction:column;gap:8px;">
         ${subjMats.map(matCardHTML).join('')}
       </div>`;
+    subjMats.forEach(m => renderAssignmentsSection(m.id, m.course, 'asg-' + m.id));
   });
 }
 
