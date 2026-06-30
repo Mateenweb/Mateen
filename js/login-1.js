@@ -331,6 +331,23 @@ window.doReset = async () => {
   try {
     await sendPasswordResetEmail(auth, email);
     showSuccess('تم الإرسال ✅', `أُرسل رابط الاستعادة إلى\n${email}`);
+
+    // إشعار للإدارة بطلب استعادة كلمة المرور
+    try {
+      const adminSnap = await getDocs(query(collection(db, 'users'), where('role', '==', 'admin')));
+      const notifPromises = adminSnap.docs.map(adminDoc =>
+        addDoc(collection(db, 'userNotifications', adminDoc.id, 'items'), {
+          type:      'password_reset_request',
+          title:     '🔑 طلب استعادة كلمة المرور',
+          body:      `تم إرسال رابط استعادة كلمة المرور إلى ${email}`,
+          url:       'admin.html',
+          read:      false,
+          createdAt: serverTimestamp(),
+        })
+      );
+      await Promise.all(notifPromises);
+    } catch(notifErr) { console.error('reset notif error:', notifErr); }
+
   } catch(e) {
     showError(ERRORS[e.code] || 'تعذر الإرسال');
     setLoading('resetBtn', false, '<i class="ti ti-send"></i> إرسال رابط الاستعادة');
