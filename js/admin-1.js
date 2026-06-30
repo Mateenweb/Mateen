@@ -34,6 +34,8 @@ onAuthStateChanged(auth, async user => {
     loadPendingAccounts();
     loadAllUsers();
     document.getElementById('allUsersSection').style.display = 'block';
+    document.getElementById('deletionRequestsSection').style.display = 'block';
+    loadDeletionRequests();
   }
   if (role !== 'admin') {
     document.getElementById('studentsSection').style.display = 'none';
@@ -1285,4 +1287,72 @@ window.userFieldUpdate = async (uid, field, value) => {
     console.error('userFieldUpdate error:', e);
     alert('حدث خطأ أثناء الحفظ');
   }
+};
+
+// ── طلبات حذف الحسابات ────────────────────────────────────
+async function loadDeletionRequests() {
+  const container = document.getElementById('deletionRequestsContainer');
+  const badge     = document.getElementById('deletionBadge');
+  try {
+    const snap = await getDocs(query(
+      collection(db, 'deletionRequests'),
+      where('status', '==', 'pending')
+    ));
+
+    if (snap.empty) {
+      container.innerHTML = '<div class="empty-state"><i class="ti ti-inbox"></i> لا توجد طلبات حذف حالياً</div>';
+      badge.style.display = 'none';
+      return;
+    }
+
+    badge.textContent = snap.size;
+    badge.style.display = 'inline-block';
+
+    const roleLabels = { mateen:'بنت متين', student:'طالبة عادية', teacher:'معلمة', supervisor:'مشرفة', admin:'إدارة' };
+
+    container.innerHTML = snap.docs.map(d => {
+      const r = { id: d.id, ...d.data() };
+      const date = r.requestedAt ? new Date(r.requestedAt.seconds*1000).toLocaleDateString('ar-EG') : '—';
+      return `
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border:1px solid var(--border);border-radius:12px;margin-bottom:10px;background:var(--white)">
+          <div>
+            <div style="font-weight:700;color:var(--green-dark)">${esc(r.name||'—')}</div>
+            <div style="font-size:12px;color:var(--text-mid)">${esc(r.email||'')} · ${roleLabels[r.role]||r.role||''} · طلبت بتاريخ ${date}</div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button onclick="approveDeletion('${r.id}','${r.uid}')"
+              style="background:#c0392b;color:#fff;border:none;border-radius:8px;padding:7px 16px;font-family:inherit;cursor:pointer;font-size:13px">
+              <i class="ti ti-trash"></i> موافقة وحذف
+            </button>
+            <button onclick="rejectDeletion('${r.id}')"
+              style="background:var(--beige2);color:var(--text-dark);border:1px solid var(--border);border-radius:8px;padding:7px 16px;font-family:inherit;cursor:pointer;font-size:13px">
+              رفض
+            </button>
+          </div>
+        </div>`;
+    }).join('');
+  } catch(e) {
+    console.error('loadDeletionRequests:', e);
+    container.innerHTML = '<div class="empty-state"><i class="ti ti-alert-triangle"></i> حدث خطأ أثناء التحميل</div>';
+  }
+}
+
+window.approveDeletion = async (reqId, uid) => {
+  if (!confirm('سيتم حذف الحساب وكل بياناته نهائياً. متأكدة؟')) return;
+  try {
+    await fullDeleteUser(uid);
+    await deleteDoc(doc(db, 'deletionRequests', reqId));
+    showToast('✅ تم حذف الحساب بناءً على الطلب');
+    loadDeletionRequests();
+  } catch(e) {
+    console.error('approveDeletion:', e);
+    alert('حدث خطأ أثناء الحذف');
+  }
+};
+
+window.rejectDeletion = async (reqId) => {
+  if (!confirm('رفض طلب الحذف؟')) return;
+  await updateDoc(doc(db, 'deletionRequests', reqId), { status: 'rejected' });
+  showToast('تم رفض الطلب');
+  loadDeletionRequests();
 };
