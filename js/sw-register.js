@@ -199,3 +199,14 @@ function showIOSBanner() {
   `;
   document.body.appendChild(banner);
 }
+
+// ── تثبيت بالضغط على اللوجو ──────────────────────────────────────────────
+window.triggerInstall = async () => {
+  if (deferredInstallPrompt) {
+    deferredInstallPrompt.prompt();
+    const { outcome } = await deferredInstallPrompt.userChoice;
+    if (outcome === 'accepted') deferredInstallPrompt = null;
+  } else {
+    showInstallBanner();
+  }
+};
