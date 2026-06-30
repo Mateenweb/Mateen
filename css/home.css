@@ -425,7 +425,18 @@ body {
   border-bottom: 1px solid rgba(201,162,39,0.3) !important;
 }
 #mainSidebar .offcanvas-body {
-  background: var(--white) !important;
+  background: var(--beige) !important;
+}
+#mainSidebar .offcanvas-body,
+#mainSidebar .offcanvas-body * {
+  --bs-offcanvas-bg: var(--beige);
+}
+#sidebar-user,
+#sidebar-user.show-user,
+.sidebar-nav,
+#notifBtnWrap,
+.sidebar-footer {
+  background: var(--beige) !important;
 }
 #mainSidebar .sidebar-nav {
   overflow-y: auto;
