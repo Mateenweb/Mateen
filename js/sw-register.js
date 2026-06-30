@@ -15,7 +15,23 @@ if ('serviceWorker' in navigator) {
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   deferredInstallPrompt = e;
+  // أظهر زرار التثبيت فوراً
+  const installBtn = document.getElementById('installAppBtn');
+  if (installBtn) installBtn.style.display = 'flex';
   showInstallBanner();
+});
+
+// أظهر الزرار فوراً لو الموقع مش مثبّت بالفعل (بدون انتظار beforeinstallprompt)
+window.addEventListener('load', () => {
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches
+    || window.navigator.standalone;
+  if (!isStandalone) {
+    const installBtn = document.getElementById('installAppBtn');
+    if (installBtn) installBtn.style.display = 'flex';
+    if (!localStorage.getItem('installBannerDismissed')) {
+      setTimeout(showInstallBanner, 4000);
+    }
+  }
 });
 
 function showInstallBanner() {
