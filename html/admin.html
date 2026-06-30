@@ -400,6 +400,81 @@
   </div>
 </div>
 
+<!-- ── قسم إدارة المواد الدراسية ── -->
+<div class="section" id="subjectsSection">
+  <div class="section-head">
+    <div class="section-head-title"><i class="ti ti-books"></i> إدارة المواد الدراسية</div>
+    <button class="btn-add-row" onclick="openAddSubjectModal()"><i class="ti ti-plus"></i> مادة جديدة</button>
+  </div>
+  <div id="subjectsList" style="padding:12px 16px;display:flex;flex-direction:column;gap:8px">
+    <div style="color:var(--text-mid);font-size:13px;padding:20px;text-align:center"><i class="ti ti-loader spin"></i></div>
+  </div>
+</div>
+
+<!-- Modal إضافة مادة -->
+<div id="addSubjectModal" class="modal-overlay" onclick="if(event.target===this)this.classList.remove('show')">
+  <div class="modal-box" style="width:min(94vw,400px)">
+    <div class="modal-head">
+      <span class="m-title">إضافة مادة جديدة</span>
+      <button class="m-close" onclick="document.getElementById('addSubjectModal').classList.remove('show')">✕</button>
+    </div>
+    <div class="modal-body" style="display:flex;flex-direction:column;gap:12px">
+      <input id="newSubjectName" type="text" placeholder="اسم المادة (مثال: السيرة النبوية)" class="m-input-news"/>
+      <button onclick="submitAddSubject()" style="background:linear-gradient(135deg,#2c1a0e,#5c3d2e);color:#e8c96a;border:none;border-radius:10px;padding:10px;font-family:inherit;font-size:14px;cursor:pointer;font-weight:600;">
+        إضافة
+      </button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { loadSubjectsWithIds, addSubject, deleteSubject } from "../js/subjects.js";
+
+async function renderSubjectsList() {
+  const list = document.getElementById('subjectsList');
+  if (!list) return;
+  list.innerHTML = '<div style="color:var(--text-mid);font-size:13px;padding:20px;text-align:center"><i class="ti ti-loader spin"></i></div>';
+  const subjects = await loadSubjectsWithIds();
+  if (subjects.length === 0) {
+    list.innerHTML = '<div class="empty-state">لا توجد مواد بعد</div>';
+    return;
+  }
+  list.innerHTML = subjects.map(s => `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:rgba(92,61,46,0.05);border-radius:10px;border:1px solid var(--border)">
+      <span style="font-size:14px;font-weight:600">${s.name}</span>
+      <button onclick="window.removeSubject('${s.id}')" style="background:none;border:none;color:#e74c3c;cursor:pointer;padding:4px"><i class="ti ti-trash"></i></button>
+    </div>
+  `).join('');
+}
+
+window.openAddSubjectModal = () => {
+  document.getElementById('newSubjectName').value = '';
+  document.getElementById('addSubjectModal').classList.add('show');
+};
+
+window.submitAddSubject = async () => {
+  const name = document.getElementById('newSubjectName').value.trim();
+  if (!name) { alert('من فضلك اكتبي اسم المادة'); return; }
+  try {
+    await addSubject(name);
+    document.getElementById('addSubjectModal').classList.remove('show');
+    renderSubjectsList();
+  } catch(e) {
+    alert('حدث خطأ: ' + e.message);
+  }
+};
+
+window.removeSubject = async (id) => {
+  if (!confirm('متأكدة من حذف المادة دي؟')) return;
+  await deleteSubject(id);
+  renderSubjectsList();
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+  setTimeout(renderSubjectsList, 800);
+});
+</script>
+
 <!-- Modal إضافة/تعديل خبر (Admin) -->
 <div id="adminNewsModal" class="modal-overlay" onclick="if(event.target===this)this.classList.remove('show')">
   <div class="modal-box" style="width:min(94vw,520px)">
