@@ -440,6 +440,9 @@ body {
 
 /* Mobile offcanvas — يملأ الـ panel كاملاً */
 @media (max-width: 991px) {
+  #installAppBtn span { display: none; }
+  #installAppBtn { padding: 6px 8px; }
+  .nav-toggle { flex-shrink: 0; order: 99; }
   #mainSidebar {
     width: 82% !important;
     max-width: 300px !important;
@@ -1352,3 +1355,17 @@ footer {
 .hero-anim-p      { opacity:0; animation: heroFadeUp  0.6s ease 0.95s forwards; }
 .hero-anim-btns   { opacity:0; animation: heroFadeUp  0.6s ease 1.15s forwards; }
 
+
+/* تأكد إن زرار القائمة دايماً ظاهر على الموبايل */
+@media (max-width: 991px) {
+  .nav-inner {
+    flex-wrap: nowrap;
+    overflow: visible;
+  }
+  .nav-toggle {
+    min-width: 32px;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+  }
+}
