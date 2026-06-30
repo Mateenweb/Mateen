@@ -1262,9 +1262,9 @@ footer {
 #sidebar-user.show-user {
   display: flex !important;
   flex-direction: column !important;
-  height: 100% !important;
-  overflow: hidden !important;
+  flex: 1 1 auto !important;   /* ياخد المساحة المتاحة بس، مش 100% من الأب بالكامل */
   min-height: 0;
+  overflow: hidden !important;
 }
 #sidebar-user.show-user .sidebar-nav {
   flex: 1 !important;
