@@ -417,6 +417,54 @@ onAuthStateChanged(auth, async user => {
 window.doLogout = () =>
   signOut(auth).then(() => window.location.href = '../html/login.html');
 
+// ── طلب حذف الحساب — بيبعت إشعار للإدارة بدل الحذف المباشر ──
+window.requestAccountDeletion = async () => {
+  const user = auth.currentUser;
+  if (!user) return;
+
+  if (!confirm('سيتم إرسال طلب حذف حسابك للإدارة للموافقة عليه. هل تريدين المتابعة؟')) return;
+
+  const btn = document.getElementById('sidebarDeleteAccBtn');
+  if (btn) { btn.disabled = true; btn.innerHTML = '<i class="ti ti-loader spin"></i> جارٍ الإرسال...'; }
+
+  try {
+    const snap = await getDoc(doc(db, 'users', user.uid));
+    const userData = snap.exists() ? snap.data() : {};
+    const userName = userData.name || user.email;
+
+    // إرسال طلب الحذف في collection منفصلة عشان الإدارة تراجعها
+    await addDoc(collection(db, 'deletionRequests'), {
+      uid:        user.uid,
+      name:       userName,
+      email:      user.email,
+      role:       userData.role || '',
+      status:     'pending',
+      requestedAt: serverTimestamp(),
+    });
+
+    // إشعار لكل الإدارة
+    const adminSnap = await getDocs(query(collection(db, 'users'), where('role', '==', 'admin')));
+    const notifPromises = adminSnap.docs.map(adminDoc =>
+      addDoc(collection(db, 'userNotifications', adminDoc.id, 'items'), {
+        type:      'deletion_request',
+        title:     '🗑️ طلب حذف حساب',
+        body:      `${userName} طلبت حذف حسابها — بانتظار موافقتك`,
+        url:       'admin.html',
+        read:      false,
+        createdAt: serverTimestamp(),
+      })
+    );
+    await Promise.all(notifPromises);
+
+    if (btn) { btn.innerHTML = '<i class="ti ti-check"></i> تم إرسال الطلب'; }
+    alert('✅ تم إرسال طلب حذف حسابك للإدارة. سيتم التواصل معكِ قريباً إن شاء الله.');
+  } catch (e) {
+    console.error('requestAccountDeletion error:', e);
+    alert('حدث خطأ أثناء إرسال الطلب، حاولي مرة أخرى');
+    if (btn) { btn.disabled = false; btn.innerHTML = '<i class="ti ti-trash"></i> طلب حذف الحساب'; }
+  }
+};
+
 
 /* ═══════════════════════════════════════════════════════════════
    [من home-2.js] — Form التواصل: Load المستلمين + Send/Submit الMessage
