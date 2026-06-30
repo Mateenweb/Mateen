@@ -11,13 +11,56 @@ import { getAuth, onAuthStateChanged, signOut }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
 import { initNotifications } from "./notifications.js";
 import { getFirestore, doc, getDoc, getDocs, addDoc, setDoc,
-         collection, query, where, orderBy, serverTimestamp, onSnapshot }
+         collection, query, where, orderBy, serverTimestamp, onSnapshot, limit }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 import { FIREBASE_CONFIG } from "./config.js";
 
 const app  = getApps().length ? getApp() : initializeApp(FIREBASE_CONFIG);
 const auth = getAuth(app);
 const db   = getFirestore(app);
+
+// ── المواعيد المهمة (تظهر للجميع بدون تسجيل دخول) ──────────────
+onSnapshot(query(collection(db, 'events'), orderBy('order')), snap => {
+  const el = document.getElementById('homeEventsList');
+  if (!el) return;
+  if (snap.empty) {
+    el.innerHTML = '<div class="tl-item"><div class="tl-dot"></div><div><div class="tl-label" style="color:#aaa">لا توجد مواعيد</div></div></div>';
+    return;
+  }
+  el.innerHTML = snap.docs.map(d => {
+    const e = d.data();
+    return `<div class="tl-item">
+      <div class="tl-dot ${e.highlight ? 'gold' : ''}"></div>
+      <div>
+        <div class="tl-label">${e.label || e.title || ''}</div>
+        <div class="tl-date">${e.date || ''}</div>
+      </div>
+    </div>`;
+  }).join('');
+});
+
+// ── آخر الإعلانات العامة (تظهر للجميع بدون تسجيل دخول) ──────────────
+onSnapshot(query(collection(db, 'news'), orderBy('createdAt', 'desc'), limit(6)), snap => {
+  const section = document.getElementById('publicNewsSection');
+  const list    = document.getElementById('publicNewsList');
+  if (!section || !list) return;
+  const publicDocs = snap.docs.filter(d => (d.data().visibility || 'all') !== 'members');
+  if (publicDocs.length === 0) { section.style.display = 'none'; return; }
+  section.style.display = 'block';
+  list.innerHTML = publicDocs.map(d => {
+    const n = d.data();
+    const date = n.createdAt ? new Date(n.createdAt.seconds * 1000).toLocaleDateString('ar-EG', { year:'numeric', month:'long', day:'numeric' }) : '';
+    return `
+      <div class="col-12 col-md-6 col-lg-4">
+        <div class="news-card" style="background:white;border-radius:14px;border:1px solid var(--border);padding:18px 20px;height:100%;">
+          ${n.tag ? `<span style="font-size:11px;background:var(--beige);color:var(--green-dark);padding:3px 10px;border-radius:10px;">${n.tag}</span>` : ''}
+          <h3 style="font-family:Amiri,serif;font-size:16px;color:var(--green-dark);margin:10px 0 6px;">${n.title || ''}</h3>
+          <p style="font-size:13px;color:var(--text-mid);line-height:1.6;margin-bottom:10px;">${(n.body || '').slice(0,100)}${(n.body||'').length>100?'…':''}</p>
+          <div style="font-size:11px;color:#aaa;">${date}</div>
+        </div>
+      </div>`;
+  }).join('');
+});
 
 /* ═══════════════════════════════════════════════════════════════
    مستمع واحد موحّد لـ onAuthStateChanged
