@@ -5,6 +5,7 @@ import { getFirestore, collection, doc, getDoc, getDocs, onSnapshot, query, wher
 import { exportWord, exportPdf } from "./export.js";
 import { FIREBASE_CONFIG } from "./config.js";
 import { fullDeleteUser } from "./delete-account.js";
+import { loadSubjects } from "./subjects.js";
 
 const app  = getApps().length ? getApp() : initializeApp(FIREBASE_CONFIG);
 const auth = getAuth(app);
@@ -113,7 +114,6 @@ window.filterSup = () => {
   if (inp) { inp.value = val; inp.focus(); }
 };
 
-const ALL_SUBJECTS = ['التفسير', 'الفقه', 'العقيدة', 'الحديث', 'مقرأة متين'];
 // ── ربط الطالبة عند القبول ──────────────────────────────────────
 let _pendingApproveId = null;
 
@@ -154,7 +154,7 @@ window.confirmApprove = async (doLink) => {
   modal.classList.remove('show');
 
   // فعّل الحساب
-  await updateDoc(doc(db,'users',id), {status:'active', enrolledSubjects: ALL_SUBJECTS});
+  await updateDoc(doc(db,'users',id), {status:'active', enrolledSubjects: await loadSubjects()});
 
   // ربط اختياري
   if (doLink) {
