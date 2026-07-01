@@ -740,13 +740,12 @@ window.sendFile = async (input) => {
     return;
   }
 
-  // رفع الملف على Cloudinary
-  // الصور تروح /image/upload، باقي الملفات /raw/upload
-  const isImage = file.type.startsWith('image/');
-  const endpoint = isImage ? 'image' : 'auto';
+  // رفع الملف على Cloudinary — كل الأنواع على /upload عادي
   const fd = new FormData();
   fd.append('file', file);
   fd.append('upload_preset', UPLOAD_PRESET);
+  fd.append('resource_type', 'auto');
+  const endpoint = 'auto';
   let data;
   try {
     const res = await fetch(
