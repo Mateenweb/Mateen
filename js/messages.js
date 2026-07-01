@@ -731,6 +731,31 @@ window.sendFile = async (input) => {
     return;
   }
 
+  // أظهر loading indicator
+  const sendBtn = document.getElementById('msgSendBtn');
+  const fileBtn = document.getElementById('fileUploadBtn');
+  const originalSendHtml = sendBtn?.innerHTML;
+  if (sendBtn) { sendBtn.disabled = true; sendBtn.innerHTML = '<i class="ti ti-loader-2 ti-spin"></i>'; }
+  if (fileBtn) fileBtn.disabled = true;
+
+  // أضيف رسالة مؤقتة "جارٍ الرفع..." في الشات
+  const tempId = 'uploading-' + Date.now();
+  const bubblesEl = document.getElementById('msgBubbles');
+  if (bubblesEl) {
+    const tempDiv = document.createElement('div');
+    tempDiv.id = tempId;
+    tempDiv.style.cssText = 'display:flex;justify-content:flex-start;padding:4px 12px';
+    tempDiv.innerHTML = '<div style="background:#f0ebe0;border-radius:12px;padding:8px 14px;font-size:13px;color:#888;display:flex;align-items:center;gap:8px"><i class="ti ti-loader-2 ti-spin"></i> جارٍ رفع الملف...</div>';
+    bubblesEl.appendChild(tempDiv);
+    bubblesEl.scrollTop = bubblesEl.scrollHeight;
+  }
+
+  const cleanupLoading = () => {
+    if (sendBtn) { sendBtn.disabled = false; sendBtn.innerHTML = originalSendHtml; }
+    if (fileBtn) fileBtn.disabled = false;
+    document.getElementById(tempId)?.remove();
+  };
+
   // رفع الملف على Cloudinary
   // الصور تروح /image/upload، باقي الملفات /raw/upload
   const isImage = file.type.startsWith('image/');
@@ -746,10 +771,11 @@ window.sendFile = async (input) => {
     );
     data = await res.json();
   } catch(e) {
+    cleanupLoading();
     alert('فشل رفع الملف — تحقق من اتصالك بالإنترنت');
     return;
   }
-  if (!data.secure_url) { alert('فشل رفع الملف: ' + (data.error?.message || 'خطأ غير معروف')); return; }
+  if (!data.secure_url) { cleanupLoading(); alert('فشل رفع الملف: ' + (data.error?.message || 'خطأ غير معروف')); return; }
 
   const url      = data.secure_url;
   const fileName = file.name;
@@ -763,7 +789,9 @@ window.sendFile = async (input) => {
     senderName: currentUserData?.role === 'admin' ? 'إدارة متين' : (currentUserData?.name || ''),
     senderRole: currentUserData?.role || '',
     sentAt:     serverTimestamp(),
-  });
+    // نشيل الـ loading بعد ما تتحفظ الرسالة
+  });  cleanupLoading();
+
 
   // تحديث lastMsg + unread
   if (otherId) {
