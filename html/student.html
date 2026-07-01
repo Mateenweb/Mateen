@@ -48,7 +48,7 @@
       <a href="home.html" class="stu-btn-home"><i class="ti ti-home"></i> الرئيسية</a>
       <button class="stu-btn-logout" id="logoutBtn"><i class="ti ti-logout"></i> خروج</button>
     </div>
-      <button onclick="history.back()" class="nav-back-btn" aria-label="رجوع">
+      <button onclick="history.length > 1 ? history.back() : window.location.href="home.html"" class="nav-back-btn" aria-label="رجوع">
       <i class="ti ti-arrow-right"></i>
     </button>
     <button onclick="startPageTour()" title="جولة تعريفية"

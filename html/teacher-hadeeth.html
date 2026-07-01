@@ -47,7 +47,7 @@
 <button class="nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')">
 <i class="ti ti-menu-2"></i>
 </button>
-    <button onclick="history.back()" class="nav-back-btn" aria-label="رجوع">
+    <button onclick="history.length > 1 ? history.back() : window.location.href="home.html"" class="nav-back-btn" aria-label="رجوع">
       <i class="ti ti-arrow-right"></i>
     </button>
     <button onclick="startPageTour()" title="جولة تعريفية"

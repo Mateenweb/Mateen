@@ -44,7 +44,7 @@
   </div>
   <button onclick="typeof startPageTour==='function'&&startPageTour()" title="جولة تعريفية"
     style="background:none;border:none;color:rgba(255,255,255,0.85);font-size:18px;cursor:pointer;padding:6px 8px;display:flex;align-items:center;flex-shrink:0;">❓</button>
-  <button onclick="history.back()" class="nav-back-btn" aria-label="رجوع"><i class="ti ti-arrow-right"></i></button>
+  <button onclick="history.length > 1 ? history.back() : window.location.href="home.html"" class="nav-back-btn" aria-label="رجوع"><i class="ti ti-arrow-right"></i></button>
   <button class="nav-toggle" aria-label="القائمة" onclick="document.getElementById('supMobNav').classList.toggle('open')">
     <i class="ti ti-menu-2"></i>
   </button>
