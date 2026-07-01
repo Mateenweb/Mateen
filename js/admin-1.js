@@ -45,6 +45,7 @@ onAuthStateChanged(auth, async user => {
   const testerEl = document.getElementById('siteTesterSection');
   if (testerEl) testerEl.style.display = 'none';
   loadMats();
+  loadTeachers();
 });
 
 
@@ -130,6 +131,45 @@ window.doAdd = async () => {
 };
 
 // ── LOAD ──────────────────────────────────────────────
+function loadTeachers() {
+  const SUBJECT_AR = {
+    tafseer: 'التفسير', fiqh: 'الفقه', aqeedah: 'العقيدة',
+    hadith: 'الحديث', hadeeth: 'الحديث', quran: 'مقرأة متين',
+    quran1: 'مقرأة متين (١)', quran2: 'مقرأة متين (٢)'
+  };
+  const SUBJECT_PAGE = {
+    tafseer: 'teacher-tafseer.html', fiqh: 'teacher-fiqh.html',
+    aqeedah: 'teacher-aqeedah.html', hadith: 'teacher-hadeeth.html',
+    hadeeth: 'teacher-hadeeth.html', quran: 'teacher-quran1.html',
+    quran1: 'teacher-quran1.html', quran2: 'teacher-quran2.html'
+  };
+
+  getDocs(query(collection(db, 'users'), where('role', '==', 'teacher'))).then(snap => {
+    const grid = document.getElementById('teachersList');
+    if (!grid) return;
+    if (snap.empty) { grid.innerHTML = '<div style="color:var(--text-mid);font-size:13px;text-align:center;padding:20px;grid-column:1/-1">لا توجد معلمات مسجلات</div>'; return; }
+
+    grid.innerHTML = snap.docs.map(d => {
+      const t = d.data();
+      const subjectAr = SUBJECT_AR[t.subject] || t.subject || '—';
+      const page = SUBJECT_PAGE[t.subject];
+      return `
+        <div style="background:var(--white);border:1px solid var(--border);border-radius:12px;padding:16px;display:flex;align-items:center;gap:12px;">
+          <div style="width:44px;height:44px;border-radius:50%;background:var(--green-dark);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">📚</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:14px;font-weight:700;color:var(--text-dark);margin-bottom:2px">${t.name || '—'}</div>
+            <div style="font-size:12px;color:var(--text-mid);margin-bottom:4px">${t.email || ''}</div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+              <span style="font-size:11px;background:rgba(45,110,69,0.1);color:var(--green-dark);border-radius:20px;padding:2px 10px;border:1px solid rgba(45,110,69,0.2)">${subjectAr}</span>
+              <span style="font-size:11px;background:${t.status==='active'?'rgba(39,174,96,0.1)':'rgba(230,126,34,0.1)'};color:${t.status==='active'?'#1e8449':'#a04000'};border-radius:20px;padding:2px 10px;">${t.status==='active'?'نشطة':'موقوفة'}</span>
+            </div>
+          </div>
+          ${page ? `<a href="${page}" target="_blank" style="color:var(--green-dark);font-size:20px;flex-shrink:0;" title="صفحة المعلمة"><i class="ti ti-external-link"></i></a>` : ''}
+        </div>`;
+    }).join('');
+  }).catch(e => console.error('loadTeachers:', e));
+}
+
 function loadMats() {
   onSnapshot(query(collection(db, 'materials'), orderBy('addedAt','desc')), snap => {
     allMats = snap.docs.map(d => ({ id: d.id, ...d.data() }));
