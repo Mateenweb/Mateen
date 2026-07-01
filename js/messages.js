@@ -406,7 +406,14 @@ window.openConv = async (cid, otherId, otherName, otherRole) => {
           <div class="msg-bubble-wrap">
             ${!mine ? `<div class="msg-sender-name">${otherName}</div>` : ''}
             <div class="msg-bubble-outer">
-              ${mine ? `<button class="msg-delete-btn ${seen ? 'seen' : ''}" title="${seen ? 'لا يمكن الحذف — تمت القراءة' : 'حذف الرسالة'}" onclick="deleteMsg('${activeConvId}','${m.id}',${seen})"><i class="ti ti-trash"></i></button>` : ''}
+              ${mine ? `
+              <div class="msg-delete-wrap" style="position:relative;align-self:flex-end;">
+                <button class="msg-delete-btn" title="خيارات الحذف" onclick="toggleDeleteMenu(event,'${m.id}')"><i class="ti ti-trash"></i></button>
+                <div id="del-menu-${m.id}" style="display:none;position:absolute;${currentUserData?.role==='mateen'?'left':'right'}:0;bottom:28px;background:var(--white);border:1px solid var(--border);border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,0.12);z-index:100;min-width:160px;overflow:hidden;">
+                  <button onclick="deleteMsgMine('${activeConvId}','${m.id}')" style="width:100%;padding:10px 14px;border:none;background:none;font-family:inherit;font-size:13px;cursor:pointer;text-align:right;display:flex;align-items:center;gap:8px;color:var(--text-dark)"><i class="ti ti-eye-off"></i> حذف من عندي فقط</button>
+                  ${currentUserData?.role==='admin'||currentUserData?.role==='support'||currentUserData?.role==='supervisor' ? `<button onclick="deleteMsgBoth('${activeConvId}','${m.id}')" style="width:100%;padding:10px 14px;border:none;background:none;font-family:inherit;font-size:13px;cursor:pointer;text-align:right;display:flex;align-items:center;gap:8px;color:#c0392b;border-top:1px solid var(--border)"><i class="ti ti-trash"></i> حذف من الاتنين</button>` : ''}
+                </div>
+              </div>` : ''}
               <div class="msg-bubble ${mine ? 'mine' : 'theirs'}" title="${fullTime}">
                 ${m.type === 'image'
   ? (m.viewOnce && !mine && currentUserData?.role === 'mateen'
@@ -559,13 +566,47 @@ function escapeAttr(str) {
 }
 
 // ── Delete Message من عند User only ───────────────────────────
-window.deleteMsg = async (convId, msgId, seen) => {
-  if (seen) {
-    alert('لا يمكن حذف هذه الرسالة — تمت قراءتها بالفعل');
-    return;
-  }
-  if (!confirm('هل تريدين حذف هذه الرسالة؟\nستختفي من عند الاثنين نهائياً.')) return;
+// ── Toggle delete menu ──────────────────────────────────────
+window.toggleDeleteMenu = (e, msgId) => {
+  e.stopPropagation();
+  // أغلق كل القوائم الأخرى
+  document.querySelectorAll('[id^="del-menu-"]').forEach(m => {
+    if (m.id !== `del-menu-${msgId}`) m.style.display = 'none';
+  });
+  const menu = document.getElementById(`del-menu-${msgId}`);
+  if (menu) menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+};
 
+// أغلق القوائم لما تضغطي برا
+document.addEventListener('click', () => {
+  document.querySelectorAll('[id^="del-menu-"]').forEach(m => m.style.display = 'none');
+});
+
+// ── حذف من عندي فقط ────────────────────────────────────────
+window.deleteMsgMine = async (convId, msgId) => {
+  if (!confirm('ستختفي هذه الرسالة منك فقط. هل تريدين المتابعة؟')) return;
+  await updateDoc(doc(db, 'conversations', convId, 'messages', msgId), {
+    [`deletedBy.${currentUser.uid}`]: true
+  });
+};
+
+// ── حذف من الاتنين (أدمن/سوبرفايزر/سابورت) ───────────────
+window.deleteMsgBoth = async (convId, msgId) => {
+  if (!confirm('ستُحذف هذه الرسالة نهائياً من عند الاتنين. هل تريدين المتابعة؟')) return;
+  // حدّث lastMsg لو كانت آخر رسالة
+  try {
+    const msgsSnap = await getDocs(
+      query(collection(db, 'conversations', convId, 'messages'), orderBy('sentAt', 'desc'))
+    );
+    const msgs = msgsSnap.docs.filter(d => d.id !== msgId);
+    if (msgs.length > 0) {
+      const prev = msgs[0].data();
+      await updateDoc(doc(db, 'conversations', convId), {
+        lastMsg: prev.type === 'image' ? '📷 صورة' : prev.type === 'audio' ? '🎤 صوتية' : (prev.text || ''),
+        lastAt: prev.sentAt,
+      });
+    }
+  } catch(e) {}
   await deleteDoc(doc(db, 'conversations', convId, 'messages', msgId));
 };
 
