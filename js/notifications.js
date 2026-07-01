@@ -389,13 +389,15 @@ function listenAdminNotifications(userId) {
 
 // ── export للاستخدام الخارجي If محتاج ───────────────────────────────────
 export async function initNotifications(userId) {
-  restorePendingToasts();
+  restorePendingToasts(userId);
   if (!userId) return;
-  // افحص role User
   try {
-    const snap = await getDocs(query(collection(db, 'users')));
-    // نجيب role من Firestore
-  } catch(e) {}
+    const userSnap = await getDoc(doc(db, 'users', userId));
+    if (userSnap.exists()) {
+      const role = userSnap.data().role;
+      await initAdminNotifications(userId, role);
+    }
+  } catch(e) { console.error('initNotifications:', e); }
 }
 
 export async function initAdminNotifications(userId, role) {
