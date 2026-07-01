@@ -97,7 +97,7 @@ function matCardHTML(m) {
           </div>
           ${m.notes ? `<div style="font-size:12px;color:var(--text-mid);background:var(--beige);padding:7px 10px;border-radius:8px;margin-bottom:10px">${m.notes}</div>` : ''}
           <div style="background:var(--beige,#f7f0e5);border-radius:12px;padding:12px;">
-            <audio id="audio-${m.id}" src="${m.url}" preload="metadata" style="display:none"></audio>
+            <audio id="audio-${m.id}" src="${m.url}" preload="metadata" style="display:none" controlsList="nodownload" oncontextmenu="return false"></audio>
             <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
               <button onclick="toggleAudio('${m.id}')" id="playBtn-${m.id}"
                 style="width:38px;height:38px;border-radius:50%;background:var(--green-dark);color:white;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
@@ -501,13 +501,14 @@ window.submitNewCourse = async () => {
   const title = document.getElementById('newCourseTitle').value.trim();
   const course = document.getElementById('newCourseCat').value;
   const type  = document.getElementById('newCourseType').value;
-  const url   = document.getElementById('newCourseUrl').value.trim();
+  const isAudio = type === 'تسجيل صوتي';
+  const url   = isAudio ? (_uploadedAudioUrl || '') : document.getElementById('newCourseUrl').value.trim();
   const notes = document.getElementById('newCourseNotes').value.trim();
   const err   = document.getElementById('addCourseErr');
 
   if (!title || !course || !url) {
     err.style.display = 'block';
-    err.textContent = 'يرجى تعبئة الحقول المطلوبة (الاسم، المادة، الرابط)';
+    err.textContent = isAudio ? 'يرجى رفع الملف الصوتي أولاً' : 'يرجى تعبئة الحقول المطلوبة (الاسم، المادة، الرابط)';
     return;
   }
   err.style.display = 'none';
@@ -926,3 +927,65 @@ document.addEventListener('click', () => {
     });
   });
 }, { once: true });
+
+// ── Audio Upload to Cloudinary ─────────────────────────────────
+let _uploadedAudioUrl = null;
+
+// لما يتغير نوع المحتوى — لو تسجيل صوتي يظهر upload بدل URL
+window.onCourseTypeChange = (selectEl) => {
+  const isAudio = selectEl.value === 'تسجيل صوتي';
+  const urlWrap = document.getElementById('urlFieldWrap');
+  const audioWrap = document.getElementById('audioUploadWrap');
+  if (urlWrap)   urlWrap.style.display   = isAudio ? 'none' : 'block';
+  if (audioWrap) audioWrap.style.display = isAudio ? 'block' : 'none';
+  if (!isAudio) _uploadedAudioUrl = null;
+};
+
+window.handleAudioUpload = async (input) => {
+  const file = input.files[0];
+  if (!file) return;
+  const progressWrap = document.getElementById('audioUploadProgress');
+  const progressBar  = document.getElementById('audioProgressBar');
+  const doneMsg      = document.getElementById('audioUploadDone');
+  const uploadBox    = document.getElementById('audioUploadBox');
+
+  progressWrap.style.display = 'block';
+  doneMsg.style.display = 'none';
+  uploadBox.style.display = 'none';
+
+  try {
+    const fd = new FormData();
+    fd.append('file', file);
+    fd.append('upload_preset', 'mateen_uploads');
+    fd.append('resource_type', 'video'); // Cloudinary uses 'video' for audio too
+
+    // Upload with XHR for progress tracking
+    const url = await new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', `https://api.cloudinary.com/v1_1/dqqtznoqt/video/upload`);
+      xhr.upload.onprogress = (e) => {
+        if (e.lengthComputable) {
+          const pct = Math.round(e.loaded / e.total * 100);
+          progressBar.style.width = pct + '%';
+        }
+      };
+      xhr.onload = () => {
+        const data = JSON.parse(xhr.responseText);
+        if (data.secure_url) resolve(data.secure_url);
+        else reject(new Error(data.error?.message || 'فشل الرفع'));
+      };
+      xhr.onerror = () => reject(new Error('خطأ في الشبكة'));
+      xhr.send(fd);
+    });
+
+    _uploadedAudioUrl = url;
+    progressWrap.style.display = 'none';
+    doneMsg.style.display = 'block';
+    doneMsg.textContent = '✅ تم الرفع — ' + file.name;
+
+  } catch(e) {
+    progressWrap.style.display = 'none';
+    uploadBox.style.display = 'block';
+    alert('فشل رفع الصوت: ' + e.message);
+  }
+};
