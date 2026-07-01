@@ -740,13 +740,11 @@ window.sendFile = async (input) => {
     return;
   }
 
-  // رفع الملف على Cloudinary — كل الأنواع على /upload عادي
+  // رفع الملف على Cloudinary — كل الأنواع على /image/upload عشان يبقى public
   const fd = new FormData();
   fd.append('file', file);
   fd.append('upload_preset', UPLOAD_PRESET);
-  fd.append('access_mode', 'public');
-  fd.append('resource_type', 'auto');
-  const endpoint = 'auto';
+  const endpoint = 'image';
   let data;
   try {
     const res = await fetch(
