@@ -744,6 +744,7 @@ window.sendFile = async (input) => {
   const fd = new FormData();
   fd.append('file', file);
   fd.append('upload_preset', UPLOAD_PRESET);
+  fd.append('access_mode', 'public');
   fd.append('resource_type', 'auto');
   const endpoint = 'auto';
   let data;
