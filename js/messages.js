@@ -725,16 +725,31 @@ window.sendFile = async (input) => {
   if (!file || !activeConvId) return;
   input.value = '';
 
-  // رفع الملف على Cloudinary كـ raw resource
+  // تحقق من حجم الملف (max 10MB)
+  if (file.size > 10 * 1024 * 1024) {
+    alert('حجم الملف كبير جداً — الحد الأقصى 10 ميجا');
+    return;
+  }
+
+  // رفع الملف على Cloudinary
+  // الصور تروح /image/upload، باقي الملفات /raw/upload
+  const isImage = file.type.startsWith('image/');
+  const endpoint = isImage ? 'image' : 'auto';
   const fd = new FormData();
   fd.append('file', file);
   fd.append('upload_preset', UPLOAD_PRESET);
-  const res  = await fetch(
-    `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/raw/upload`,
-    { method: 'POST', body: fd }
-  );
-  const data = await res.json();
-  if (!data.secure_url) { alert('فشل رفع الملف'); return; }
+  let data;
+  try {
+    const res = await fetch(
+      `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/${endpoint}/upload`,
+      { method: 'POST', body: fd }
+    );
+    data = await res.json();
+  } catch(e) {
+    alert('فشل رفع الملف — تحقق من اتصالك بالإنترنت');
+    return;
+  }
+  if (!data.secure_url) { alert('فشل رفع الملف: ' + (data.error?.message || 'خطأ غير معروف')); return; }
 
   const url      = data.secure_url;
   const fileName = file.name;
