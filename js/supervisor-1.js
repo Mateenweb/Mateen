@@ -571,7 +571,7 @@ function renderStudents(list) {
         return `<div class="stu-mob-card">
           <div class="stu-mob-top">
             <div class="stu-mob-name">
-              <a class="btn-stu-link" href="student.html?id=${s.id}" target="_blank">👤</a>
+              <a class="btn-stu-link" href="student.html?id=${s.id}">👤</a>
               ${window._userRole==='admin'
                 ? `<input type="text" value="${esc(s.name||'')}" oninput="stuAutoName('${s.id}',this.value)" class="stu-mob-name-input"/>`
                 : `<span class="stu-mob-name-input" style="padding:4px 0">${esc(s.name||'—')}</span>`}
@@ -675,7 +675,7 @@ function renderStudents(list) {
       <td><input type="checkbox" class="row-check" data-id="${s.id}" onchange="onRowCheck()"></td>
       <td style="color:var(--text-mid);font-size:12px">${i+1}</td>
       <td><div class="stu-name-cell">
-        <a class="btn-stu-link" href="student.html?id=${s.id}" target="_blank" title="صفحة الطالبة">👤</a>
+        <a class="btn-stu-link" href="student.html?id=${s.id}" title="صفحة الطالبة">👤</a>
         ${window._userRole==='admin'
           ? `<input type="text" value="${esc(s.name||'')}" oninput="stuAutoName('${s.id}',this.value)" style="min-width:100px">`
           : `<span class="stu-name-text">${esc(s.name||'—')}</span>`}

@@ -164,7 +164,7 @@ function loadTeachers() {
               <span style="font-size:11px;background:${t.status==='active'?'rgba(39,174,96,0.1)':'rgba(230,126,34,0.1)'};color:${t.status==='active'?'#1e8449':'#a04000'};border-radius:20px;padding:2px 10px;">${t.status==='active'?'نشطة':'موقوفة'}</span>
             </div>
           </div>
-          ${page ? `<a href="${page}" target="_blank" style="color:var(--green-dark);font-size:20px;flex-shrink:0;" title="صفحة المعلمة"><i class="ti ti-external-link"></i></a>` : ''}
+          ${page ? `<a href="${page}" style="color:var(--green-dark);font-size:20px;flex-shrink:0;" title="صفحة المعلمة"><i class="ti ti-external-link"></i></a>` : ''}
         </div>`;
     }).join('');
   }).catch(e => console.error('loadTeachers:', e));
@@ -604,7 +604,7 @@ function renderStudents(list) {
         return `<div class="stu-mob-card">
           <div class="stu-mob-top">
             <div class="stu-mob-name">
-              <a class="btn-stu-link" href="student.html?id=${s.id}" target="_blank">👤</a>
+              <a class="btn-stu-link" href="student.html?id=${s.id}">👤</a>
               <input type="text" value="${esc(s.name || '')}"
                 oninput="stuAutoName('${s.id}', this.value)"
                 class="stu-mob-name-input"/>
@@ -704,7 +704,7 @@ function renderStudents(list) {
       <td><input type="checkbox" class="row-check" data-id="${s.id}" onchange="onRowCheck()"></td>
       <td style="color:var(--text-mid);font-size:12px">${i+1}</td>
       <td><div class="stu-name-cell">
-        <a class="btn-stu-link" href="student.html?id=${s.id}" target="_blank" title="صفحة الطالبة">👤</a>
+        <a class="btn-stu-link" href="student.html?id=${s.id}" title="صفحة الطالبة">👤</a>
         <input type="text" value="${esc(s.name||'')}" oninput="stuAutoName('${s.id}',this.value)" style="min-width:100px">
         ${statusSel}
       </div></td>
