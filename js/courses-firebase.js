@@ -46,7 +46,7 @@ const MAIN_SUBJECTS = ['التفسير', 'الفقه', 'العقيدة', 'الح
 
 const TYPE_ICONS = {
   محاضرة: '🎙️', ملخص: '📄', واجب: '📝', اختبار: '✅',
-  مرجع: '📚', فيديو: '🎬', أخرى: '📎'
+  مرجع: '📚', فيديو: '🎬', 'تسجيل صوتي': '🎧', أخرى: '📎'
 };
 
 function detectLinkType(url) {
@@ -86,6 +86,38 @@ function matCardHTML(m) {
   return `
     <div style="text-decoration:none;">
       <div class="mat-card-item">
+        ${m.type === 'تسجيل صوتي' ? `
+        <div>
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+            <span style="font-size:20px">🎧</span>
+            <div>
+              <div style="font-size:13px;font-weight:700;color:var(--green-dark)">${m.title}</div>
+              <div style="font-size:11px;color:var(--text-mid);margin-top:2px">تسجيل صوتي</div>
+            </div>
+          </div>
+          ${m.notes ? `<div style="font-size:12px;color:var(--text-mid);background:var(--beige);padding:7px 10px;border-radius:8px;margin-bottom:10px">${m.notes}</div>` : ''}
+          <div style="background:var(--beige,#f7f0e5);border-radius:12px;padding:12px;">
+            <audio id="audio-${m.id}" src="${m.url}" preload="metadata" style="display:none"></audio>
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+              <button onclick="toggleAudio('${m.id}')" id="playBtn-${m.id}"
+                style="width:38px;height:38px;border-radius:50%;background:var(--green-dark);color:white;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <i class="ti ti-player-play" id="playIcon-${m.id}"></i>
+              </button>
+              <div style="flex:1">
+                <div style="position:relative;height:6px;background:rgba(0,0,0,0.1);border-radius:3px;cursor:pointer;margin-bottom:4px" onclick="seekAudio('${m.id}',event)">
+                  <div id="progress-${m.id}" style="height:100%;background:var(--green-dark);border-radius:3px;width:0%;transition:width 0.1s"></div>
+                </div>
+                <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text-mid)">
+                  <span id="curTime-${m.id}">0:00</span>
+                  <span id="durTime-${m.id}">0:00</span>
+                </div>
+              </div>
+              <button onclick="changeSpeed('${m.id}')" id="speedBtn-${m.id}"
+                style="font-size:11px;font-weight:700;color:var(--green-dark);background:transparent;border:1px solid var(--green-dark);border-radius:6px;padding:2px 6px;cursor:pointer">1x</button>
+            </div>
+          </div>
+        </div>
+        ` : `
         <a href="${m.url}" target="_blank" rel="noopener" style="text-decoration:none;display:block;">
           <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
             <span style="font-size:20px">${TYPE_ICONS[m.type] || '📎'}</span>
@@ -96,7 +128,7 @@ function matCardHTML(m) {
           </div>
           ${m.notes ? `<div style="font-size:12px;color:var(--text-mid);background:var(--beige);padding:7px 10px;border-radius:8px;margin-bottom:8px">${m.notes}</div>` : ''}
           <div style="font-size:12px;color:var(--gold-dark)">${LINK_LABELS[detectLinkType(m.url)]}</div>
-        </a>
+        </a>`}
         ${m.assignment?.title ? `
         <div style="margin-top:8px;background:rgba(201,162,39,0.08);border:1px solid rgba(201,162,39,0.25);border-radius:8px;padding:8px 10px;">
           <div style="font-size:12px;font-weight:700;color:var(--green-dark);margin-bottom:3px;"><i class="ti ti-clipboard-list"></i> واجب: ${m.assignment.title}</div>
@@ -823,3 +855,74 @@ function showAdminBtns() {
   const btns = document.getElementById('adminBtns');
   if (btns && isAdmin()) btns.style.display = 'flex';
 }
+
+// ── Audio Player Functions ──────────────────────────────────────
+const _audioSpeeds = [1, 1.25, 1.5, 1.75, 2];
+const _audioSpeedIdx = {};
+
+window.toggleAudio = (id) => {
+  const audio = document.getElementById('audio-' + id);
+  const icon  = document.getElementById('playIcon-' + id);
+  if (!audio) return;
+  if (audio.paused) {
+    // أوقف أي تسجيل تاني شغال
+    document.querySelectorAll('audio').forEach(a => { if (a !== audio) { a.pause(); } });
+    document.querySelectorAll('[id^="playIcon-"]').forEach(i => { i.className = 'ti ti-player-play'; });
+    audio.play();
+    icon.className = 'ti ti-player-pause';
+    audio.ontimeupdate = () => updateProgress(id);
+    audio.onended = () => { icon.className = 'ti ti-player-play'; };
+  } else {
+    audio.pause();
+    icon.className = 'ti ti-player-play';
+  }
+};
+
+window.seekAudio = (id, event) => {
+  const audio = document.getElementById('audio-' + id);
+  if (!audio || !audio.duration) return;
+  const bar = event.currentTarget;
+  const ratio = event.offsetX / bar.offsetWidth;
+  audio.currentTime = ratio * audio.duration;
+  updateProgress(id);
+};
+
+window.changeSpeed = (id) => {
+  const audio = document.getElementById('audio-' + id);
+  const btn   = document.getElementById('speedBtn-' + id);
+  if (!audio || !btn) return;
+  _audioSpeedIdx[id] = ((_audioSpeedIdx[id] || 0) + 1) % _audioSpeeds.length;
+  const speed = _audioSpeeds[_audioSpeedIdx[id]];
+  audio.playbackRate = speed;
+  btn.textContent = speed + 'x';
+};
+
+function updateProgress(id) {
+  const audio    = document.getElementById('audio-' + id);
+  const progress = document.getElementById('progress-' + id);
+  const curTime  = document.getElementById('curTime-' + id);
+  const durTime  = document.getElementById('durTime-' + id);
+  if (!audio || !progress) return;
+  const pct = audio.duration ? (audio.currentTime / audio.duration * 100) : 0;
+  progress.style.width = pct + '%';
+  curTime.textContent = formatTime(audio.currentTime);
+  durTime.textContent = formatTime(audio.duration || 0);
+}
+
+function formatTime(sec) {
+  if (isNaN(sec)) return '0:00';
+  const m = Math.floor(sec / 60);
+  const s = Math.floor(sec % 60).toString().padStart(2, '0');
+  return m + ':' + s;
+}
+
+// جهّز الـ duration لما تتحمل الـ metadata
+document.addEventListener('click', () => {
+  document.querySelectorAll('audio[id^="audio-"]').forEach(audio => {
+    const id = audio.id.replace('audio-', '');
+    audio.addEventListener('loadedmetadata', () => {
+      const durTime = document.getElementById('durTime-' + id);
+      if (durTime) durTime.textContent = formatTime(audio.duration);
+    });
+  });
+}, { once: true });
