@@ -356,15 +356,17 @@ window.submitNews = async () => {
   const tag        = document.getElementById('newsTag').value;
   const pinned     = document.getElementById('newsPinned').checked;
   const visibility = document.getElementById('newsVisibility').value;
-  const editId     = document.getElementById('newsSubmitBtn').dataset.editId;
+  const submitBtn  = document.getElementById('newsSubmitBtn');
+  if (!submitBtn) { alert('خطأ: لم يتم تحميل الصفحة بشكل صحيح، أعيدي التحميل'); return; }
+  const editId     = submitBtn.dataset.editId;
 
   if (!title) { alert('يرجى إدخال العنوان'); return; }
 
   if (editId) {
     // تعديل خبر موجود
     await updateDoc(doc(db, 'news', editId), { title, body, tag, pinned, visibility });
-    delete document.getElementById('newsSubmitBtn').dataset.editId;
-    document.getElementById('newsSubmitBtn').textContent = '📤 نشر الخبر';
+    delete submitBtn.dataset.editId;
+    submitBtn.textContent = '📤 نشر الخبر';
   } else {
     // إضافة خبر جديد
     await addDoc(collection(db, 'news'), {
