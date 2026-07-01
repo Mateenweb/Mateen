@@ -389,20 +389,18 @@ function listenAdminNotifications(userId) {
 
 // ── export للاستخدام الخارجي If محتاج ───────────────────────────────────
 export async function initNotifications(userId) {
-  restorePendingToasts(userId);
+  restorePendingToasts();
   if (!userId) return;
+  // افحص role User
   try {
-    const userSnap = await getDoc(doc(db, 'users', userId));
-    if (userSnap.exists()) {
-      const role = userSnap.data().role;
-      await initAdminNotifications(userId, role);
-    }
-  } catch(e) { console.error('initNotifications:', e); }
+    const snap = await getDocs(query(collection(db, 'users')));
+    // نجيب role من Firestore
+  } catch(e) {}
 }
 
 export async function initAdminNotifications(userId, role) {
   if (!userId) return;
-  if (role === 'admin' || role === 'supervisor') {
+  if (role === 'admin') {
     listenAdminNotifications(userId);
   }
 }
