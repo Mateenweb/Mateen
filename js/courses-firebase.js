@@ -472,14 +472,36 @@ window.submitNewCourse = async () => {
   btn.disabled = true;
   btn.innerHTML = '<i class="ti ti-loader"></i> جاري الإضافة...';
 
+  // واجب اختياري
+  const asgTitle    = document.getElementById('asgTitle')?.value.trim();
+  const asgDeadline = document.getElementById('asgDeadline')?.value;
+  const asgDesc     = document.getElementById('asgDesc')?.value.trim();
+  const assignment  = asgTitle ? { title: asgTitle, deadline: asgDeadline || null, desc: asgDesc || '' } : null;
+
+  // اختبار اختياري
+  const examTitle    = document.getElementById('examTitle')?.value.trim();
+  const examPath     = document.getElementById('examPath')?.value.trim();
+  const examDeadline = document.getElementById('examDeadline')?.value;
+  const exam         = examTitle && examPath ? { title: examTitle, path: examPath, deadline: examDeadline || null } : null;
+
   try {
     await addDoc(collection(db, 'materials'), {
       title, course, type, url, notes,
+      ...(assignment ? { assignment } : {}),
+      ...(exam ? { exam } : {}),
       addedAt: Date.now(),
       addedBy: auth.currentUser.email,
     });
-    ['newCourseTitle','newCourseCat','newCourseUrl','newCourseNotes'].forEach(id => {
-      document.getElementById(id).value = '';
+    // reset all fields
+    ['newCourseTitle','newCourseCat','newCourseUrl','newCourseNotes',
+     'asgTitle','asgDeadline','asgDesc','examTitle','examPath','examDeadline'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = '';
+    });
+    // أغلق الأقسام الاختيارية
+    ['asgSection','examSection'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = 'none';
     });
     document.getElementById('addCourseModal').style.display = 'none';
   } catch(e) {
