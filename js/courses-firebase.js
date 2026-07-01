@@ -97,6 +97,18 @@ function matCardHTML(m) {
           ${m.notes ? `<div style="font-size:12px;color:var(--text-mid);background:var(--beige);padding:7px 10px;border-radius:8px;margin-bottom:8px">${m.notes}</div>` : ''}
           <div style="font-size:12px;color:var(--gold-dark)">${LINK_LABELS[detectLinkType(m.url)]}</div>
         </a>
+        ${m.assignment?.title ? `
+        <div style="margin-top:8px;background:rgba(201,162,39,0.08);border:1px solid rgba(201,162,39,0.25);border-radius:8px;padding:8px 10px;">
+          <div style="font-size:12px;font-weight:700;color:var(--green-dark);margin-bottom:3px;"><i class="ti ti-clipboard-list"></i> واجب: ${m.assignment.title}</div>
+          ${m.assignment.deadline ? `<div style="font-size:11px;color:var(--text-mid)">⏰ آخر موعد: ${new Date(m.assignment.deadline).toLocaleString('ar-EG',{dateStyle:'medium',timeStyle:'short'})}</div>` : ''}
+          ${m.assignment.desc ? `<div style="font-size:11px;color:var(--text-mid);margin-top:3px">${m.assignment.desc}</div>` : ''}
+        </div>` : ''}
+        ${m.exam?.title ? `
+        <a href="${m.exam.path}" target="_blank" rel="noopener" style="text-decoration:none;display:block;margin-top:8px;background:rgba(45,110,69,0.06);border:1px solid rgba(45,110,69,0.2);border-radius:8px;padding:8px 10px;">
+          <div style="font-size:12px;font-weight:700;color:var(--green-dark);margin-bottom:3px;"><i class="ti ti-pencil-check"></i> اختبار: ${m.exam.title}</div>
+          ${m.exam.deadline ? `<div style="font-size:11px;color:var(--text-mid)">⏰ آخر موعد: ${new Date(m.exam.deadline).toLocaleString('ar-EG',{dateStyle:'medium',timeStyle:'short'})}</div>` : ''}
+          <div style="font-size:11px;color:var(--green-dark);margin-top:4px;font-weight:600">ابدئي الاختبار ←</div>
+        </a>` : ''}
         ${editBtns}
         <div id="asg-${m.id}" data-asg-container="${m.id}"></div>
       </div>
