@@ -2,7 +2,7 @@
 let deferredInstallPrompt = null;
 
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/Mateen/firebase-messaging-sw.js', {
+  navigator.serviceWorker.register('/Mateen/sw.js', {
     scope: '/Mateen/'
   }).then(reg => {
     console.log('[SW] registered:', reg.scope);
