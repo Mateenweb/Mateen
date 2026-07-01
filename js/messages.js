@@ -413,6 +413,14 @@ window.openConv = async (cid, otherId, otherName, otherRole) => {
           ? `<span class="view-once-done"><i class="ti ti-eye-off"></i> تم الاستماع</span>`
           : `<button class="view-once-btn" onclick="viewOnceOpen('${activeConvId}','${m.id}','${m.url}','audio')"><i class="ti ti-player-play"></i> اضغطي للاستماع مرة واحدة</button>`)
       : `<audio controls controlsList="nodownload" src="${m.url}"></audio>`)
+  : m.type === 'file'
+  ? `<a href="${m.fileUrl}" target="_blank" style="display:flex;align-items:center;gap:8px;text-decoration:none;color:inherit;background:rgba(0,0,0,0.06);padding:8px 12px;border-radius:10px;min-width:160px;max-width:220px">
+      <i class="ti ti-paperclip" style="font-size:22px;flex-shrink:0"></i>
+      <div style="overflow:hidden">
+        <div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${m.fileName || 'ملف'}</div>
+        <div style="font-size:11px;opacity:0.7">${m.fileSize || ''}</div>
+      </div>
+    </a>`
   : `<span class="msg-text">${escapeHtml(m.text || '')}</span>`}
                 ${m.viewOnce && mine ? `<span class="view-once-tag"><i class="ti ti-flame"></i> مرة واحدة</span>` : ''}
                 <span class="msg-time">${time}${mine ? ` <i class="ti ti-${seen ? 'checks' : 'check'}" style="color:${seen ? 'var(--gold,#c9a227)' : 'rgba(255,255,255,0.6)'};font-size:13px"></i>` : ''}</span>
@@ -634,6 +642,28 @@ window.toggleViewOnce = () => {
     btn.style.opacity = viewOnceMode ? '1' : '0.5';
     btn.style.color   = viewOnceMode ? 'var(--gold)' : '';
     btn.title = viewOnceMode ? 'مرة واحدة (مفعّل)' : 'مرة واحدة';
+  }
+};
+
+window.sendFile = async (input) => {
+  const file = input.files[0];
+  if (!file || !activeConvId) return;
+  input.value = '';
+  try {
+    const url = await uploadMedia(file, 'raw');
+    const fileName = file.name;
+    const fileSize = file.size > 1024*1024
+      ? (file.size/1024/1024).toFixed(1) + ' MB'
+      : (file.size/1024).toFixed(0) + ' KB';
+    await sendMsgToFirestore(activeConvId, {
+      type: 'file',
+      fileUrl: url,
+      fileName,
+      fileSize,
+      text: `📎 ${fileName} (${fileSize})`
+    });
+  } catch(e) {
+    alert('فشل رفع الملف: ' + e.message);
   }
 };
 
