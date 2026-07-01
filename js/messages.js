@@ -719,6 +719,48 @@ let audioChunks   = [];
 let recordInterval = null;
 let recordSeconds  = 0;
 
+// ── إرسال ملف (PDF, Word, Excel, PPT...) ──────────────────────────────────────
+window.sendFile = async (input) => {
+  const file = input.files[0];
+  if (!file || !activeConvId) return;
+  input.value = '';
+
+  // رفع الملف على Cloudinary كـ raw resource
+  const fd = new FormData();
+  fd.append('file', file);
+  fd.append('upload_preset', UPLOAD_PRESET);
+  const res  = await fetch(
+    `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/raw/upload`,
+    { method: 'POST', body: fd }
+  );
+  const data = await res.json();
+  if (!data.secure_url) { alert('فشل رفع الملف'); return; }
+
+  const url      = data.secure_url;
+  const fileName = file.name;
+  const fileSize = (file.size / 1024).toFixed(1) + ' KB';
+
+  const otherId = allConvs.find(cv => cv.id === activeConvId)?.otherId;
+  await addDoc(collection(db, 'conversations', activeConvId, 'messages'), {
+    type: 'file', url, text: `📎 ${fileName}`,
+    fileName, fileSize,
+    senderId:   currentUser.uid,
+    senderName: currentUserData?.role === 'admin' ? 'إدارة متين' : (currentUserData?.name || ''),
+    senderRole: currentUserData?.role || '',
+    sentAt:     serverTimestamp(),
+  });
+
+  // تحديث lastMsg + unread
+  if (otherId) {
+    await setDoc(doc(db, 'conversations', activeConvId), {
+      lastMsg: `📎 ${fileName}`,
+      lastAt:  serverTimestamp(),
+      [`unread.${otherId}`]: (allConvs.find(cv=>cv.id===activeConvId)?.unread?.[otherId] ?? 0) + 1,
+      [`unread.${currentUser.uid}`]: 0,
+    }, { merge: true });
+  }
+};
+
 window.toggleRecording = async () => {
   const btn = document.getElementById('recordBtn');
   const indicator = document.getElementById('recordingIndicator');
