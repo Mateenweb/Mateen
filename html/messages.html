@@ -143,8 +143,12 @@
           <!-- Buttons الصوت  and the Image (للمعWhenت وSupervisors  and the إدارة only) -->
           <div id="mediaButtons" style="display:none;gap:4px;align-items:center;flex-shrink:0;">
             <input type="file" id="imgFileInput" accept="image/*" style="display:none" onchange="sendImage(this)">
+            <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.zip" style="display:none" onchange="sendFile(this)">
             <button class="msg-media-btn" onclick="document.getElementById('imgFileInput').click()" title="إرسال صورة">
               <i class="ti ti-photo"></i>
+            </button>
+            <button class="msg-media-btn" onclick="document.getElementById('fileInput').click()" title="إرسال ملف">
+              <i class="ti ti-paperclip"></i>
             </button>
             <button class="msg-media-btn" id="recordBtn" onclick="toggleRecording()" title="تسجيل صوتي">
               <i class="ti ti-microphone"></i>
