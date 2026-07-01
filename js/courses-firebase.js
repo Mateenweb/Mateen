@@ -989,3 +989,9 @@ window.handleAudioUpload = async (input) => {
     alert('فشل رفع الصوت: ' + e.message);
   }
 };
+
+// ربط onchange للـ select بعد تحميل الـ module
+document.addEventListener('DOMContentLoaded', () => {
+  const typeSelect = document.getElementById('newCourseType');
+  if (typeSelect) typeSelect.addEventListener('change', () => onCourseTypeChange(typeSelect));
+});
