@@ -332,6 +332,12 @@ window.openConv = async (cid, otherId, otherName, otherRole) => {
   const convEl = document.getElementById('msgConv');
   convEl.style.display = 'flex';
 
+  // على الموبايل — اخبي القايمة وظهّر الشات
+  if (window.innerWidth <= 700) {
+    document.getElementById('msgSidebar')?.classList.add('mob-hidden');
+    document.querySelector('.msg-main')?.classList.add('mob-visible');
+  }
+
   // Header
   document.getElementById('convHeaderAvatar').innerHTML = avatarHtml(otherName, otherRole, 38);
   document.getElementById('convName').textContent  = otherName;
