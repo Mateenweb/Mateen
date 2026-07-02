@@ -96,8 +96,10 @@ onAuthStateChanged(auth, async user => {
   currentUser     = user;
   currentUserData = data;
 
-  document.getElementById('authGate').style.display   = 'none';
-  document.getElementById('mainContent').style.display = 'block';
+  const authGateEl = document.getElementById('authGate');
+  const mainContentEl = document.getElementById('mainContent');
+  if (authGateEl) authGateEl.style.display = 'none';
+  if (mainContentEl) mainContentEl.style.display = 'block';
 
   // Show role badge in header
   const roleBadge = document.getElementById('myRoleBadge');

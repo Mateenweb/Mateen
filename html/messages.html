@@ -227,7 +227,8 @@ window.addEventListener('load', () => {
     const main = document.querySelector('.msg-main');
     if (main) main.classList.remove('mob-visible');
   }
-  document.getElementById('convList').addEventListener('click', e => {
+  const convListEl = document.getElementById('convList');
+  if (convListEl) convListEl.addEventListener('click', e => {
     if (e.target.closest('.conv-item')) setTimeout(mobOpenChat, 60);
   });
 });
