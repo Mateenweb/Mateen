@@ -642,14 +642,19 @@ body:has(.msg-layout) {
   }
 
   .msg-main {
-    display: none !important;
     position: absolute;
     inset: 0;
-    z-index: 3;
+    z-index: 0;
+    display: flex !important;
+    transform: translateX(0);
+    opacity: 0.4;
+    pointer-events: none;
   }
 
   .msg-main.mob-visible {
-    display: flex !important;
+    z-index: 3;
+    opacity: 1;
+    pointer-events: auto;
   }
 
   .mob-back-btn { display: flex !important; }
