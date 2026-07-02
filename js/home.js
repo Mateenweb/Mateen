@@ -181,7 +181,20 @@ window.obInstallApp = async (src) => {
     }
     window.deferredInstallPrompt = null;
   } else {
-    if (btn) btn.innerHTML = '<i class="ti ti-info-circle"></i> أضيفيه من قائمة المشاركة';
+    const isAndroid = /android/i.test(navigator.userAgent);
+    if (isAndroid) {
+      // Android: حمّل الـ APK مباشرة
+      const a = document.createElement('a');
+      a.href = 'https://mateenweb.github.io/Mateen/mateen.apk';
+      a.download = 'برنامج متين.apk';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      if (btn) btn.innerHTML = '<i class="ti ti-download"></i> جارٍ التحميل...';
+    } else {
+      // iOS: أرشدي المستخدمة
+      if (btn) btn.innerHTML = '<i class="ti ti-info-circle"></i> Safari ← المشاركة ← أضف للشاشة';
+    }
   }
 };
 
