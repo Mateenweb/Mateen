@@ -647,11 +647,15 @@ body:has(.msg-layout) {
     display: flex;
     transform: translateX(-100%);
     transition: transform 0.25s ease;
+    visibility: hidden;
+    pointer-events: none;
   }
 
   .msg-main.mob-visible {
     z-index: 3;
     transform: translateX(0);
+    visibility: visible;
+    pointer-events: auto;
   }
 
   .mob-back-btn { display: flex !important; }
