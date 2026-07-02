@@ -212,7 +212,7 @@ let isAdmin   = false;
 let isMember  = false; // مسجلة (أي دور)
 
 // ── تحميل المواعيد المهمة (للجميع بدون login) ──────────────
-onSnapshot(query(collection(db,'events'), orderBy('createdAt','desc')), snap => {
+onSnapshot(query(collection(db,'events'), orderBy('order','asc')), snap => {
   const el = document.getElementById('eventsList');
   if (!el) return;
   if (snap.empty) { el.innerHTML = '<div class="tl-item"><div class="tl-dot"></div><div><div class="tl-label" style="color:#aaa">لا توجد مواعيد</div></div></div>'; return; }
