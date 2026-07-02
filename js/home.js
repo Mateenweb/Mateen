@@ -173,7 +173,20 @@ window.obInstallApp = async (src) => {
   const btn = src === 'sb'
     ? document.querySelector('#notifBtnWrap button:last-child')
     : document.getElementById('ob-install-btn');
-  if (window.deferredInstallPrompt) {
+  const isAndroid = /android/i.test(navigator.userAgent);
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+
+  if (isAndroid) {
+    const a = document.createElement('a');
+    a.href = 'https://mateenweb.github.io/Mateen/mateen.apk';
+    a.download = 'mateen.apk';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    if (btn) btn.innerHTML = '<i class="ti ti-download"></i> جارٍ التحميل...';
+  } else if (isIOS) {
+    alert('لتثبيت التطبيق على iPhone:\n1. افتحي الموقع في Safari\n2. اضغطي زرار المشاركة (□↑)\n3. اختاري "أضف إلى الشاشة الرئيسية"');
+  } else if (window.deferredInstallPrompt) {
     window.deferredInstallPrompt.prompt();
     const { outcome } = await window.deferredInstallPrompt.userChoice;
     if (outcome === 'accepted') {
@@ -181,20 +194,7 @@ window.obInstallApp = async (src) => {
     }
     window.deferredInstallPrompt = null;
   } else {
-    const isAndroid = /android/i.test(navigator.userAgent);
-    if (isAndroid) {
-      // Android: حمّل الـ APK مباشرة
-      const a = document.createElement('a');
-      a.href = 'https://mateenweb.github.io/Mateen/mateen.apk';
-      a.download = 'برنامج متين.apk';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      if (btn) btn.innerHTML = '<i class="ti ti-download"></i> جارٍ التحميل...';
-    } else {
-      // iOS: أرشدي المستخدمة
-      if (btn) btn.innerHTML = '<i class="ti ti-info-circle"></i> Safari ← المشاركة ← أضف للشاشة';
-    }
+    if (btn) btn.innerHTML = '<i class="ti ti-check"></i> مثبت بالفعل';
   }
 };
 
