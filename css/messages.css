@@ -265,7 +265,7 @@ body:has(.msg-layout) {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  background: var(--beige, #faf7f2);
+  background: #f0ebe3;
 }
 
 .msg-empty-state {
@@ -641,17 +641,14 @@ body:has(.msg-layout) {
   }
 
   .msg-main {
+    display: none !important;
     position: absolute;
     inset: 0;
-    z-index: 0;
-    display: flex;
-    transform: translateX(-100%);
-    transition: transform 0.25s ease;
+    z-index: 3;
   }
 
   .msg-main.mob-visible {
-    z-index: 3;
-    transform: translateX(0);
+    display: flex !important;
   }
 
   .mob-back-btn { display: flex !important; }
