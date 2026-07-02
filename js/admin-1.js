@@ -1098,7 +1098,7 @@ onSnapshot(query(collection(db,'news'), orderBy('createdAt','desc')), snap => {
 });
 
 // ── تحميل المواعيد ────────────────────────────────────
-onSnapshot(query(collection(db,'events'), orderBy('createdAt','desc')), snap => {
+onSnapshot(query(collection(db,'events'), orderBy('createdAt','asc')), snap => {
   const el = document.getElementById('eventsAdminList');
   if (!el) return;
   if (snap.empty) {
