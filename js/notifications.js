@@ -361,7 +361,7 @@ async function showMissedNotifications(userId) {
       showNotifToast(n.title || 'إشعار جديد', n.body || '', n.url || '');
       playSound();
       // امسح بعد الWidth/Display
-      d.ref.delete().catch(() => {});
+      deleteDoc(d.ref).catch(() => {});
     });
   } catch(e) {
     console.warn('[Notif] missed notifications error:', e);
