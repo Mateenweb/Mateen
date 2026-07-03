@@ -635,6 +635,9 @@ body:has(.msg-layout) {
     inset: 0;
     z-index: 2;
     transition: transform 0.25s ease;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
   }
 
   .msg-sidebar.mob-hidden {
