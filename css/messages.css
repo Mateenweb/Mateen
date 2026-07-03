@@ -645,13 +645,12 @@ body:has(.msg-layout) {
     position: absolute;
     inset: 0;
     z-index: 0;
-    display: flex !important;
+    display: none;
     transform: translateX(0);
-    opacity: 0.4;
-    pointer-events: none;
   }
 
   .msg-main.mob-visible {
+    display: flex !important;
     z-index: 3;
     opacity: 1;
     pointer-events: auto;
