@@ -1,5 +1,5 @@
 // ── Mateen PWA Service Worker ──────────────────────────────────
-const CACHE_NAME = 'mateen-v1';
+const CACHE_NAME = 'mateen-v2'; // ⬆️ رفع رقم النسخة يجبر تحديث الكاش القديم
 const ASSETS = [
   '/Mateen/html/home.html',
   '/Mateen/html/login.html',
@@ -26,15 +26,32 @@ self.addEventListener('activate', e => {
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
   if (e.request.url.includes('firestore') || e.request.url.includes('firebase')) return;
-  e.respondWith(
-    caches.match(e.request).then(cached => cached || fetch(e.request).then(res => {
-      if (res && res.status === 200 && res.type === 'basic') {
-        const clone = res.clone();
-        caches.open(CACHE_NAME).then(c => c.put(e.request, clone));
-      }
-      return res;
-    }))
-  );
+
+  const isCodeFile = /\.(js|html|css)(\?|$)/.test(e.request.url);
+
+  if (isCodeFile) {
+    // Network-first: نجيب أحدث نسخة دايمًا لو فيه إنترنت، ونستخدم الكاش بس لو الشبكة فشلت (offline)
+    e.respondWith(
+      fetch(e.request).then(res => {
+        if (res && res.status === 200 && res.type === 'basic') {
+          const clone = res.clone();
+          caches.open(CACHE_NAME).then(c => c.put(e.request, clone));
+        }
+        return res;
+      }).catch(() => caches.match(e.request))
+    );
+  } else {
+    // Cache-first للصور والملفات الثابتة اللي مش بتتغير كتير
+    e.respondWith(
+      caches.match(e.request).then(cached => cached || fetch(e.request).then(res => {
+        if (res && res.status === 200 && res.type === 'basic') {
+          const clone = res.clone();
+          caches.open(CACHE_NAME).then(c => c.put(e.request, clone));
+        }
+        return res;
+      }))
+    );
+  }
 });
 
 // Firebase Messaging
