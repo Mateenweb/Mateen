@@ -245,7 +245,7 @@ function chipAtt(v) {
  * studentsData = [
  *   { name, sessions: [ { date, day, subjects:{قرآن:'present'|'absent'|'',...} } ] }
  * ]
- * mode: 'perStudent' = Page لكل طالبة | 'combined' = Schedule/Table not/don'tترك
+ * mode: 'perStudent' = صفحة لكل طالبة | 'perDay' = صفحة لكل يوم (كل الطالبات والمواد) | 'perSubject' = صفحة لكل مادة
  */
 function buildAttPages(studentsData, mode) {
   // اجمع كل Subjects الموجودة
@@ -257,8 +257,20 @@ function buildAttPages(studentsData, mode) {
   );
   const subjects = [...allSubjects];
 
+  // كل التواريخ المميزة عبر كل الطالبات (مستخدمة في perDay و perSubject)
+  function collectAllDates() {
+    const dateMap = {};
+    studentsData.forEach(st =>
+      (st.sessions||[]).forEach(se => {
+        const key = se.date||'';
+        if (!dateMap[key]) dateMap[key] = { date: se.date||'', day: se.day||'' };
+      })
+    );
+    return Object.values(dateMap).sort((a,b)=>a.date<b.date?-1:1);
+  }
+
   if (mode === 'perStudent') {
-    // ── Page لكل طالبة ──────────────────────────────
+    // ── صفحة لكل طالبة ──────────────────────────────
     return studentsData.map(st => {
       const sessions = [...(st.sessions || [])].sort((a,b) => (a.date||'') < (b.date||'') ? -1 : 1);
       const subjs = subjects.length ? subjects : [...new Set(sessions.flatMap(se => Object.keys(se.subjects||{})))];
@@ -286,18 +298,80 @@ function buildAttPages(studentsData, mode) {
       </div>`;
     }).join('');
 
-  } else {
-    // ── Schedule/Table not/don'tترك — Column لكل طالبة ─────────────────
-    // نجمع كل الجلسات (date+day) المميزة
-    const dateMap = {};
-    studentsData.forEach(st =>
-      (st.sessions||[]).forEach(se => {
-        const key = se.date||'';
-        if (!dateMap[key]) dateMap[key] = { date: se.date||'', day: se.day||'' };
-      })
-    );
-    const allDates = Object.values(dateMap).sort((a,b)=>a.date<b.date?-1:1);
+  } else if (mode === 'perDay') {
+    // ── صفحة لكل يوم — كل الطالبات وكل المواد في جدول واحد ──────
+    const allDates = collectAllDates();
+    if (!allDates.length) {
+      return `<div class="att-page"><div class="att-title">سجل الحضور والغياب</div>
+        <p style="text-align:center;color:#999;padding:30px">لا توجد جلسات مسجلة</p></div>`;
+    }
 
+    return allDates.map(dd => {
+      const headCells = `<th>#</th><th class="td-name">الطالبة</th>` + subjects.map(s=>`<th>${s}</th>`).join('') + `<th>الإجمالي</th>`;
+      let totalP = 0, totalA = 0;
+      const rows = studentsData.map((st, i) => {
+        const se = (st.sessions||[]).find(x => (x.date||'') === (dd.date||''));
+        const subjCells = subjects.map(s => `<td>${chipAtt(se ? (se.subjects||{})[s]||'' : '')}</td>`).join('');
+        const p = se ? Object.values(se.subjects||{}).filter(v=>v==='present').length : 0;
+        const a = se ? Object.values(se.subjects||{}).filter(v=>v==='absent').length : 0;
+        totalP += p; totalA += a;
+        const total = se ? `${p}✔ / ${a}✖` : '<span class="chip-empty">—</span>';
+        return `<tr><td>${i+1}</td><td class="td-name">${st.name}</td>${subjCells}<td>${total}</td></tr>`;
+      }).join('');
+
+      return `<div class="att-page">
+        <div class="att-header"><div class="att-prog">📖 برنامج متين العلمي</div></div>
+        <div class="att-title">سجل الحضور والغياب</div>
+        <div class="att-subtitle">${dd.day || ''} — ${dd.date || ''}</div>
+        <table>
+          <thead><tr>${headCells}</tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+        <div class="att-footer"><span>برنامج متين العلمي</span><span>◆</span><span>${totalP}✔ / ${totalA}✖</span></div>
+      </div>`;
+    }).join('');
+
+  } else if (mode === 'perSubject') {
+    // ── صفحة لكل مادة — كل الطالبات وكل التواريخ لنفس المادة ──────
+    const allDates = collectAllDates();
+    const subjList = subjects.length ? subjects : ['—'];
+
+    if (!allDates.length) {
+      return `<div class="att-page"><div class="att-title">سجل الحضور والغياب</div>
+        <p style="text-align:center;color:#999;padding:30px">لا توجد جلسات مسجلة</p></div>`;
+    }
+
+    return subjList.map(subj => {
+      const nameHeads = studentsData.map(st => `<th>${st.name}</th>`).join('');
+      const headCells = `<th>#</th><th>اليوم</th><th>التاريخ</th>${nameHeads}`;
+
+      let totalP = 0, totalA = 0;
+      const rows = allDates.map((dd, i) => {
+        const cells = studentsData.map(st => {
+          const se = (st.sessions||[]).find(x=>(x.date||'')===(dd.date||''));
+          const v = se ? (se.subjects||{})[subj] : undefined;
+          if (v === 'present') totalP++;
+          if (v === 'absent') totalA++;
+          return `<td>${chipAtt(v||'')}</td>`;
+        }).join('');
+        return `<tr><td>${i+1}</td><td>${dd.day}</td><td>${dd.date}</td>${cells}</tr>`;
+      }).join('');
+
+      return `<div class="att-page">
+        <div class="att-header"><div class="att-prog">📖 برنامج متين العلمي</div></div>
+        <div class="att-title">سجل الحضور والغياب</div>
+        <div class="att-subtitle">مادة: ${subj}</div>
+        <table>
+          <thead><tr>${headCells}</tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+        <div class="att-footer"><span>برنامج متين العلمي</span><span>◆</span><span>${totalP}✔ / ${totalA}✖</span></div>
+      </div>`;
+    }).join('');
+
+  } else {
+    // ── (قديم) جدول مشترك ملخّص — يُبقى للتوافق لو استُدعي بهذا الاسم ──
+    const allDates = collectAllDates();
     const nameHeads = studentsData.map(st => `<th>${st.name}</th>`).join('');
     const headCells = `<th>#</th><th>اليوم</th><th>التاريخ</th>${nameHeads}`;
 
