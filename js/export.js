@@ -245,7 +245,7 @@ function chipAtt(v) {
  * studentsData = [
  *   { name, sessions: [ { date, day, subjects:{قرآن:'present'|'absent'|'',...} } ] }
  * ]
- * mode: 'perStudent' = صفحة لكل طالبة | 'perDay' = صفحة لكل يوم (كل الطالبات والمواد) | 'perSubject' = صفحة لكل مادة
+ * mode: 'perStudent' = صفحة لكل طالبة | 'perWeek' = صفحة لكل أسبوع (كل الطالبات والمواد) | 'perSubject' = صفحة لكل مادة
  */
 function buildAttPages(studentsData, mode) {
   // اجمع كل Subjects الموجودة
@@ -257,7 +257,7 @@ function buildAttPages(studentsData, mode) {
   );
   const subjects = [...allSubjects];
 
-  // كل التواريخ المميزة عبر كل الطالبات (مستخدمة في perDay و perSubject)
+  // كل التواريخ المميزة عبر كل الطالبات (مستخدمة في perWeek و perSubject)
   function collectAllDates() {
     const dateMap = {};
     studentsData.forEach(st =>
@@ -298,31 +298,50 @@ function buildAttPages(studentsData, mode) {
       </div>`;
     }).join('');
 
-  } else if (mode === 'perDay') {
-    // ── صفحة لكل يوم — كل الطالبات وكل المواد في جدول واحد ──────
+  } else if (mode === 'perWeek') {
+    // ── صفحة لكل أسبوع — كل الطالبات وكل المواد، مجمّعة بالأسبوع (الأحد → السبت) ──
     const allDates = collectAllDates();
     if (!allDates.length) {
       return `<div class="att-page"><div class="att-title">سجل الحضور والغياب</div>
         <p style="text-align:center;color:#999;padding:30px">لا توجد جلسات مسجلة</p></div>`;
     }
 
-    return allDates.map(dd => {
-      const headCells = `<th>#</th><th class="td-name">الطالبة</th>` + subjects.map(s=>`<th>${s}</th>`).join('') + `<th>الإجمالي</th>`;
-      let totalP = 0, totalA = 0;
-      const rows = studentsData.map((st, i) => {
-        const se = (st.sessions||[]).find(x => (x.date||'') === (dd.date||''));
-        const subjCells = subjects.map(s => `<td>${chipAtt(se ? (se.subjects||{})[s]||'' : '')}</td>`).join('');
-        const p = se ? Object.values(se.subjects||{}).filter(v=>v==='present').length : 0;
-        const a = se ? Object.values(se.subjects||{}).filter(v=>v==='absent').length : 0;
-        totalP += p; totalA += a;
-        const total = se ? `${p}✔ / ${a}✖` : '<span class="chip-empty">—</span>';
-        return `<tr><td>${i+1}</td><td class="td-name">${st.name}</td>${subjCells}<td>${total}</td></tr>`;
-      }).join('');
+    function getWeekRange(dateStr) {
+      const d = new Date(dateStr + 'T00:00:00');
+      const dow = d.getDay(); // 0 = الأحد
+      const start = new Date(d); start.setDate(d.getDate() - dow);
+      const end = new Date(start); end.setDate(start.getDate() + 6);
+      const fmt = dt => dt.toISOString().split('T')[0];
+      return { start: fmt(start), end: fmt(end) };
+    }
+
+    const weekMap = {};
+    allDates.forEach(dd => {
+      const { start, end } = getWeekRange(dd.date);
+      if (!weekMap[start]) weekMap[start] = { start, end, dates: [] };
+      weekMap[start].dates.push(dd);
+    });
+    const weeks = Object.values(weekMap).sort((a,b) => a.start < b.start ? -1 : 1);
+
+    return weeks.map(week => {
+      const headCells = `<th>#</th><th>اليوم</th><th>التاريخ</th><th class="td-name">الطالبة</th>` + subjects.map(s=>`<th>${s}</th>`).join('') + `<th>الإجمالي</th>`;
+      let totalP = 0, totalA = 0, rowNum = 0;
+      const rows = week.dates.map(dd =>
+        studentsData.map(st => {
+          const se = (st.sessions||[]).find(x => (x.date||'') === dd.date);
+          const subjCells = subjects.map(s => `<td>${chipAtt(se ? (se.subjects||{})[s]||'' : '')}</td>`).join('');
+          const p = se ? Object.values(se.subjects||{}).filter(v=>v==='present').length : 0;
+          const a = se ? Object.values(se.subjects||{}).filter(v=>v==='absent').length : 0;
+          totalP += p; totalA += a; rowNum++;
+          const total = se ? `${p}✔ / ${a}✖` : '<span class="chip-empty">—</span>';
+          return `<tr><td>${rowNum}</td><td>${dd.day||''}</td><td>${dd.date||''}</td><td class="td-name">${st.name}</td>${subjCells}<td>${total}</td></tr>`;
+        }).join('')
+      ).join('');
 
       return `<div class="att-page">
         <div class="att-header"><div class="att-prog">📖 برنامج متين العلمي</div></div>
         <div class="att-title">سجل الحضور والغياب</div>
-        <div class="att-subtitle">${dd.day || ''} — ${dd.date || ''}</div>
+        <div class="att-subtitle">الأسبوع من ${week.start} إلى ${week.end}</div>
         <table>
           <thead><tr>${headCells}</tr></thead>
           <tbody>${rows}</tbody>
