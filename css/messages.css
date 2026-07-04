@@ -32,7 +32,6 @@ body:has(.msg-layout) {
   padding: 18px 16px 12px;
   border-bottom: 1px solid var(--border, #e8dcc8);
   background: var(--beige, #faf7f2);
-  flex-shrink: 0;
 }
 
 .msg-sidebar-top {
@@ -134,7 +133,6 @@ body:has(.msg-layout) {
   overflow-y: auto;
   flex: 1;
   padding: 4px 0;
-  min-height: 0;
 }
 
 #convList::-webkit-scrollbar { width: 4px; }
@@ -640,7 +638,6 @@ body:has(.msg-layout) {
     display: flex;
     flex-direction: column;
     height: 100%;
-    min-height: 0;
   }
 
   .msg-sidebar.mob-hidden {
