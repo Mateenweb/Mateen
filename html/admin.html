@@ -356,6 +356,7 @@
 <button class="btn-add-row" onclick="addStudentRow()"><i class="ti ti-plus"></i> إضافة طالبة</button>
 <button class="btn-add-row" style="background:linear-gradient(135deg,#2c1a0e,#5c3d2e);color:#e8c96a;border:none;" onclick="openBulkGradeModal()"><i class="ti ti-plus"></i> إضافة اختبار جماعي</button>
       <button class="btn-add-row" style="background:transparent;border:1px solid #e74c3c;color:#e74c3c;" onclick="openDeleteExamModal()"><i class="ti ti-trash"></i> حذف اختبار جماعي</button>
+      <button class="btn-add-row" style="background:transparent;border:1px solid #e74c3c;color:#e74c3c;" onclick="openResetDataModal()"><i class="ti ti-database-off"></i> مسح كل البيانات</button>
     <button class="btn-add-row btn-export-word" onclick="openExportModal()"><i class="ti ti-download"></i> تصدير Word / PDF</button>
 <button class="btn-add-row btn-export-att" onclick="openAttModal()"><i class="ti ti-clipboard-list"></i> تصدير الحضور والغياب</button>
 <a href="stats.html" class="btn-add-row btn-export-stats"><i class="ti ti-chart-bar"></i> الإحصائيات</a>
@@ -977,6 +978,32 @@ function formatSize(bytes) {
       <div id="examListToDelete" style="display:flex;flex-direction:column;gap:8px;max-height:300px;overflow-y:auto">
         <div style="text-align:center;color:var(--text-mid);font-size:13px;padding:20px">جارٍ التحميل...</div>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ Modal مسح كل البيانات ══ -->
+<div id="resetDataModal" class="modal-overlay" style="display:none" onclick="if(event.target===this)this.style.display='none'">
+  <div class="modal-box" style="width:min(94vw,420px)">
+    <div class="modal-head">
+      <span class="m-title">⚠️ مسح البيانات</span>
+      <button class="m-close" onclick="document.getElementById('resetDataModal').style.display='none'">✕</button>
+    </div>
+    <div class="modal-body" style="display:flex;flex-direction:column;gap:12px">
+      <p style="font-size:13px;color:#e74c3c;font-weight:600">تحذير: هذه العملية لا يمكن التراجع عنها!</p>
+      <p style="font-size:12px;color:var(--text-mid)">اختاري نوع البيانات اللي عاوزة تمسحيها من عند كل الطالبات (بما فيهم المؤرشفين).</p>
+      <button onclick="resetAllStudentData('grades');this.closest('.modal-overlay').style.display='none'" 
+        style="background:transparent;border:1px solid #e74c3c;color:#e74c3c;border-radius:10px;padding:10px;font-family:inherit;font-size:13px;cursor:pointer;font-weight:600">
+        🗑️ مسح كل الدرجات فقط
+      </button>
+      <button onclick="resetAllStudentData('sessions');this.closest('.modal-overlay').style.display='none'"
+        style="background:transparent;border:1px solid #e74c3c;color:#e74c3c;border-radius:10px;padding:10px;font-family:inherit;font-size:13px;cursor:pointer;font-weight:600">
+        🗑️ مسح كل الحضور والغياب فقط
+      </button>
+      <button onclick="resetAllStudentData('all');this.closest('.modal-overlay').style.display='none'"
+        style="background:#e74c3c;color:white;border:none;border-radius:10px;padding:10px;font-family:inherit;font-size:13px;cursor:pointer;font-weight:700">
+        🗑️ مسح كل الدرجات والحضور معاً
+      </button>
     </div>
   </div>
 </div>
