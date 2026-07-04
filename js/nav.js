@@ -66,9 +66,35 @@ function _navIsLoggedIn() {
 }
 
 // Auto-run if nav-placeholder exists and renderNav isn't called manually
-document.addEventListener('DOMContentLoaded', function() {
+document.async function _addAdminBtn() {
+  const page = location.pathname.split('/').pop() || 'home.html';
+  if (page !== 'home.html' && page !== '') return;
+  try {
+    const keys = Object.keys(localStorage).filter(k => k.startsWith('firebase:authUser:'));
+    if (!keys.length) return;
+    const userData = JSON.parse(localStorage.getItem(keys[0]));
+    if (!userData?.uid) return;
+    const { initializeApp, getApps } = await import('https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js');
+    const { getFirestore, doc, getDoc } = await import('https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js');
+    const { FIREBASE_CONFIG } = await import('./config.js');
+    const app = getApps().length ? getApps()[0] : initializeApp(FIREBASE_CONFIG);
+    const db = getFirestore(app);
+    const snap = await getDoc(doc(db, 'users', userData.uid));
+    if (!snap.exists() || snap.data().role !== 'admin') return;
+    const navBtns = document.querySelector('.nav-btns');
+    if (!navBtns) return;
+    const btn = document.createElement('a');
+    btn.href = 'admin.html';
+    btn.className = 'btn-admin';
+    btn.innerHTML = '<i class="ti ti-dashboard"></i> لوحة الإدارة';
+    navBtns.prepend(btn);
+  } catch(e) {}
+}
+
+addEventListener('DOMContentLoaded', function() {
   if (document.getElementById('nav-placeholder')) {
     const page = location.pathname.split('/').pop() || 'home.html';
     renderNav(page);
+    _addAdminBtn();
   }
 });
