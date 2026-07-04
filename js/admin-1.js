@@ -1475,13 +1475,128 @@ function showImportPreview() {
     if (importedGrades[norm]) {
       const input = document.querySelector(`.bg-score[data-id="${s.id}"]`);
       if (input) input.value = importedGrades[norm].score;
+    } else {
+      // Check for similar names (first name match)
+      const firstName = s.name.split(' ')[0];
+      const similar = Object.values(importedGrades).find(g => 
+        g.original.split(' ')[0] === firstName && 
+        normalizeName(g.original.split(' ')[0]) === normalizeName(firstName)
+      );
+      
+      if (similar) {
+        const confirm = setTimeout(() => {
+          showSimilarNameConfirm(s, similar);
+        }, 0);
+      }
     }
   });
 }
+
+function showSimilarNameConfirm(student, importedGrade) {
+  const modal = document.createElement('div');
+  modal.style.cssText = `
+    position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:2000;
+    display:flex;align-items:center;justify-content:center;
+  `;
+  modal.innerHTML = `
+    <div style="background:#fff;border-radius:14px;padding:24px;max-width:420px;width:90vw;box-shadow:0 8px 32px rgba(0,0,0,0.25)">
+      <div style="font-size:14px;font-weight:700;color:var(--green-dark);margin-bottom:12px">
+        🔍 تطابق محتمل
+      </div>
+      <div style="font-size:13px;color:var(--text-dark);margin-bottom:16px;line-height:1.8">
+        هل الطالبة <strong>${esc(student.name)}</strong> هي نفسها <strong>${esc(importedGrade.original)}</strong>؟<br>
+        <span style="color:var(--text-mid);font-size:12px">الدرجة: ${importedGrade.score}</span>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end">
+        <button onclick="this.closest('[role=dialog]')?.remove()" style="background:var(--beige2);border:1px solid var(--border);border-radius:8px;padding:8px 20px;font-family:inherit;cursor:pointer;font-size:13px">لا</button>
+        <button onclick="confirmSimilarName('${student.id}',${importedGrade.score});this.closest('[role=dialog]')?.remove()" style="background:var(--green-dark);color:#fff;border:none;border-radius:8px;padding:8px 20px;font-family:inherit;cursor:pointer;font-size:13px;font-weight:600">نعم ✓</button>
+      </div>
+    </div>
+  `;
+  modal.setAttribute('role', 'dialog');
+  document.body.appendChild(modal);
+}
+
+window.confirmSimilarName = (studentId, score) => {
+  const input = document.querySelector(`.bg-score[data-id="${studentId}"]`);
+  if (input) input.value = score;
+};
 
 window.clearExcelImport = () => {
   importedGrades = {};
   document.getElementById('bgExcelFile').value = '';
   document.getElementById('bgPreviewSection').style.display = 'none';
   renderBGStudents();
+};
+
+// ════════════════════════════════════════════════════════════════
+// حذف اختبار جماعي من عند كل الطالبات
+window.openDeleteExamModal = async () => {
+  const modal = document.getElementById('deleteExamModal');
+  const list  = document.getElementById('examListToDelete');
+  if (!modal) { alert('المودال مش موجود'); return; }
+  
+  modal.style.display = 'flex';
+  list.innerHTML = '<div style="text-align:center;color:var(--text-mid);font-size:13px;padding:20px">جارٍ التحميل...</div>';
+
+  try {
+    // جيب كل الطالبات وكل الاختبارات بتاعتهم
+    const studSnap = await getDocs(query(collection(db, 'students'), where('archived', '!=', true)));
+    const examMap = {}; // { label_subject: [ {studentId, gradeId} ] }
+
+    await Promise.all(studSnap.docs.map(async sDoc => {
+      const gradesSnap = await getDocs(collection(db, 'students', sDoc.id, 'grades'));
+      gradesSnap.docs.forEach(g => {
+        const data = g.data();
+        const key = `${data.label || 'اختبار'}|||${data.subject || ''}`;
+        if (!examMap[key]) examMap[key] = [];
+        examMap[key].push({ studentId: sDoc.id, gradeId: g.id });
+      });
+    }));
+
+    if (Object.keys(examMap).length === 0) {
+      list.innerHTML = '<div style="text-align:center;color:var(--text-mid);font-size:13px;padding:20px">لا توجد اختبارات</div>';
+      return;
+    }
+
+    list.innerHTML = Object.entries(examMap).map(([key, entries]) => {
+      const [label, subject] = key.split('|||');
+      return `<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:rgba(92,61,46,0.05);border-radius:10px;border:1px solid var(--border);margin-bottom:8px">
+        <div>
+          <div style="font-size:13px;font-weight:700">${esc(label)}</div>
+          ${subject ? `<div style="font-size:11px;color:var(--text-mid)">${esc(subject)}</div>` : ''}
+          <div style="font-size:11px;color:var(--text-mid)">📊 ${entries.length} طالبة</div>
+        </div>
+        <button onclick="deleteBulkExam('${encodeURIComponent(key)}')" style="background:none;border:1px solid #e74c3c;color:#e74c3c;border-radius:8px;padding:5px 12px;cursor:pointer;font-size:12px;font-family:inherit;white-space:nowrap">
+          <i class="ti ti-trash"></i> حذف
+        </button>
+      </div>`;
+    }).join('');
+
+    // حفظ examMap للاستخدام لاحقاً
+    window._examMapCache = examMap;
+  } catch(e) {
+    list.innerHTML = `<div style="color:#e74c3c;font-size:13px;padding:20px">❌ خطأ: ${e.message}</div>`;
+    console.error('openDeleteExamModal:', e);
+  }
+};
+
+window.deleteBulkExam = async (encodedKey) => {
+  const key = decodeURIComponent(encodedKey);
+  const [label] = key.split('|||');
+  if (!confirm(`متأكدة من حذف "${label}" من عند كل الطالبات؟`)) return;
+
+  const entries = window._examMapCache?.[key] || [];
+  if (!entries.length) { alert('مفيش بيانات'); return; }
+
+  try {
+    await Promise.all(entries.map(({ studentId, gradeId }) =>
+      deleteDoc(doc(db, 'students', studentId, 'grades', gradeId))
+    ));
+    showToast?.(`✅ تم حذف "${label}" من ${entries.length} طالبة`);
+    openDeleteExamModal(); // إعادة تحميل القايمة
+  } catch(e) {
+    showToast?.('❌ خطأ: ' + e.message);
+    console.error('deleteBulkExam:', e);
+  }
 };
