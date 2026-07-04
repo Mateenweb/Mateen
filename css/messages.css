@@ -622,7 +622,7 @@ body:has(.msg-layout) {
    ════════════════════════════════════ */
 @media (max-width: 700px) {
   .msg-layout {
-    height: calc(100dvh - 58px - 36px);
+    height: calc(100vh - 58px);
     position: relative;
     overflow: hidden;
   }
