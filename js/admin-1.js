@@ -1575,3 +1575,31 @@ window.deleteBulkExam = async (encodedKey) => {
     showToast('خطأ: ' + e.message);
   }
 };
+
+// ── مسح كل الدرجات والغياب من عند كل الطالبات ────────────────
+window.resetAllStudentData = async (type) => {
+  const typeName = type === 'grades' ? 'الدرجات' : type === 'sessions' ? 'الحضور والغياب' : 'الدرجات والحضور والغياب';
+  if (!confirm(`⚠️ متأكدة من مسح ${typeName} من عند كل الطالبات (بما فيهم المؤرشفين)؟\n\nهذا الإجراء لا يمكن التراجع عنه!`)) return;
+  if (!confirm(`تأكيد نهائي: حذف ${typeName} من عند كل الطالبات؟`)) return;
+
+  showToast('⏳ جارٍ المسح...');
+  try {
+    const snap = await getDocs(collection(db, 'students'));
+    const types = type === 'all' ? ['grades', 'sessions'] : [type];
+
+    await Promise.all(snap.docs.map(async sDoc => {
+      await Promise.all(types.map(async sub => {
+        const subSnap = await getDocs(collection(db, 'students', sDoc.id, sub));
+        await Promise.all(subSnap.docs.map(d => deleteDoc(doc(db, 'students', sDoc.id, sub, d.id))));
+      }));
+    }));
+
+    showToast(`✅ تم مسح ${typeName} من عند ${snap.size} طالبة`);
+  } catch(e) {
+    showToast('خطأ: ' + e.message);
+  }
+};
+
+window.openResetDataModal = () => {
+  document.getElementById('resetDataModal').style.display = 'flex';
+};
