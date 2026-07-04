@@ -7,7 +7,7 @@ import { getFirestore, collection, addDoc, deleteDoc, doc,
          onSnapshot, query, orderBy, where, getDoc, updateDoc, getDocs, serverTimestamp }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 import { FIREBASE_CONFIG } from "./config.js";
-import { exportWord, exportPdf } from "./export.js";
+import { exportWord, exportPdf, exportAttendanceWord, exportAttendancePdf } from "./export.js";
 import { fullDeleteUser } from "./delete-account.js";
 import { loadSubjectsFor } from "./subjects.js";
 
@@ -538,11 +538,28 @@ window.closeExportModal = () => {
   if (m) { m.classList.remove('show'); }
 };
 
-// ── Modal تصthisر Attendance  and the غياب ──────────────────────────────
+// ── Modal تصدير الحضور والغياب ──────────────────────────────
 window.openAttModal = () => {
   const m = document.getElementById('attModal');
   if (m) { m.classList.add('show'); }
+  renderAttStudentList();
 };
+
+function renderAttStudentList() {
+  const list = document.getElementById('attStudentList');
+  if (!list) return;
+  const students = allStudents.filter(s => s.name && s.name !== 'طالبة جديدة' && !s.archived);
+  if (!students.length) {
+    list.innerHTML = '<div class="stu-empty" style="padding:14px;text-align:center;color:var(--text-mid);font-size:13px">لا توجد طالبات</div>';
+    return;
+  }
+  list.innerHTML = students.map(s => `
+    <label class="att-stu-label">
+      <input type="checkbox" class="att-check" data-id="${s.id}" data-name="${esc(s.name||'')}" checked/>
+      <span>${esc(s.name||'—')}</span>
+    </label>
+  `).join('');
+}
 
 window.closeAttModal = () => {
   const m = document.getElementById('attModal');
@@ -554,8 +571,30 @@ window.attSelectAll = (checked) => {
 };
 
 window.doAttExport = async (type) => {
-  showToast('ميزة تصدير الحضور والغياب قيد التطوير قريباً');
-  window.closeAttModal();
+  const mode = document.getElementById('attMode')?.value || 'perStudent';
+  const checked = [...document.querySelectorAll('.att-check:checked')];
+
+  if (!checked.length) { showToast('اختاري طالبة واحدة على الأقل'); return; }
+
+  showToast('جارٍ تجهيز التصدير...');
+
+  try {
+    const studentsData = await Promise.all(checked.map(async cb => {
+      const sid  = cb.dataset.id;
+      const name = cb.dataset.name;
+      const sessSnap = await getDocs(collection(db, 'students', sid, 'sessions'));
+      const sessions = sessSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+      return { name, sessions };
+    }));
+
+    if (type === 'word') await exportAttendanceWord(studentsData, mode);
+    else await exportAttendancePdf(studentsData, mode);
+
+    window.closeAttModal();
+  } catch (e) {
+    console.error('doAttExport error:', e);
+    showToast('حدث خطأ أثناء التصدير: ' + e.message);
+  }
 };
 
 window.doExport = async (type) => {
