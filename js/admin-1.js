@@ -1281,6 +1281,7 @@ window.bgClearAll  = () => document.querySelectorAll('.bg-check').forEach(cb => 
 
 // ── استيراد الدرجات من ملف Excel ────────────────────────────
 let bgImportRows = [];
+let bgActiveStudents = [];
 
 function normalizeName(name) {
   return (name || '')
@@ -1290,6 +1291,11 @@ function normalizeName(name) {
     .replace(/[\u064B-\u065F]/g, '') // إزالة التشكيل
     .replace(/\s+/g, '')             // إزالة المسافات
     .trim();
+}
+
+function firstNameNormalized(name) {
+  const first = (name || '').trim().split(/\s+/)[0] || '';
+  return normalizeName(first);
 }
 
 window.importExcelGrades = async () => {
@@ -1312,60 +1318,109 @@ window.importExcelGrades = async () => {
 
     if (!nameKey || !scoreKey) { showToast('لم يتم التعرف على أعمدة الاسم أو الدرجة في الملف'); return; }
 
-    const students = allStudents.filter(s => s.name && s.name !== 'طالبة جديدة');
-    const normalizedMap = new Map();
-    students.forEach(s => normalizedMap.set(normalizeName(s.name), s));
+    bgActiveStudents = allStudents.filter(s => s.name && s.name !== 'طالبة جديدة');
+
+    // خرائط المطابقة: بالاسم الكامل، وبأول اسم
+    const fullNameMap = new Map();
+    const firstNameMap = new Map();
+    bgActiveStudents.forEach(s => {
+      fullNameMap.set(normalizeName(s.name), s);
+      const fn = firstNameNormalized(s.name);
+      if (!firstNameMap.has(fn)) firstNameMap.set(fn, []);
+      firstNameMap.get(fn).push(s);
+    });
 
     bgImportRows = rows.map(row => {
       const rawName = String(row[nameKey] || '').trim();
       if (!rawName) return null;
       const score = Number(row[scoreKey]) || 0;
-      const match = normalizedMap.get(normalizeName(rawName));
-      return {
-        rawName,
-        score,
-        studentId: match ? match.id : null,
-        studentName: match ? match.name : null,
-        matched: !!match,
-        include: true,
-      };
+
+      const exact = fullNameMap.get(normalizeName(rawName));
+      if (exact) {
+        return { rawName, score, studentId: exact.id, matchType: 'exact', include: true };
+      }
+
+      const candidates = firstNameMap.get(firstNameNormalized(rawName)) || [];
+      if (candidates.length === 1) {
+        // اسم أول متطابق مع طالبة واحدة بس — مطابقة محتملة تحتاج تأكيدك
+        return { rawName, score, studentId: candidates[0].id, matchType: 'suggested', include: true };
+      }
+      if (candidates.length > 1) {
+        // أكتر من طالبة بنفس أول اسم — لازم تختاري إنتِ
+        return { rawName, score, studentId: null, matchType: 'ambiguous', include: false };
+      }
+      // مفيش أي تطابق
+      return { rawName, score, studentId: null, matchType: 'none', include: false };
     }).filter(Boolean);
 
     renderBGPreview();
     document.getElementById('bgPreviewSection').style.display = 'block';
 
-    const matchedCount = bgImportRows.filter(r => r.matched).length;
-    showToast(`تم استيراد ${bgImportRows.length} صف — تطابق ${matchedCount} تلقائيًا`);
+    const exact = bgImportRows.filter(r => r.matchType === 'exact').length;
+    const needsReview = bgImportRows.filter(r => r.matchType !== 'exact').length;
+    showToast(`تم استيراد ${bgImportRows.length} صف — ${exact} تطابقت تلقائيًا${needsReview ? `، و${needsReview} محتاجة مراجعتك` : ''}`);
   } catch (e) {
     console.error('importExcelGrades error:', e);
     showToast('حدث خطأ أثناء قراءة الملف: ' + e.message);
   }
 };
 
+function buildStudentOptions(selectedId) {
+  const sorted = [...bgActiveStudents].sort((a, b) => (a.name || '').localeCompare(b.name || '', 'ar'));
+  return `<option value="">— اختاري الطالبة —</option>` +
+    sorted.map(s => `<option value="${s.id}" ${s.id === selectedId ? 'selected' : ''}>${esc(s.name)}</option>`).join('');
+}
+
 function renderBGPreview() {
   const tbody = document.getElementById('bgPreviewBody');
-  tbody.innerHTML = bgImportRows.map((r, i) => `
-    <tr style="border-bottom:1px solid var(--border)${r.matched ? '' : ';background:rgba(192,57,43,0.06)'}">
+  tbody.innerHTML = bgImportRows.map((r, i) => {
+    const needsReview = r.matchType !== 'exact';
+    const rowBg = r.matchType === 'exact' ? '' : r.matchType === 'none' ? ';background:rgba(192,57,43,0.06)' : ';background:rgba(201,162,39,0.08)';
+
+    const statusLabel = {
+      exact:     '<span style="color:#2e8b57">✅ تطابق تام</span>',
+      suggested: '<span style="color:#c9852b">🔶 راجعي التطابق</span>',
+      ambiguous: '<span style="color:#c9852b">🔶 أكتر من احتمال</span>',
+      none:      '<span style="color:#c0392b">❌ اختاري يدويًا</span>',
+    }[r.matchType];
+
+    const nameCell = needsReview
+      ? `<div style="font-weight:600;margin-bottom:4px">${esc(r.rawName)}</div>
+         <select onchange="bgSelectStudent(${i}, this.value)" style="width:100%;border:1px solid var(--border);border-radius:6px;padding:3px 6px;font-family:inherit;font-size:11px">
+           ${buildStudentOptions(r.studentId)}
+         </select>`
+      : `${esc(r.rawName)}`;
+
+    return `
+    <tr style="border-bottom:1px solid var(--border)${rowBg}">
       <td style="padding:6px 8px">
-        <input type="checkbox" ${r.include ? 'checked' : ''} onchange="bgToggleRow(${i}, this.checked)" style="margin-left:6px;vertical-align:middle" ${r.matched ? '' : 'disabled'}/>
-        ${esc(r.studentName || r.rawName)}
+        <input type="checkbox" ${r.include ? 'checked' : ''} onchange="bgToggleRow(${i}, this.checked)" style="margin-left:6px;vertical-align:top" ${r.studentId ? '' : 'disabled'}/>
+        ${nameCell}
       </td>
-      <td style="padding:6px 8px;text-align:center">
+      <td style="padding:6px 8px;text-align:center;vertical-align:top">
         <input type="number" value="${r.score}" min="0" onchange="bgUpdateRowScore(${i}, this.value)"
           style="width:60px;border:1px solid var(--border);border-radius:6px;padding:3px 6px;text-align:center;font-family:inherit;font-size:12px"/>
       </td>
-      <td style="padding:6px 8px;text-align:center">
-        ${r.matched ? '<span style="color:#2e8b57">✅ تطابق</span>' : '<span style="color:#c0392b">❌ غير موجودة</span>'}
-      </td>
+      <td style="padding:6px 8px;text-align:center;vertical-align:top">${statusLabel}</td>
     </tr>
-  `).join('');
+  `;
+  }).join('');
 
-  const matchedCount = bgImportRows.filter(r => r.matched).length;
-  document.getElementById('bgMatchCount').textContent = `✅ ${matchedCount} من ${bgImportRows.length} متطابقة (راجعي الدرجات قبل التطبيق)`;
+  const exact = bgImportRows.filter(r => r.matchType === 'exact').length;
+  const resolved = bgImportRows.filter(r => r.studentId).length;
+  document.getElementById('bgMatchCount').textContent =
+    `✅ ${exact} تطابق تلقائي | 🔶 ${resolved - exact} اتأكدت يدويًا | ❌ ${bgImportRows.length - resolved} لسه محتاجة اختيار`;
 }
 
 window.bgToggleRow = (i, checked) => { if (bgImportRows[i]) bgImportRows[i].include = checked; };
 window.bgUpdateRowScore = (i, val) => { if (bgImportRows[i]) bgImportRows[i].score = Number(val) || 0; };
+
+window.bgSelectStudent = (i, studentId) => {
+  if (!bgImportRows[i]) return;
+  bgImportRows[i].studentId = studentId || null;
+  bgImportRows[i].include = !!studentId;
+  renderBGPreview();
+};
 
 window.clearExcelImport = () => {
   bgImportRows = [];
@@ -1375,8 +1430,9 @@ window.clearExcelImport = () => {
 
 // تطبيق الدرجات المستوردة (بعد المراجعة) على قايمة الطالبات تحت
 window.applyExcelImport = () => {
-  const toApply = bgImportRows.filter(r => r.matched && r.include);
-  if (!toApply.length) { showToast('لا يوجد صفوف متطابقة لتطبيقها'); return; }
+  const toApply = bgImportRows.filter(r => r.studentId && r.include);
+  const pending = bgImportRows.filter(r => !r.studentId);
+  if (!toApply.length) { showToast('لا يوجد صفوف جاهزة للتطبيق — راجعي الاختيارات أولاً'); return; }
 
   // نلغي تحديد كل الطالبات أولاً، بعدين نحدد بس اللي جايين من الملف
   document.querySelectorAll('.bg-check').forEach(cb => cb.checked = false);
@@ -1388,7 +1444,7 @@ window.applyExcelImport = () => {
     if (scoreInput) scoreInput.value = r.score;
   });
 
-  showToast(`✅ تم تطبيق درجات ${toApply.length} طالبة على القائمة — راجعيها ثم اضغطي "حفظ الدرجات"`);
+  showToast(`✅ تم تطبيق درجات ${toApply.length} طالبة على القائمة${pending.length ? ` — لسه ${pending.length} محتاجة اختيار يدوي` : ''} — راجعيها ثم اضغطي "حفظ الدرجات"`);
 };
 
 window.saveBulkGrades = async () => {
