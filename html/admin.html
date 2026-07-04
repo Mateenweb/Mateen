@@ -355,7 +355,7 @@
 <div class="foot-actions-row">
 <button class="btn-add-row" onclick="addStudentRow()"><i class="ti ti-plus"></i> إضافة طالبة</button>
 <button class="btn-add-row" style="background:linear-gradient(135deg,#2c1a0e,#5c3d2e);color:#e8c96a;border:none;" onclick="openBulkGradeModal()"><i class="ti ti-plus"></i> إضافة اختبار جماعي</button>
-<button class="btn-add-row" style="background:linear-gradient(135deg,#5c3d2e,#8a5e3c);color:#e8c96a;border:none;" onclick="openDeleteExamModal()"><i class="ti ti-trash"></i> حذف اختبار جماعي</button>
+      <button class="btn-add-row" style="background:transparent;border:1px solid #e74c3c;color:#e74c3c;" onclick="openDeleteExamModal()"><i class="ti ti-trash"></i> حذف اختبار جماعي</button>
     <button class="btn-add-row btn-export-word" onclick="openExportModal()"><i class="ti ti-download"></i> تصدير Word / PDF</button>
 <button class="btn-add-row btn-export-att" onclick="openAttModal()"><i class="ti ti-clipboard-list"></i> تصدير الحضور والغياب</button>
 <a href="stats.html" class="btn-add-row btn-export-stats"><i class="ti ti-chart-bar"></i> الإحصائيات</a>
@@ -512,8 +512,7 @@
         <div class="m-label-row">طريقة التصدير:</div>
         <select id="attMode" class="m-select">
           <option value="perStudent">صفحة مستقلة لكل طالبة</option>
-          <option value="perWeek">صفحة لكل أسبوع (كل الطالبات وكل المواد)</option>
-          <option value="perSubject">صفحة لكل مادة (كل الطالبات)</option>
+          <option value="combined">جدول مشترك لكل الطالبات</option>
         </select>
       </div>
       <hr class="m-hr">
@@ -636,7 +635,6 @@
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="../js/admin-1.js" type="module"></script>
 <script type="module" src="../js/notifications.js"></script>
 <script src="../js/sw-register.js"></script>
@@ -697,13 +695,22 @@
             <tbody id="bgPreviewBody"></tbody>
           </table>
         </div>
-        <div style="margin-top:8px;display:flex;align-items:center;justify-content:space-between;font-size:11px;color:var(--text-mid)">
-          <span id="bgMatchCount"></span>
-          <div style="display:flex;gap:14px">
-            <button onclick="clearExcelImport()" style="background:none;border:none;color:#c0392b;cursor:pointer;text-decoration:underline;font-family:inherit;font-size:11px">مسح</button>
-            <button onclick="applyExcelImport()" style="background:var(--gold);color:var(--green-dark);border:none;border-radius:6px;padding:5px 14px;font-family:inherit;font-weight:700;cursor:pointer;font-size:11px">✅ تأكيد وتطبيق على القائمة</button>
-          </div>
+        <div style="margin-top:8px;font-size:11px;color:var(--text-mid)">
+          <span id="bgMatchCount"></span> | 
+          <button onclick="clearExcelImport()" style="background:none;border:none;color:#c0392b;cursor:pointer;text-decoration:underline;font-family:inherit;font-size:11px">مسح</button>
         </div>
+      </div>
+
+      <!-- رفع ملف Excel -->
+      <div style="margin-bottom:16px;padding:12px;background:rgba(92,61,46,0.05);border-radius:10px;border:1px dashed var(--border)">
+        <div style="font-size:13px;font-weight:600;color:var(--text-dark);margin-bottom:8px">📊 استيراد الدرجات من Excel (اختياري)</div>
+        <div style="font-size:12px;color:var(--text-mid);margin-bottom:8px">ارفعي ملف Google Forms أو Excel فيه عمود "اسم الطالبة" وعمود "Score" أو "الدرجة"</div>
+        <input type="file" id="excelGradeFile" accept=".xlsx,.xls,.csv" style="display:none" onchange="importGradesFromExcel(this)">
+        <button onclick="document.getElementById('excelGradeFile').click()" style="background:var(--green-dark);color:white;border:none;border-radius:8px;padding:7px 16px;font-family:inherit;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:6px">
+          <i class="ti ti-upload"></i> رفع ملف Excel
+        </button>
+        <div id="excelImportPreview"></div>
+        <div id="excelImportStatus" style="font-size:12px;margin-top:8px;display:none"></div>
       </div>
 
       <!-- Select students -->
@@ -721,20 +728,6 @@
         <button onclick="closeBulkGradeModal()" style="background:var(--beige2);border:1px solid var(--border);border-radius:8px;padding:9px 20px;font-family:inherit;cursor:pointer">إلغاء</button>
         <button onclick="saveBulkGrades()" style="background:linear-gradient(135deg,#2c1a0e,#5c3d2e);color:#e8c96a;border:none;border-radius:8px;padding:9px 24px;font-family:inherit;font-weight:700;cursor:pointer"><i class="ti ti-device-floppy"></i> حفظ الدرجات</button>
       </div>
-    </div>
-  </div>
-</div>
-
-<!-- ══ Modal حذف اختبار جماعي ══ -->
-<div id="deleteExamModal" class="modal-overlay" style="display:none">
-  <div class="modal-content" style="max-width:500px">
-    <div class="modal-header">
-      <div class="modal-title"><i class="ti ti-trash"></i> حذف اختبار جماعي</div>
-      <button class="modal-close" onclick="document.getElementById('deleteExamModal').style.display='none'">✕</button>
-    </div>
-    <div class="modal-body">
-      <div style="font-size:12px;color:var(--text-mid);margin-bottom:16px">اختاري الاختبار اللي عاوزة تحذفيه من عند كل الطالبات:</div>
-      <div id="examListToDelete" style="max-height:300px;overflow-y:auto"></div>
     </div>
   </div>
 </div>
@@ -971,5 +964,21 @@ function formatSize(bytes) {
   return (bytes/1024/1024).toFixed(2) + ' MB';
 }
 </script>
+
+<!-- ══ Modal حذف اختبار جماعي ══ -->
+<div id="deleteExamModal" class="modal-overlay" style="display:none" onclick="if(event.target===this)this.style.display='none'">
+  <div class="modal-box" style="width:min(94vw,480px)">
+    <div class="modal-head">
+      <span class="m-title">🗑️ حذف اختبار جماعي</span>
+      <button class="m-close" onclick="document.getElementById('deleteExamModal').style.display='none'">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:13px;color:var(--text-mid);margin-bottom:14px">اختاري الاختبار اللي عاوزة تحذفيه من عند كل الطالبات.</p>
+      <div id="examListToDelete" style="display:flex;flex-direction:column;gap:8px;max-height:300px;overflow-y:auto">
+        <div style="text-align:center;color:var(--text-mid);font-size:13px;padding:20px">جارٍ التحميل...</div>
+      </div>
+    </div>
+  </div>
+</div>
 
 </body>
