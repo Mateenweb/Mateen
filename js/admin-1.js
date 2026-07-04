@@ -1279,6 +1279,118 @@ function renderBGStudents() {
 window.bgSelectAll = () => document.querySelectorAll('.bg-check').forEach(cb => cb.checked = true);
 window.bgClearAll  = () => document.querySelectorAll('.bg-check').forEach(cb => cb.checked = false);
 
+// ── استيراد الدرجات من ملف Excel ────────────────────────────
+let bgImportRows = [];
+
+function normalizeName(name) {
+  return (name || '')
+    .replace(/[أإآا]/g, 'ا')       // توحيد الألف
+    .replace(/[ةه]/g, 'ه')          // توحيد التاء المربوطة
+    .replace(/ى/g, 'ي')              // توحيد الألف المقصورة
+    .replace(/[\u064B-\u065F]/g, '') // إزالة التشكيل
+    .replace(/\s+/g, '')             // إزالة المسافات
+    .trim();
+}
+
+window.importExcelGrades = async () => {
+  const fileInput = document.getElementById('bgExcelFile');
+  const file = fileInput.files[0];
+  if (!file) { showToast('اختاري ملف أولاً'); return; }
+  if (typeof XLSX === 'undefined') { showToast('مكتبة قراءة Excel لم تُحمّل، حدّثي الصفحة'); return; }
+
+  try {
+    const data = await file.arrayBuffer();
+    const workbook = XLSX.read(data, { type: 'array' });
+    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(sheet, { defval: '' });
+
+    if (!rows.length) { showToast('الملف فارغ'); return; }
+
+    const keys = Object.keys(rows[0]);
+    const nameKey  = keys.find(k => /اسم\s*الطالبة|الاسم/i.test(k)) || keys[0];
+    const scoreKey = keys.find(k => /score/i.test(k)) || keys.find(k => /الدرجة/i.test(k)) || keys[1];
+
+    if (!nameKey || !scoreKey) { showToast('لم يتم التعرف على أعمدة الاسم أو الدرجة في الملف'); return; }
+
+    const students = allStudents.filter(s => s.name && s.name !== 'طالبة جديدة');
+    const normalizedMap = new Map();
+    students.forEach(s => normalizedMap.set(normalizeName(s.name), s));
+
+    bgImportRows = rows.map(row => {
+      const rawName = String(row[nameKey] || '').trim();
+      if (!rawName) return null;
+      const score = Number(row[scoreKey]) || 0;
+      const match = normalizedMap.get(normalizeName(rawName));
+      return {
+        rawName,
+        score,
+        studentId: match ? match.id : null,
+        studentName: match ? match.name : null,
+        matched: !!match,
+        include: true,
+      };
+    }).filter(Boolean);
+
+    renderBGPreview();
+    document.getElementById('bgPreviewSection').style.display = 'block';
+
+    const matchedCount = bgImportRows.filter(r => r.matched).length;
+    showToast(`تم استيراد ${bgImportRows.length} صف — تطابق ${matchedCount} تلقائيًا`);
+  } catch (e) {
+    console.error('importExcelGrades error:', e);
+    showToast('حدث خطأ أثناء قراءة الملف: ' + e.message);
+  }
+};
+
+function renderBGPreview() {
+  const tbody = document.getElementById('bgPreviewBody');
+  tbody.innerHTML = bgImportRows.map((r, i) => `
+    <tr style="border-bottom:1px solid var(--border)${r.matched ? '' : ';background:rgba(192,57,43,0.06)'}">
+      <td style="padding:6px 8px">
+        <input type="checkbox" ${r.include ? 'checked' : ''} onchange="bgToggleRow(${i}, this.checked)" style="margin-left:6px;vertical-align:middle" ${r.matched ? '' : 'disabled'}/>
+        ${esc(r.studentName || r.rawName)}
+      </td>
+      <td style="padding:6px 8px;text-align:center">
+        <input type="number" value="${r.score}" min="0" onchange="bgUpdateRowScore(${i}, this.value)"
+          style="width:60px;border:1px solid var(--border);border-radius:6px;padding:3px 6px;text-align:center;font-family:inherit;font-size:12px"/>
+      </td>
+      <td style="padding:6px 8px;text-align:center">
+        ${r.matched ? '<span style="color:#2e8b57">✅ تطابق</span>' : '<span style="color:#c0392b">❌ غير موجودة</span>'}
+      </td>
+    </tr>
+  `).join('');
+
+  const matchedCount = bgImportRows.filter(r => r.matched).length;
+  document.getElementById('bgMatchCount').textContent = `✅ ${matchedCount} من ${bgImportRows.length} متطابقة (راجعي الدرجات قبل التطبيق)`;
+}
+
+window.bgToggleRow = (i, checked) => { if (bgImportRows[i]) bgImportRows[i].include = checked; };
+window.bgUpdateRowScore = (i, val) => { if (bgImportRows[i]) bgImportRows[i].score = Number(val) || 0; };
+
+window.clearExcelImport = () => {
+  bgImportRows = [];
+  document.getElementById('bgPreviewSection').style.display = 'none';
+  document.getElementById('bgExcelFile').value = '';
+};
+
+// تطبيق الدرجات المستوردة (بعد المراجعة) على قايمة الطالبات تحت
+window.applyExcelImport = () => {
+  const toApply = bgImportRows.filter(r => r.matched && r.include);
+  if (!toApply.length) { showToast('لا يوجد صفوف متطابقة لتطبيقها'); return; }
+
+  // نلغي تحديد كل الطالبات أولاً، بعدين نحدد بس اللي جايين من الملف
+  document.querySelectorAll('.bg-check').forEach(cb => cb.checked = false);
+
+  toApply.forEach(r => {
+    const cb = document.querySelector(`.bg-check[data-id="${r.studentId}"]`);
+    const scoreInput = document.querySelector(`.bg-score[data-id="${r.studentId}"]`);
+    if (cb) cb.checked = true;
+    if (scoreInput) scoreInput.value = r.score;
+  });
+
+  showToast(`✅ تم تطبيق درجات ${toApply.length} طالبة على القائمة — راجعيها ثم اضغطي "حفظ الدرجات"`);
+};
+
 window.saveBulkGrades = async () => {
   const label   = document.getElementById('bgLabel').value.trim();
   const subject = document.getElementById('bgSubject').value;
@@ -1395,138 +1507,6 @@ window.rejectDeletion = async (reqId) => {
   await updateDoc(doc(db, 'deletionRequests', reqId), { status: 'rejected' });
   showToast('تم رفض الطلب');
   loadDeletionRequests();
-};
-
-// ════════════════════════════════════════════════════════════════
-// Excel Grade Import
-let importedGrades = {};
-
-function normalizeName(name) {
-  return (name || '')
-    .replace(/[أإآا]/g, 'ا')
-    .replace(/[ةه]/g, 'ه')
-    .replace(/ى/g, 'ي')
-    .replace(/[\u064B-\u065F]/g, '')
-    .replace(/\s+/g, '')
-    .trim()
-    .toLowerCase();
-}
-
-window.importExcelGrades = async () => {
-  const file = document.getElementById('bgExcelFile').files[0];
-  if (!file) { alert('اختاري ملفاً أولاً'); return; }
-
-  try {
-    const { read } = await import('https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.min.js');
-    const arrayBuffer = await file.arrayBuffer();
-    const workbook = read(new Uint8Array(arrayBuffer));
-    const sheet = workbook.Sheets[workbook.SheetNames[0]];
-    const data = read(workbook, { header: 1 });
-    
-    // Find columns
-    let nameCol = -1, scoreCol = -1;
-    const headers = data[0] || [];
-    headers.forEach((h, i) => {
-      const norm = (h || '').toLowerCase();
-      if (norm.includes('اسم') || norm.includes('name')) nameCol = i;
-      if (norm.includes('score') || norm.includes('درجة')) scoreCol = i;
-    });
-
-    if (nameCol < 0 || scoreCol < 0) { alert('لم أجد أعمدة الاسم أو الدرجة'); return; }
-
-    importedGrades = {};
-    data.slice(1).forEach(row => {
-      const name = (row[nameCol] || '').trim();
-      const score = parseFloat(row[scoreCol]) || 0;
-      if (name) importedGrades[normalizeName(name)] = { original: name, score };
-    });
-
-    showImportPreview();
-  } catch (e) {
-    alert('خطأ في قراءة الملف: ' + e.message);
-  }
-};
-
-function showImportPreview() {
-  const students = allStudents.filter(s => s.name && s.name !== 'طالبة جديدة');
-  let matched = 0, unmatched = 0;
-
-  const rows = students.map(s => {
-    const norm = normalizeName(s.name);
-    const grade = importedGrades[norm];
-    if (grade) matched++;
-    else unmatched++;
-
-    return `
-      <tr style="border-bottom:1px solid var(--border)">
-        <td style="padding:8px;text-align:right">${esc(s.name)}</td>
-        <td style="padding:8px;text-align:center;font-weight:600;color:${grade?'var(--green-dark)':'#c0392b'}">${grade ? grade.score : '—'}</td>
-        <td style="padding:8px;text-align:center;font-size:11px;color:#888">${grade ? '✓ موجودة' : '✗ غير موجودة'}</td>
-      </tr>`;
-  }).join('');
-
-  document.getElementById('bgPreviewBody').innerHTML = rows;
-  document.getElementById('bgMatchCount').textContent = `تطابقت ${matched} طالبة من ${students.length}`;
-  document.getElementById('bgPreviewSection').style.display = 'block';
-  
-  // Auto-fill the grades in the main form
-  students.forEach(s => {
-    const norm = normalizeName(s.name);
-    if (importedGrades[norm]) {
-      const input = document.querySelector(`.bg-score[data-id="${s.id}"]`);
-      if (input) input.value = importedGrades[norm].score;
-    } else {
-      // Check for similar names (first name match)
-      const firstName = s.name.split(' ')[0];
-      const similar = Object.values(importedGrades).find(g => 
-        g.original.split(' ')[0] === firstName && 
-        normalizeName(g.original.split(' ')[0]) === normalizeName(firstName)
-      );
-      
-      if (similar) {
-        const confirm = setTimeout(() => {
-          showSimilarNameConfirm(s, similar);
-        }, 0);
-      }
-    }
-  });
-}
-
-function showSimilarNameConfirm(student, importedGrade) {
-  const modal = document.createElement('div');
-  modal.style.cssText = `
-    position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:2000;
-    display:flex;align-items:center;justify-content:center;
-  `;
-  modal.innerHTML = `
-    <div style="background:#fff;border-radius:14px;padding:24px;max-width:420px;width:90vw;box-shadow:0 8px 32px rgba(0,0,0,0.25)">
-      <div style="font-size:14px;font-weight:700;color:var(--green-dark);margin-bottom:12px">
-        🔍 تطابق محتمل
-      </div>
-      <div style="font-size:13px;color:var(--text-dark);margin-bottom:16px;line-height:1.8">
-        هل الطالبة <strong>${esc(student.name)}</strong> هي نفسها <strong>${esc(importedGrade.original)}</strong>؟<br>
-        <span style="color:var(--text-mid);font-size:12px">الدرجة: ${importedGrade.score}</span>
-      </div>
-      <div style="display:flex;gap:10px;justify-content:flex-end">
-        <button onclick="this.closest('[role=dialog]')?.remove()" style="background:var(--beige2);border:1px solid var(--border);border-radius:8px;padding:8px 20px;font-family:inherit;cursor:pointer;font-size:13px">لا</button>
-        <button onclick="confirmSimilarName('${student.id}',${importedGrade.score});this.closest('[role=dialog]')?.remove()" style="background:var(--green-dark);color:#fff;border:none;border-radius:8px;padding:8px 20px;font-family:inherit;cursor:pointer;font-size:13px;font-weight:600">نعم ✓</button>
-      </div>
-    </div>
-  `;
-  modal.setAttribute('role', 'dialog');
-  document.body.appendChild(modal);
-}
-
-window.confirmSimilarName = (studentId, score) => {
-  const input = document.querySelector(`.bg-score[data-id="${studentId}"]`);
-  if (input) input.value = score;
-};
-
-window.clearExcelImport = () => {
-  importedGrades = {};
-  document.getElementById('bgExcelFile').value = '';
-  document.getElementById('bgPreviewSection').style.display = 'none';
-  renderBGStudents();
 };
 
 // ════════════════════════════════════════════════════════════════

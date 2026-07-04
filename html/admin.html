@@ -635,6 +635,7 @@
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="../js/admin-1.js" type="module"></script>
 <script type="module" src="../js/notifications.js"></script>
 <script src="../js/sw-register.js"></script>
@@ -695,9 +696,12 @@
             <tbody id="bgPreviewBody"></tbody>
           </table>
         </div>
-        <div style="margin-top:8px;font-size:11px;color:var(--text-mid)">
-          <span id="bgMatchCount"></span> | 
-          <button onclick="clearExcelImport()" style="background:none;border:none;color:#c0392b;cursor:pointer;text-decoration:underline;font-family:inherit;font-size:11px">مسح</button>
+        <div style="margin-top:8px;display:flex;align-items:center;justify-content:space-between;font-size:11px;color:var(--text-mid)">
+          <span id="bgMatchCount"></span>
+          <div style="display:flex;gap:14px">
+            <button onclick="clearExcelImport()" style="background:none;border:none;color:#c0392b;cursor:pointer;text-decoration:underline;font-family:inherit;font-size:11px">مسح</button>
+            <button onclick="applyExcelImport()" style="background:var(--gold);color:var(--green-dark);border:none;border-radius:6px;padding:5px 14px;font-family:inherit;font-weight:700;cursor:pointer;font-size:11px">✅ تأكيد وتطبيق على القائمة</button>
+          </div>
         </div>
       </div>
 
