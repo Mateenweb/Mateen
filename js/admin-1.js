@@ -351,7 +351,7 @@ window.approveUser = async id => {
     'اختاري طالبة لربطها بحساب: ' + name;
 
   document.getElementById('linkSearch').value = '';
-  renderLinkList(allStudents);
+  renderLinkList(allStudents.filter(s => !s.archived));
 
   const modal = document.getElementById('linkModal');
   modal.classList.add('show');
@@ -365,7 +365,8 @@ window.closeLinkModal = () => {
 
 window.filterLinkList = () => {
   const q = document.getElementById('linkSearch').value.trim().toLowerCase();
-  renderLinkList(q ? allStudents.filter(s => (s.name||'').toLowerCase().includes(q)) : allStudents);
+  const base = allStudents.filter(s => !s.archived);
+  renderLinkList(q ? base.filter(s => (s.name||'').toLowerCase().includes(q)) : base);
 };
 
 function renderLinkList(list) {
@@ -563,6 +564,7 @@ window.doExport = async (type) => {
   const fr = document.getElementById('stuFilterResult').value;
   const fs = document.getElementById('stuFilterStatus').value;
   let data = allStudents.filter(s=>
+    !s.archived &&
     (!q  || (s.name||'').toLowerCase().includes(q)) &&
     (fi==='all' || s.interview===fi) &&
     (fr==='all' || s.accepted===fr) &&
@@ -986,7 +988,7 @@ window.adminOpenLinkModal = async (userId, userName) => {
   window._selectedLinkId = null;
   document.getElementById('linkModalSubtitle').textContent = 'اختاري طالبة لربطها بحساب: ' + userName;
   document.getElementById('linkSearch').value = '';
-  renderLinkList(allStudents);
+  renderLinkList(allStudents.filter(s => !s.archived));
   document.getElementById('linkModal').classList.add('show');
 };
 
@@ -1265,7 +1267,7 @@ window.closeBulkGradeModal = () => {
 
 function renderBGStudents() {
   const list = document.getElementById('bgStudentsList');
-  const students = allStudents.filter(s => s.name && s.name !== 'طالبة جديدة');
+  const students = allStudents.filter(s => s.name && s.name !== 'طالبة جديدة' && !s.archived);
   list.innerHTML = students.map(s => `
     <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-bottom:1px solid var(--border)">
       <input type="checkbox" class="bg-check" data-id="${s.id}" data-name="${esc(s.name||'')}" checked style="width:16px;height:16px;cursor:pointer"/>
@@ -1318,7 +1320,7 @@ window.importExcelGrades = async () => {
 
     if (!nameKey || !scoreKey) { showToast('لم يتم التعرف على أعمدة الاسم أو الدرجة في الملف'); return; }
 
-    bgActiveStudents = allStudents.filter(s => s.name && s.name !== 'طالبة جديدة');
+    bgActiveStudents = allStudents.filter(s => s.name && s.name !== 'طالبة جديدة' && !s.archived);
 
     // خرائط المطابقة: بالاسم الكامل، وبأول اسم
     const fullNameMap = new Map();

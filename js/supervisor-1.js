@@ -702,6 +702,7 @@ window.doExport = async (type) => {
   const fr = document.getElementById('stuFilterResult')?.value||'all';
   const fs = document.getElementById('stuFilterStatus')?.value||'all';
   let data = allStudents.filter(s=>
+    !s.archived &&
     (!q||(s.name||'').toLowerCase().includes(q))&&
     (fi==='all'||s.interview===fi)&&
     (fr==='all'||s.accepted===fr)&&
