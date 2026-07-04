@@ -1396,3 +1396,92 @@ window.rejectDeletion = async (reqId) => {
   showToast('تم رفض الطلب');
   loadDeletionRequests();
 };
+
+// ════════════════════════════════════════════════════════════════
+// Excel Grade Import
+let importedGrades = {};
+
+function normalizeName(name) {
+  return (name || '')
+    .replace(/[أإآا]/g, 'ا')
+    .replace(/[ةه]/g, 'ه')
+    .replace(/ى/g, 'ي')
+    .replace(/[\u064B-\u065F]/g, '')
+    .replace(/\s+/g, '')
+    .trim()
+    .toLowerCase();
+}
+
+window.importExcelGrades = async () => {
+  const file = document.getElementById('bgExcelFile').files[0];
+  if (!file) { alert('اختاري ملفاً أولاً'); return; }
+
+  try {
+    const { read } = await import('https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.min.js');
+    const arrayBuffer = await file.arrayBuffer();
+    const workbook = read(new Uint8Array(arrayBuffer));
+    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+    const data = read(workbook, { header: 1 });
+    
+    // Find columns
+    let nameCol = -1, scoreCol = -1;
+    const headers = data[0] || [];
+    headers.forEach((h, i) => {
+      const norm = (h || '').toLowerCase();
+      if (norm.includes('اسم') || norm.includes('name')) nameCol = i;
+      if (norm.includes('score') || norm.includes('درجة')) scoreCol = i;
+    });
+
+    if (nameCol < 0 || scoreCol < 0) { alert('لم أجد أعمدة الاسم أو الدرجة'); return; }
+
+    importedGrades = {};
+    data.slice(1).forEach(row => {
+      const name = (row[nameCol] || '').trim();
+      const score = parseFloat(row[scoreCol]) || 0;
+      if (name) importedGrades[normalizeName(name)] = { original: name, score };
+    });
+
+    showImportPreview();
+  } catch (e) {
+    alert('خطأ في قراءة الملف: ' + e.message);
+  }
+};
+
+function showImportPreview() {
+  const students = allStudents.filter(s => s.name && s.name !== 'طالبة جديدة');
+  let matched = 0, unmatched = 0;
+
+  const rows = students.map(s => {
+    const norm = normalizeName(s.name);
+    const grade = importedGrades[norm];
+    if (grade) matched++;
+    else unmatched++;
+
+    return `
+      <tr style="border-bottom:1px solid var(--border)">
+        <td style="padding:8px;text-align:right">${esc(s.name)}</td>
+        <td style="padding:8px;text-align:center;font-weight:600;color:${grade?'var(--green-dark)':'#c0392b'}">${grade ? grade.score : '—'}</td>
+        <td style="padding:8px;text-align:center;font-size:11px;color:#888">${grade ? '✓ موجودة' : '✗ غير موجودة'}</td>
+      </tr>`;
+  }).join('');
+
+  document.getElementById('bgPreviewBody').innerHTML = rows;
+  document.getElementById('bgMatchCount').textContent = `تطابقت ${matched} طالبة من ${students.length}`;
+  document.getElementById('bgPreviewSection').style.display = 'block';
+  
+  // Auto-fill the grades in the main form
+  students.forEach(s => {
+    const norm = normalizeName(s.name);
+    if (importedGrades[norm]) {
+      const input = document.querySelector(`.bg-score[data-id="${s.id}"]`);
+      if (input) input.value = importedGrades[norm].score;
+    }
+  });
+}
+
+window.clearExcelImport = () => {
+  importedGrades = {};
+  document.getElementById('bgExcelFile').value = '';
+  document.getElementById('bgPreviewSection').style.display = 'none';
+  renderBGStudents();
+};
