@@ -1517,10 +1517,10 @@ window.openDeleteExamModal = async () => {
 
   try {
     // جيب كل الطالبات وكل الاختبارات بتاعتهم
-    const studSnap = await getDocs(query(collection(db, 'students'), where('archived', '!=', true)));
+    const studSnap = await getDocs(collection(db, 'students'));
     const examMap = {}; // { label_subject: [ {studentId, gradeId} ] }
 
-    await Promise.all(studSnap.docs.map(async sDoc => {
+    await Promise.all(studSnap.docs.filter(d => !d.data().archived).map(async sDoc => {
       const gradesSnap = await getDocs(collection(db, 'students', sDoc.id, 'grades'));
       gradesSnap.docs.forEach(g => {
         const data = g.data();
