@@ -553,14 +553,8 @@
     <div style="border-top:1px solid var(--border);padding-top:12px">
       <div style="font-size:13px;color:var(--text-mid);margin-bottom:10px">⚠️ منطقة الخطر — هذه الإجراءات لا يمكن التراجع عنها</div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <button onclick="resetAllStudentData('grades')" class="btn-danger-outline">
-          <i class="ti ti-eraser"></i> مسح كل الدرجات
-        </button>
-        <button onclick="resetAllStudentData('sessions')" class="btn-danger-outline">
-          <i class="ti ti-calendar-off"></i> مسح كل الحضور والغياب
-        </button>
-        <button onclick="resetAllStudentData('all')" class="btn-danger-solid">
-          <i class="ti ti-trash"></i> مسح كل البيانات
+        <button onclick="openResetDataModal()" class="btn-danger-solid">
+          <i class="ti ti-trash"></i> مسح البيانات
         </button>
       </div>
     </div>
