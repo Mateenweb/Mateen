@@ -99,12 +99,33 @@
 </div>
 <!-- MAIN -->
 <div id="mainContent" class="main-content-hidden">
-<div class="hero">
-<div class="hero-badge">🛡️ لوحة الإداريات</div>
-<h1>إدارة المواد العلمية</h1>
-<p>إضافة وإدارة روابط مواد الدراسة لجميع المسارات</p>
-</div>
 <div class="container">
+
+<!-- ══ ADMIN TABS BAR ══ -->
+<div class="admin-tabs-bar" id="adminTabsBar">
+  <button class="admin-tab active" id="tab-btn-students" onclick="switchAdminTab('students')">
+    <i class="ti ti-users"></i> <span>الطالبات</span>
+  </button>
+  <button class="admin-tab" id="tab-btn-accounts" onclick="switchAdminTab('accounts')">
+    <i class="ti ti-user-check"></i> <span>الحسابات</span>
+    <span class="admin-tab-badge" id="tab-badge-accounts" style="display:none"></span>
+  </button>
+  <button class="admin-tab" id="tab-btn-teachers" onclick="switchAdminTab('teachers')">
+    <i class="ti ti-school"></i> <span>المعلمات</span>
+  </button>
+  <button class="admin-tab" id="tab-btn-content" onclick="switchAdminTab('content')">
+    <i class="ti ti-books"></i> <span>المحتوى</span>
+  </button>
+  <button class="admin-tab" id="tab-btn-news" onclick="switchAdminTab('news')">
+    <i class="ti ti-speakerphone"></i> <span>الأخبار</span>
+  </button>
+  <button class="admin-tab" id="tab-btn-tools" onclick="switchAdminTab('tools')">
+    <i class="ti ti-settings"></i> <span>الأدوات</span>
+  </button>
+</div>
+
+<!-- ══ TAB: STUDENTS ══ -->
+<div id="admin-tab-students" class="admin-tab-panel">
 <!-- STATS -->
 <div class="stats-row">
 <div class="stat-card"><div class="stat-num" id="sTotal">0</div><div class="stat-label">إجمالي المواد</div></div>
@@ -112,144 +133,6 @@
 <div class="stat-card"><div class="stat-num" id="sVid">0</div><div class="stat-label">فيديو</div></div>
 <div class="stat-card"><div class="stat-num" id="sOth">0</div><div class="stat-label">ملفات أخرى</div></div>
 </div>
-<!-- ADD FORM -->
-<div class="section">
-<div class="section-head">
-<div class="section-head-title"><i class="ti ti-plus"></i> إضافة مادة جديدة</div>
-</div>
-<div class="section-body">
-<div class="howto">
-<div class="howto-title"><i class="ti ti-info-circle"></i> كيف أحصل على الرابط؟</div>
-<div class="howto-steps">
-<div class="howto-step"><span class="step-num">1</span>ارفعي الملف على Google Drive أو Dropbox أو أي خدمة تخزين</div>
-<div class="howto-step"><span class="step-num">2</span>اضغطي "مشاركة" واجعليه "يمكن لأي شخص لديه الرابط العرض"</div>
-<div class="howto-step"><span class="step-num">3</span>انسخي الرابط والصقيه في الحقل أدناه</div>
-</div>
-</div>
-<div class="err-msg" id="errMsg"><i class="ti ti-alert-circle"></i><span id="errText"></span></div>
-<div class="add-form">
-<div class="field">
-<label>رابط الملف <span class="required-star">*</span></label>
-<div class="link-wrap">
-<i class="ti ti-link"></i>
-<input id="fUrl" placeholder="https://drive.google.com/file/d/..." type="url"/>
-</div>
-<div class="link-hint">Google Drive · Dropbox · OneDrive · YouTube · أي رابط مباشر</div>
-</div>
-<div class="form-row">
-<div class="field">
-<label>المادة / المسار <span class="required-star">*</span></label>
-<select id="fCourse">
-<option value="">اختاري المادة</option>
-<option>التفسير</option><option>الفقه</option><option>العقيدة</option>
-<option>الحديث</option><option>السيرة النبوية</option>
-<option>التجويد والتلاوة</option><option>النحو</option><option>أخرى</option>
-</select>
-</div>
-<div class="field">
-<label>نوع المحتوى</label>
-<select id="fType">
-<option value="محاضرة">محاضرة</option>
-<option value="ملخص">ملخص</option>
-<option value="واجب">واجب</option>
-<option value="اختبار">اختبار</option>
-<option value="مرجع">مرجع علمي</option>
-<option value="فيديو">فيديو</option>
-<option value="أخرى">أخرى</option>
-</select>
-</div>
-</div>
-<div class="field">
-<label>عنوان المادة <span class="required-star">*</span></label>
-<input id="fTitle" placeholder="مثال: محاضرة تفسير سورة الفاتحة — الأسبوع الأول" type="text"/>
-</div>
-<div class="field">
-<label>ملاحظات للطالبات (اختياري)</label>
-<textarea id="fNotes" placeholder="أي تعليمات أو ملاحظات..."></textarea>
-</div>
-<button class="btn-add" id="addBtn" onclick="doAdd()">
-<i class="ti ti-circle-plus"></i> إضافة المادة
-          </button>
-</div>
-</div>
-</div>
-<!-- DELETION REQUESTS SECTION -->
-<div class="section" id="deletionRequestsSection" style="display:none">
-  <div class="section-head">
-    <div class="section-head-title">
-      <i class="ti ti-trash"></i> طلبات حذف الحسابات
-      <span id="deletionBadge" style="display:none;background:#c0392b;color:#fff;border-radius:20px;padding:2px 10px;font-size:12px;margin-right:8px;"></span>
-    </div>
-  </div>
-  <div id="deletionRequestsContainer">
-    <div class="empty-state"><i class="ti ti-inbox"></i> لا توجد طلبات حذف حالياً</div>
-  </div>
-</div>
-
-<!-- PENDING ACCOUNTS SECTION (admin only) -->
-<div class="section section-collapsed" id="pendingSection">
-<div class="section-head">
-<div class="section-head-title">
-<i class="ti ti-user-check"></i> الحسابات المعلقة — بانتظار الموافقة
-          <span class="pending-badge badge-hidden" id="pendingBadge"></span>
-</div>
-</div>
-<div id="pendingContainer">
-<div class="empty-state"><i class="ti ti-inbox"></i>لا توجد حسابات معلقة</div>
-</div>
-</div>
-<!-- ALL USERS SECTION (admin only) -->
-<div class="section section-collapsed" id="allUsersSection">
-  <div class="section-head">
-    <div class="section-head-title">
-      <i class="ti ti-users"></i> جميع الحسابات المسجلة
-      <span class="pending-badge badge-hidden badge-green" id="allUsersBadge"></span>
-    </div>
-    <div class="users-filter-row">
-      <input id="usersSearch" type="text" placeholder="ابحثي بالاسم أو البريد..."
-        oninput="renderAllUsers()"
-        class="users-search-input"/>
-      <select id="usersFilterRole" onchange="renderAllUsers()"
-        class="users-filter-select">
-        <option value="all">كل الأدوار</option>
-        <option value="student">أصدقاء متين</option>
-        <option value="mateen">بنات متين</option>
-        <option value="teacher">معلمة</option>
-        <option value="supervisor">مشرفة</option>
-        <option value="admin">إدارة</option>
-      </select>
-      <select id="usersFilterStatus" onchange="renderAllUsers()"
-        class="users-filter-select">
-        <option value="all">كل الحالات</option>
-        <option value="active">مفعّل</option>
-        <option value="pending">معلق</option>
-        <option value="suspended">موقوف</option>
-      </select>
-    </div>
-  </div>
-  <div class="stu-stats-row">
-    <div class="stu-stat"><span id="uTotal">0</span><small>الكل</small></div>
-    <div class="stu-stat accepted"><span id="uActive">0</span><small>مفعّلون</small></div>
-    <div class="stu-stat pending"><span id="uPending">0</span><small>معلقون</small></div>
-    <div class="stu-stat rejected"><span id="uSuspended">0</span><small>موقوفون</small></div>
-  </div>
-  <div class="table-scroll-wrap">
-    <table class="pending-table">
-      <thead><tr>
-        <th>#</th><th>الاسم</th><th>الدور</th>
-        <th>البريد الإلكتروني</th><th>الجوال</th>
-        <th>السنة</th><th>تاريخ التسجيل</th><th>الحالة</th>
-        <th>الربط</th><th>إجراء</th>
-      </tr></thead>
-      <tbody id="allUsersBody">
-        <tr><td colspan="8" class="table-loader-cell">
-          <i class="ti ti-loader spin loader-spin-lg"></i>
-        </td></tr>
-      </tbody>
-    </table>
-  </div>
-</div>
-
 <!-- STUDENTS / INTERVIEWS SECTION -->
 <div class="section" id="studentsSection">
 <div class="section-head">
@@ -365,43 +248,162 @@
 </button>
 </div>
 </div>
-<!-- NEWS & EVENTS MANAGEMENT SECTION -->
-<div class="section" id="newsSection">
+</div><!-- /admin-tab-students -->
+
+<!-- ══ TAB: ACCOUNTS ══ -->
+<div id="admin-tab-accounts" class="admin-tab-panel" style="display:none">
+<!-- DELETION REQUESTS SECTION -->
+<div class="section" id="deletionRequestsSection">
   <div class="section-head">
-    <div class="section-head-title"><i class="ti ti-speakerphone"></i> إدارة الأخبار والمواعيد</div>
-    <div style="display:flex;gap:8px">
-      <button class="btn-add-row" onclick="openAddNewsModal()"><i class="ti ti-plus"></i> خبر جديد</button>
-      <button class="btn-add-row" style="background:rgba(59,130,246,0.12);color:#2563eb;border-color:#93c5fd" onclick="openAddEventModal()"><i class="ti ti-calendar-plus"></i> موعد مهم</button>
+    <div class="section-head-title">
+      <i class="ti ti-trash"></i> طلبات حذف الحسابات
+      <span id="deletionBadge" style="display:none;background:#c0392b;color:#fff;border-radius:20px;padding:2px 10px;font-size:12px;margin-right:8px;"></span>
     </div>
   </div>
-
-  <!-- tabs -->
-  <div style="display:flex;gap:0;border-bottom:2px solid var(--border);margin:0 16px">
-    <button id="newsTabBtn" onclick="switchNewsTab('news')"
-      style="padding:10px 20px;border:none;background:none;font-family:inherit;font-size:13px;font-weight:600;color:var(--green-dark);border-bottom:2px solid var(--green-dark);margin-bottom:-2px;cursor:pointer">
-      📰 الأخبار
-    </button>
-    <button id="eventsTabBtn" onclick="switchNewsTab('events')"
-      style="padding:10px 20px;border:none;background:none;font-family:inherit;font-size:13px;color:var(--text-mid);cursor:pointer">
-      📅 المواعيد المهمة
-    </button>
-  </div>
-
-  <!-- قسم الأخبار -->
-  <div id="newsTabContent">
-    <div id="newsAdminList" style="padding:12px 16px;display:flex;flex-direction:column;gap:10px">
-      <div style="color:var(--text-mid);font-size:13px;padding:20px;text-align:center"><i class="ti ti-loader spin"></i></div>
-    </div>
-  </div>
-
-  <!-- قسم المواعيد -->
-  <div id="eventsTabContent" style="display:none">
-    <div id="eventsAdminList" style="padding:12px 16px;display:flex;flex-direction:column;gap:8px">
-      <div style="color:var(--text-mid);font-size:13px;padding:20px;text-align:center"><i class="ti ti-loader spin"></i></div>
-    </div>
+  <div id="deletionRequestsContainer">
+    <div class="empty-state"><i class="ti ti-inbox"></i> لا توجد طلبات حذف حالياً</div>
   </div>
 </div>
+<!-- PENDING ACCOUNTS SECTION (admin only) -->
+<div class="section" id="pendingSection">
+<div class="section-head">
+<div class="section-head-title">
+<i class="ti ti-user-check"></i> الحسابات المعلقة — بانتظار الموافقة
+          <span class="pending-badge badge-hidden" id="pendingBadge"></span>
+</div>
+</div>
+<div id="pendingContainer">
+<div class="empty-state"><i class="ti ti-inbox"></i>لا توجد حسابات معلقة</div>
+</div>
+</div>
+<!-- ALL USERS SECTION (admin only) -->
+<div class="section" id="allUsersSection">
+  <div class="section-head">
+    <div class="section-head-title">
+      <i class="ti ti-users"></i> جميع الحسابات المسجلة
+      <span class="pending-badge badge-hidden badge-green" id="allUsersBadge"></span>
+    </div>
+    <div class="users-filter-row">
+      <input id="usersSearch" type="text" placeholder="ابحثي بالاسم أو البريد..."
+        oninput="renderAllUsers()"
+        class="users-search-input"/>
+      <select id="usersFilterRole" onchange="renderAllUsers()"
+        class="users-filter-select">
+        <option value="all">كل الأدوار</option>
+        <option value="student">أصدقاء متين</option>
+        <option value="mateen">بنات متين</option>
+        <option value="teacher">معلمة</option>
+        <option value="supervisor">مشرفة</option>
+        <option value="admin">إدارة</option>
+      </select>
+      <select id="usersFilterStatus" onchange="renderAllUsers()"
+        class="users-filter-select">
+        <option value="all">كل الحالات</option>
+        <option value="active">مفعّل</option>
+        <option value="pending">معلق</option>
+        <option value="suspended">موقوف</option>
+      </select>
+    </div>
+  </div>
+  <div class="stu-stats-row">
+    <div class="stu-stat"><span id="uTotal">0</span><small>الكل</small></div>
+    <div class="stu-stat accepted"><span id="uActive">0</span><small>مفعّلون</small></div>
+    <div class="stu-stat pending"><span id="uPending">0</span><small>معلقون</small></div>
+    <div class="stu-stat rejected"><span id="uSuspended">0</span><small>موقوفون</small></div>
+  </div>
+  <div class="table-scroll-wrap">
+    <table class="pending-table">
+      <thead><tr>
+        <th>#</th><th>الاسم</th><th>الدور</th>
+        <th>البريد الإلكتروني</th><th>الجوال</th>
+        <th>السنة</th><th>تاريخ التسجيل</th><th>الحالة</th>
+        <th>الربط</th><th>إجراء</th>
+      </tr></thead>
+      <tbody id="allUsersBody">
+        <tr><td colspan="8" class="table-loader-cell">
+          <i class="ti ti-loader spin loader-spin-lg"></i>
+        </td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+</div><!-- /admin-tab-accounts -->
 
+<!-- ══ TAB: TEACHERS ══ -->
+<div id="admin-tab-teachers" class="admin-tab-panel" style="display:none">
+<div class="section" id="teachersSection">
+  <div class="section-head">
+    <div class="section-head-title"><i class="ti ti-school"></i> المعلمات</div>
+  </div>
+  <div id="teachersContainer">
+    <div class="empty-state"><i class="ti ti-loader ti-spin"></i> جارٍ التحميل...</div>
+  </div>
+</div>
+</div><!-- /admin-tab-teachers -->
+
+<!-- ══ TAB: CONTENT ══ -->
+<div id="admin-tab-content" class="admin-tab-panel" style="display:none">
+<!-- ADD FORM -->
+<div class="section">
+<div class="section-head">
+<div class="section-head-title"><i class="ti ti-plus"></i> إضافة مادة جديدة</div>
+</div>
+<div class="section-body">
+<div class="howto">
+<div class="howto-title"><i class="ti ti-info-circle"></i> كيف أحصل على الرابط؟</div>
+<div class="howto-steps">
+<div class="howto-step"><span class="step-num">1</span>ارفعي الملف على Google Drive أو Dropbox أو أي خدمة تخزين</div>
+<div class="howto-step"><span class="step-num">2</span>اضغطي "مشاركة" واجعليه "يمكن لأي شخص لديه الرابط العرض"</div>
+<div class="howto-step"><span class="step-num">3</span>انسخي الرابط والصقيه في الحقل أدناه</div>
+</div>
+</div>
+<div class="err-msg" id="errMsg"><i class="ti ti-alert-circle"></i><span id="errText"></span></div>
+<div class="add-form">
+<div class="field">
+<label>رابط الملف <span class="required-star">*</span></label>
+<div class="link-wrap">
+<i class="ti ti-link"></i>
+<input id="fUrl" placeholder="https://drive.google.com/file/d/..." type="url"/>
+</div>
+<div class="link-hint">Google Drive · Dropbox · OneDrive · YouTube · أي رابط مباشر</div>
+</div>
+<div class="form-row">
+<div class="field">
+<label>المادة / المسار <span class="required-star">*</span></label>
+<select id="fCourse">
+<option value="">اختاري المادة</option>
+<option>التفسير</option><option>الفقه</option><option>العقيدة</option>
+<option>الحديث</option><option>السيرة النبوية</option>
+<option>التجويد والتلاوة</option><option>النحو</option><option>أخرى</option>
+</select>
+</div>
+<div class="field">
+<label>نوع المحتوى</label>
+<select id="fType">
+<option value="محاضرة">محاضرة</option>
+<option value="ملخص">ملخص</option>
+<option value="واجب">واجب</option>
+<option value="اختبار">اختبار</option>
+<option value="مرجع">مرجع علمي</option>
+<option value="فيديو">فيديو</option>
+<option value="أخرى">أخرى</option>
+</select>
+</div>
+</div>
+<div class="field">
+<label>عنوان المادة <span class="required-star">*</span></label>
+<input id="fTitle" placeholder="مثال: محاضرة تفسير سورة الفاتحة — الأسبوع الأول" type="text"/>
+</div>
+<div class="field">
+<label>ملاحظات للطالبات (اختياري)</label>
+<textarea id="fNotes" placeholder="أي تعليمات أو ملاحظات..."></textarea>
+</div>
+<button class="btn-add" id="addBtn" onclick="doAdd()">
+<i class="ti ti-circle-plus"></i> إضافة المادة
+          </button>
+</div>
+</div>
+</div>
 <!-- ── قسم إدارة المواد الدراسية ── -->
 <div class="section" id="subjectsSection">
   <div class="section-head">
@@ -471,7 +473,6 @@
     </div>
   </div>
 </div>
-
 <!-- MATERIALS LIST -->
 <div class="section">
 <div class="section-head">
@@ -496,7 +497,77 @@
 </div>
 </div>
 </div>
+</div><!-- /admin-tab-content -->
+
+<!-- ══ TAB: NEWS ══ -->
+<div id="admin-tab-news" class="admin-tab-panel" style="display:none">
+<!-- NEWS & EVENTS MANAGEMENT SECTION -->
+<div class="section" id="newsSection">
+  <div class="section-head">
+    <div class="section-head-title"><i class="ti ti-speakerphone"></i> إدارة الأخبار والمواعيد</div>
+    <div style="display:flex;gap:8px">
+      <button class="btn-add-row" onclick="openAddNewsModal()"><i class="ti ti-plus"></i> خبر جديد</button>
+      <button class="btn-add-row" style="background:rgba(59,130,246,0.12);color:#2563eb;border-color:#93c5fd" onclick="openAddEventModal()"><i class="ti ti-calendar-plus"></i> موعد مهم</button>
+    </div>
+  </div>
+
+  <!-- tabs -->
+  <div style="display:flex;gap:0;border-bottom:2px solid var(--border);margin:0 16px">
+    <button id="newsTabBtn" onclick="switchNewsTab('news')"
+      style="padding:10px 20px;border:none;background:none;font-family:inherit;font-size:13px;font-weight:600;color:var(--green-dark);border-bottom:2px solid var(--green-dark);margin-bottom:-2px;cursor:pointer">
+      📰 الأخبار
+    </button>
+    <button id="eventsTabBtn" onclick="switchNewsTab('events')"
+      style="padding:10px 20px;border:none;background:none;font-family:inherit;font-size:13px;color:var(--text-mid);cursor:pointer">
+      📅 المواعيد المهمة
+    </button>
+  </div>
+
+  <!-- قسم الأخبار -->
+  <div id="newsTabContent">
+    <div id="newsAdminList" style="padding:12px 16px;display:flex;flex-direction:column;gap:10px">
+      <div style="color:var(--text-mid);font-size:13px;padding:20px;text-align:center"><i class="ti ti-loader spin"></i></div>
+    </div>
+  </div>
+
+  <!-- قسم المواعيد -->
+  <div id="eventsTabContent" style="display:none">
+    <div id="eventsAdminList" style="padding:12px 16px;display:flex;flex-direction:column;gap:8px">
+      <div style="color:var(--text-mid);font-size:13px;padding:20px;text-align:center"><i class="ti ti-loader spin"></i></div>
+    </div>
+  </div>
 </div>
+</div><!-- /admin-tab-news -->
+
+<!-- ══ TAB: TOOLS ══ -->
+<div id="admin-tab-tools" class="admin-tab-panel" style="display:none">
+<div class="section">
+  <div class="section-head">
+    <div class="section-head-title"><i class="ti ti-settings"></i> أدوات النظام</div>
+  </div>
+  <div style="padding:20px;display:flex;flex-direction:column;gap:12px">
+    <a href="support.html" class="btn-add-row" style="text-align:center">
+      <i class="ti ti-bug"></i> فحص الموقع الشامل
+    </a>
+    <div style="border-top:1px solid var(--border);padding-top:12px">
+      <div style="font-size:13px;color:var(--text-mid);margin-bottom:10px">⚠️ منطقة الخطر — هذه الإجراءات لا يمكن التراجع عنها</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button onclick="resetAllStudentData('grades')" class="btn-danger-outline">
+          <i class="ti ti-eraser"></i> مسح كل الدرجات
+        </button>
+        <button onclick="resetAllStudentData('sessions')" class="btn-danger-outline">
+          <i class="ti ti-calendar-off"></i> مسح كل الحضور والغياب
+        </button>
+        <button onclick="resetAllStudentData('all')" class="btn-danger-solid">
+          <i class="ti ti-trash"></i> مسح كل البيانات
+        </button>
+      </div>
+    </div>
+  </div>
+</div><!-- /admin-tab-tools -->
+
+</div><!-- /container -->
+</div><!-- /mainContent -->
 
 <!-- ── Modal تصthisر Attendance  and the غياب ── -->
 <div class="modal-overlay m-overlay z-mid" id="attModal">
@@ -540,6 +611,94 @@
   .att-stu-label { display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:8px;border:1px solid #eee;cursor:pointer;font-size:13px;font-family:Cairo,sans-serif;transition:background .15s; }
   .att-stu-label:hover { background:#f5f8fb; }
   .att-stu-label input[type=checkbox] { width:16px;height:16px;accent-color:#1a4a2e;cursor:pointer; }
+
+/* ══ ADMIN TABS ══ */
+.admin-tabs-bar {
+  display: flex;
+  gap: 4px;
+  background: var(--beige2, #f0e8d8);
+  border-radius: 14px;
+  padding: 6px;
+  margin-bottom: 20px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 12px rgba(44,26,14,0.08);
+}
+.admin-tabs-bar::-webkit-scrollbar { display: none; }
+.admin-tab {
+  flex: 1;
+  min-width: 80px;
+  padding: 10px 8px;
+  border: none;
+  background: transparent;
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--text-mid, #8a6a52);
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  white-space: nowrap;
+  position: relative;
+}
+.admin-tab:hover { background: rgba(255,255,255,0.6); }
+.admin-tab.active {
+  background: var(--white, #fff);
+  color: var(--green-dark, #1b4332);
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(44,26,14,0.12);
+}
+.admin-tab-badge {
+  background: #c0392b;
+  color: #fff;
+  border-radius: 10px;
+  padding: 1px 6px;
+  font-size: 11px;
+  font-weight: 700;
+  min-width: 18px;
+  text-align: center;
+}
+.btn-danger-outline {
+  padding: 10px 16px;
+  border: 1.5px solid #c0392b;
+  background: transparent;
+  color: #c0392b;
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.btn-danger-outline:hover { background: rgba(192,57,43,0.08); }
+.btn-danger-solid {
+  padding: 10px 16px;
+  border: none;
+  background: #c0392b;
+  color: #fff;
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.btn-danger-solid:hover { background: #a93226; }
+@media (max-width: 600px) {
+  .admin-tab span { display: none; }
+  .admin-tab { min-width: 44px; padding: 10px 6px; }
+  .admin-tabs-bar { gap: 2px; padding: 4px; }
+}
 </style>
 
 <!-- ── Modal التصthisر ── -->
@@ -1008,5 +1167,53 @@ function formatSize(bytes) {
     </div>
   </div>
 </div>
+
+
+<script>
+// ══ ADMIN TABS SYSTEM ══
+const ADMIN_TABS = ['students','accounts','teachers','content','news','tools'];
+
+window.switchAdminTab = function(name) {
+  // أخبي كل التابات
+  ADMIN_TABS.forEach(t => {
+    const panel = document.getElementById('admin-tab-' + t);
+    const btn   = document.getElementById('tab-btn-' + t);
+    if (panel) panel.style.display = 'none';
+    if (btn)   btn.classList.remove('active');
+  });
+
+  // أظهر التاب المطلوب
+  const panel = document.getElementById('admin-tab-' + name);
+  const btn   = document.getElementById('tab-btn-' + name);
+  if (panel) panel.style.display = 'block';
+  if (btn)   btn.classList.add('active');
+
+  // احفظ في sessionStorage
+  sessionStorage.setItem('adminActiveTab', name);
+
+  // لو تاب المعلمات — حمّل البيانات
+  if (name === 'teachers' && typeof loadTeachersTab === 'function') {
+    loadTeachersTab();
+  }
+};
+
+// استعادة آخر تاب عند فتح الصفحة
+document.addEventListener('DOMContentLoaded', () => {
+  const saved = sessionStorage.getItem('adminActiveTab') || 'students';
+  switchAdminTab(saved);
+});
+
+// badge الحسابات المعلقة — يتحدث تلقائياً
+window._updateAccountsBadge = function(count) {
+  const badge = document.getElementById('tab-badge-accounts');
+  if (!badge) return;
+  if (count > 0) {
+    badge.textContent = count;
+    badge.style.display = 'inline-block';
+  } else {
+    badge.style.display = 'none';
+  }
+};
+</script>
 
 </body>
