@@ -3,6 +3,7 @@
 // ===========================
 
 import { showToast } from './ui.js';
+import { MATEEN_LOGO_BASE64 } from './mateen-logo.js';
 
 const MH = ['محرم','صفر','ربيع الأول','ربيع الثاني','جمادى الأولى','جمادى الثانية','رجب','شعبان','رمضان','شوال','ذو القعدة','ذو الحجة'];
 const MG = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
@@ -195,42 +196,68 @@ export async function exportPdf(students) {
 const SUBJ_LABEL = { 'قرآن':'قرآن', 'فقه':'فقه', 'تفسير':'تفسير', 'عقيدة':'عقيدة', 'حديث':'حديث' };
 
 const ATT_CSS = `
-  @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Noto+Naskh+Arabic:wght@400;600;700&display=swap');
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Cairo', Arial, sans-serif; direction: rtl; background: #f0f0f0; padding: 20px; }
+  body { font-family: 'Noto Naskh Arabic', 'Cairo', Arial, sans-serif; direction: rtl;
+    background: #efe2c8; padding: 20px; }
   @media print {
     body { background: white; padding: 0; }
-    .att-page { box-shadow: none; margin: 0; border-radius: 0; page-break-after: always; }
+    .att-page { box-shadow: none; margin: 0; border-radius: 0; border: none; page-break-after: always; }
     .att-page:last-child { page-break-after: avoid; }
+    .att-page::before { border-radius: 0; }
   }
-  .att-page { background: white; max-width: 800px; margin: 0 auto 30px; padding: 32px 36px 24px;
-    border-radius: 8px; box-shadow: 0 2px 12px rgba(0,0,0,.1); page-break-after: always; }
+  .att-page { position: relative; background: linear-gradient(180deg,#fffdf8 0%,#fbf4e6 100%);
+    max-width: 800px; margin: 0 auto 30px; padding: 36px 40px 26px; border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(92,61,46,.16); border: 1px solid #e3cfa8; page-break-after: always; overflow: hidden; }
   .att-page:last-child { page-break-after: avoid; }
-  .att-header { display: flex; justify-content: space-between; align-items: flex-start;
-    padding-bottom: 14px; border-bottom: 2.5px solid #1a3a5c; margin-bottom: 18px; }
-  .att-prog { font-size: 24px; font-weight: 600; color: #1a3a5c; }
-  .att-title { text-align: center; font-size: 22px; font-weight: 600; color: #1a3a5c; margin-bottom: 4px; }
-  .att-subtitle { text-align: center; font-size: 16px; color: #666; margin-bottom: 14px; }
-  table { width: 100%; border-collapse: collapse; font-size: 15px; margin-top: 10px; }
-  thead tr { background: #1a3a5c; }
-  thead th { color: white; padding: 10px 10px; text-align: center; font-weight: 600; font-size: 15px; }
-  tbody tr:nth-child(odd)  { background: white; }
-  tbody tr:nth-child(even) { background: #f5f8fb; }
-  tbody td { padding: 9px 10px; text-align: center; color: #333; border-bottom: 0.5px solid #e8edf2; font-size: 14px; }
-  .td-name { text-align: right; font-weight: 600; }
-  .chip-present { background:#d4edda; color:#1a6b36; padding:2px 10px; border-radius:20px; font-size:13px; }
-  .chip-absent  { background:#fde8e8; color:#b71c1c; padding:2px 10px; border-radius:20px; font-size:13px; }
-  .chip-empty   { color:#bbb; font-size:13px; }
-  .att-footer { display:flex; justify-content:space-between; margin-top:16px; padding-top:10px;
-    border-top:0.5px solid #ddd; font-size:13px; color:#bbb; }
+  .att-page::before { content:''; position:absolute; top:0; left:0; right:0; height:7px;
+    background: linear-gradient(90deg,#8a5e3c,#c9a227,#e8c96a,#c9a227,#8a5e3c); }
+  .att-header { display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    padding: 16px 0 16px; border-bottom: 2.5px solid #c9a227; margin-bottom: 20px; }
+  .att-logo { width: 58px; height: 58px; object-fit: contain; flex-shrink: 0; }
+  .att-prog-wrap { text-align: right; }
+  .att-prog { font-family: 'Amiri', serif; font-size: 23px; font-weight: 700; color: #5c3d2e; }
+  .att-prog-sub { font-size: 11.5px; color: #8a6a52; margin-top: 2px; }
+  .att-title { text-align: center; font-family: 'Amiri', serif; font-size: 24px; font-weight: 700;
+    color: #5c3d2e; margin-bottom: 4px; }
+  .att-subtitle { text-align: center; font-size: 15px; font-weight: 600; color: #8a5e3c; margin-bottom: 16px; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; margin-top: 8px; }
+  thead tr { background: linear-gradient(90deg,#5c3d2e,#7a4f34,#5c3d2e); }
+  thead th { color: #e8c96a; padding: 11px 10px; text-align: center; font-weight: 700; font-size: 14px; }
+  tbody tr:nth-child(odd)  { background: #fffdf8; }
+  tbody tr:nth-child(even) { background: #f3e9d4; }
+  tbody td { padding: 9px 10px; text-align: center; color: #2c1a0e; border-bottom: 1px solid #e3d3ae; font-size: 13.5px; }
+  .td-name { text-align: right; font-weight: 700; color: #5c3d2e; }
+  .chip-present { background:#e5f2e6; color:#1a6b36; padding:3px 12px; border-radius:20px; font-size:12.5px; font-weight:600; }
+  .chip-absent  { background:#fbe9e9; color:#b71c1c; padding:3px 12px; border-radius:20px; font-size:12.5px; font-weight:600; }
+  .chip-empty   { color:#c3ac8c; font-size:12.5px; }
+  .att-footer { display:flex; justify-content:space-between; align-items:center; margin-top:18px; padding-top:12px;
+    border-top:1px solid #d6c4a8; font-size:12px; color:#8a6a52; }
+  .att-footer span:nth-child(2) { color:#c9a227; font-size:15px; }
 `;
 
-function buildAttHtml(pages) {
+function attHeaderHtml() {
+  return `<div class="att-header">
+    <img src="${MATEEN_LOGO_BASE64}" class="att-logo" alt="شعار متين"/>
+    <div class="att-prog-wrap">
+      <div class="att-prog">برنامج متين العلمي</div>
+      <div class="att-prog-sub">سجلّ متابعة الحضور والغياب</div>
+    </div>
+  </div>`;
+}
+
+function buildAttHtmlWord(pages) {
   return `<html xmlns:o="urn:schemas-microsoft-com:office:office"
     xmlns:w="urn:schemas-microsoft-com:office:word"
     xmlns="http://www.w3.org/TR/REC-html40">
   <head><meta charset="UTF-8">
-  <xml><w:WordDocument><w:View>Print</w:View><w:Zoom>90</w:Zoom></w:WordDocument></xml>
+  <!--[if gte mso 9]><xml><w:WordDocument><w:View>Print</w:View><w:Zoom>90</w:Zoom></w:WordDocument></xml><![endif]-->
+  <style>${ATT_CSS}</style></head>
+  <body>${pages}</body></html>`;
+}
+
+function buildAttHtmlPrint(pages) {
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>سجل الحضور والغياب</title>
   <style>${ATT_CSS}</style></head>
   <body>${pages}</body></html>`;
 }
@@ -287,7 +314,7 @@ function buildAttPages(studentsData, mode) {
       const summaryRow = `<tr style="background:#eef3ff;font-weight:600"><td colspan="3">الإجمالي</td>${subjs.map(()=>'<td></td>').join('')}<td>${totalP}✔ / ${totalA}✖</td></tr>`;
 
       return `<div class="att-page">
-        <div class="att-header"><div class="att-prog">📖 برنامج متين العلمي</div></div>
+        ${attHeaderHtml()}
         <div class="att-title">سجل الحضور والغياب</div>
         <div class="att-subtitle">${st.name}</div>
         <table>
@@ -339,7 +366,7 @@ function buildAttPages(studentsData, mode) {
       ).join('');
 
       return `<div class="att-page">
-        <div class="att-header"><div class="att-prog">📖 برنامج متين العلمي</div></div>
+        ${attHeaderHtml()}
         <div class="att-title">سجل الحضور والغياب</div>
         <div class="att-subtitle">الأسبوع من ${week.start} إلى ${week.end}</div>
         <table>
@@ -376,7 +403,7 @@ function buildAttPages(studentsData, mode) {
       ).join('');
 
       return `<div class="att-page">
-        <div class="att-header"><div class="att-prog">📖 برنامج متين العلمي</div></div>
+        ${attHeaderHtml()}
         <div class="att-title">سجل الحضور والغياب</div>
         <div class="att-subtitle">مادة: ${subj}</div>
         <table>
@@ -395,7 +422,7 @@ function buildAttPages(studentsData, mode) {
 
 export async function exportAttendanceWord(studentsData, mode='perStudent') {
   if (!studentsData.length) { showToast('لا توجد بيانات للتصدير'); return; }
-  const html = buildAttHtml(buildAttPages(studentsData, mode));
+  const html = buildAttHtmlWord(buildAttPages(studentsData, mode));
   const blob = new Blob(['\uFEFF'+html], {
     type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document;charset=utf-8'
   });
@@ -409,7 +436,7 @@ export async function exportAttendanceWord(studentsData, mode='perStudent') {
 
 export async function exportAttendancePdf(studentsData, mode='perStudent') {
   if (!studentsData.length) { showToast('لا توجد بيانات للتصدير'); return; }
-  const html = buildAttHtml(buildAttPages(studentsData, mode));
+  const html = buildAttHtmlPrint(buildAttPages(studentsData, mode));
   const win = window.open('', '_blank');
   win.document.write(html);
   win.document.close();
