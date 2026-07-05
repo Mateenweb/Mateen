@@ -29,7 +29,7 @@ onAuthStateChanged(auth, async user => {
   }
   document.getElementById('navUserName').textContent  = user.displayName || 'الإدارة';
   document.getElementById('authGate').style.display   = 'none';
-  document.getElementById('mainContent').style.display = 'flex';
+  document.getElementById('mainContent').classList.remove('main-content-hidden');
 
   if (role === 'admin' || role === 'supervisor') {
     document.getElementById('pendingSection').style.display = 'block';
