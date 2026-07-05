@@ -1800,15 +1800,34 @@ window.deleteBulkExam = async (encodedKey) => {
 // ══════════════════════════════════════════════════════════════
 //  إضافة حضور جماعي
 // ══════════════════════════════════════════════════════════════
+// جدول أسماء الأيام حسب getDay() (0=الأحد ... 6=السبت) — نفس الترتيب المستخدم في ميزة لصق الرسالة
+const BA_WEEKDAY_NAMES = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+
+// بيحسب اسم اليوم من التاريخ المختار ويحدّث dropdown "اليوم" تلقائيًا
+function baSyncDayFromDate() {
+  const dateVal = document.getElementById('baDate')?.value;
+  const daySelect = document.getElementById('baDay');
+  if (!dateVal || !daySelect) return;
+  const d = new Date(dateVal + 'T00:00:00');
+  daySelect.value = BA_WEEKDAY_NAMES[d.getDay()];
+}
+
 window.openBulkAttModal = () => {
   const modal = document.getElementById('bulkAttModal');
   modal.style.display = 'flex';
   const dateInput = document.getElementById('baDate');
   if (dateInput && !dateInput.value) dateInput.value = new Date().toISOString().slice(0, 10);
+  baSyncDayFromDate();
   renderBAStudents();
 };
 
-// إعادة عرض المواد لما تتغيّر اليوم — يهم فقط في وضع "كل مواد اليوم"
+// لو غيّرت التاريخ، يتحدّث اسم اليوم تلقائيًا وتتحدث معه مواد "كل مواد اليوم"
+document.getElementById('baDate')?.addEventListener('change', () => {
+  baSyncDayFromDate();
+  renderBAStudents();
+});
+
+// إعادة عرض المواد لما تتغيّر اليوم يدويًا — يهم فقط في وضع "كل مواد اليوم"
 document.getElementById('baDay')?.addEventListener('change', renderBAStudents);
 
 window.closeBulkAttModal = () => {
