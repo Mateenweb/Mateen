@@ -5,6 +5,10 @@
 import { showToast } from './ui.js';
 import { MATEEN_LOGO_BASE64 } from './mateen-logo.js';
 
+function watermarkHtml() {
+  return `<img src="${MATEEN_LOGO_BASE64}" class="wm-logo" alt=""/>`;
+}
+
 const MH = ['محرم','صفر','ربيع الأول','ربيع الثاني','جمادى الأولى','جمادى الثانية','رجب','شعبان','رمضان','شوال','ذو القعدة','ذو الحجة'];
 const MG = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
 const DAYS_ORDER = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
@@ -71,6 +75,7 @@ function buildTableHtml(students, cols, headers, title, subtitle='') {
 
   return `
   <div class="page">
+    ${watermarkHtml()}
     <div class="page-header">
       <img src="${MATEEN_LOGO_BASE64}" class="page-logo" alt="شعار متين"/>
       <div class="page-header-text">
@@ -119,6 +124,9 @@ const PAGE_CSS = `
   .name-td { text-align: right; font-weight: 600; color: #5c3d2e; }
   .page-footer { display: flex; justify-content: space-between; margin-top: 18px; padding-top: 12px; border-top: 1px solid #d6c4a8; font-size: 12px; color: #8a6a52; }
   .page-footer span:nth-child(2) { color: #c9a227; font-size: 15px; }
+  .wm-logo { position: absolute; top: 50%; left: 50%; width: 320px; height: 320px; object-fit: contain;
+    transform: translate(-50%,-50%) rotate(-15deg); opacity: 0.07; z-index: 0; pointer-events: none; }
+  .page-header, .page-title, .page-subtitle, table, .page-footer { position: relative; z-index: 1; }
 `;
 
 function buildFullHtmlWord(pages) {
@@ -248,6 +256,9 @@ const ATT_CSS = `
   .att-footer { display:flex; justify-content:space-between; align-items:center; margin-top:18px; padding-top:12px;
     border-top:1px solid #d6c4a8; font-size:12px; color:#8a6a52; }
   .att-footer span:nth-child(2) { color:#c9a227; font-size:15px; }
+  .wm-logo { position: absolute; top: 50%; left: 50%; width: 320px; height: 320px; object-fit: contain;
+    transform: translate(-50%,-50%) rotate(-15deg); opacity: 0.07; z-index: 0; pointer-events: none; }
+  .att-header, .att-title, .att-subtitle, table, .att-footer { position: relative; z-index: 1; }
 `;
 
 function attHeaderHtml() {
@@ -328,6 +339,7 @@ function buildAttPages(studentsData, mode) {
       const summaryRow = `<tr style="background:#eef3ff;font-weight:600"><td colspan="3">الإجمالي</td>${subjs.map(()=>'<td></td>').join('')}<td>${totalP}✔ / ${totalA}✖</td></tr>`;
 
       return `<div class="att-page">
+        ${watermarkHtml()}
         ${attHeaderHtml()}
         <div class="att-title">سجل الحضور والغياب</div>
         <div class="att-subtitle">${st.name}</div>
@@ -380,6 +392,7 @@ function buildAttPages(studentsData, mode) {
       ).join('');
 
       return `<div class="att-page">
+        ${watermarkHtml()}
         ${attHeaderHtml()}
         <div class="att-title">سجل الحضور والغياب</div>
         <div class="att-subtitle">الأسبوع من ${week.start} إلى ${week.end}</div>
@@ -417,6 +430,7 @@ function buildAttPages(studentsData, mode) {
       ).join('');
 
       return `<div class="att-page">
+        ${watermarkHtml()}
         ${attHeaderHtml()}
         <div class="att-title">سجل الحضور والغياب</div>
         <div class="att-subtitle">مادة: ${subj}</div>
