@@ -1880,108 +1880,93 @@ window.applyExcelGrades = () => {
 // ── حذف اختبار جماعي من عند كل الطالبات ─────────────────────
 
 // ── مسح كل الدرجات والغياب ─────────────────────────────────────
-window.resetAllStudentData = async (type) => {
-  const typeName = type === 'grades' ? 'الدرجات' : type === 'sessions' ? 'الحضور والغياب' : 'الدرجات والحضور والغياب';
 
-  showToast('⏳ جارٍ تحميل البيانات...');
+window.openResetDataModal = async () => {
+  const modal = document.getElementById('resetDataModal');
+  const list  = document.getElementById('resetStudentsList');
+  modal.style.display = 'flex';
+  list.innerHTML = '<div style="text-align:center;color:var(--text-mid);font-size:13px;padding:20px">جارٍ التحميل...</div>';
 
   try {
     const snap = await getDocs(collection(db, 'students'));
-    const types = type === 'all' ? ['grades', 'sessions'] : [type];
+    const studentsWithData = [];
 
-    // جيب كل البيانات الأول عشان تظهر للمستخدم
-    const studentData = [];
     await Promise.all(snap.docs.map(async sDoc => {
       const data = sDoc.data();
-      const name = data.name || 'غير معروف';
-      let grades = 0, sessions = 0;
-      await Promise.all(types.map(async sub => {
-        const subSnap = await getDocs(collection(db, 'students', sDoc.id, sub));
-        if (sub === 'grades') grades = subSnap.size;
-        if (sub === 'sessions') sessions = subSnap.size;
-      }));
-      if (grades > 0 || sessions > 0) {
-        studentData.push({ id: sDoc.id, name, grades, sessions });
+      const gradesSnap   = await getDocs(collection(db, 'students', sDoc.id, 'grades'));
+      const sessionsSnap = await getDocs(collection(db, 'students', sDoc.id, 'sessions'));
+      if (gradesSnap.size > 0 || sessionsSnap.size > 0) {
+        studentsWithData.push({
+          id: sDoc.id,
+          name: data.name || 'طالبة',
+          archived: !!data.archived,
+          grades: gradesSnap.size,
+          sessions: sessionsSnap.size,
+        });
       }
     }));
 
-    if (!studentData.length) {
-      showToast('مفيش بيانات للمسح');
+    if (studentsWithData.length === 0) {
+      list.innerHTML = '<div style="text-align:center;color:var(--text-mid);font-size:13px;padding:20px">لا توجد بيانات للمسح</div>';
       return;
     }
 
-    // اعرض التفاصيل في modal
-    let detailsHtml = studentData.map(s => {
-      let details = [];
-      if (s.grades > 0) details.push(`${s.grades} درجة`);
-      if (s.sessions > 0) details.push(`${s.sessions} سجل حضور`);
-      return `<div style="display:flex;justify-content:space-between;padding:8px 12px;border-bottom:1px solid var(--border);font-size:13px">
-        <span style="font-weight:600">${s.name}</span>
-        <span style="color:var(--text-mid)">${details.join(' + ')}</span>
-      </div>`;
-    }).join('');
-
-    // ابني الـ modal
-    const existing = document.getElementById('resetPreviewModal');
-    if (existing) existing.remove();
-
-    const modal = document.createElement('div');
-    modal.id = 'resetPreviewModal';
-    modal.style.cssText = 'position:fixed;inset:0;background:rgba(44,26,14,0.6);z-index:10000;display:flex;align-items:center;justify-content:center';
-    modal.innerHTML = `
-      <div style="background:var(--beige);border-radius:18px;width:min(95vw,520px);max-height:80vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 10px 40px rgba(0,0,0,0.3);border:1.5px solid var(--border)">
-        <div style="padding:18px 20px;border-bottom:1px solid var(--border);background:var(--beige2);display:flex;justify-content:space-between;align-items:center">
-          <span style="font-weight:700;font-size:16px;color:#c0392b">⚠️ تأكيد مسح ${typeName}</span>
-          <button onclick="document.getElementById('resetPreviewModal').remove()" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--text-mid)">✕</button>
+    window._resetStudentsCache = studentsWithData;
+    list.innerHTML = studentsWithData.map(s => `
+      <label style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:rgba(92,61,46,0.04);border-radius:8px;cursor:pointer">
+        <input type="checkbox" class="reset-student-cb" data-id="${s.id}" checked style="width:16px;height:16px"/>
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:600">${s.name} ${s.archived ? '<span style="font-size:10px;color:#e67e22">(مؤرشفة)</span>' : ''}</div>
+          <div style="font-size:11px;color:var(--text-mid)">
+            ${s.grades > 0 ? `📊 ${s.grades} درجة` : ''}
+            ${s.sessions > 0 ? `📋 ${s.sessions} سجل حضور` : ''}
+          </div>
         </div>
-        <div style="padding:12px 16px;background:rgba(192,57,43,0.08);border-bottom:1px solid var(--border);font-size:13px;color:#c0392b">
-          هيتمسح من عند <strong>${studentData.length} طالبة</strong> — هذا الإجراء لا يمكن التراجع عنه!
-        </div>
-        <div style="overflow-y:auto;flex:1">
-          ${detailsHtml}
-        </div>
-        <div style="padding:16px 20px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end">
-          <button onclick="document.getElementById('resetPreviewModal').remove()" 
-            style="padding:10px 20px;border:1px solid var(--border);background:var(--beige);border-radius:10px;font-family:inherit;font-size:14px;cursor:pointer">
-            إلغاء
-          </button>
-          <button id="confirmResetBtn"
-            style="padding:10px 20px;border:none;background:#c0392b;color:white;border-radius:10px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer">
-            🗑️ تأكيد الحذف
-          </button>
-        </div>
-      </div>`;
-    document.body.appendChild(modal);
-
-    // لما يضغط تأكيد
-    document.getElementById('confirmResetBtn').onclick = async () => {
-      modal.remove();
-      showToast('⏳ جارٍ المسح...');
-      let totalGrades = 0, totalSessions = 0;
-      await Promise.all(studentData.map(async s => {
-        await Promise.all(types.map(async sub => {
-          const subSnap = await getDocs(collection(db, 'students', s.id, sub));
-          if (sub === 'grades') totalGrades += subSnap.size;
-          if (sub === 'sessions') totalSessions += subSnap.size;
-          await Promise.all(subSnap.docs.map(d => deleteDoc(doc(db, 'students', s.id, sub, d.id))));
-        }));
-      }));
-      let summary = `✅ تم المسح:
-`;
-      if (totalGrades > 0) summary += `• ${totalGrades} درجة
-`;
-      if (totalSessions > 0) summary += `• ${totalSessions} سجل حضور
-`;
-      summary += `• من عند ${studentData.length} طالبة`;
-      alert(summary);
-      showToast('✅ تم المسح بنجاح');
-    };
+      </label>`).join('');
 
   } catch(e) {
-    showToast('خطأ: ' + e.message);
+    list.innerHTML = `<div style="color:#e74c3c;font-size:13px;padding:10px">خطأ: ${e.message}</div>`;
   }
 };
 
-window.openResetDataModal = () => {
-  document.getElementById('resetDataModal').style.display = 'flex';
+window.selectAllResetStudents = (val) => {
+  document.querySelectorAll('.reset-student-cb').forEach(cb => cb.checked = val);
+};
+
+window.confirmResetSelected = async () => {
+  const type = document.querySelector('input[name="resetType"]:checked')?.value || 'all';
+  const selected = [...document.querySelectorAll('.reset-student-cb:checked')].map(cb => cb.dataset.id);
+
+  if (!selected.length) { alert('اختاري طالبة واحدة على الأقل'); return; }
+
+  const typeName = type === 'grades' ? 'الدرجات' : type === 'sessions' ? 'الحضور والغياب' : 'الدرجات والحضور';
+  if (!confirm(`متأكدة من مسح ${typeName} من عند ${selected.length} طالبة؟`)) return;
+
+  const types = type === 'all' ? ['grades', 'sessions'] : [type];
+  let totalGrades = 0, totalSessions = 0;
+
+  try {
+    await Promise.all(selected.map(async sid => {
+      await Promise.all(types.map(async sub => {
+        const subSnap = await getDocs(collection(db, 'students', sid, sub));
+        if (sub === 'grades') totalGrades += subSnap.size;
+        if (sub === 'sessions') totalSessions += subSnap.size;
+        await Promise.all(subSnap.docs.map(d => deleteDoc(doc(db, 'students', sid, sub, d.id))));
+      }));
+    }));
+
+    let summary = `✅ تم المسح:
+`;
+    if (totalGrades > 0) summary += `• ${totalGrades} درجة
+`;
+    if (totalSessions > 0) summary += `• ${totalSessions} سجل حضور
+`;
+    summary += `• من عند ${selected.length} طالبة`;
+    alert(summary);
+
+    document.getElementById('resetDataModal').style.display = 'none';
+    showToast('✅ تم المسح بنجاح');
+  } catch(e) {
+    showToast('خطأ: ' + e.message);
+  }
 };
