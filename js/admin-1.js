@@ -1995,6 +1995,178 @@ window.deleteBulkAttendance = async (encodedKey) => {
   }
 };
 
+// ══════════════════════════════════════════════════════════════
+//  استيراد حضور من رسالة نصية (زي رسائل واتساب)
+// ══════════════════════════════════════════════════════════════
+const ATT_MSG_EMOJI_RE = /(✅️|❌️|⭕️|✅|❌|⭕)/g;
+const ATT_MSG_DAY_NAMES = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+
+window.openPasteAttModal = () => {
+  document.getElementById('pasteAttModal').style.display = 'flex';
+  document.getElementById('paDate').value = new Date().toISOString().slice(0, 10);
+  document.getElementById('paMessage').value = '';
+  document.getElementById('paPreviewSection').style.display = 'none';
+  window._paParsed = null;
+};
+
+window.closePasteAttModal = () => {
+  document.getElementById('pasteAttModal').style.display = 'none';
+};
+
+// بنى regex لاسم طالبة بيقبل اختلافات الألف/التاء المربوطة/الياء الشائعة، ومسافات مرنة بين الكلمات
+function buildAttNameRegex(name) {
+  const escRe = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const words = name.trim().split(/\s+/).filter(Boolean).map(w => {
+    let pattern = '';
+    for (const ch of w) {
+      if ('أإآا'.includes(ch)) pattern += '[أإآا]';
+      else if (ch === 'ة' || ch === 'ه') pattern += '[ةه]';
+      else if (ch === 'ي' || ch === 'ى') pattern += '[يى]';
+      else pattern += escRe(ch);
+    }
+    return pattern;
+  });
+  return new RegExp(words.join('\\s+'), 'g');
+}
+
+// بيدور على كل أسماء الطالبات جوه النص، ويقسّم النص لقطع (اسم + رموز + ملاحظة) لكل طالبة
+function parseAttendanceMessage(text, students) {
+  let matches = [];
+  students.forEach(s => {
+    if (!s.name) return;
+    const re = buildAttNameRegex(s.name);
+    let m;
+    while ((m = re.exec(text)) !== null) {
+      matches.push({ start: m.index, end: m.index + m[0].length, studentId: s.id, name: s.name });
+      if (m[0].length === 0) re.lastIndex++;
+    }
+  });
+
+  // رتّبي حسب الموقع، ولو فيه تداخل بين مطابقتين خدي الأطول
+  matches.sort((a, b) => a.start - b.start || (b.end - b.start) - (a.end - a.start));
+  const clean = [];
+  let lastEnd = -1;
+  for (const m of matches) {
+    if (m.start >= lastEnd) { clean.push(m); lastEnd = m.end; }
+  }
+
+  const segments = clean.map((m, i) => {
+    const segStart = m.end;
+    const segEnd = (i + 1 < clean.length) ? clean[i + 1].start : text.length;
+    const chunk = text.slice(segStart, segEnd);
+    const marks = chunk.match(ATT_MSG_EMOJI_RE) || [];
+    const noteText = chunk.replace(ATT_MSG_EMOJI_RE, '').trim();
+    const periods = marks.map(mk => mk.includes('✅') ? 'present' : mk.includes('❌') ? 'absent' : 'excused');
+    return {
+      studentId: m.studentId,
+      name: m.name,
+      periods,
+      note: noteText,
+      include: true,
+      suspicious: periods.length === 0 || periods.length > 4,
+    };
+  });
+
+  const matchedIds = new Set(clean.map(m => m.studentId));
+  const notMentioned = students.filter(s => !matchedIds.has(s.id));
+
+  return { segments, notMentioned };
+}
+
+window.parseAttendanceMessageUI = () => {
+  const text = document.getElementById('paMessage').value.trim();
+  const date = document.getElementById('paDate').value;
+  if (!date) { showToast('حددي التاريخ'); return; }
+  if (!text) { showToast('الصقي نص الرسالة'); return; }
+
+  const students = allStudents.filter(s => s.name && s.name !== 'طالبة جديدة' && !s.archived);
+  const { segments, notMentioned } = parseAttendanceMessage(text, students);
+  window._paParsed = segments;
+
+  if (!segments.length) {
+    document.getElementById('paSummary').innerHTML = '❌ مفيش أي اسم طالبة اتعرف عليه في الرسالة. تأكدي إن الأسماء مطابقة لأسماء الطالبات المسجّلة.';
+    document.getElementById('paNotMentioned').style.display = 'none';
+    document.getElementById('paRowsList').innerHTML = '';
+    document.getElementById('paPreviewSection').style.display = 'block';
+    return;
+  }
+
+  const suspiciousCount = segments.filter(s => s.suspicious).length;
+  document.getElementById('paSummary').innerHTML =
+    `✅ اتعرف على <strong>${segments.length}</strong> طالبة من الرسالة` +
+    (suspiciousCount ? ` — ⚠️ <strong>${suspiciousCount}</strong> منهم محتاجين مراجعة (عدد رموز غريب)` : '');
+
+  const nmDiv = document.getElementById('paNotMentioned');
+  if (notMentioned.length) {
+    nmDiv.style.display = 'block';
+    nmDiv.innerHTML = `⚠️ <strong>${notMentioned.length}</strong> طالبة من القائمة متذكروش في الرسالة خالص (ممكن يبقوا غايبين ونسيتي تكتبيهم، أو الاسم مكتوب مختلف شوية):<br>` +
+      notMentioned.map(s => esc(s.name)).join('، ');
+  } else {
+    nmDiv.style.display = 'none';
+  }
+
+  document.getElementById('paRowsList').innerHTML = segments.map((s, i) => `
+    <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-bottom:1px solid var(--border);${s.suspicious ? 'background:rgba(201,162,39,0.08)' : ''}">
+      <input type="checkbox" ${s.include ? 'checked' : ''} onchange="paToggleInclude(${i}, this.checked)" style="width:16px;height:16px;cursor:pointer;flex-shrink:0"/>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:600">${esc(s.name)} ${s.suspicious ? '⚠️' : ''}</div>
+        <div style="font-size:11px;color:var(--text-mid)">${s.periods.map(p => p === 'present' ? '✔' : p === 'absent' ? '✖' : '⭕').join(' ') || '—'}${s.note ? ' — 📝 ' + esc(s.note) : ''}</div>
+      </div>
+    </div>
+  `).join('');
+
+  document.getElementById('paPreviewSection').style.display = 'block';
+};
+
+window.paToggleInclude = (idx, checked) => {
+  if (window._paParsed?.[idx]) window._paParsed[idx].include = checked;
+};
+
+window.confirmPasteAttendance = async () => {
+  const date   = document.getElementById('paDate').value;
+  const period = document.getElementById('paPeriod').value;
+  const segments = (window._paParsed || []).filter(s => s.include);
+  if (!segments.length) { showToast('مفيش صفوف متحددة للحفظ'); return; }
+
+  const d = new Date(date + 'T00:00:00');
+  const day = ATT_MSG_DAY_NAMES[d.getDay()];
+
+  if (!confirm(`هيتم إنشاء ${segments.length} سجل حضور ليوم ${day} (${date}). متأكدة؟`)) return;
+
+  const btn = document.querySelector('[onclick="confirmPasteAttendance()"]');
+  if (btn) { btn.disabled = true; btn.textContent = 'جارٍ الحفظ...'; }
+
+  try {
+    await Promise.all(segments.map(s => {
+      const subjects = {};
+      s.periods.forEach((status, i) => {
+        const label = ['الحصة الأولى', 'الحصة الثانية', 'الحصة الثالثة', 'الحصة الرابعة', 'الحصة الخامسة'][i] || `الحصة ${i + 1}`;
+        subjects[label] = status;
+      });
+      return addDoc(collection(db, 'students', s.studentId, 'sessions'), {
+        day: period ? `${day} (${period})` : day,
+        date, subjects, createdAt: Date.now(),
+      });
+    }));
+
+    const withNotes = segments.filter(s => s.note);
+    await Promise.all(withNotes.map(async s => {
+      const sSnap = await getDoc(doc(db, 'students', s.studentId));
+      const existing = sSnap.exists() ? (sSnap.data().notes || '') : '';
+      const combined = (existing ? existing + '\n' : '') + `[${date}] ${s.note}`;
+      await updateDoc(doc(db, 'students', s.studentId), { notes: combined });
+    }));
+
+    showToast(`✅ تم تسجيل حضور ${segments.length} طالبة${withNotes.length ? ` و${withNotes.length} ملاحظة` : ''}`);
+    closePasteAttModal();
+  } catch(e) {
+    showToast('❌ خطأ: ' + e.message);
+    console.error('confirmPasteAttendance:', e);
+  } finally {
+    if (btn) { btn.disabled = false; btn.innerHTML = '<i class="ti ti-device-floppy"></i> تأكيد وحفظ الحضور'; }
+  }
+};
+
 
 // ── استيراد الدرجات من Excel مع Preview ────────────────────────
 window.importGradesFromExcel = async (input) => {
