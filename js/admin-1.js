@@ -1784,38 +1784,101 @@ window.applyExcelGrades = () => {
 // ── مسح كل الدرجات والغياب ─────────────────────────────────────
 window.resetAllStudentData = async (type) => {
   const typeName = type === 'grades' ? 'الدرجات' : type === 'sessions' ? 'الحضور والغياب' : 'الدرجات والحضور والغياب';
-  if (!confirm(`⚠️ متأكدة من مسح ${typeName} من عند كل الطالبات (بما فيهم المؤرشفين)؟\n\nهذا الإجراء لا يمكن التراجع عنه!`)) return;
-  if (!confirm(`تأكيد نهائي: حذف ${typeName} من عند كل الطالبات؟`)) return;
 
-  showToast('⏳ جارٍ المسح...');
+  showToast('⏳ جارٍ تحميل البيانات...');
+
   try {
     const snap = await getDocs(collection(db, 'students'));
     const types = type === 'all' ? ['grades', 'sessions'] : [type];
 
-    let totalGrades = 0, totalSessions = 0, totalStudents = 0;
+    // جيب كل البيانات الأول عشان تظهر للمستخدم
+    const studentData = [];
     await Promise.all(snap.docs.map(async sDoc => {
-      let hadData = false;
+      const data = sDoc.data();
+      const name = data.name || 'غير معروف';
+      let grades = 0, sessions = 0;
       await Promise.all(types.map(async sub => {
         const subSnap = await getDocs(collection(db, 'students', sDoc.id, sub));
-        if (subSnap.size > 0) {
-          hadData = true;
-          if (sub === 'grades') totalGrades += subSnap.size;
-          if (sub === 'sessions') totalSessions += subSnap.size;
-          await Promise.all(subSnap.docs.map(d => deleteDoc(doc(db, 'students', sDoc.id, sub, d.id))));
-        }
+        if (sub === 'grades') grades = subSnap.size;
+        if (sub === 'sessions') sessions = subSnap.size;
       }));
-      if (hadData) totalStudents++;
+      if (grades > 0 || sessions > 0) {
+        studentData.push({ id: sDoc.id, name, grades, sessions });
+      }
     }));
 
-    let summary = `✅ تم المسح:
+    if (!studentData.length) {
+      showToast('مفيش بيانات للمسح');
+      return;
+    }
+
+    // اعرض التفاصيل في modal
+    let detailsHtml = studentData.map(s => {
+      let details = [];
+      if (s.grades > 0) details.push(`${s.grades} درجة`);
+      if (s.sessions > 0) details.push(`${s.sessions} سجل حضور`);
+      return `<div style="display:flex;justify-content:space-between;padding:8px 12px;border-bottom:1px solid var(--border);font-size:13px">
+        <span style="font-weight:600">${s.name}</span>
+        <span style="color:var(--text-mid)">${details.join(' + ')}</span>
+      </div>`;
+    }).join('');
+
+    // ابني الـ modal
+    const existing = document.getElementById('resetPreviewModal');
+    if (existing) existing.remove();
+
+    const modal = document.createElement('div');
+    modal.id = 'resetPreviewModal';
+    modal.style.cssText = 'position:fixed;inset:0;background:rgba(44,26,14,0.6);z-index:10000;display:flex;align-items:center;justify-content:center';
+    modal.innerHTML = `
+      <div style="background:var(--beige);border-radius:18px;width:min(95vw,520px);max-height:80vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 10px 40px rgba(0,0,0,0.3);border:1.5px solid var(--border)">
+        <div style="padding:18px 20px;border-bottom:1px solid var(--border);background:var(--beige2);display:flex;justify-content:space-between;align-items:center">
+          <span style="font-weight:700;font-size:16px;color:#c0392b">⚠️ تأكيد مسح ${typeName}</span>
+          <button onclick="document.getElementById('resetPreviewModal').remove()" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--text-mid)">✕</button>
+        </div>
+        <div style="padding:12px 16px;background:rgba(192,57,43,0.08);border-bottom:1px solid var(--border);font-size:13px;color:#c0392b">
+          هيتمسح من عند <strong>${studentData.length} طالبة</strong> — هذا الإجراء لا يمكن التراجع عنه!
+        </div>
+        <div style="overflow-y:auto;flex:1">
+          ${detailsHtml}
+        </div>
+        <div style="padding:16px 20px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end">
+          <button onclick="document.getElementById('resetPreviewModal').remove()" 
+            style="padding:10px 20px;border:1px solid var(--border);background:var(--beige);border-radius:10px;font-family:inherit;font-size:14px;cursor:pointer">
+            إلغاء
+          </button>
+          <button id="confirmResetBtn"
+            style="padding:10px 20px;border:none;background:#c0392b;color:white;border-radius:10px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer">
+            🗑️ تأكيد الحذف
+          </button>
+        </div>
+      </div>`;
+    document.body.appendChild(modal);
+
+    // لما يضغط تأكيد
+    document.getElementById('confirmResetBtn').onclick = async () => {
+      modal.remove();
+      showToast('⏳ جارٍ المسح...');
+      let totalGrades = 0, totalSessions = 0;
+      await Promise.all(studentData.map(async s => {
+        await Promise.all(types.map(async sub => {
+          const subSnap = await getDocs(collection(db, 'students', s.id, sub));
+          if (sub === 'grades') totalGrades += subSnap.size;
+          if (sub === 'sessions') totalSessions += subSnap.size;
+          await Promise.all(subSnap.docs.map(d => deleteDoc(doc(db, 'students', s.id, sub, d.id))));
+        }));
+      }));
+      let summary = `✅ تم المسح:
 `;
-    if (totalGrades > 0) summary += `• ${totalGrades} درجة
+      if (totalGrades > 0) summary += `• ${totalGrades} درجة
 `;
-    if (totalSessions > 0) summary += `• ${totalSessions} سجل حضور
+      if (totalSessions > 0) summary += `• ${totalSessions} سجل حضور
 `;
-    summary += `• من عند ${totalStudents} طالبة`;
-    alert(summary);
-    showToast('✅ تم المسح بنجاح');
+      summary += `• من عند ${studentData.length} طالبة`;
+      alert(summary);
+      showToast('✅ تم المسح بنجاح');
+    };
+
   } catch(e) {
     showToast('خطأ: ' + e.message);
   }
