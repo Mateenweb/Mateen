@@ -7,7 +7,7 @@ import { getFirestore, collection, addDoc, deleteDoc, doc,
          onSnapshot, query, orderBy, where, getDoc, updateDoc, getDocs, serverTimestamp }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 import { FIREBASE_CONFIG } from "./config.js";
-import { exportWord, exportPdf } from "./export.js";
+import { exportWord, exportPdf, exportAttendanceWord, exportAttendancePdf } from "./export.js";
 import { fullDeleteUser } from "./delete-account.js";
 import { loadSubjectsFor } from "./subjects.js";
 
@@ -351,7 +351,7 @@ window.approveUser = async id => {
     'اختاري طالبة لربطها بحساب: ' + name;
 
   document.getElementById('linkSearch').value = '';
-  renderLinkList(allStudents);
+  renderLinkList(allStudents.filter(s => !s.archived));
 
   const modal = document.getElementById('linkModal');
   modal.classList.add('show');
@@ -365,7 +365,8 @@ window.closeLinkModal = () => {
 
 window.filterLinkList = () => {
   const q = document.getElementById('linkSearch').value.trim().toLowerCase();
-  renderLinkList(q ? allStudents.filter(s => (s.name||'').toLowerCase().includes(q)) : allStudents);
+  const base = allStudents.filter(s => !s.archived);
+  renderLinkList(q ? base.filter(s => (s.name||'').toLowerCase().includes(q)) : base);
 };
 
 function renderLinkList(list) {
@@ -537,11 +538,28 @@ window.closeExportModal = () => {
   if (m) { m.classList.remove('show'); }
 };
 
-// ── Modal تصthisر Attendance  and the غياب ──────────────────────────────
+// ── Modal تصدير الحضور والغياب ──────────────────────────────
 window.openAttModal = () => {
   const m = document.getElementById('attModal');
   if (m) { m.classList.add('show'); }
+  renderAttStudentList();
 };
+
+function renderAttStudentList() {
+  const list = document.getElementById('attStudentList');
+  if (!list) return;
+  const students = allStudents.filter(s => s.name && s.name !== 'طالبة جديدة' && !s.archived);
+  if (!students.length) {
+    list.innerHTML = '<div class="stu-empty" style="padding:14px;text-align:center;color:var(--text-mid);font-size:13px">لا توجد طالبات</div>';
+    return;
+  }
+  list.innerHTML = students.map(s => `
+    <label class="att-stu-label">
+      <input type="checkbox" class="att-check" data-id="${s.id}" data-name="${esc(s.name||'')}" checked/>
+      <span>${esc(s.name||'—')}</span>
+    </label>
+  `).join('');
+}
 
 window.closeAttModal = () => {
   const m = document.getElementById('attModal');
@@ -553,8 +571,30 @@ window.attSelectAll = (checked) => {
 };
 
 window.doAttExport = async (type) => {
-  showToast('ميزة تصدير الحضور والغياب قيد التطوير قريباً');
-  window.closeAttModal();
+  const mode = document.getElementById('attMode')?.value || 'perStudent';
+  const checked = [...document.querySelectorAll('.att-check:checked')];
+
+  if (!checked.length) { showToast('اختاري طالبة واحدة على الأقل'); return; }
+
+  showToast('جارٍ تجهيز التصدير...');
+
+  try {
+    const studentsData = await Promise.all(checked.map(async cb => {
+      const sid  = cb.dataset.id;
+      const name = cb.dataset.name;
+      const sessSnap = await getDocs(collection(db, 'students', sid, 'sessions'));
+      const sessions = sessSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+      return { name, sessions };
+    }));
+
+    if (type === 'word') await exportAttendanceWord(studentsData, mode);
+    else await exportAttendancePdf(studentsData, mode);
+
+    window.closeAttModal();
+  } catch (e) {
+    console.error('doAttExport error:', e);
+    showToast('حدث خطأ أثناء التصدير: ' + e.message);
+  }
 };
 
 window.doExport = async (type) => {
@@ -563,6 +603,7 @@ window.doExport = async (type) => {
   const fr = document.getElementById('stuFilterResult').value;
   const fs = document.getElementById('stuFilterStatus').value;
   let data = allStudents.filter(s=>
+    !s.archived &&
     (!q  || (s.name||'').toLowerCase().includes(q)) &&
     (fi==='all' || s.interview===fi) &&
     (fr==='all' || s.accepted===fr) &&
@@ -986,7 +1027,7 @@ window.adminOpenLinkModal = async (userId, userName) => {
   window._selectedLinkId = null;
   document.getElementById('linkModalSubtitle').textContent = 'اختاري طالبة لربطها بحساب: ' + userName;
   document.getElementById('linkSearch').value = '';
-  renderLinkList(allStudents);
+  renderLinkList(allStudents.filter(s => !s.archived));
   document.getElementById('linkModal').classList.add('show');
 };
 
@@ -1279,6 +1320,174 @@ function renderBGStudents() {
 window.bgSelectAll = () => document.querySelectorAll('.bg-check').forEach(cb => cb.checked = true);
 window.bgClearAll  = () => document.querySelectorAll('.bg-check').forEach(cb => cb.checked = false);
 
+// ── استيراد الدرجات من ملف Excel ────────────────────────────
+let bgImportRows = [];
+let bgActiveStudents = [];
+
+function normalizeName(name) {
+  return (name || '')
+    .replace(/[أإآا]/g, 'ا')       // توحيد الألف
+    .replace(/[ةه]/g, 'ه')          // توحيد التاء المربوطة
+    .replace(/ى/g, 'ي')              // توحيد الألف المقصورة
+    .replace(/[\u064B-\u065F]/g, '') // إزالة التشكيل
+    .replace(/\s+/g, '')             // إزالة المسافات
+    .trim();
+}
+
+function firstNameNormalized(name) {
+  const first = (name || '').trim().split(/\s+/)[0] || '';
+  return normalizeName(first);
+}
+
+window.importExcelGrades = async () => {
+  const fileInput = document.getElementById('bgExcelFile');
+  const file = fileInput.files[0];
+  if (!file) { showToast('اختاري ملف أولاً'); return; }
+  if (typeof XLSX === 'undefined') { showToast('مكتبة قراءة Excel لم تُحمّل، حدّثي الصفحة'); return; }
+
+  try {
+    const data = await file.arrayBuffer();
+    const workbook = XLSX.read(data, { type: 'array' });
+    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(sheet, { defval: '' });
+
+    if (!rows.length) { showToast('الملف فارغ'); return; }
+
+    const keys = Object.keys(rows[0]);
+    const nameKey  = keys.find(k => /اسم\s*الطالبة|الاسم/i.test(k)) || keys[0];
+    const scoreKey = keys.find(k => /score/i.test(k)) || keys.find(k => /الدرجة/i.test(k)) || keys[1];
+
+    if (!nameKey || !scoreKey) { showToast('لم يتم التعرف على أعمدة الاسم أو الدرجة في الملف'); return; }
+
+    bgActiveStudents = allStudents.filter(s => s.name && s.name !== 'طالبة جديدة' && !s.archived);
+
+    // خرائط المطابقة: بالاسم الكامل، وبأول اسم
+    const fullNameMap = new Map();
+    const firstNameMap = new Map();
+    bgActiveStudents.forEach(s => {
+      fullNameMap.set(normalizeName(s.name), s);
+      const fn = firstNameNormalized(s.name);
+      if (!firstNameMap.has(fn)) firstNameMap.set(fn, []);
+      firstNameMap.get(fn).push(s);
+    });
+
+    bgImportRows = rows.map(row => {
+      const rawName = String(row[nameKey] || '').trim();
+      if (!rawName) return null;
+      const score = Number(row[scoreKey]) || 0;
+
+      const exact = fullNameMap.get(normalizeName(rawName));
+      if (exact) {
+        return { rawName, score, studentId: exact.id, matchType: 'exact', include: true };
+      }
+
+      const candidates = firstNameMap.get(firstNameNormalized(rawName)) || [];
+      if (candidates.length === 1) {
+        // اسم أول متطابق مع طالبة واحدة بس — مطابقة محتملة تحتاج تأكيدك
+        return { rawName, score, studentId: candidates[0].id, matchType: 'suggested', include: true };
+      }
+      if (candidates.length > 1) {
+        // أكتر من طالبة بنفس أول اسم — لازم تختاري إنتِ
+        return { rawName, score, studentId: null, matchType: 'ambiguous', include: false };
+      }
+      // مفيش أي تطابق
+      return { rawName, score, studentId: null, matchType: 'none', include: false };
+    }).filter(Boolean);
+
+    renderBGPreview();
+    document.getElementById('bgPreviewSection').style.display = 'block';
+
+    const exact = bgImportRows.filter(r => r.matchType === 'exact').length;
+    const needsReview = bgImportRows.filter(r => r.matchType !== 'exact').length;
+    showToast(`تم استيراد ${bgImportRows.length} صف — ${exact} تطابقت تلقائيًا${needsReview ? `، و${needsReview} محتاجة مراجعتك` : ''}`);
+  } catch (e) {
+    console.error('importExcelGrades error:', e);
+    showToast('حدث خطأ أثناء قراءة الملف: ' + e.message);
+  }
+};
+
+function buildStudentOptions(selectedId) {
+  const sorted = [...bgActiveStudents].sort((a, b) => (a.name || '').localeCompare(b.name || '', 'ar'));
+  return `<option value="">— اختاري الطالبة —</option>` +
+    sorted.map(s => `<option value="${s.id}" ${s.id === selectedId ? 'selected' : ''}>${esc(s.name)}</option>`).join('');
+}
+
+function renderBGPreview() {
+  const tbody = document.getElementById('bgPreviewBody');
+  tbody.innerHTML = bgImportRows.map((r, i) => {
+    const needsReview = r.matchType !== 'exact';
+    const rowBg = r.matchType === 'exact' ? '' : r.matchType === 'none' ? ';background:rgba(192,57,43,0.06)' : ';background:rgba(201,162,39,0.08)';
+
+    const statusLabel = {
+      exact:     '<span style="color:#2e8b57">✅ تطابق تام</span>',
+      suggested: '<span style="color:#c9852b">🔶 راجعي التطابق</span>',
+      ambiguous: '<span style="color:#c9852b">🔶 أكتر من احتمال</span>',
+      none:      '<span style="color:#c0392b">❌ اختاري يدويًا</span>',
+    }[r.matchType];
+
+    const nameCell = needsReview
+      ? `<div style="font-weight:600;margin-bottom:4px">${esc(r.rawName)}</div>
+         <select onchange="bgSelectStudent(${i}, this.value)" style="width:100%;border:1px solid var(--border);border-radius:6px;padding:3px 6px;font-family:inherit;font-size:11px">
+           ${buildStudentOptions(r.studentId)}
+         </select>`
+      : `${esc(r.rawName)}`;
+
+    return `
+    <tr style="border-bottom:1px solid var(--border)${rowBg}">
+      <td style="padding:6px 8px">
+        <input type="checkbox" ${r.include ? 'checked' : ''} onchange="bgToggleRow(${i}, this.checked)" style="margin-left:6px;vertical-align:top" ${r.studentId ? '' : 'disabled'}/>
+        ${nameCell}
+      </td>
+      <td style="padding:6px 8px;text-align:center;vertical-align:top">
+        <input type="number" value="${r.score}" min="0" onchange="bgUpdateRowScore(${i}, this.value)"
+          style="width:60px;border:1px solid var(--border);border-radius:6px;padding:3px 6px;text-align:center;font-family:inherit;font-size:12px"/>
+      </td>
+      <td style="padding:6px 8px;text-align:center;vertical-align:top">${statusLabel}</td>
+    </tr>
+  `;
+  }).join('');
+
+  const exact = bgImportRows.filter(r => r.matchType === 'exact').length;
+  const resolved = bgImportRows.filter(r => r.studentId).length;
+  document.getElementById('bgMatchCount').textContent =
+    `✅ ${exact} تطابق تلقائي | 🔶 ${resolved - exact} اتأكدت يدويًا | ❌ ${bgImportRows.length - resolved} لسه محتاجة اختيار`;
+}
+
+window.bgToggleRow = (i, checked) => { if (bgImportRows[i]) bgImportRows[i].include = checked; };
+window.bgUpdateRowScore = (i, val) => { if (bgImportRows[i]) bgImportRows[i].score = Number(val) || 0; };
+
+window.bgSelectStudent = (i, studentId) => {
+  if (!bgImportRows[i]) return;
+  bgImportRows[i].studentId = studentId || null;
+  bgImportRows[i].include = !!studentId;
+  renderBGPreview();
+};
+
+window.clearExcelImport = () => {
+  bgImportRows = [];
+  document.getElementById('bgPreviewSection').style.display = 'none';
+  document.getElementById('bgExcelFile').value = '';
+};
+
+// تطبيق الدرجات المستوردة (بعد المراجعة) على قايمة الطالبات تحت
+window.applyExcelImport = () => {
+  const toApply = bgImportRows.filter(r => r.studentId && r.include);
+  const pending = bgImportRows.filter(r => !r.studentId);
+  if (!toApply.length) { showToast('لا يوجد صفوف جاهزة للتطبيق — راجعي الاختيارات أولاً'); return; }
+
+  // نلغي تحديد كل الطالبات أولاً، بعدين نحدد بس اللي جايين من الملف
+  document.querySelectorAll('.bg-check').forEach(cb => cb.checked = false);
+
+  toApply.forEach(r => {
+    const cb = document.querySelector(`.bg-check[data-id="${r.studentId}"]`);
+    const scoreInput = document.querySelector(`.bg-score[data-id="${r.studentId}"]`);
+    if (cb) cb.checked = true;
+    if (scoreInput) scoreInput.value = r.score;
+  });
+
+  showToast(`✅ تم تطبيق درجات ${toApply.length} طالبة على القائمة${pending.length ? ` — لسه ${pending.length} محتاجة اختيار يدوي` : ''} — راجعيها ثم اضغطي "حفظ الدرجات"`);
+};
+
 window.saveBulkGrades = async () => {
   const label   = document.getElementById('bgLabel').value.trim();
   const subject = document.getElementById('bgSubject').value;
@@ -1397,18 +1606,80 @@ window.rejectDeletion = async (reqId) => {
   loadDeletionRequests();
 };
 
-// ── استيراد الدرجات من Excel مع Preview ────────────────────────
-function normalizeName(name) {
-  if (!name) return '';
-  return String(name)
-    .replace(/[أإآ]/g, 'ا')
-    .replace(/ة/g, 'ه')
-    .replace(/ى/g, 'ي')
-    .replace(/[\u064B-\u065F]/g, '')
-    .replace(/\s+/g, '')
-    .trim();
-}
+// ════════════════════════════════════════════════════════════════
+// حذف اختبار جماعي من عند كل الطالبات
+window.openDeleteExamModal = async () => {
+  const modal = document.getElementById('deleteExamModal');
+  const list  = document.getElementById('examListToDelete');
+  if (!modal) { alert('المودال مش موجود'); return; }
+  
+  modal.style.display = 'flex';
+  list.innerHTML = '<div style="text-align:center;color:var(--text-mid);font-size:13px;padding:20px">جارٍ التحميل...</div>';
 
+  try {
+    // جيب كل الطالبات وكل الاختبارات بتاعتهم
+    const studSnap = await getDocs(query(collection(db, 'students'), where('archived', '!=', true)));
+    const examMap = {}; // { label_subject: [ {studentId, gradeId} ] }
+
+    await Promise.all(studSnap.docs.map(async sDoc => {
+      const gradesSnap = await getDocs(collection(db, 'students', sDoc.id, 'grades'));
+      gradesSnap.docs.forEach(g => {
+        const data = g.data();
+        const key = `${data.label || 'اختبار'}|||${data.subject || ''}`;
+        if (!examMap[key]) examMap[key] = [];
+        examMap[key].push({ studentId: sDoc.id, gradeId: g.id });
+      });
+    }));
+
+    if (Object.keys(examMap).length === 0) {
+      list.innerHTML = '<div style="text-align:center;color:var(--text-mid);font-size:13px;padding:20px">لا توجد اختبارات</div>';
+      return;
+    }
+
+    list.innerHTML = Object.entries(examMap).map(([key, entries]) => {
+      const [label, subject] = key.split('|||');
+      return `<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:rgba(92,61,46,0.05);border-radius:10px;border:1px solid var(--border);margin-bottom:8px">
+        <div>
+          <div style="font-size:13px;font-weight:700">${esc(label)}</div>
+          ${subject ? `<div style="font-size:11px;color:var(--text-mid)">${esc(subject)}</div>` : ''}
+          <div style="font-size:11px;color:var(--text-mid)">📊 ${entries.length} طالبة</div>
+        </div>
+        <button onclick="deleteBulkExam('${encodeURIComponent(key)}')" style="background:none;border:1px solid #e74c3c;color:#e74c3c;border-radius:8px;padding:5px 12px;cursor:pointer;font-size:12px;font-family:inherit;white-space:nowrap">
+          <i class="ti ti-trash"></i> حذف
+        </button>
+      </div>`;
+    }).join('');
+
+    // حفظ examMap للاستخدام لاحقاً
+    window._examMapCache = examMap;
+  } catch(e) {
+    list.innerHTML = `<div style="color:#e74c3c;font-size:13px;padding:20px">❌ خطأ: ${e.message}</div>`;
+    console.error('openDeleteExamModal:', e);
+  }
+};
+
+window.deleteBulkExam = async (encodedKey) => {
+  const key = decodeURIComponent(encodedKey);
+  const [label] = key.split('|||');
+  if (!confirm(`متأكدة من حذف "${label}" من عند كل الطالبات؟`)) return;
+
+  const entries = window._examMapCache?.[key] || [];
+  if (!entries.length) { alert('مفيش بيانات'); return; }
+
+  try {
+    await Promise.all(entries.map(({ studentId, gradeId }) =>
+      deleteDoc(doc(db, 'students', studentId, 'grades', gradeId))
+    ));
+    showToast?.(`✅ تم حذف "${label}" من ${entries.length} طالبة`);
+    openDeleteExamModal(); // إعادة تحميل القايمة
+  } catch(e) {
+    showToast?.('❌ خطأ: ' + e.message);
+    console.error('deleteBulkExam:', e);
+  }
+};
+
+
+// ── استيراد الدرجات من Excel مع Preview ────────────────────────
 window.importGradesFromExcel = async (input) => {
   const file = input.files[0];
   if (!file) return;
@@ -1509,74 +1780,8 @@ window.applyExcelGrades = () => {
 };
 
 // ── حذف اختبار جماعي من عند كل الطالبات ─────────────────────
-window.openDeleteExamModal = async () => {
-  const modal = document.getElementById('deleteExamModal');
-  const list  = document.getElementById('examListToDelete');
-  modal.style.display = 'flex';
-  list.innerHTML = '<div style="text-align:center;color:var(--text-mid);font-size:13px;padding:20px">جارٍ التحميل...</div>';
 
-  try {
-    // جيب كل الطالبات وكل الاختبارات بتاعتهم
-    const studSnap = await getDocs(collection(db, 'students'));
-    const examMap = {}; // { label_subject: [ {studentId, gradeId} ] }
-
-    await Promise.all(studSnap.docs.filter(d => !d.data().archived).map(async sDoc => {
-      const gradesSnap = await getDocs(collection(db, 'students', sDoc.id, 'grades'));
-      gradesSnap.docs.forEach(g => {
-        const data = g.data();
-        const key = `${data.label || 'اختبار'}|||${data.subject || ''}`;
-        if (!examMap[key]) examMap[key] = [];
-        examMap[key].push({ studentId: sDoc.id, gradeId: g.id });
-      });
-    }));
-
-    if (Object.keys(examMap).length === 0) {
-      list.innerHTML = '<div style="text-align:center;color:var(--text-mid);font-size:13px;padding:20px">لا توجد اختبارات</div>';
-      return;
-    }
-
-    list.innerHTML = Object.entries(examMap).map(([key, entries]) => {
-      const [label, subject] = key.split('|||');
-      return `<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:rgba(92,61,46,0.05);border-radius:10px;border:1px solid var(--border)">
-        <div>
-          <div style="font-size:13px;font-weight:700">${label}</div>
-          ${subject ? `<div style="font-size:11px;color:var(--text-mid)">${subject}</div>` : ''}
-          <div style="font-size:11px;color:var(--text-mid)">${entries.length} طالبة</div>
-        </div>
-        <button onclick="deleteBulkExam('${encodeURIComponent(key)}')" style="background:none;border:1px solid #e74c3c;color:#e74c3c;border-radius:8px;padding:5px 12px;cursor:pointer;font-size:12px;font-family:inherit">
-          <i class="ti ti-trash"></i> حذف
-        </button>
-      </div>`;
-    }).join('');
-
-    // حفظ examMap للاستخدام لاحقاً
-    window._examMapCache = examMap;
-
-  } catch(e) {
-    list.innerHTML = `<div style="color:#e74c3c;font-size:13px;padding:20px">خطأ: ${e.message}</div>`;
-  }
-};
-
-window.deleteBulkExam = async (encodedKey) => {
-  const key = decodeURIComponent(encodedKey);
-  const [label] = key.split('|||');
-  if (!confirm(`متأكدة من حذف "${label}" من عند كل الطالبات؟`)) return;
-
-  const entries = window._examMapCache?.[key] || [];
-  if (!entries.length) { alert('مفيش بيانات'); return; }
-
-  try {
-    await Promise.all(entries.map(({ studentId, gradeId }) =>
-      deleteDoc(doc(db, 'students', studentId, 'grades', gradeId))
-    ));
-    showToast(`✅ تم حذف "${label}" من ${entries.length} طالبة`);
-    openDeleteExamModal(); // إعادة تحميل القايمة
-  } catch(e) {
-    showToast('خطأ: ' + e.message);
-  }
-};
-
-// ── مسح كل الدرجات والغياب من عند كل الطالبات ────────────────
+// ── مسح كل الدرجات والغياب ─────────────────────────────────────
 window.resetAllStudentData = async (type) => {
   const typeName = type === 'grades' ? 'الدرجات' : type === 'sessions' ? 'الحضور والغياب' : 'الدرجات والحضور والغياب';
   if (!confirm(`⚠️ متأكدة من مسح ${typeName} من عند كل الطالبات (بما فيهم المؤرشفين)؟\n\nهذا الإجراء لا يمكن التراجع عنه!`)) return;
