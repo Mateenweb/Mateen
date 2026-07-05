@@ -462,10 +462,12 @@ export async function exportAttendanceWord(studentsData, mode='perStudent') {
   showToast('تم التصدير Word ✅');
 }
 
-export async function exportAttendancePdf(studentsData, mode='perStudent') {
+export async function exportAttendancePdf(studentsData, mode='perStudent', preOpenedWin=null) {
   if (!studentsData.length) { showToast('لا توجد بيانات للتصدير'); return; }
   const html = buildAttHtmlPrint(buildAttPages(studentsData, mode));
-  const win = window.open('', '_blank');
+  const win = preOpenedWin || window.open('', '_blank');
+  if (!win) { showToast('المتصفح منع فتح نافذة الطباعة — فعّلي السماح بالنوافذ المنبثقة'); return; }
+  win.document.open();
   win.document.write(html);
   win.document.close();
   win.focus();

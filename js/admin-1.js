@@ -576,6 +576,16 @@ window.doAttExport = async (type) => {
 
   if (!checked.length) { showToast('اختاري طالبة واحدة على الأقل'); return; }
 
+  // مهم لآيفون/سفاري: لازم نفتح النافذة فورًا جوه حدث الضغطة (قبل أي await)
+  // عشان المتصفح يعتبرها فتحت بأمر المستخدم مباشرة، مش نافذة منبثقة (popup) اتحجب.
+  let preOpenedWin = null;
+  if (type === 'pdf') {
+    preOpenedWin = window.open('', '_blank');
+    if (preOpenedWin) {
+      preOpenedWin.document.write('<meta charset="UTF-8"><body style="font-family:sans-serif;padding:40px;text-align:center;color:#8a6a52">جارٍ تجهيز الملف...</body>');
+    }
+  }
+
   showToast('جارٍ تجهيز التصدير...');
 
   try {
@@ -587,12 +597,17 @@ window.doAttExport = async (type) => {
       return { name, sessions };
     }));
 
-    if (type === 'word') await exportAttendanceWord(studentsData, mode);
-    else await exportAttendancePdf(studentsData, mode);
+    if (type === 'word') {
+      await exportAttendanceWord(studentsData, mode);
+    } else {
+      if (!preOpenedWin) { showToast('المتصفح منع فتح نافذة الطباعة — فعّلي السماح بالنوافذ المنبثقة وحاولي تاني'); return; }
+      await exportAttendancePdf(studentsData, mode, preOpenedWin);
+    }
 
     window.closeAttModal();
   } catch (e) {
     console.error('doAttExport error:', e);
+    if (preOpenedWin) preOpenedWin.close();
     showToast('حدث خطأ أثناء التصدير: ' + e.message);
   }
 };
