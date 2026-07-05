@@ -16,6 +16,7 @@ const auth = getAuth(app);
 const db   = getFirestore(app);
 let allMats = [];
 let currentUserRole = null;
+let _baAllSubjects = []; // كل المواد — تستخدم في وضع "كل مواد اليوم" بمودال الحضور الجماعي
 
 // ── AUTH GUARD ────────────────────────────────────────
 onAuthStateChanged(auth, async user => {
@@ -223,9 +224,10 @@ async function loadSubjectOptions() {
     // ملء baSubject
     const baSubject = document.getElementById('baSubject');
     if (baSubject) {
-      baSubject.innerHTML = '<option value="">— اختاري —</option>' +
+      baSubject.innerHTML = '<option value="">— اختاري —</option><option value="__ALL__">📅 كل مواد اليوم</option>' +
         subjects.map(s => `<option>${s}</option>`).join('');
     }
+    _baAllSubjects = subjects;
 
   } catch(e) {
     console.error('loadSubjectOptions:', e);
@@ -1808,16 +1810,44 @@ function baBtnHtml(sid, status) {
       style="font-size:12px;padding:5px 10px;border-radius:6px;cursor:pointer;font-family:inherit;border:1px solid ${absentActive ? '#c0392b' : 'var(--border)'};background:${absentActive ? 'rgba(192,57,43,0.12)' : 'var(--beige2)'};color:${absentActive ? '#c0392b' : 'var(--text-mid)'}">✖ غائبة</button>`;
 }
 
+function baSubjBtnsHtml(status) {
+  const presentActive = status === 'present';
+  const absentActive  = status === 'absent';
+  return `
+    <button type="button" onclick="baToggleSubjStatus(this,'present')"
+      style="font-size:11px;padding:3px 8px;border-radius:5px;cursor:pointer;font-family:inherit;border:1px solid ${presentActive ? '#1e8449' : 'var(--border)'};background:${presentActive ? 'rgba(39,174,96,0.15)' : 'var(--beige2)'};color:${presentActive ? '#1e8449' : 'var(--text-mid)'}">✔</button>
+    <button type="button" onclick="baToggleSubjStatus(this,'absent')"
+      style="font-size:11px;padding:3px 8px;border-radius:5px;cursor:pointer;font-family:inherit;border:1px solid ${absentActive ? '#c0392b' : 'var(--border)'};background:${absentActive ? 'rgba(192,57,43,0.12)' : 'var(--beige2)'};color:${absentActive ? '#c0392b' : 'var(--text-mid)'}">✖</button>`;
+}
+
+function baSubjRowHtml(sid, subj, status = 'present') {
+  return `<div class="ba-subj-wrap" data-id="${sid}" data-subject="${esc(subj)}" data-status="${status}" style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+    <span style="font-size:11px;color:var(--text-mid);min-width:78px;flex-shrink:0">${esc(subj)}</span>
+    <div class="ba-subj-btns" style="display:flex;gap:4px">${baSubjBtnsHtml(status)}</div>
+  </div>`;
+}
+
+window.baToggleSubjStatus = (btnEl, status) => {
+  const wrap = btnEl.closest('.ba-subj-wrap');
+  if (!wrap) return;
+  wrap.dataset.status = status;
+  wrap.querySelector('.ba-subj-btns').innerHTML = baSubjBtnsHtml(status);
+};
+
 function renderBAStudents() {
   const list = document.getElementById('baStudentsList');
   const students = allStudents.filter(s => s.name && s.name !== 'طالبة جديدة' && !s.archived);
+  const subjectVal = document.getElementById('baSubject')?.value || '';
+  const allMode = subjectVal === '__ALL__';
+
   list.innerHTML = students.map(s => `
-    <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-bottom:1px solid var(--border)">
-      <input type="checkbox" class="ba-check" data-id="${s.id}" data-name="${esc(s.name||'')}" checked style="width:16px;height:16px;cursor:pointer"/>
+    <div style="display:flex;align-items:${allMode ? 'flex-start' : 'center'};gap:10px;padding:9px 12px;border-bottom:1px solid var(--border)">
+      <input type="checkbox" class="ba-check" data-id="${s.id}" data-name="${esc(s.name||'')}" checked style="width:16px;height:16px;cursor:pointer;margin-top:${allMode ? '2px' : '0'}"/>
       <span style="flex:1;font-size:13px;font-weight:600">${esc(s.name||'—')}</span>
-      <div class="ba-status-wrap" data-id="${s.id}" data-status="present" style="display:flex;gap:6px">
-        ${baBtnHtml(s.id, 'present')}
-      </div>
+      ${allMode
+        ? `<div style="display:flex;flex-direction:column;gap:2px">${_baAllSubjects.map(subj => baSubjRowHtml(s.id, subj, 'present')).join('')}</div>`
+        : `<div class="ba-status-wrap" data-id="${s.id}" data-status="present" style="display:flex;gap:6px">${baBtnHtml(s.id, 'present')}</div>`
+      }
     </div>
   `).join('');
 }
@@ -1832,8 +1862,20 @@ window.baSetStatus = (sid, status) => {
   wrap.innerHTML = baBtnHtml(sid, status);
 };
 
-window.baMarkAllPresent = () => document.querySelectorAll('.ba-status-wrap').forEach(el => baSetStatus(el.dataset.id, 'present'));
-window.baMarkAllAbsent  = () => document.querySelectorAll('.ba-status-wrap').forEach(el => baSetStatus(el.dataset.id, 'absent'));
+window.baMarkAllPresent = () => {
+  document.querySelectorAll('.ba-status-wrap').forEach(el => baSetStatus(el.dataset.id, 'present'));
+  document.querySelectorAll('.ba-subj-wrap').forEach(el => {
+    el.dataset.status = 'present';
+    el.querySelector('.ba-subj-btns').innerHTML = baSubjBtnsHtml('present');
+  });
+};
+window.baMarkAllAbsent = () => {
+  document.querySelectorAll('.ba-status-wrap').forEach(el => baSetStatus(el.dataset.id, 'absent'));
+  document.querySelectorAll('.ba-subj-wrap').forEach(el => {
+    el.dataset.status = 'absent';
+    el.querySelector('.ba-subj-btns').innerHTML = baSubjBtnsHtml('absent');
+  });
+};
 
 window.saveBulkAttendance = async () => {
   const day     = document.getElementById('baDay').value;
@@ -1846,16 +1888,28 @@ window.saveBulkAttendance = async () => {
   const checked = [...document.querySelectorAll('.ba-check:checked')];
   if (!checked.length) { showToast('اختاري طالبة واحدة على الأقل'); return; }
 
+  const allMode = subject === '__ALL__';
+  if (allMode && !_baAllSubjects.length) { showToast('لا توجد مواد مسجّلة'); return; }
+
   const btn = document.querySelector('[onclick="saveBulkAttendance()"]');
   if (btn) { btn.disabled = true; btn.textContent = 'جارٍ الحفظ...'; }
 
   try {
     await Promise.all(checked.map(cb => {
       const sid = cb.dataset.id;
-      const status = document.querySelector(`.ba-status-wrap[data-id="${sid}"]`)?.dataset.status || 'present';
+      let subjectsMap;
+      if (allMode) {
+        subjectsMap = {};
+        document.querySelectorAll(`.ba-subj-wrap[data-id="${sid}"]`).forEach(w => {
+          subjectsMap[w.dataset.subject] = w.dataset.status;
+        });
+      } else {
+        const status = document.querySelector(`.ba-status-wrap[data-id="${sid}"]`)?.dataset.status || 'present';
+        subjectsMap = { [subject]: status };
+      }
       return addDoc(collection(db, 'students', sid, 'sessions'), {
         day, date,
-        subjects: { [subject]: status },
+        subjects: subjectsMap,
         createdAt: Date.now(),
       });
     }));
