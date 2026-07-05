@@ -275,6 +275,10 @@
           <span class="ami-icon" style="background:rgba(192,57,43,0.1);color:#c0392b"><i class="ti ti-calendar-x"></i></span>
           <span class="ami-text"><strong>حذف حضور جماعي</strong><small>احذفي جلسة حضور من كل الطالبات</small></span>
         </button>
+        <button class="actions-menu-item" onclick="openPasteAttModal();toggleActionsMenu()">
+          <span class="ami-icon" style="background:rgba(155,89,182,0.12);color:#8e44ad"><i class="ti ti-message-2"></i></span>
+          <span class="ami-text"><strong>استيراد حضور من رسالة</strong><small>الصقي رسالة الحضور وهيتم تفريغها تلقائيًا</small></span>
+        </button>
       </div>
 
       <!-- ── مجموعة 3: التصدير ── -->
@@ -473,6 +477,62 @@
   </div>
 </div>
 
+<!-- Modal إضافة/تعديل خبر (Admin) -->
+<div id="adminNewsModal" class="modal-overlay" onclick="if(event.target===this)this.classList.remove('show')">
+  <div class="modal-box" style="width:min(94vw,520px)">
+    <div class="modal-head">
+      <span class="m-title" id="adminNewsModalTitle">خبر جديد</span>
+      <button class="m-close" onclick="document.getElementById('adminNewsModal').classList.remove('show')">✕</button>
+    </div>
+    <div class="modal-body" style="display:flex;flex-direction:column;gap:12px">
+      <input id="anTitle" type="text" placeholder="عنوان الخبر أو الإعلان" class="m-input-news"/>
+      <textarea id="anBody" rows="4" placeholder="تفاصيل الخبر..." class="m-textarea-news"></textarea>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <select id="anTag" class="m-select-news" style="flex:1">
+          <option value="📢 إعلان">📢 إعلان</option>
+          <option value="📝 خبر">📝 خبر</option>
+          <option value="🎉 مناسبة">🎉 مناسبة</option>
+          <option value="⚠️ تنبيه">⚠️ تنبيه</option>
+          <option value="📅 موعد">📅 موعد</option>
+        </select>
+        <select id="anVisibility" class="m-select-news" style="flex:1">
+          <option value="public">🌐 للجميع (بدون تسجيل)</option>
+          <option value="members">🔒 للمسجلات فقط</option>
+        </select>
+      </div>
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer">
+        <input type="checkbox" id="anPinned"> تثبيت الخبر في الأعلى
+      </label>
+    </div>
+    <div class="modal-body" style="border-top:1px solid var(--border);padding-top:12px;display:flex;justify-content:flex-end;gap:10px">
+      <button class="m-btn" style="background:var(--beige);color:var(--text-dark);border:1px solid var(--border)"
+        onclick="document.getElementById('adminNewsModal').classList.remove('show')">إلغاء</button>
+      <button class="m-btn" onclick="submitAdminNews()"><i class="ti ti-send"></i> نشر</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal إضافة/تعديل موعد مهم -->
+<div id="adminEventModal" class="modal-overlay" onclick="if(event.target===this)this.classList.remove('show')">
+  <div class="modal-box" style="width:min(94vw,420px)">
+    <div class="modal-head">
+      <span class="m-title" id="adminEventModalTitle">موعد مهم جديد</span>
+      <button class="m-close" onclick="document.getElementById('adminEventModal').classList.remove('show')">✕</button>
+    </div>
+    <div class="modal-body" style="display:flex;flex-direction:column;gap:12px">
+      <input id="aeName" type="text" placeholder="اسم الموعد / الحدث" class="m-input-news"/>
+      <input id="aeDate" type="text" placeholder="التاريخ (مثال: الأحد ١٩ صفر)" class="m-input-news"/>
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer">
+        <input type="checkbox" id="aeHighlight"> تمييز بالذهبي (حدث مهم)
+      </label>
+    </div>
+    <div class="modal-body" style="border-top:1px solid var(--border);padding-top:12px;display:flex;justify-content:flex-end;gap:10px">
+      <button class="m-btn" style="background:var(--beige);color:var(--text-dark);border:1px solid var(--border)"
+        onclick="document.getElementById('adminEventModal').classList.remove('show')">إلغاء</button>
+      <button class="m-btn" onclick="submitAdminEvent()"><i class="ti ti-calendar-check"></i> حفظ</button>
+    </div>
+  </div>
+</div>
 <!-- MATERIALS LIST -->
 <div class="section">
 <div class="section-head">
@@ -549,76 +609,19 @@
     <div style="border-top:1px solid var(--border);padding-top:12px">
       <div style="font-size:13px;color:var(--text-mid);margin-bottom:10px">⚠️ منطقة الخطر — هذه الإجراءات لا يمكن التراجع عنها</div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <button onclick="openResetDataModal('grades')" class="btn-danger-outline">
+        <button onclick="resetAllStudentData('grades')" class="btn-danger-outline">
           <i class="ti ti-eraser"></i> مسح كل الدرجات
         </button>
-        <button onclick="openResetDataModal('sessions')" class="btn-danger-outline">
+        <button onclick="resetAllStudentData('sessions')" class="btn-danger-outline">
           <i class="ti ti-calendar-off"></i> مسح كل الحضور والغياب
         </button>
-        <button onclick="openResetDataModal('all')" class="btn-danger-solid">
+        <button onclick="resetAllStudentData('all')" class="btn-danger-solid">
           <i class="ti ti-trash"></i> مسح كل البيانات
         </button>
       </div>
     </div>
   </div>
 </div><!-- /admin-tab-tools -->
-
-<!-- Modal إضافة/تعديل خبر (Admin) -->
-<div id="adminNewsModal" class="modal-overlay" onclick="if(event.target===this)this.classList.remove('show')">
-  <div class="modal-box" style="width:min(94vw,520px)">
-    <div class="modal-head">
-      <span class="m-title" id="adminNewsModalTitle">خبر جديد</span>
-      <button class="m-close" onclick="document.getElementById('adminNewsModal').classList.remove('show')">✕</button>
-    </div>
-    <div class="modal-body" style="display:flex;flex-direction:column;gap:12px">
-      <input id="anTitle" type="text" placeholder="عنوان الخبر أو الإعلان" class="m-input-news"/>
-      <textarea id="anBody" rows="4" placeholder="تفاصيل الخبر..." class="m-textarea-news"></textarea>
-      <div style="display:flex;gap:10px;flex-wrap:wrap">
-        <select id="anTag" class="m-select-news" style="flex:1">
-          <option value="📢 إعلان">📢 إعلان</option>
-          <option value="📝 خبر">📝 خبر</option>
-          <option value="🎉 مناسبة">🎉 مناسبة</option>
-          <option value="⚠️ تنبيه">⚠️ تنبيه</option>
-          <option value="📅 موعد">📅 موعد</option>
-        </select>
-        <select id="anVisibility" class="m-select-news" style="flex:1">
-          <option value="public">🌐 للجميع (بدون تسجيل)</option>
-          <option value="members">🔒 للمسجلات فقط</option>
-        </select>
-      </div>
-      <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer">
-        <input type="checkbox" id="anPinned"> تثبيت الخبر في الأعلى
-      </label>
-    </div>
-    <div class="modal-body" style="border-top:1px solid var(--border);padding-top:12px;display:flex;justify-content:flex-end;gap:10px">
-      <button class="m-btn" style="background:var(--beige);color:var(--text-dark);border:1px solid var(--border)"
-        onclick="document.getElementById('adminNewsModal').classList.remove('show')">إلغاء</button>
-      <button class="m-btn" onclick="submitAdminNews()"><i class="ti ti-send"></i> نشر</button>
-    </div>
-  </div>
-</div>
-
-<!-- Modal إضافة/تعديل موعد مهم -->
-<div id="adminEventModal" class="modal-overlay" onclick="if(event.target===this)this.classList.remove('show')">
-  <div class="modal-box" style="width:min(94vw,420px)">
-    <div class="modal-head">
-      <span class="m-title" id="adminEventModalTitle">موعد مهم جديد</span>
-      <button class="m-close" onclick="document.getElementById('adminEventModal').classList.remove('show')">✕</button>
-    </div>
-    <div class="modal-body" style="display:flex;flex-direction:column;gap:12px">
-      <input id="aeName" type="text" placeholder="اسم الموعد / الحدث" class="m-input-news"/>
-      <input id="aeDate" type="text" placeholder="التاريخ (مثال: الأحد ١٩ صفر)" class="m-input-news"/>
-      <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer">
-        <input type="checkbox" id="aeHighlight"> تمييز بالذهبي (حدث مهم)
-      </label>
-    </div>
-    <div class="modal-body" style="border-top:1px solid var(--border);padding-top:12px;display:flex;justify-content:flex-end;gap:10px">
-      <button class="m-btn" style="background:var(--beige);color:var(--text-dark);border:1px solid var(--border)"
-        onclick="document.getElementById('adminEventModal').classList.remove('show')">إلغاء</button>
-      <button class="m-btn" onclick="submitAdminEvent()"><i class="ti ti-calendar-check"></i> حفظ</button>
-    </div>
-  </div>
-</div>
 
 </div><!-- /container -->
 </div><!-- /mainContent -->
@@ -667,11 +670,6 @@
   .att-stu-label input[type=checkbox] { width:16px;height:16px;accent-color:#1a4a2e;cursor:pointer; }
 
 /* ══ ADMIN TABS ══ */
-.admin-tab-panel {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
 .admin-tabs-bar {
   display: flex;
   gap: 4px;
@@ -1058,6 +1056,50 @@
   </div>
 </div>
 
+<!-- ══ مودال استيراد حضور من رسالة نصية ══ -->
+<div id="pasteAttModal" class="modal-overlay" style="display:none">
+  <div class="modal-box" style="max-width:760px;width:96vw">
+    <div class="modal-head">
+      <span class="m-title m-title-amber">💬 استيراد حضور من رسالة</span>
+      <button class="m-close" onclick="closePasteAttModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+        <div>
+          <label style="font-size:12px;color:var(--text-mid);display:block;margin-bottom:4px">التاريخ *</label>
+          <input id="paDate" type="date" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:inherit;font-size:13px"/>
+        </div>
+        <div>
+          <label style="font-size:12px;color:var(--text-mid);display:block;margin-bottom:4px">الفترة (اختياري)</label>
+          <select id="paPeriod" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:inherit;font-size:13px">
+            <option value="">—</option>
+            <option value="الفترة الصباحية">الفترة الصباحية</option>
+            <option value="الفترة المسائية">الفترة المسائية</option>
+          </select>
+        </div>
+      </div>
+
+      <label style="font-size:12px;color:var(--text-mid);display:block;margin-bottom:4px">الصقي نص الرسالة هنا *</label>
+      <textarea id="paMessage" rows="8" placeholder="أسماء محمد سليمان ✅️✅️✅️ أميرة بشير خلف✅️✅️✅️ ..." style="width:100%;border:1px solid var(--border);border-radius:8px;padding:10px;font-family:inherit;font-size:13px;resize:vertical"></textarea>
+
+      <div style="display:flex;justify-content:flex-end;margin-top:10px">
+        <button onclick="parseAttendanceMessageUI()" style="background:var(--green-dark);color:#fff;border:none;border-radius:8px;padding:9px 20px;font-family:inherit;font-weight:700;cursor:pointer"><i class="ti ti-wand"></i> تحليل الرسالة</button>
+      </div>
+
+      <div id="paPreviewSection" style="display:none;margin-top:18px;border-top:1px solid var(--border);padding-top:14px">
+        <div id="paSummary" style="font-size:13px;margin-bottom:10px;font-weight:600"></div>
+        <div id="paNotMentioned" style="display:none;margin-bottom:12px;background:rgba(201,162,39,0.1);border:1px solid rgba(201,162,39,0.3);border-radius:8px;padding:10px;font-size:12px"></div>
+        <div id="paRowsList" style="max-height:340px;overflow-y:auto;border:1px solid var(--border);border-radius:10px;padding:4px"></div>
+
+        <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:16px">
+          <button onclick="closePasteAttModal()" style="background:var(--beige2);border:1px solid var(--border);border-radius:8px;padding:9px 20px;font-family:inherit;cursor:pointer">إلغاء</button>
+          <button onclick="confirmPasteAttendance()" style="background:linear-gradient(135deg,#2c1a0e,#5c3d2e);color:#e8c96a;border:none;border-radius:8px;padding:9px 24px;font-family:inherit;font-weight:700;cursor:pointer"><i class="ti ti-device-floppy"></i> تأكيد وحفظ الحضور</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script src="../js/tour.js"></script>
 
 
@@ -1353,7 +1395,7 @@ window.switchAdminTab = function(name) {
   // أظهر التاب المطلوب
   const panel = document.getElementById('admin-tab-' + name);
   const btn   = document.getElementById('tab-btn-' + name);
-  if (panel) panel.style.display = 'flex';
+  if (panel) panel.style.display = 'block';
   if (btn)   btn.classList.add('active');
 
   // احفظ في sessionStorage
