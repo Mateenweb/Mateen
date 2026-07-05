@@ -6,7 +6,7 @@ const BASE = window.location.hostname.includes('github.io') ? '/Mateen' : '';
 // ═══════════════════════════════════════════════════════
 import { initializeApp, getApps, getApp }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
-import { getFirestore, collection, query, where, orderBy,
+import { getFirestore, collection, collectionGroup, query, where, orderBy,
          onSnapshot, doc, getDoc, updateDoc, addDoc, serverTimestamp, deleteDoc, getDocs }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 import { getAuth, onAuthStateChanged }
@@ -38,11 +38,11 @@ function playSound() {
 }
 
 // ── كتابة Notification for the  Service Worker (للMobile PWA) ───────────────────────
-async function pushToSW(userId, title, body, url) {
+async function pushToSW(userId, title, body, url, convId) {
   try {
     await addDoc(
       collection(db, 'notifications', userId, 'pending'),
-      { title, body, url, createdAt: serverTimestamp() }
+      { title, body, url, convId: convId || null, createdAt: serverTimestamp() }
     );
   } catch(e) { console.warn('[Notif] SW push failed:', e); }
 }
@@ -230,7 +230,7 @@ function startListening(userId) {
         } catch(e) {}
 
         const notifTitle = `💬 ${senderName}`;
-        pushToSW(userId, notifTitle, lastMsg, window.location.origin + BASE + '/html/messages.html');
+        pushToSW(userId, notifTitle, lastMsg, window.location.origin + BASE + '/html/messages.html', convId);
         if (!onMsgsPage) {
           showNotifToast(notifTitle, lastMsg, BASE + '/html/messages.html');
           showBrowserNotif(notifTitle, lastMsg);
@@ -407,6 +407,21 @@ export async function initAdminNotifications(userId, role) {
 
 export { showNotifToast as showToast };
 
+// تتنادى لما رسالة أو محادثة تتحذف نهائياً — تمسح أي توست معلّق (pending)
+// مرتبط بنفس المحادثة عند أي مستخدم كان لسه ماشافوش الإشعار
+export async function deletePendingNotificationsForConv(convId) {
+  if (!convId) return;
+  try {
+    const snap = await getDocs(
+      query(collectionGroup(db, 'pending'), where('convId', '==', convId))
+    );
+    await Promise.all(snap.docs.map(d => deleteDoc(d.ref).catch(() => {})));
+    return snap.docs.length;
+  } catch(e) {
+    console.warn('[Notif] deletePendingNotificationsForConv failed:', e);
+    return 0;
+  }
+}
 // تتنادى لما المستخدم يفتح شات معين — تشيل الـ toast المرتبط بيه
 export function dismissToastForConv(url) {
   document.querySelectorAll('[data-notif][data-conv-url]').forEach(t => {
