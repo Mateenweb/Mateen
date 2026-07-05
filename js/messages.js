@@ -2,6 +2,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/fireba
 import { getFirestore, collection, doc, getDoc, getDocs, addDoc, deleteDoc, query, where, orderBy, onSnapshot, serverTimestamp, updateDoc, setDoc, deleteField } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
 import { FIREBASE_CONFIG } from "./config.js";
+import { deletePendingNotificationsForConv } from "./notifications.js";
 
 const app  = initializeApp(FIREBASE_CONFIG);
 const db   = getFirestore(app);
@@ -620,6 +621,8 @@ window.deleteMsgBoth = async (convId, msgId) => {
     }
   } catch(e) {}
   await deleteDoc(doc(db, 'conversations', convId, 'messages', msgId));
+  // امسحي أي توست معلّق (لسه ماظهرش) مرتبط بنفس المحادثة عند أي حد
+  deletePendingNotificationsForConv(convId).catch(() => {});
 };
 
 
