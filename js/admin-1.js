@@ -2100,11 +2100,16 @@ window.applyExcelGrades = () => {
 
 // ── مسح كل الدرجات والغياب ─────────────────────────────────────
 
-window.openResetDataModal = async () => {
+window.openResetDataModal = async (defaultType) => {
   const modal = document.getElementById('resetDataModal');
   const list  = document.getElementById('resetStudentsList');
   modal.style.display = 'flex';
   list.innerHTML = '<div style="text-align:center;color:var(--text-mid);font-size:13px;padding:20px">جارٍ التحميل...</div>';
+
+  if (defaultType) {
+    const radio = document.querySelector(`input[name="resetType"][value="${defaultType}"]`);
+    if (radio) radio.checked = true;
+  }
 
   try {
     const snap = await getDocs(collection(db, 'students'));
