@@ -236,16 +236,23 @@
 </table>
 </div>
 <div class="foot-actions-row">
-<button class="btn-add-row" onclick="addStudentRow()"><i class="ti ti-plus"></i> إضافة طالبة</button>
-<button class="btn-add-row" style="background:linear-gradient(135deg,#2c1a0e,#5c3d2e);color:#e8c96a;border:none;" onclick="openBulkGradeModal()"><i class="ti ti-plus"></i> إضافة اختبار جماعي</button>
-      <button class="btn-add-row" style="background:transparent;border:1px solid #e74c3c;color:#e74c3c;" onclick="openDeleteExamModal()"><i class="ti ti-trash"></i> حذف اختبار جماعي</button>
-      <button class="btn-add-row" style="background:transparent;border:1px solid #e74c3c;color:#e74c3c;" onclick="openResetDataModal()"><i class="ti ti-database-off"></i> مسح كل البيانات</button>
-    <button class="btn-add-row btn-export-word" onclick="openExportModal()"><i class="ti ti-download"></i> تصدير Word / PDF</button>
-<button class="btn-add-row btn-export-att" onclick="openAttModal()"><i class="ti ti-clipboard-list"></i> تصدير الحضور والغياب</button>
-<a href="stats.html" class="btn-add-row btn-export-stats"><i class="ti ti-chart-bar"></i> الإحصائيات</a>
-<button class="btn-add-row" onclick="showArchive()" style="border-color:var(--text-mid);color:var(--text-mid)">
-  <i class="ti ti-archive"></i> الأرشيف
-</button>
+  <!-- زراران رئيسيان -->
+  <button class="btn-add-row" onclick="addStudentRow()"><i class="ti ti-user-plus"></i> إضافة طالبة</button>
+  <a href="stats.html" class="btn-add-row btn-export-stats"><i class="ti ti-chart-bar"></i> الإحصائيات</a>
+
+  <!-- قايمة الإجراءات -->
+  <div style="position:relative;display:inline-block">
+    <button class="btn-add-row" id="actionsMenuBtn" onclick="toggleActionsMenu()" style="background:var(--beige2);border-color:var(--border)">
+      <i class="ti ti-settings-2"></i> إجراءات ▾
+    </button>
+    <div id="actionsMenu" style="display:none;position:absolute;bottom:110%;right:0;background:var(--white);border:1.5px solid var(--border);border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.12);padding:6px;min-width:200px;z-index:200">
+      <button class="actions-menu-item" onclick="openBulkGradeModal();toggleActionsMenu()"><i class="ti ti-plus"></i> إضافة اختبار جماعي</button>
+      <button class="actions-menu-item" onclick="openDeleteExamModal();toggleActionsMenu()"><i class="ti ti-trash"></i> حذف اختبار جماعي</button>
+      <button class="actions-menu-item" onclick="openExportModal();toggleActionsMenu()"><i class="ti ti-download"></i> تصدير Word / PDF</button>
+      <button class="actions-menu-item" onclick="openAttModal();toggleActionsMenu()"><i class="ti ti-clipboard-list"></i> تصدير الحضور والغياب</button>
+      <button class="actions-menu-item" onclick="showArchive();toggleActionsMenu()"><i class="ti ti-archive"></i> الأرشيف</button>
+    </div>
+  </div>
 </div>
 </div>
 </div><!-- /admin-tab-students -->
@@ -335,7 +342,7 @@
   <div class="section-head">
     <div class="section-head-title"><i class="ti ti-school"></i> المعلمات</div>
   </div>
-  <div id="teachersContainer">
+  <div id="teachersList" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;padding:16px">
     <div class="empty-state"><i class="ti ti-loader ti-spin"></i> جارٍ التحميل...</div>
   </div>
 </div>
@@ -699,6 +706,25 @@
   .admin-tab { min-width: 44px; padding: 10px 6px; }
   .admin-tabs-bar { gap: 2px; padding: 4px; }
 }
+
+/* ══ Actions Dropdown Menu ══ */
+.actions-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 14px;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--text-dark, #2c1a0e);
+  cursor: pointer;
+  text-align: right;
+  transition: background 0.15s;
+}
+.actions-menu-item:hover { background: var(--beige, #faf7f2); }
 </style>
 
 <!-- ── Modal التصthisر ── -->
@@ -1212,6 +1238,27 @@ window._updateAccountsBadge = function(count) {
     badge.style.display = 'inline-block';
   } else {
     badge.style.display = 'none';
+  }
+};
+</script>
+
+
+<script>
+window.toggleActionsMenu = function() {
+  const menu = document.getElementById('actionsMenu');
+  if (!menu) return;
+  const isOpen = menu.style.display === 'block';
+  menu.style.display = isOpen ? 'none' : 'block';
+  if (!isOpen) {
+    // أقفل لما يضغط برا
+    setTimeout(() => {
+      document.addEventListener('click', function closeMenu(e) {
+        if (!e.target.closest('#actionsMenu') && !e.target.closest('#actionsMenuBtn')) {
+          menu.style.display = 'none';
+          document.removeEventListener('click', closeMenu);
+        }
+      });
+    }, 10);
   }
 };
 </script>
