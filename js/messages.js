@@ -483,7 +483,7 @@ window.openConv = async (cid, otherId, otherName, otherRole) => {
           : `<button class="view-once-btn" onclick="viewOnceOpen('${activeConvId}','${m.id}','${m.url}','audio')"><i class="ti ti-player-play"></i> اضغطي للاستماع مرة واحدة</button>`)
       : `<audio controls controlsList="nodownload" src="${m.url}"></audio>`)
   : m.type === 'file'
-  ? `<a href="${m.url}" download="${m.fileName || ''}" target="_blank" rel="noopener"
+  ? `<a href="${m.fileUrl || m.url || ''}" download="${m.fileName || ''}" target="_blank" rel="noopener"
       style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:rgba(255,255,255,0.15);border-radius:10px;text-decoration:none;color:inherit;max-width:220px">
       <i class="ti ti-file-download" style="font-size:20px;flex-shrink:0"></i>
       <div style="min-width:0">
