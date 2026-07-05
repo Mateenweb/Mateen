@@ -1792,14 +1792,30 @@ window.resetAllStudentData = async (type) => {
     const snap = await getDocs(collection(db, 'students'));
     const types = type === 'all' ? ['grades', 'sessions'] : [type];
 
+    let totalGrades = 0, totalSessions = 0, totalStudents = 0;
     await Promise.all(snap.docs.map(async sDoc => {
+      let hadData = false;
       await Promise.all(types.map(async sub => {
         const subSnap = await getDocs(collection(db, 'students', sDoc.id, sub));
-        await Promise.all(subSnap.docs.map(d => deleteDoc(doc(db, 'students', sDoc.id, sub, d.id))));
+        if (subSnap.size > 0) {
+          hadData = true;
+          if (sub === 'grades') totalGrades += subSnap.size;
+          if (sub === 'sessions') totalSessions += subSnap.size;
+          await Promise.all(subSnap.docs.map(d => deleteDoc(doc(db, 'students', sDoc.id, sub, d.id))));
+        }
       }));
+      if (hadData) totalStudents++;
     }));
 
-    showToast(`✅ تم مسح ${typeName} من عند ${snap.size} طالبة`);
+    let summary = `✅ تم المسح:
+`;
+    if (totalGrades > 0) summary += `• ${totalGrades} درجة
+`;
+    if (totalSessions > 0) summary += `• ${totalSessions} سجل حضور
+`;
+    summary += `• من عند ${totalStudents} طالبة`;
+    alert(summary);
+    showToast('✅ تم المسح بنجاح');
   } catch(e) {
     showToast('خطأ: ' + e.message);
   }
