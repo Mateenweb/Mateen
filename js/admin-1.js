@@ -220,6 +220,13 @@ async function loadSubjectOptions() {
         subjects.map(s => `<option>${s}</option>`).join('');
     }
 
+    // ملء baSubject
+    const baSubject = document.getElementById('baSubject');
+    if (baSubject) {
+      baSubject.innerHTML = '<option value="">— اختاري —</option>' +
+        subjects.map(s => `<option>${s}</option>`).join('');
+    }
+
   } catch(e) {
     console.error('loadSubjectOptions:', e);
   }
@@ -1773,6 +1780,164 @@ window.deleteBulkExam = async (encodedKey) => {
   } catch(e) {
     showToast?.('❌ خطأ: ' + e.message);
     console.error('deleteBulkExam:', e);
+  }
+};
+
+// ══════════════════════════════════════════════════════════════
+//  إضافة حضور جماعي
+// ══════════════════════════════════════════════════════════════
+window.openBulkAttModal = () => {
+  const modal = document.getElementById('bulkAttModal');
+  modal.style.display = 'flex';
+  const dateInput = document.getElementById('baDate');
+  if (dateInput && !dateInput.value) dateInput.value = new Date().toISOString().slice(0, 10);
+  renderBAStudents();
+};
+
+window.closeBulkAttModal = () => {
+  document.getElementById('bulkAttModal').style.display = 'none';
+};
+
+function baBtnHtml(sid, status) {
+  const presentActive = status === 'present';
+  const absentActive  = status === 'absent';
+  return `
+    <button type="button" onclick="baSetStatus('${sid}','present')"
+      style="font-size:12px;padding:5px 10px;border-radius:6px;cursor:pointer;font-family:inherit;border:1px solid ${presentActive ? '#1e8449' : 'var(--border)'};background:${presentActive ? 'rgba(39,174,96,0.15)' : 'var(--beige2)'};color:${presentActive ? '#1e8449' : 'var(--text-mid)'}">✔ حاضرة</button>
+    <button type="button" onclick="baSetStatus('${sid}','absent')"
+      style="font-size:12px;padding:5px 10px;border-radius:6px;cursor:pointer;font-family:inherit;border:1px solid ${absentActive ? '#c0392b' : 'var(--border)'};background:${absentActive ? 'rgba(192,57,43,0.12)' : 'var(--beige2)'};color:${absentActive ? '#c0392b' : 'var(--text-mid)'}">✖ غائبة</button>`;
+}
+
+function renderBAStudents() {
+  const list = document.getElementById('baStudentsList');
+  const students = allStudents.filter(s => s.name && s.name !== 'طالبة جديدة' && !s.archived);
+  list.innerHTML = students.map(s => `
+    <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-bottom:1px solid var(--border)">
+      <input type="checkbox" class="ba-check" data-id="${s.id}" data-name="${esc(s.name||'')}" checked style="width:16px;height:16px;cursor:pointer"/>
+      <span style="flex:1;font-size:13px;font-weight:600">${esc(s.name||'—')}</span>
+      <div class="ba-status-wrap" data-id="${s.id}" data-status="present" style="display:flex;gap:6px">
+        ${baBtnHtml(s.id, 'present')}
+      </div>
+    </div>
+  `).join('');
+}
+
+window.baSelectAll = () => document.querySelectorAll('.ba-check').forEach(cb => cb.checked = true);
+window.baClearAll  = () => document.querySelectorAll('.ba-check').forEach(cb => cb.checked = false);
+
+window.baSetStatus = (sid, status) => {
+  const wrap = document.querySelector(`.ba-status-wrap[data-id="${sid}"]`);
+  if (!wrap) return;
+  wrap.dataset.status = status;
+  wrap.innerHTML = baBtnHtml(sid, status);
+};
+
+window.baMarkAllPresent = () => document.querySelectorAll('.ba-status-wrap').forEach(el => baSetStatus(el.dataset.id, 'present'));
+window.baMarkAllAbsent  = () => document.querySelectorAll('.ba-status-wrap').forEach(el => baSetStatus(el.dataset.id, 'absent'));
+
+window.saveBulkAttendance = async () => {
+  const day     = document.getElementById('baDay').value;
+  const date    = document.getElementById('baDate').value;
+  const subject = document.getElementById('baSubject').value;
+
+  if (!day || !date) { showToast('اختاري اليوم والتاريخ'); return; }
+  if (!subject) { showToast('اختاري المادة'); return; }
+
+  const checked = [...document.querySelectorAll('.ba-check:checked')];
+  if (!checked.length) { showToast('اختاري طالبة واحدة على الأقل'); return; }
+
+  const btn = document.querySelector('[onclick="saveBulkAttendance()"]');
+  if (btn) { btn.disabled = true; btn.textContent = 'جارٍ الحفظ...'; }
+
+  try {
+    await Promise.all(checked.map(cb => {
+      const sid = cb.dataset.id;
+      const status = document.querySelector(`.ba-status-wrap[data-id="${sid}"]`)?.dataset.status || 'present';
+      return addDoc(collection(db, 'students', sid, 'sessions'), {
+        day, date,
+        subjects: { [subject]: status },
+        createdAt: Date.now(),
+      });
+    }));
+    showToast(`✅ تم تسجيل الحضور لـ ${checked.length} طالبة`);
+    closeBulkAttModal();
+  } catch(e) {
+    showToast('خطأ: ' + e.message);
+  } finally {
+    if (btn) { btn.disabled = false; btn.innerHTML = '<i class="ti ti-device-floppy"></i> حفظ الحضور'; }
+  }
+};
+
+// ══════════════════════════════════════════════════════════════
+//  حذف حضور جماعي من عند كل الطالبات
+// ══════════════════════════════════════════════════════════════
+window.openDeleteAttModal = async () => {
+  const modal = document.getElementById('deleteAttModal');
+  const list  = document.getElementById('attListToDelete');
+  if (!modal) { alert('المودال مش موجود'); return; }
+
+  modal.style.display = 'flex';
+  list.innerHTML = '<div style="text-align:center;color:var(--text-mid);font-size:13px;padding:20px">جارٍ التحميل...</div>';
+
+  try {
+    const studSnap = await getDocs(query(collection(db, 'students'), where('archived', '!=', true)));
+    const attMap = {}; // { date|||day: [ {studentId, sessionId} ] }
+
+    await Promise.all(studSnap.docs.map(async sDoc => {
+      const sessSnap = await getDocs(collection(db, 'students', sDoc.id, 'sessions'));
+      sessSnap.docs.forEach(se => {
+        const data = se.data();
+        const key = `${data.date || ''}|||${data.day || ''}`;
+        if (!attMap[key]) attMap[key] = [];
+        attMap[key].push({ studentId: sDoc.id, sessionId: se.id });
+      });
+    }));
+
+    if (Object.keys(attMap).length === 0) {
+      list.innerHTML = '<div style="text-align:center;color:var(--text-mid);font-size:13px;padding:20px">لا توجد جلسات حضور</div>';
+      return;
+    }
+
+    const sortedKeys = Object.keys(attMap).sort((a, b) => b.localeCompare(a));
+
+    list.innerHTML = sortedKeys.map(key => {
+      const [date, day] = key.split('|||');
+      const entries = attMap[key];
+      return `<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:rgba(92,61,46,0.05);border-radius:10px;border:1px solid var(--border);margin-bottom:8px">
+        <div>
+          <div style="font-size:13px;font-weight:700">${esc(date || '—')}${day ? ` — ${esc(day)}` : ''}</div>
+          <div style="font-size:11px;color:var(--text-mid)">📊 ${entries.length} سجل حضور</div>
+        </div>
+        <button onclick="deleteBulkAttendance('${encodeURIComponent(key)}')" style="background:none;border:1px solid #e74c3c;color:#e74c3c;border-radius:8px;padding:5px 12px;cursor:pointer;font-size:12px;font-family:inherit;white-space:nowrap">
+          <i class="ti ti-trash"></i> حذف
+        </button>
+      </div>`;
+    }).join('');
+
+    window._attMapCache = attMap;
+  } catch(e) {
+    list.innerHTML = `<div style="color:#e74c3c;font-size:13px;padding:20px">❌ خطأ: ${e.message}</div>`;
+    console.error('openDeleteAttModal:', e);
+  }
+};
+
+window.deleteBulkAttendance = async (encodedKey) => {
+  const key = decodeURIComponent(encodedKey);
+  const [date, day] = key.split('|||');
+  if (!confirm(`متأكدة من حذف حضور يوم "${date || day}" من عند كل الطالبات؟`)) return;
+
+  const entries = window._attMapCache?.[key] || [];
+  if (!entries.length) { alert('مفيش بيانات'); return; }
+
+  try {
+    await Promise.all(entries.map(({ studentId, sessionId }) =>
+      deleteDoc(doc(db, 'students', studentId, 'sessions', sessionId))
+    ));
+    showToast?.(`✅ تم حذف الحضور من ${entries.length} طالبة`);
+    openDeleteAttModal(); // إعادة تحميل القايمة
+  } catch(e) {
+    showToast?.('❌ خطأ: ' + e.message);
+    console.error('deleteBulkAttendance:', e);
   }
 };
 
