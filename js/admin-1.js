@@ -16,7 +16,19 @@ const auth = getAuth(app);
 const db   = getFirestore(app);
 let allMats = [];
 let currentUserRole = null;
-let _baAllSubjects = []; // كل المواد — تستخدم في وضع "كل مواد اليوم" بمودال الحضور الجماعي
+let _baAllSubjects = []; // كل المواد — تستخدم كـ fallback لو اليوم مش موجود في الجدول
+// جدول مواد كل يوم — نفس الجدول المستخدم في مودال الطالبة (student.js) بالضبط
+const BA_DAY_SUBJECTS = {
+  'الأحد':    ['الفقه', 'التفسير', 'مقرأة متين'],
+  'الاثنين':  ['التفسير', 'الفقه', 'مقرأة متين'],
+  'الثلاثاء': ['العقيدة', 'الحديث', 'مقرأة متين'],
+  'الأربعاء': ['الفقه', 'الحديث', 'مقرأة متين'],
+  'الخميس':   ['التفسير', 'العقيدة', 'مقرأة متين'],
+};
+function baSubjectsForCurrentDay() {
+  const day = document.getElementById('baDay')?.value || '';
+  return BA_DAY_SUBJECTS[day] || _baAllSubjects;
+}
 
 // ── AUTH GUARD ────────────────────────────────────────
 onAuthStateChanged(auth, async user => {
@@ -1796,6 +1808,9 @@ window.openBulkAttModal = () => {
   renderBAStudents();
 };
 
+// إعادة عرض المواد لما تتغيّر اليوم — يهم فقط في وضع "كل مواد اليوم"
+document.getElementById('baDay')?.addEventListener('change', renderBAStudents);
+
 window.closeBulkAttModal = () => {
   document.getElementById('bulkAttModal').style.display = 'none';
 };
@@ -1845,7 +1860,7 @@ function renderBAStudents() {
       <input type="checkbox" class="ba-check" data-id="${s.id}" data-name="${esc(s.name||'')}" checked style="width:16px;height:16px;cursor:pointer;margin-top:${allMode ? '2px' : '0'}"/>
       <span style="flex:1;font-size:13px;font-weight:600">${esc(s.name||'—')}</span>
       ${allMode
-        ? `<div style="display:flex;flex-direction:column;gap:2px">${_baAllSubjects.map(subj => baSubjRowHtml(s.id, subj, 'present')).join('')}</div>`
+        ? `<div style="display:flex;flex-direction:column;gap:2px">${baSubjectsForCurrentDay().map(subj => baSubjRowHtml(s.id, subj, 'present')).join('')}</div>`
         : `<div class="ba-status-wrap" data-id="${s.id}" data-status="present" style="display:flex;gap:6px">${baBtnHtml(s.id, 'present')}</div>`
       }
     </div>
@@ -1889,7 +1904,7 @@ window.saveBulkAttendance = async () => {
   if (!checked.length) { showToast('اختاري طالبة واحدة على الأقل'); return; }
 
   const allMode = subject === '__ALL__';
-  if (allMode && !_baAllSubjects.length) { showToast('لا توجد مواد مسجّلة'); return; }
+  if (allMode && !baSubjectsForCurrentDay().length) { showToast('لا توجد مواد لهذا اليوم'); return; }
 
   const btn = document.querySelector('[onclick="saveBulkAttendance()"]');
   if (btn) { btn.disabled = true; btn.textContent = 'جارٍ الحفظ...'; }
