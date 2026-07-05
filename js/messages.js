@@ -340,10 +340,30 @@ function renderConvList(list) {
           </div>
           <span class="conv-role-pill" style="background:${ROLE_INITIALS_BG[c.otherRole]||'#eee'};color:${ROLE_COLORS[c.otherRole]||'#555'}">${roleLabel}</span>
         </div>
-        ${!viewOnlyMode ? `<button class="conv-delete-btn" title="حذف المحادثة"
-          onclick="event.stopPropagation(); deleteConv('${c.id}')">
-          <i class="ti ti-trash"></i>
-        </button>` : ''}
+        ${(() => {
+          if (currentUserData?.role !== 'admin') {
+            return `<button class="conv-delete-btn" title="حذف المحادثة"
+              onclick="event.stopPropagation(); deleteConv('${c.id}')">
+              <i class="ti ti-trash"></i>
+            </button>`;
+          }
+          // الأدمن: قايمة خيارات حذف (من طرف واحد تختاره، أو نهائيًا من الاتنين)
+          const uidA  = vUid();
+          const nameA = escapeAttr(viewOnlyMode ? viewOnlyName : (currentUserData?.name || 'أنا'));
+          const nameB = escapeAttr(c.otherName || '—');
+          return `
+            <div class="conv-delete-wrap" style="position:relative;">
+              <button class="conv-delete-btn" title="خيارات الحذف"
+                onclick="event.stopPropagation(); toggleConvDeleteMenu(event,'${c.id}')">
+                <i class="ti ti-trash"></i>
+              </button>
+              <div id="del-menu-conv-${c.id}" style="display:none;position:absolute;left:0;top:28px;background:var(--white);border:1px solid var(--border);border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,0.12);z-index:100;min-width:180px;overflow:hidden;">
+                <button onclick="event.stopPropagation(); adminDeleteConvSide('${c.id}','${uidA}','${nameA}')" style="width:100%;padding:10px 14px;border:none;background:none;font-family:inherit;font-size:13px;cursor:pointer;text-align:right;display:flex;align-items:center;gap:8px;color:var(--text-dark)"><i class="ti ti-eye-off"></i> حذف من ${nameA} فقط</button>
+                <button onclick="event.stopPropagation(); adminDeleteConvSide('${c.id}','${c.otherId}','${nameB}')" style="width:100%;padding:10px 14px;border:none;background:none;font-family:inherit;font-size:13px;cursor:pointer;text-align:right;display:flex;align-items:center;gap:8px;color:var(--text-dark);border-top:1px solid var(--border)"><i class="ti ti-eye-off"></i> حذف من ${nameB} فقط</button>
+                <button onclick="event.stopPropagation(); adminDeleteConvBoth('${c.id}')" style="width:100%;padding:10px 14px;border:none;background:none;font-family:inherit;font-size:13px;cursor:pointer;text-align:right;display:flex;align-items:center;gap:8px;color:#c0392b;border-top:1px solid var(--border)"><i class="ti ti-trash"></i> حذف نهائي من الاتنين</button>
+              </div>
+            </div>`;
+        })()}
         </div>
       </div>`;
   }).join('');
@@ -690,6 +710,65 @@ window.deleteConv = async (cid) => {
     activeConvId = null;
     document.getElementById('msgConv').style.display  = 'none';
     document.getElementById('msgEmpty').style.display = 'flex';
+  }
+};
+
+// ── قايمة حذف المحادثة (أدمن فقط) ────────────────────────────
+window.toggleConvDeleteMenu = (e, cid) => {
+  e.stopPropagation();
+  document.querySelectorAll('[id^="del-menu-"]').forEach(m => {
+    if (m.id !== `del-menu-conv-${cid}`) m.style.display = 'none';
+  });
+  const menu = document.getElementById(`del-menu-conv-${cid}`);
+  if (menu) menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+};
+
+// حذف المحادثة من عند طرف واحد بس (تختار الأدمن أي طرف)
+window.adminDeleteConvSide = async (cid, targetUid, targetName) => {
+  if (currentUserData?.role !== 'admin') return;
+  if (!confirm(`هتتحذف المحادثة دي من عند "${targetName}" بس. الطرف التاني هيفضل شايفها. تكملي؟`)) return;
+  try {
+    await updateDoc(doc(db, 'conversations', cid), {
+      [`hiddenBy.${targetUid}`]: true,
+      [`deletedAt.${targetUid}`]: serverTimestamp(),
+    });
+    // لو اللي اتحذفلها هي نفسها اللي بنشوف محادثاتها دلوقتي (vUid())، شيلها من القايمة الظاهرة
+    if (targetUid === vUid()) {
+      allConvs = allConvs.filter(c => c.id !== cid);
+      renderConvList(allConvs);
+      if (activeConvId === cid) {
+        if (msgUnsub) { msgUnsub(); msgUnsub = null; }
+        activeConvId = null;
+        document.getElementById('msgConv').style.display  = 'none';
+        document.getElementById('msgEmpty').style.display = 'flex';
+      }
+    }
+  } catch (e) {
+    console.error('adminDeleteConvSide error:', e);
+    alert('حصل خطأ أثناء الحذف: ' + e.message);
+  }
+};
+
+// حذف المحادثة نهائيًا من الاتنين (كل الرسايل كمان) — لا يمكن التراجع
+window.adminDeleteConvBoth = async (cid) => {
+  if (currentUserData?.role !== 'admin') return;
+  if (!confirm('هتتحذف المحادثة نهائيًا من عند الطرفين مع كل رسايلها، ومينفعش ترجع تاني. متأكدة؟')) return;
+  try {
+    const msgsSnap = await getDocs(collection(db, 'conversations', cid, 'messages'));
+    await Promise.all(msgsSnap.docs.map(d => deleteDoc(d.ref)));
+    await deleteDoc(doc(db, 'conversations', cid));
+
+    allConvs = allConvs.filter(c => c.id !== cid);
+    renderConvList(allConvs);
+    if (activeConvId === cid) {
+      if (msgUnsub) { msgUnsub(); msgUnsub = null; }
+      activeConvId = null;
+      document.getElementById('msgConv').style.display  = 'none';
+      document.getElementById('msgEmpty').style.display = 'flex';
+    }
+  } catch (e) {
+    console.error('adminDeleteConvBoth error:', e);
+    alert('حصل خطأ أثناء الحذف: ' + e.message);
   }
 };
 
