@@ -2,6 +2,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/fireba
 import { getFirestore, collection, doc, getDoc, getDocs, addDoc, deleteDoc, query, where, orderBy, onSnapshot, serverTimestamp, updateDoc, setDoc, deleteField } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
 import { FIREBASE_CONFIG } from "./config.js";
+import { deletePendingNotificationsForConv } from "./notifications.js";
 
 const app  = initializeApp(FIREBASE_CONFIG);
 const db   = getFirestore(app);
@@ -377,14 +378,9 @@ window.openConv = async (cid, otherId, otherName, otherRole) => {
   // Mark as read — صفّر الـ unread في Firestore مباشرة (مش في وضع العرض فقط)
   if (!viewOnlyMode) {
     markConvRead(cid);
-    // صفّر flat field والـ nested الاتنين
-    const _convSnap2 = await getDoc(doc(db, 'conversations', cid)).catch(()=>null);
-    const _nestedUnread = _convSnap2?.data()?.unread || {};
-    _nestedUnread[currentUser.uid] = 0;
     await updateDoc(doc(db, 'conversations', cid), {
       [`unread.${currentUser.uid}`]: 0,
-      unread: _nestedUnread,
-    }).catch(() => {});
+    }).catch(err => console.error('فشل تصفير unread:', err));
 
     // حدّث الـ local state فوراً
     const convInList = allConvs.find(cv => cv.id === cid);
@@ -455,7 +451,7 @@ window.openConv = async (cid, otherId, otherName, otherRole) => {
                 <button class="msg-delete-btn" title="خيارات الحذف" onclick="toggleDeleteMenu(event,'${m.id}')"><i class="ti ti-trash"></i></button>
                 <div id="del-menu-${m.id}" style="display:none;position:absolute;${currentUserData?.role==='mateen'?'left':'right'}:0;bottom:28px;background:var(--white);border:1px solid var(--border);border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,0.12);z-index:100;min-width:160px;overflow:hidden;">
                   <button onclick="deleteMsgMine('${activeConvId}','${m.id}')" style="width:100%;padding:10px 14px;border:none;background:none;font-family:inherit;font-size:13px;cursor:pointer;text-align:right;display:flex;align-items:center;gap:8px;color:var(--text-dark)"><i class="ti ti-eye-off"></i> حذف من عندي فقط</button>
-                  ${currentUserData?.role==='admin'||currentUserData?.role==='support'||currentUserData?.role==='teacher' ? `<button onclick="deleteMsgBoth('${activeConvId}','${m.id}')" style="width:100%;padding:10px 14px;border:none;background:none;font-family:inherit;font-size:13px;cursor:pointer;text-align:right;display:flex;align-items:center;gap:8px;color:#c0392b;border-top:1px solid var(--border)"><i class="ti ti-trash"></i> حذف من الاتنين</button>` : ''}
+                  ${currentUserData?.role==='admin' ? `<button onclick="deleteMsgBoth('${activeConvId}','${m.id}')" style="width:100%;padding:10px 14px;border:none;background:none;font-family:inherit;font-size:13px;cursor:pointer;text-align:right;display:flex;align-items:center;gap:8px;color:#c0392b;border-top:1px solid var(--border)"><i class="ti ti-trash"></i> حذف من الاتنين</button>` : ''}
                 </div>
               </div>` : ''}
               <div class="msg-bubble ${mine ? 'mine' : 'theirs'}" title="${fullTime}">
@@ -646,7 +642,7 @@ window.deleteMsgMine = async (convId, msgId) => {
   });
 };
 
-// ── حذف من الاتنين (أدمن/سوبرفايزر/سابورت) ───────────────
+// ── حذف من الاتنين (أدمن فقط) ───────────────
 window.deleteMsgBoth = async (convId, msgId) => {
   if (viewOnlyMode) return;
   if (!confirm('ستُحذف هذه الرسالة نهائياً من عند الاتنين. هل تريدين المتابعة؟')) return;
@@ -665,6 +661,8 @@ window.deleteMsgBoth = async (convId, msgId) => {
     }
   } catch(e) {}
   await deleteDoc(doc(db, 'conversations', convId, 'messages', msgId));
+  // امسحي أي توست معلّق (لسه ماظهرش) مرتبط بنفس المحادثة عند أي حد
+  deletePendingNotificationsForConv(convId).catch(() => {});
 };
 
 
