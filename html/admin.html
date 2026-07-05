@@ -1009,8 +1009,9 @@
         </div>
         <div>
           <label style="font-size:12px;color:var(--text-mid);display:block;margin-bottom:4px">المادة *</label>
-          <select id="baSubject" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:inherit;font-size:13px">
+          <select id="baSubject" onchange="renderBAStudents()" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:inherit;font-size:13px">
             <option value="">— اختاري —</option>
+            <option value="__ALL__">📅 كل مواد اليوم</option>
           </select>
         </div>
       </div>
