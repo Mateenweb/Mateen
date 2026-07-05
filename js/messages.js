@@ -341,12 +341,7 @@ function renderConvList(list) {
           <span class="conv-role-pill" style="background:${ROLE_INITIALS_BG[c.otherRole]||'#eee'};color:${ROLE_COLORS[c.otherRole]||'#555'}">${roleLabel}</span>
         </div>
         ${(() => {
-          if (currentUserData?.role !== 'admin') {
-            return `<button class="conv-delete-btn" title="حذف المحادثة"
-              onclick="event.stopPropagation(); deleteConv('${c.id}')">
-              <i class="ti ti-trash"></i>
-            </button>`;
-          }
+          if (currentUserData?.role !== 'admin') return ''; // غير الأدمن مالهاش صلاحية حذف المحادثة خالص
           // الأدمن: قايمة خيارات حذف (من طرف واحد تختاره، أو نهائيًا من الاتنين)
           const uidA  = vUid();
           const nameA = escapeAttr(viewOnlyMode ? viewOnlyName : (currentUserData?.name || 'أنا'));
@@ -694,7 +689,8 @@ window.unhideConv = async (cid) => {
 };
 
 window.deleteConv = async (cid) => {
-  if (viewOnlyMode) return;
+  // حذف المحادثة بقى صلاحية الأدمن بس (عن طريق قايمة adminDeleteConvSide/Both)
+  if (viewOnlyMode || currentUserData?.role !== 'admin') return;
   if (!confirm('هل تريدين حذف هذه المحادثة؟\nستختفي منك فقط والطرف الآخر لن يتأثر.')) return;
 
   await updateDoc(doc(db, 'conversations', cid), {
