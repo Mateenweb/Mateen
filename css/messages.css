@@ -796,6 +796,9 @@ body:has(.msg-layout) {
   0%,100% { opacity: 1; }
   50%      { opacity: 0; }
 }
+@keyframes msg-spin {
+  to { transform: rotate(360deg); }
+}
 
 /* فقاعة الImage */
 .msg-bubble img.msg-img {

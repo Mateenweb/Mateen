@@ -167,6 +167,12 @@
                     onkeydown="handleMsgKey(event)"
                     oninput="autoGrow(this)"></textarea>
 
+          <!-- مؤشر رفع الصورة/الملف/الصوت -->
+          <div id="uploadIndicator" style="display:none;align-items:center;gap:6px;font-size:12px;color:var(--text-mid);flex-shrink:0;">
+            <i class="ti ti-loader-2" style="animation:msg-spin 0.8s linear infinite;"></i>
+            <span id="uploadIndicatorText">جارٍ الرفع...</span>
+          </div>
+
           <!-- مؤشر التسجيل -->
           <div id="recordingIndicator" style="display:none;align-items:center;gap:6px;font-size:12px;color:#c0392b;flex-shrink:0;">
             <span style="width:8px;height:8px;background:#c0392b;border-radius:50%;animation:blink 1s infinite;"></span>

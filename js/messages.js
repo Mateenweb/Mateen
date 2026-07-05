@@ -816,6 +816,18 @@ window.toggleViewOnce = () => {
   }
 };
 
+// ── مؤشر رفع (صورة/ملف/صوت) ─────────────────────────────────
+function showUploadIndicator(text) {
+  const el = document.getElementById('uploadIndicator');
+  const txt = document.getElementById('uploadIndicatorText');
+  if (txt) txt.textContent = text || 'جارٍ الرفع...';
+  if (el) el.style.display = 'flex';
+}
+function hideUploadIndicator() {
+  const el = document.getElementById('uploadIndicator');
+  if (el) el.style.display = 'none';
+}
+
 window.sendImage = async (input) => {
   if (viewOnlyMode) return;
   const file = input.files[0];
@@ -823,12 +835,15 @@ window.sendImage = async (input) => {
   input.value = '';
 
   let url;
+  showUploadIndicator('جارٍ رفع الصورة...');
   try {
     url = await uploadMedia(file, 'image');
   } catch (e) {
     console.error('sendImage upload error:', e);
     alert('فشل رفع الصورة: ' + (e.message || 'خطأ غير معروف'));
     return;
+  } finally {
+    hideUploadIndicator();
   }
 
   const otherId = allConvs.find(c => c.id === activeConvId)?.otherId;
@@ -878,6 +893,7 @@ window.sendFile = async (input) => {
   fd.append('upload_preset', UPLOAD_PRESET);
   const endpoint = 'auto';
   let data;
+  showUploadIndicator('جارٍ رفع الملف...');
   try {
     const res = await fetch(
       `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/${endpoint}/upload`,
@@ -885,9 +901,11 @@ window.sendFile = async (input) => {
     );
     data = await res.json();
   } catch(e) {
+    hideUploadIndicator();
     alert('فشل رفع الملف — تحقق من اتصالك بالإنترنت');
     return;
   }
+  hideUploadIndicator();
   if (!data.secure_url) { alert('فشل رفع الملف: ' + (data.error?.message || 'خطأ غير معروف')); return; }
 
   const url      = data.secure_url;
@@ -944,12 +962,15 @@ window.toggleRecording = async () => {
 
       const blob = new Blob(audioChunks, { type: 'audio/webm' });
       let url;
+      showUploadIndicator('جارٍ رفع الرسالة الصوتية...');
       try {
         url = await uploadMedia(blob, 'audio');
       } catch (e) {
         console.error('voice upload error:', e);
         alert('فشل رفع الرسالة الصوتية: ' + (e.message || 'خطأ غير معروف'));
         return;
+      } finally {
+        hideUploadIndicator();
       }
 
       const otherId = allConvs.find(c => c.id === activeConvId)?.otherId;
