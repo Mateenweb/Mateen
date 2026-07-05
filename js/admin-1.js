@@ -131,6 +131,11 @@ window.doAdd = async () => {
 };
 
 // ── LOAD ──────────────────────────────────────────────
+// تتنادى لما تاب المعلمات يتفتح
+window.loadTeachersTab = function() {
+  loadTeachers();
+};
+
 function loadTeachers() {
   const SUBJECT_AR = {
     tafseer: 'التفسير', fiqh: 'الفقه', aqeedah: 'العقيدة',
@@ -284,6 +289,7 @@ function renderPending(list) {
 
   badge.style.display = 'inline';
   badge.textContent   = list.length;
+  if (typeof window._updateAccountsBadge === 'function') window._updateAccountsBadge(list.length);
 
   // فصل: طالبات متين (موافقة not/don'tرفة)  and the باقي (موافقة أدمن)
   const mateen = list.filter(u => u.role === 'mateen');
