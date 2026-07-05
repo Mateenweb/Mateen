@@ -1206,27 +1206,40 @@ function formatSize(bytes) {
   </div>
 </div>
 
-<!-- ══ Modal مسح كل البيانات ══ -->
+<!-- ══ Modal مسح البيانات ══ -->
 <div id="resetDataModal" class="modal-overlay" style="display:none" onclick="if(event.target===this)this.style.display='none'">
-  <div class="modal-box" style="width:min(94vw,420px)">
+  <div class="modal-box" style="width:min(94vw,550px);max-height:90vh;overflow-y:auto">
     <div class="modal-head">
       <span class="m-title">⚠️ مسح البيانات</span>
       <button class="m-close" onclick="document.getElementById('resetDataModal').style.display='none'">✕</button>
     </div>
     <div class="modal-body" style="display:flex;flex-direction:column;gap:12px">
       <p style="font-size:13px;color:#e74c3c;font-weight:600">تحذير: هذه العملية لا يمكن التراجع عنها!</p>
-      <p style="font-size:12px;color:var(--text-mid)">اختاري نوع البيانات اللي عاوزة تمسحيها من عند كل الطالبات (بما فيهم المؤرشفين).</p>
-      <button onclick="resetAllStudentData('grades');this.closest('.modal-overlay').style.display='none'" 
-        style="background:transparent;border:1px solid #e74c3c;color:#e74c3c;border-radius:10px;padding:10px;font-family:inherit;font-size:13px;cursor:pointer;font-weight:600">
-        🗑️ مسح كل الدرجات فقط
-      </button>
-      <button onclick="resetAllStudentData('sessions');this.closest('.modal-overlay').style.display='none'"
-        style="background:transparent;border:1px solid #e74c3c;color:#e74c3c;border-radius:10px;padding:10px;font-family:inherit;font-size:13px;cursor:pointer;font-weight:600">
-        🗑️ مسح كل الحضور والغياب فقط
-      </button>
-      <button onclick="resetAllStudentData('all');this.closest('.modal-overlay').style.display='none'"
-        style="background:#e74c3c;color:white;border:none;border-radius:10px;padding:10px;font-family:inherit;font-size:13px;cursor:pointer;font-weight:700">
-        🗑️ مسح كل الدرجات والحضور معاً
+      <!-- نوع البيانات -->
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;background:rgba(231,76,60,0.06);padding:6px 12px;border-radius:8px;border:1px solid var(--border)">
+          <input type="radio" name="resetType" value="grades" checked> الدرجات فقط
+        </label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;background:rgba(231,76,60,0.06);padding:6px 12px;border-radius:8px;border:1px solid var(--border)">
+          <input type="radio" name="resetType" value="sessions"> الحضور والغياب فقط
+        </label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;background:rgba(231,76,60,0.06);padding:6px 12px;border-radius:8px;border:1px solid var(--border)">
+          <input type="radio" name="resetType" value="all"> الاتنين معاً
+        </label>
+      </div>
+      <!-- قايمة الطالبات -->
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div style="font-size:13px;font-weight:600">الطالبات اللي عندهم بيانات:</div>
+        <div style="display:flex;gap:8px">
+          <button onclick="selectAllResetStudents(true)" style="font-size:11px;background:none;border:1px solid var(--border);border-radius:6px;padding:3px 8px;cursor:pointer">تحديد الكل</button>
+          <button onclick="selectAllResetStudents(false)" style="font-size:11px;background:none;border:1px solid var(--border);border-radius:6px;padding:3px 8px;cursor:pointer">إلغاء الكل</button>
+        </div>
+      </div>
+      <div id="resetStudentsList" style="max-height:300px;overflow-y:auto;border:1px solid var(--border);border-radius:10px;padding:8px;display:flex;flex-direction:column;gap:6px">
+        <div style="text-align:center;color:var(--text-mid);font-size:13px;padding:20px">جارٍ التحميل...</div>
+      </div>
+      <button onclick="confirmResetSelected()" style="background:#e74c3c;color:white;border:none;border-radius:10px;padding:11px;font-family:inherit;font-size:14px;cursor:pointer;font-weight:700">
+        🗑️ مسح البيانات للمحددين
       </button>
     </div>
   </div>
