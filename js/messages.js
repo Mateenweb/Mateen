@@ -70,6 +70,12 @@ let msgUnsub        = null;
 let convUnsub       = null;   // unsubscribe for the  conversations listener
 let allUsers        = [];
 let allConvs        = [];
+// وضع "عرض فقط" — لما الإدارة تفتح messages.html?uid=XXX تشوف محادثات شخص تاني بدون ما تتدخل فيها
+let viewOnlyMode    = false;
+let viewOnlyUid     = null;
+let viewOnlyName    = '';
+// الـ uid اللي بنعرض محادثاته فعليًا (بتاع الشخص نفسه في وضع العرض، أو المستخدم الحالي عادة)
+function vUid() { return viewOnlyMode ? viewOnlyUid : (currentUser?.uid || ''); }
 // استرجع المحادثات المقروءة من sessionStorage
 const _storedRead = sessionStorage.getItem('readConvIds');
 const readConvIds = new Set(_storedRead ? JSON.parse(_storedRead) : []);
@@ -129,15 +135,37 @@ onAuthStateChanged(auth, async user => {
   activeConvId = null;
   // لا تمسح allConvs So that تفضل Menu/List ظاهرة أثناء إعادة Loading
 
+  // ── وضع "عرض فقط": الإدارة بتفتح messages.html?uid=XXX عشان تشوف محادثات حد تاني ──
+  const params = new URLSearchParams(window.location.search);
+  const viewUidParam = params.get('uid');
+  if (viewUidParam && data.role === 'admin' && viewUidParam !== currentUser.uid) {
+    viewOnlyMode = true;
+    viewOnlyUid  = viewUidParam;
+    try {
+      const targetSnap = await getDoc(doc(db, 'users', viewUidParam));
+      viewOnlyName = targetSnap.exists() ? (targetSnap.data().name || 'مستخدمة') : 'مستخدمة';
+    } catch(e) { viewOnlyName = 'مستخدمة'; }
+    activateViewOnlyUi();
+  }
+
   loadConversations();
   loadAllUsers();
 
-  // فتح Modal "Message جthisدة" If جاية from the هوم بـ ?compose=1
-  const params = new URLSearchParams(window.location.search);
   if (params.get('compose') === '1') {
     setTimeout(() => window.showNewConv && window.showNewConv(), 600);
   }
 });
+
+// ── تفعيل واجهة "وضع العرض فقط" ─────────────────────────────────────────────
+function activateViewOnlyUi() {
+  const banner = document.getElementById('viewOnlyBanner');
+  const nameEl = document.getElementById('viewOnlyName');
+  if (nameEl) nameEl.textContent = viewOnlyName;
+  if (banner) banner.style.display = 'flex';
+
+  const composeBtn = document.querySelector('.compose-btn');
+  if (composeBtn) composeBtn.style.display = 'none';
+}
 
 window.doLogout = () => signOut(auth).then(() => window.location.href = '../html/login.html');
 
@@ -194,11 +222,13 @@ async function loadAllUsers() {
 
 // ── Load conversations ─────────────────────────────────────────────────────
 function loadConversations() {
+  const targetUid = vUid();
+  if (!targetUid) return;
   // بدون orderBy So that not/don't محتاجين composite index في Firestore
   // الSort بيتعمل in the ـ client بعد ما Data ترجع
   const q = query(
     collection(db, 'conversations'),
-    where('participants', 'array-contains', currentUser.uid)
+    where('participants', 'array-contains', targetUid)
   );
 
   convUnsub = onSnapshot(q, async snap => {
@@ -217,8 +247,8 @@ function loadConversations() {
 
     const promises = snap.docs.map(async d => {
       const data = d.data();
-      if (data.hiddenBy?.[currentUser.uid] && d.id !== activeConvId) return null;
-      const otherId = data.participants?.find(p => p !== currentUser.uid);
+      if (data.hiddenBy?.[targetUid] && d.id !== activeConvId) return null;
+      const otherId = data.participants?.find(p => p !== targetUid);
       if (!otherId) return null;
 
       // جيب الاسم من الـ cache أو من Firestore
@@ -244,7 +274,7 @@ function loadConversations() {
     allConvs = results.filter(Boolean);
 
     // Sort from the أحدث للأقدم
-    const uid = currentUser?.uid || '';
+    const uid = targetUid;
     allConvs.sort((a, b) => {
       const aUnread = a[`unread.${uid}`] ?? a.unread?.[uid] ?? 0;
       const bUnread = b[`unread.${uid}`] ?? b.unread?.[uid] ?? 0;
@@ -253,8 +283,6 @@ function loadConversations() {
       return (b.lastAt?.seconds || 0) - (a.lastAt?.seconds || 0);
     });
 
-    window._debug_convs = allConvs;
-    console.log("[DEBUG] allConvs:", allConvs.map(cv => ({id:cv.id.slice(0,8), unread:cv.unread, flat:cv[`unread.${currentUser?.uid}`]})));
     renderConvList(allConvs);
 
     // لا تفتح محادثة أوتوماتيك - User يختار بsame style
@@ -281,7 +309,7 @@ function renderConvList(list) {
   }
   el.innerHTML = list.map(c => {
     const time   = fmtTime(c.lastAt?.seconds);
-    const uid = currentUser?.uid || '';
+    const uid = vUid();
     const fv = c[`unread.${uid}`];
     const nv = c.unread?.[uid];
     // اخد الـ unread من Firestore مباشرة بدون تدخل readConvIds
@@ -311,10 +339,10 @@ function renderConvList(list) {
           </div>
           <span class="conv-role-pill" style="background:${ROLE_INITIALS_BG[c.otherRole]||'#eee'};color:${ROLE_COLORS[c.otherRole]||'#555'}">${roleLabel}</span>
         </div>
-        <button class="conv-delete-btn" title="حذف المحادثة"
+        ${!viewOnlyMode ? `<button class="conv-delete-btn" title="حذف المحادثة"
           onclick="event.stopPropagation(); deleteConv('${c.id}')">
           <i class="ti ti-trash"></i>
-        </button>
+        </button>` : ''}
         </div>
       </div>`;
   }).join('');
@@ -346,28 +374,36 @@ window.openConv = async (cid, otherId, otherName, otherRole) => {
   document.getElementById('convRole').textContent  = ROLE_LABELS[otherRole] || otherRole;
   document.getElementById('convRole').style.color  = ROLE_COLORS[otherRole] || 'var(--text-mid)';
 
-  // Mark as read — صفّر الـ unread في Firestore مباشرة
-  markConvRead(cid);
-  // صفّر flat field والـ nested الاتنين
-  const _convSnap2 = await getDoc(doc(db, 'conversations', cid)).catch(()=>null);
-  const _nestedUnread = _convSnap2?.data()?.unread || {};
-  _nestedUnread[currentUser.uid] = 0;
-  await updateDoc(doc(db, 'conversations', cid), {
-    [`unread.${currentUser.uid}`]: 0,
-    unread: _nestedUnread,
-  }).catch(() => {});
+  // Mark as read — صفّر الـ unread في Firestore مباشرة (مش في وضع العرض فقط)
+  if (!viewOnlyMode) {
+    markConvRead(cid);
+    // صفّر flat field والـ nested الاتنين
+    const _convSnap2 = await getDoc(doc(db, 'conversations', cid)).catch(()=>null);
+    const _nestedUnread = _convSnap2?.data()?.unread || {};
+    _nestedUnread[currentUser.uid] = 0;
+    await updateDoc(doc(db, 'conversations', cid), {
+      [`unread.${currentUser.uid}`]: 0,
+      unread: _nestedUnread,
+    }).catch(() => {});
 
-  // حدّث الـ local state فوراً
-  const convInList = allConvs.find(cv => cv.id === cid);
-  if (convInList) {
-    convInList[`unread.${currentUser.uid}`] = 0;
-    renderConvList(allConvs);
+    // حدّث الـ local state فوراً
+    const convInList = allConvs.find(cv => cv.id === cid);
+    if (convInList) {
+      convInList[`unread.${currentUser.uid}`] = 0;
+      renderConvList(allConvs);
+    }
+
+    // علّم Messages الطرف الثاني كمقروءة (So that يعرف المرسل إن رسالته اتقرأت)
+    const allMsgsSnap = await getDocs(collection(db, 'conversations', cid, 'messages'));
+    const toMark = allMsgsSnap.docs.filter(d => d.data().senderId !== currentUser.uid && !d.data().read);
+    await Promise.all(toMark.map(d => updateDoc(d.ref, { read: true })));
   }
 
-  // علّم Messages الطرف الثاني كمقروءة (So that يعرف المرسل إن رسالته اتقرأت)
-  const allMsgsSnap = await getDocs(collection(db, 'conversations', cid, 'messages'));
-  const toMark = allMsgsSnap.docs.filter(d => d.data().senderId !== currentUser.uid && !d.data().read);
-  await Promise.all(toMark.map(d => updateDoc(d.ref, { read: true })));
+  // في وضع العرض فقط: اخفِ صندوق الكتابة والأزرار — مفيش إرسال أو حذف من هنا
+  const inputWrap = document.querySelector('.msg-input-wrap');
+  if (inputWrap) inputWrap.style.display = viewOnlyMode ? 'none' : 'flex';
+  const viewOnlyNote = document.getElementById('viewOnlyInputNote');
+  if (viewOnlyNote) viewOnlyNote.style.display = viewOnlyMode ? 'flex' : 'none';
 
   // Listen to messages
   const q = query(collection(db, 'conversations', cid, 'messages'));
@@ -375,14 +411,14 @@ window.openConv = async (cid, otherId, otherName, otherRole) => {
   // جيبي وقت الDelete من Firestore So that نفلتر الMessages القthisمة
   const convForDelete = await getDoc(doc(db, 'conversations', cid));
   const deletedAtSec  = convForDelete.exists()
-    ? (convForDelete.data().deletedAt?.[currentUser.uid]?.seconds || 0)
+    ? (convForDelete.data().deletedAt?.[vUid()]?.seconds || 0)
     : 0;
 
   msgUnsub = onSnapshot(q, snap => {
     // Sort الMessages باIfقت in the ـ client
     const sorted = snap.docs
       .map(d => ({ id: d.id, ...d.data() }))
-      .filter(m => !m.deletedBy?.[currentUser.uid])          // اخفِ الMessages المحذوفة منك
+      .filter(m => !m.deletedBy?.[vUid()])          // اخفِ الMessages المحذوفة منك
       .filter(m => (m.sentAt?.seconds || 0) > deletedAtSec)  // اخفِ الMessages قبل وقت الDelete
       .sort((a, b) => (a.sentAt?.seconds || 0) - (b.sentAt?.seconds || 0));
     const bubbles = document.getElementById('msgBubbles');
@@ -393,7 +429,7 @@ window.openConv = async (cid, otherId, otherName, otherRole) => {
     // Group by day
     let lastDay = '';
     bubbles.innerHTML = sorted.map(m => {
-      const mine = m.senderId === currentUser.uid;
+      const mine = m.senderId === vUid();
       const sec  = m.sentAt?.seconds;
       const time = sec ? new Date(sec * 1000).toLocaleTimeString('ar', { hour: '2-digit', minute: '2-digit' }) : '';
       const fullTime = fmtFullTime(sec);
@@ -414,7 +450,7 @@ window.openConv = async (cid, otherId, otherName, otherRole) => {
           <div class="msg-bubble-wrap">
             ${!mine ? `<div class="msg-sender-name">${otherName}</div>` : ''}
             <div class="msg-bubble-outer">
-              ${mine ? `
+              ${mine && !viewOnlyMode ? `
               <div class="msg-delete-wrap" style="position:relative;align-self:flex-end;">
                 <button class="msg-delete-btn" title="خيارات الحذف" onclick="toggleDeleteMenu(event,'${m.id}')"><i class="ti ti-trash"></i></button>
                 <div id="del-menu-${m.id}" style="display:none;position:absolute;${currentUserData?.role==='mateen'?'left':'right'}:0;bottom:28px;background:var(--white);border:1px solid var(--border);border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,0.12);z-index:100;min-width:160px;overflow:hidden;">
@@ -461,6 +497,7 @@ window.openConv = async (cid, otherId, otherName, otherRole) => {
 
 // ── Send message ───────────────────────────────────────────────────────────
 window.sendMsg = async () => {
+  if (viewOnlyMode) return;
   const input = document.getElementById('msgInput');
   const text  = input.value.trim();
   if (!text || !activeConvId) return;
@@ -508,6 +545,7 @@ window.autoGrow = el => {
 
 // ── New conversation ───────────────────────────────────────────────────────
 window.showNewConv = () => {
+  if (viewOnlyMode) return;
   document.getElementById('newConvModal').style.display = 'flex';
   document.getElementById('userSearch').value = '';
   searchUsers();
@@ -601,6 +639,7 @@ document.addEventListener('click', () => {
 
 // ── حذف من عندي فقط ────────────────────────────────────────
 window.deleteMsgMine = async (convId, msgId) => {
+  if (viewOnlyMode) return;
   if (!confirm('ستختفي هذه الرسالة منك فقط. هل تريدين المتابعة؟')) return;
   await updateDoc(doc(db, 'conversations', convId, 'messages', msgId), {
     [`deletedBy.${currentUser.uid}`]: true
@@ -609,6 +648,7 @@ window.deleteMsgMine = async (convId, msgId) => {
 
 // ── حذف من الاتنين (أدمن/سوبرفايزر/سابورت) ───────────────
 window.deleteMsgBoth = async (convId, msgId) => {
+  if (viewOnlyMode) return;
   if (!confirm('ستُحذف هذه الرسالة نهائياً من عند الاتنين. هل تريدين المتابعة؟')) return;
   // حدّث lastMsg لو كانت آخر رسالة
   try {
@@ -636,6 +676,7 @@ window.unhideConv = async (cid) => {
 };
 
 window.deleteConv = async (cid) => {
+  if (viewOnlyMode) return;
   if (!confirm('هل تريدين حذف هذه المحادثة؟\nستختفي منك فقط والطرف الآخر لن يتأثر.')) return;
 
   await updateDoc(doc(db, 'conversations', cid), {
@@ -703,6 +744,7 @@ window.toggleViewOnce = () => {
 };
 
 window.sendImage = async (input) => {
+  if (viewOnlyMode) return;
   const file = input.files[0];
   if (!file || !activeConvId) return;
   input.value = '';
@@ -738,6 +780,7 @@ let recordSeconds  = 0;
 
 // ── إرسال ملف (PDF, Word, Excel, PPT...) ──────────────────────────────────────
 window.sendFile = async (input) => {
+  if (viewOnlyMode) return;
   const file = input.files[0];
   if (!file || !activeConvId) return;
   input.value = '';
@@ -792,6 +835,7 @@ window.sendFile = async (input) => {
 };
 
 window.toggleRecording = async () => {
+  if (viewOnlyMode) return;
   const btn = document.getElementById('recordBtn');
   const indicator = document.getElementById('recordingIndicator');
   const timerEl   = document.getElementById('recordTimer');

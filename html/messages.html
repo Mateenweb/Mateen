@@ -70,6 +70,9 @@
 </nav>
 
   <!-- Main layout -->
+  <div id="viewOnlyBanner" style="display:none;align-items:center;justify-content:center;gap:8px;background:#fff3cd;color:#7a5b00;padding:10px 16px;text-align:center;font-size:13px;font-weight:700;border-bottom:1px solid #e8d9a0;">
+    <i class="ti ti-eye"></i> وضع العرض فقط — بتشوفي محادثات: <span id="viewOnlyName">—</span>
+  </div>
   <div class="msg-layout">
 
     <!-- ── Sidebar (conversation list) ── -->
@@ -173,6 +176,11 @@
           <button class="msg-send-btn" onclick="sendMsg()" title="إرسال">
             <i class="ti ti-send"></i>
           </button>
+        </div>
+
+        <!-- ملاحظة وضع العرض فقط (بدل صندوق الكتابة) -->
+        <div id="viewOnlyInputNote" style="display:none;align-items:center;justify-content:center;gap:8px;padding:14px;color:#8a6a52;font-size:13px;border-top:1px solid var(--border);">
+          <i class="ti ti-lock"></i> وضع العرض فقط — مش ممكن الإرسال أو الحذف من هنا
         </div>
 
       </div>

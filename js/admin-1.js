@@ -164,7 +164,10 @@ function loadTeachers() {
               <span style="font-size:11px;background:${t.status==='active'?'rgba(39,174,96,0.1)':'rgba(230,126,34,0.1)'};color:${t.status==='active'?'#1e8449':'#a04000'};border-radius:20px;padding:2px 10px;">${t.status==='active'?'نشطة':'موقوفة'}</span>
             </div>
           </div>
-          ${page ? `<a href="${page}" style="color:var(--green-dark);font-size:20px;flex-shrink:0;" title="صفحة المعلمة"><i class="ti ti-external-link"></i></a>` : ''}
+          <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
+            ${page ? `<a href="${page}" style="color:var(--green-dark);font-size:20px;" title="صفحة المعلمة"><i class="ti ti-external-link"></i></a>` : ''}
+            <a href="messages.html?uid=${d.id}" style="color:var(--gold);font-size:20px;" title="رسائلها"><i class="ti ti-message-circle"></i></a>
+          </div>
         </div>`;
     }).join('');
   }).catch(e => console.error('loadTeachers:', e));
