@@ -1868,6 +1868,7 @@ window.baToggleSubjStatus = (btnEl, status) => {
   wrap.querySelector('.ba-subj-btns').innerHTML = baSubjBtnsHtml(status);
 };
 
+window.renderBAStudents = renderBAStudents;
 function renderBAStudents() {
   const list = document.getElementById('baStudentsList');
   const students = allStudents.filter(s => s.name && s.name !== 'طالبة جديدة' && !s.archived);
