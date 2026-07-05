@@ -72,8 +72,9 @@ function buildTableHtml(students, cols, headers, title, subtitle='') {
   return `
   <div class="page">
     <div class="page-header">
-      <div>
-        <div class="prog-name">📖 برنامج متين العلمي المستوي الثاني </div>
+      <img src="${MATEEN_LOGO_BASE64}" class="page-logo" alt="شعار متين"/>
+      <div class="page-header-text">
+        <div class="prog-name">برنامج متين العلمي المستوي الثاني</div>
       </div>
     </div>
     <div class="page-title">${title}</div>
@@ -92,31 +93,35 @@ function buildTableHtml(students, cols, headers, title, subtitle='') {
 }
 
 const PAGE_CSS = `
-  @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Noto+Naskh+Arabic:wght@400;600;700&display=swap');
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Cairo', Arial, sans-serif; direction: rtl; background: #f0f0f0; padding: 20px; }
+  body { font-family: 'Noto Naskh Arabic', 'Cairo', Arial, sans-serif; direction: rtl; background: #efe2c8; padding: 20px; }
   @media print {
     body { background: white; padding: 0; }
-    .page { box-shadow: none; margin: 0; border-radius: 0; page-break-after: always; }
+    .page { box-shadow: none; margin: 0; border-radius: 0; border: none; page-break-after: always; }
     .page:last-child { page-break-after: avoid; }
+    .page::before { border-radius: 0; }
   }
-  .page { background: white; max-width: 750px; margin: 0 auto 30px; padding: 32px 36px 24px; border-radius: 8px; box-shadow: 0 2px 12px rgba(0,0,0,.1); page-break-after: always; mso-page-break-after: always; break-after: page; }
+  .page { position: relative; background: linear-gradient(180deg,#fffdf8 0%,#fbf4e6 100%); max-width: 750px; margin: 0 auto 30px; padding: 36px 40px 26px; border-radius: 12px; box-shadow: 0 4px 20px rgba(92,61,46,.16); border: 1px solid #e3cfa8; page-break-after: always; mso-page-break-after: always; break-after: page; overflow: hidden; }
   .page:last-child { page-break-after: avoid; mso-page-break-after: avoid; }
-  .page-header { display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 14px; border-bottom: 2.5px solid #1a3a5c; margin-bottom: 18px; }
-  .prog-name { font-size: 26px; font-weight: 600; color: #1a3a5c; }
-  .prog-sub  { font-size: 14px; color: #888; margin-top: 3px; }
-  .dates { text-align: left; font-size: 14px; color: #888; line-height: 1.9; }
-  .page-title { text-align: center; font-size: 24px; font-weight: 600; color: #1a3a5c; margin-bottom: 4px; }
-  .page-subtitle { text-align: center; font-size: 19px; color: #999; margin-bottom: 14px; }
-  table { width: 100%; border-collapse: collapse; font-size: 20px; margin-top: 16px; }  thead tr { background: #1a3a5c; }
-  thead th { color: white; padding: 13px 14px; text-align: center; font-weight: 600; font-size: 20px; }  tbody tr.odd  { background: white; }
-  tbody tr.even { background: #f5f8fb; }
-  tbody td { padding: 12px 14px; text-align: center; color: #333; border-bottom: 0.5px solid #e8edf2; font-size: 19px; }
-  .name-td { text-align: right; }
-  .page-footer { display: flex; justify-content: space-between; margin-top: 18px; padding-top: 10px; border-top: 0.5px solid #ddd; font-size: 13px; color: #bbb; }
+  .page::before { content:''; position:absolute; top:0; left:0; right:0; height:7px; background: linear-gradient(90deg,#8a5e3c,#c9a227,#e8c96a,#c9a227,#8a5e3c); }
+  .page-header { display: flex; align-items: center; gap: 16px; padding: 16px 0 16px; border-bottom: 2.5px solid #c9a227; margin-bottom: 20px; }
+  .page-logo { width: 58px; height: 58px; object-fit: contain; flex-shrink: 0; }
+  .prog-name { font-family: 'Amiri', serif; font-size: 22px; font-weight: 700; color: #5c3d2e; }
+  .prog-sub  { font-size: 14px; color: #8a6a52; margin-top: 3px; }
+  .dates { text-align: left; font-size: 14px; color: #8a6a52; line-height: 1.9; }
+  .page-title { text-align: center; font-family: 'Amiri', serif; font-size: 24px; font-weight: 700; color: #5c3d2e; margin-bottom: 4px; }
+  .page-subtitle { text-align: center; font-size: 17px; font-weight: 600; color: #8a5e3c; margin-bottom: 14px; }
+  table { width: 100%; border-collapse: collapse; font-size: 18px; margin-top: 16px; }  thead tr { background: linear-gradient(90deg,#5c3d2e,#7a4f34,#5c3d2e); }
+  thead th { color: #e8c96a; padding: 13px 14px; text-align: center; font-weight: 700; font-size: 18px; }  tbody tr.odd  { background: #fffdf8; }
+  tbody tr.even { background: #f3e9d4; }
+  tbody td { padding: 12px 14px; text-align: center; color: #2c1a0e; border-bottom: 1px solid #e3d3ae; font-size: 17px; }
+  .name-td { text-align: right; font-weight: 600; color: #5c3d2e; }
+  .page-footer { display: flex; justify-content: space-between; margin-top: 18px; padding-top: 12px; border-top: 1px solid #d6c4a8; font-size: 12px; color: #8a6a52; }
+  .page-footer span:nth-child(2) { color: #c9a227; font-size: 15px; }
 `;
 
-function buildFullHtml(pages) {
+function buildFullHtmlWord(pages) {
   let numbered = pages;
   let p = 1;
   numbered = numbered.replace(/{PAGE}/g, () => p++);
@@ -124,7 +129,16 @@ function buildFullHtml(pages) {
     xmlns:w="urn:schemas-microsoft-com:office:word"
     xmlns="http://www.w3.org/TR/REC-html40">
   <head><meta charset="UTF-8">
-  <xml><w:WordDocument><w:View>Print</w:View><w:Zoom>90</w:Zoom></w:WordDocument></xml>
+  <!--[if gte mso 9]><xml><w:WordDocument><w:View>Print</w:View><w:Zoom>90</w:Zoom></w:WordDocument></xml><![endif]-->
+  <style>${PAGE_CSS}</style></head>
+  <body>${numbered}</body></html>`;
+}
+
+function buildFullHtmlPrint(pages) {
+  let numbered = pages;
+  let p = 1;
+  numbered = numbered.replace(/{PAGE}/g, () => p++);
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>متين — تصدير</title>
   <style>${PAGE_CSS}</style></head>
   <body>${numbered}</body></html>`;
 }
@@ -166,7 +180,7 @@ function buildPages(students) {
 
 export async function exportWord(students) {
   if(!students.length) { showToast('لا توجد بيانات للتصدير'); return; }
-  const html = buildFullHtml(buildPages(students));
+  const html = buildFullHtmlWord(buildPages(students));
   const blob = new Blob(['\uFEFF'+html], {
     type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document;charset=utf-8'
   });
@@ -180,7 +194,7 @@ export async function exportWord(students) {
 
 export async function exportPdf(students) {
   if(!students.length) { showToast('لا توجد بيانات للتصدير'); return; }
-  const html = buildFullHtml(buildPages(students));
+  const html = buildFullHtmlPrint(buildPages(students));
   const win  = window.open('', '_blank');
   win.document.write(html);
   win.document.close();
