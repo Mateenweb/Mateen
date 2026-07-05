@@ -2134,63 +2134,74 @@ function buildProfileIndex(students) {
 }
 
 // بيدور على كل أسماء الطالبات جوه النص، ويقسّم النص لقطع (اسم + رموز + ملاحظة) لكل طالبة
+// بتقسّم النص لسطور (كل طالبة عادة سطر لوحدها في رسايل الواتساب)، وتدور على اسم في بداية كل سطر
+// المهم: أي سطر مش متعرف عليه بيفضل لوحده منفصل، وميتلخبطش/يتضاف غلط لرموز الطالبة اللي قبله
 function parseAttendanceMessage(text, students) {
   const { index, studentProfiles } = buildProfileIndex(students);
-  let matches = [];
+  const rawLines = text.split(/\n+/).map(l => l.trim()).filter(Boolean);
 
-  students.forEach(s => {
-    if (!s.name) return;
-    const profiles = studentProfiles.get(s.id) || [];
-    for (const p of profiles) {
-      const key = p.level + '|' + p.words.map(normalizeArName).join(' ');
-      const ambiguous = (index.get(key) || []).length > 1;
-      const re = buildAttNameRegexFromWords(p.words);
-      let m, found = false;
-      while ((m = re.exec(text)) !== null) {
-        matches.push({
-          start: m.index, end: m.index + m[0].length,
-          studentId: s.id, name: s.name,
-          matchLevel: p.level, ambiguous,
-        });
-        found = true;
-        if (m[0].length === 0) re.lastIndex++;
+  const segments = [];
+
+  rawLines.forEach(line => {
+    let best = null; // { studentId, name, matchLevel, ambiguous, end }
+
+    for (const s of students) {
+      if (!s.name) continue;
+      const profiles = studentProfiles.get(s.id) || [];
+      for (const p of profiles) {
+        const key = p.level + '|' + p.words.map(normalizeArName).join(' ');
+        const ambiguous = (index.get(key) || []).length > 1;
+        const re = buildAttNameRegexFromWords(p.words);
+        const m = re.exec(line);
+        if (m && m.index === 0) {
+          const cand = { studentId: s.id, name: s.name, matchLevel: p.level, ambiguous, end: m[0].length };
+          // فضّلي أطول تطابق (أدق)، ولو متساويين فضّلي الاسم الكامل على المختصر
+          if (!best || cand.end > best.end || (cand.end === best.end && cand.matchLevel === 'full' && best.matchLevel !== 'full')) {
+            best = cand;
+          }
+          break; // full بيجي قبل short في نفس مصفوفة البروفايلات، يبقى كفاية
+        }
       }
-      // لو الاسم الكامل مالقاش تطابق، جرّبي البروفايل الأقصر (اسم + اسم أب بس)؛ لو لقيتي تطابق اكتفي بيه
-      if (found) break;
     }
-  });
 
-  // رتّبي حسب الموقع، ولو فيه تداخل بين مطابقتين خدي الأطول، وقدّمي الاسم الكامل (full) على المختصر (short)
-  matches.sort((a, b) => a.start - b.start
-    || (b.end - b.start) - (a.end - a.start)
-    || (a.matchLevel === 'full' ? -1 : 1));
-  const clean = [];
-  let lastEnd = -1;
-  for (const m of matches) {
-    if (m.start >= lastEnd) { clean.push(m); lastEnd = m.end; }
-  }
+    if (!best) {
+      // سطر متعرفناش على طالبة فيه — يفضل منفصل عشان مايتلخبطش مع طالبة تانية
+      const marks = line.match(ATT_MSG_EMOJI_RE) || [];
+      const noteText = line.replace(ATT_MSG_EMOJI_RE, '').trim();
+      const periods = marks.map(mk => mk.includes('✅') ? 'present' : mk.includes('❌') ? 'absent' : 'excused');
+      segments.push({
+        studentId: null,
+        name: noteText || line,
+        rawLine: line,
+        periods,
+        note: '',
+        include: false,
+        matchLevel: 'none',
+        ambiguous: false,
+        unmatched: true,
+        suspicious: true,
+      });
+      return;
+    }
 
-  const segments = clean.map((m, i) => {
-    const segStart = m.end;
-    const segEnd = (i + 1 < clean.length) ? clean[i + 1].start : text.length;
-    const chunk = text.slice(segStart, segEnd);
+    const chunk = line.slice(best.end);
     const marks = chunk.match(ATT_MSG_EMOJI_RE) || [];
     const noteText = chunk.replace(ATT_MSG_EMOJI_RE, '').trim();
     const periods = marks.map(mk => mk.includes('✅') ? 'present' : mk.includes('❌') ? 'absent' : 'excused');
-    return {
-      studentId: m.studentId,
-      name: m.name,
+    segments.push({
+      studentId: best.studentId,
+      name: best.name,
       periods,
       note: noteText,
       include: true,
-      matchLevel: m.matchLevel,
-      ambiguous: m.ambiguous,
-      // مشكوك فيها لو: عدد رموز غريب، أو تطابق جزئي بس (اسم+اسم أب)، أو الاسم المختصر ده مشترك بين أكتر من طالبة
-      suspicious: periods.length === 0 || periods.length > 4 || m.matchLevel !== 'full' || m.ambiguous,
-    };
+      matchLevel: best.matchLevel,
+      ambiguous: best.ambiguous,
+      // مشكوك فيها لو: عدد رموز غريب، أو تطابق جزئي بس (اسم+اسم أب)، أو الاسم المختصر مشترك بين أكتر من طالبة
+      suspicious: periods.length === 0 || periods.length > 4 || best.matchLevel !== 'full' || best.ambiguous,
+    });
   });
 
-  const matchedIds = new Set(clean.map(m => m.studentId));
+  const matchedIds = new Set(segments.filter(s => s.studentId).map(s => s.studentId));
   const notMentioned = students.filter(s => !matchedIds.has(s.id));
 
   return { segments, notMentioned };
@@ -2206,6 +2217,7 @@ function paStudentOptions(selectedId) {
 }
 
 function paReasonTag(s) {
+  if (s.unmatched) return ' — سطر متعرفناش على اسم طالبة فيه، اختاري صاحبته يدويًا';
   if (s.ambiguous) return ' — تشابه أسماء، تأكدي من الطالبة الصحيحة';
   if (s.matchLevel === 'short') return ' — تطابق بالاسم واسم الأب فقط';
   if (s.periods.length === 0) return ' — لم يُقرأ أي رمز حضور/غياب بعد الاسم';
@@ -2219,12 +2231,13 @@ function paRowHtml(s, i) {
     const icon = p === 'present' ? '✔' : p === 'absent' ? '✖' : '⭕';
     return `${esc(paPeriodLabel(subjNames, pi))}: ${icon}`;
   }).join('  |  ');
+  const titleText = s.unmatched ? (s.rawLine || s.name) : s.name;
   return `
     <div class="pa-row" data-idx="${i}" style="display:flex;align-items:flex-start;gap:10px;padding:8px 12px;border-bottom:1px solid var(--border);${s.suspicious ? 'background:rgba(201,162,39,0.08)' : ''}">
       <input type="checkbox" ${s.include ? 'checked' : ''} onchange="paToggleInclude(${i}, this.checked)" style="width:16px;height:16px;cursor:pointer;flex-shrink:0;margin-top:3px"/>
-      <div style="flex:1;min-width:0">
-        <div style="font-size:13px;font-weight:600">${esc(s.name)}${s.suspicious ? ' ⚠️' : ''}</div>
-        <div style="font-size:11px;color:var(--text-mid);margin-bottom:${s.suspicious ? '6px' : '0'}">${periodsHtml || '—'}${s.note ? ' — 📝 ' + esc(s.note) : ''}</div>
+      <div style="flex:1;min-width:0;overflow-wrap:break-word;word-break:break-word">
+        <div style="font-size:13px;font-weight:600">${esc(titleText)}${s.suspicious ? ' ⚠️' : ''}</div>
+        <div style="font-size:11px;color:var(--text-mid);margin-bottom:${s.suspicious ? '6px' : '0'};white-space:normal">${periodsHtml || '—'}${(!s.unmatched && s.note) ? ' — 📝 ' + esc(s.note) : ''}</div>
         ${s.suspicious ? `
           <div style="font-size:11px;color:#a04000;margin-bottom:4px">${esc(paReasonTag(s))}</div>
           <select onchange="paChangeStudent(${i}, this.value)" style="width:100%;max-width:280px;border:1px solid var(--border);border-radius:6px;padding:3px 6px;font-family:inherit;font-size:11px">
@@ -2242,6 +2255,7 @@ window.paChangeStudent = (idx, studentId) => {
   row.name = s ? s.name : row.name;
   row.include = !!studentId;
   row.suspicious = false; // اتأكدت منها يدويًا
+  if (row.unmatched && studentId) row.unmatched = false; // بقت طالبة معروفة دلوقتي
   const el = document.querySelector(`.pa-row[data-idx="${idx}"]`);
   if (el) el.outerHTML = paRowHtml(row, idx);
 };
@@ -2264,10 +2278,14 @@ window.parseAttendanceMessageUI = () => {
     return;
   }
 
-  const suspiciousCount = segments.filter(s => s.suspicious).length;
+  const recognized = segments.filter(s => !s.unmatched);
+  const unmatchedLines = segments.filter(s => s.unmatched);
+  const suspiciousCount = recognized.filter(s => s.suspicious).length;
   document.getElementById('paSummary').innerHTML =
-    `✅ اتعرف على <strong>${segments.length}</strong> طالبة من الرسالة` +
-    (suspiciousCount ? ` — ⚠️ <strong>${suspiciousCount}</strong> منهم محتاجين مراجعة (تطابق جزئي أو تشابه أسماء أو عدد رموز غريب) — استخدمي القايمة تحت اسمها لتصحيحها` : '');
+    `✅ اتعرف على <strong>${recognized.length}</strong> طالبة من الرسالة` +
+    (suspiciousCount ? ` — ⚠️ <strong>${suspiciousCount}</strong> منهم محتاجين مراجعة (تطابق جزئي أو تشابه أسماء أو عدد رموز غريب)` : '') +
+    (unmatchedLines.length ? ` — 🔎 <strong>${unmatchedLines.length}</strong> سطر متعرفناش على طالبة فيه خالص` : '') +
+    (suspiciousCount || unmatchedLines.length ? ' — استخدمي القايمة تحت السطر لتصحيحه' : '');
 
   const nmDiv = document.getElementById('paNotMentioned');
   if (notMentioned.length) {
