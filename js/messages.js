@@ -461,7 +461,7 @@ window.openConv = async (cid, otherId, otherName, otherRole) => {
           <div class="msg-bubble-wrap">
             ${!mine ? `<div class="msg-sender-name">${otherName}</div>` : ''}
             <div class="msg-bubble-outer">
-              ${mine && !viewOnlyMode ? `
+              ${mine && !viewOnlyMode && currentUserData?.role === 'admin' ? `
               <div class="msg-delete-wrap" style="position:relative;align-self:flex-end;">
                 <button class="msg-delete-btn" title="خيارات الحذف" onclick="toggleDeleteMenu(event,'${m.id}')"><i class="ti ti-trash"></i></button>
                 <div id="del-menu-${m.id}" style="display:none;position:absolute;${currentUserData?.role==='mateen'?'left':'right'}:0;bottom:28px;background:var(--white);border:1px solid var(--border);border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,0.12);z-index:100;min-width:160px;overflow:hidden;">
@@ -650,7 +650,7 @@ document.addEventListener('click', () => {
 
 // ── حذف من عندي فقط ────────────────────────────────────────
 window.deleteMsgMine = async (convId, msgId) => {
-  if (viewOnlyMode) return;
+  if (viewOnlyMode || currentUserData?.role !== 'admin') return;
   if (!confirm('ستختفي هذه الرسالة منك فقط. هل تريدين المتابعة؟')) return;
   await updateDoc(doc(db, 'conversations', convId, 'messages', msgId), {
     [`deletedBy.${currentUser.uid}`]: true
