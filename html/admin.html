@@ -667,6 +667,11 @@
   .att-stu-label input[type=checkbox] { width:16px;height:16px;accent-color:#1a4a2e;cursor:pointer; }
 
 /* ══ ADMIN TABS ══ */
+.admin-tab-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
 .admin-tabs-bar {
   display: flex;
   gap: 4px;
@@ -1348,7 +1353,7 @@ window.switchAdminTab = function(name) {
   // أظهر التاب المطلوب
   const panel = document.getElementById('admin-tab-' + name);
   const btn   = document.getElementById('tab-btn-' + name);
-  if (panel) panel.style.display = 'block';
+  if (panel) panel.style.display = 'flex';
   if (btn)   btn.classList.add('active');
 
   // احفظ في sessionStorage
