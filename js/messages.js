@@ -822,7 +822,14 @@ window.sendImage = async (input) => {
   if (!file || !activeConvId) return;
   input.value = '';
 
-  const url  = await uploadMedia(file, 'image');
+  let url;
+  try {
+    url = await uploadMedia(file, 'image');
+  } catch (e) {
+    console.error('sendImage upload error:', e);
+    alert('فشل رفع الصورة: ' + (e.message || 'خطأ غير معروف'));
+    return;
+  }
 
   const otherId = allConvs.find(c => c.id === activeConvId)?.otherId;
   await addDoc(collection(db, 'conversations', activeConvId, 'messages'), {
@@ -864,11 +871,12 @@ window.sendFile = async (input) => {
     return;
   }
 
-  // رفع الملف على Cloudinary — كل الأنواع على /image/upload عشان يبقى public
+  // رفع الملف على Cloudinary — استخدام /auto/upload عشان يكتشف نوع الملف صح
+  // (image/upload كان بيرفض أي ملف مش صورة فعلية زي docx أو zip)
   const fd = new FormData();
   fd.append('file', file);
   fd.append('upload_preset', UPLOAD_PRESET);
-  const endpoint = 'image';
+  const endpoint = 'auto';
   let data;
   try {
     const res = await fetch(
@@ -935,7 +943,14 @@ window.toggleRecording = async () => {
       if (!activeConvId || audioChunks.length === 0) return;
 
       const blob = new Blob(audioChunks, { type: 'audio/webm' });
-      const url  = await uploadMedia(blob, 'audio');
+      let url;
+      try {
+        url = await uploadMedia(blob, 'audio');
+      } catch (e) {
+        console.error('voice upload error:', e);
+        alert('فشل رفع الرسالة الصوتية: ' + (e.message || 'خطأ غير معروف'));
+        return;
+      }
 
       const otherId = allConvs.find(c => c.id === activeConvId)?.otherId;
       await addDoc(collection(db, 'conversations', activeConvId, 'messages'), {
