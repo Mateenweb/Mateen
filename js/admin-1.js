@@ -45,6 +45,7 @@ onAuthStateChanged(auth, async user => {
   const testerEl = document.getElementById('siteTesterSection');
   if (testerEl) testerEl.style.display = 'none';
   loadMats();
+  loadSubjectOptions();
   // loadTeachers تتشتغل بس لما تاب المعلمات يتفتح
 });
 
@@ -179,6 +180,49 @@ function loadTeachers() {
         </div>`;
     }).join('');
   }).catch(e => console.error('loadTeachers:', e));
+}
+
+// ── تحميل المواد من Firestore وملء كل الـ selects ──────────────────
+const DEFAULT_SUBJECTS = ['التفسير', 'الفقه', 'العقيدة', 'الحديث', 'مقرأة متين'];
+
+async function loadSubjectOptions() {
+  try {
+    let snap = await getDocs(query(collection(db, 'subjects'), orderBy('createdAt', 'asc')));
+
+    // لو الـ collection فاضية — seed المواد الافتراضية
+    if (snap.empty) {
+      for (const name of DEFAULT_SUBJECTS) {
+        await addDoc(collection(db, 'subjects'), { name, createdAt: serverTimestamp() });
+      }
+      snap = await getDocs(query(collection(db, 'subjects'), orderBy('createdAt', 'asc')));
+    }
+
+    const subjects = snap.docs.map(d => d.data().name).filter(Boolean);
+
+    // ملء fCourse
+    const fCourse = document.getElementById('fCourse');
+    if (fCourse) {
+      fCourse.innerHTML = '<option value="">اختاري المادة</option>' +
+        subjects.map(s => `<option>${s}</option>`).join('');
+    }
+
+    // ملء filterCourse
+    const filterCourse = document.getElementById('filterCourse');
+    if (filterCourse) {
+      filterCourse.innerHTML = '<option value="">كل المواد</option>' +
+        subjects.map(s => `<option>${s}</option>`).join('');
+    }
+
+    // ملء bgSubject
+    const bgSubject = document.getElementById('bgSubject');
+    if (bgSubject) {
+      bgSubject.innerHTML = '<option value="">— اختياري —</option>' +
+        subjects.map(s => `<option>${s}</option>`).join('');
+    }
+
+  } catch(e) {
+    console.error('loadSubjectOptions:', e);
+  }
 }
 
 function loadMats() {
