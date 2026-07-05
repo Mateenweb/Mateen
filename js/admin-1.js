@@ -45,7 +45,7 @@ onAuthStateChanged(auth, async user => {
   const testerEl = document.getElementById('siteTesterSection');
   if (testerEl) testerEl.style.display = 'none';
   loadMats();
-  loadTeachers();
+  // loadTeachers تتشتغل بس لما تاب المعلمات يتفتح
 });
 
 
@@ -131,8 +131,11 @@ window.doAdd = async () => {
 };
 
 // ── LOAD ──────────────────────────────────────────────
-// تتنادى لما تاب المعلمات يتفتح
+// تتنادى لما تاب المعلمات يتفتح (مرة واحدة بس)
+let _teachersLoaded = false;
 window.loadTeachersTab = function() {
+  if (_teachersLoaded) return;
+  _teachersLoaded = true;
   loadTeachers();
 };
 
@@ -289,7 +292,6 @@ function renderPending(list) {
 
   badge.style.display = 'inline';
   badge.textContent   = list.length;
-  if (typeof window._updateAccountsBadge === 'function') window._updateAccountsBadge(list.length);
 
   // فصل: طالبات متين (موافقة not/don'tرفة)  and the باقي (موافقة أدمن)
   const mateen = list.filter(u => u.role === 'mateen');
