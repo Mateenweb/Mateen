@@ -9,6 +9,7 @@ import { getFirestore, collection, getDocs, query, orderBy, doc, getDoc }
 import { getAuth, onAuthStateChanged }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
 import { FIREBASE_CONFIG } from './config.js';
+import { loadSubjectsFor } from './subjects.js';
 
 const app  = getApps().length ? getApp() : initializeApp(FIREBASE_CONFIG);
 const db   = getFirestore(app);
@@ -46,6 +47,15 @@ async function loadAll() {
   allStudents = students;
   document.getElementById('loadingMsg').style.display = 'none';
   document.getElementById('mainContent').style.display = 'block';
+
+  // ملء فلتر مادة الدرجات من نفس مصدر المواد الحقيقي بدل القايمة الثابتة في الـ HTML
+  loadSubjectsFor('inExams').then(subjects => {
+    const sel = document.getElementById('gradeSubjectFilter');
+    if (sel && subjects.length) {
+      sel.innerHTML = '<option value="">كل المواد</option>' +
+        subjects.map(s => `<option>${s}</option>`).join('');
+    }
+  }).catch(e => console.error('loadSubjectsFor(inExams):', e));
 
   renderAll();
 }
@@ -102,9 +112,21 @@ function getAttCounts(s) {
   return { present, absent };
 }
 
+// مطابقة مرنة لاسم المادة — بتتجاهل بادئة "ال" واختلافات الألف/التاء المربوطة/الياء
+// عشان درجات قديمة اتسجلت بأسماء مختلفة شوية (زي "تفسير" بدل "التفسير") تفضل تظهر صح في الفلتر
+function normalizeSubjectName(s) {
+  return (s || '')
+    .trim()
+    .replace(/^ال/, '')
+    .replace(/[أإآا]/g, 'ا')
+    .replace(/[ةه]/g, 'ه')
+    .replace(/ى/g, 'ي');
+}
+
 function getGradeAvg(s, subjectFilter = '') {
+  const filterNorm = normalizeSubjectName(subjectFilter);
   const grades = subjectFilter
-    ? s.grades.filter(g => g.subject === subjectFilter)
+    ? s.grades.filter(g => normalizeSubjectName(g.subject) === filterNorm)
     : s.grades;
   const valid = grades.filter(g => g.total > 0);
   if (!valid.length) return null;
