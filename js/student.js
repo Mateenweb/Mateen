@@ -10,6 +10,7 @@ import { getFirestore, doc, getDoc, updateDoc, collection,
 import { getAuth, onAuthStateChanged }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
 import { FIREBASE_CONFIG } from './config.js';
+import { loadSubjectsFor } from './subjects.js';
 
 // ── Firebase Init ────────────────────────────
 const app  = initializeApp(FIREBASE_CONFIG);
@@ -78,6 +79,14 @@ function initPage() {
   // Show content, hide gate
   document.getElementById('authGate').style.display = 'none';
   document.getElementById('mainContent').style.display = 'block';
+
+  // ملء قايمة مادة الدرجة من نفس مصدر المواد الحقيقي (مش قايمة ثابتة في الـ HTML)
+  loadSubjectsFor('inExams').then(subjects => {
+    const sel = document.getElementById('gradeSubject');
+    if (sel && subjects.length) {
+      sel.innerHTML = subjects.map(s => `<option value="${s}">${s}</option>`).join('');
+    }
+  }).catch(e => console.error('loadSubjectsFor(inExams):', e));
 
 // ── Get student ID from URL ──────────────────
 const params     = new URLSearchParams(location.search);
