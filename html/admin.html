@@ -240,100 +240,96 @@
   <button class="btn-add-row" onclick="addStudentRow()"><i class="ti ti-user-plus"></i> إضافة طالبة</button>
   <a href="stats.html" class="btn-add-row btn-export-stats"><i class="ti ti-chart-bar"></i> الإحصائيات</a>
 
-  <!-- قايمة الإجراءات -->
-  <div style="position:relative;display:inline-block">
-    <button class="btn-add-row" id="actionsMenuBtn" onclick="toggleActionsMenu()" style="background:var(--beige2);border-color:var(--border)">
-      <i class="ti ti-settings-2"></i> إجراءات ▾
+  <!-- قوائم الإجراءات — كل مجموعة في زرار منفصل -->
+  <div class="am-group" style="position:relative;display:inline-block">
+    <button class="btn-add-row am-menu-btn" id="examsMenuBtn" onclick="toggleActionMenu('examsMenu')" style="background:var(--beige2);border-color:var(--border)">
+      <i class="ti ti-clipboard-text"></i> الاختبارات ▾
     </button>
-    <div id="actionsMenu" style="display:none;position:absolute;bottom:110%;right:0;background:var(--white);border:1.5px solid var(--border);border-radius:14px;box-shadow:0 8px 32px rgba(44,26,14,0.15);padding:0;min-width:230px;z-index:200;overflow:hidden">
+    <div id="examsMenu" class="am-dropdown" style="display:none;position:absolute;bottom:110%;right:0;background:var(--white);border:1.5px solid var(--border);border-radius:14px;box-shadow:0 8px 32px rgba(44,26,14,0.15);padding:4px 6px 6px;min-width:230px;z-index:200;overflow:hidden">
+      <button class="actions-menu-item" onclick="openBulkGradeModal();closeActionMenus()">
+        <span class="ami-icon" style="background:rgba(44,110,69,0.12);color:var(--green-dark)"><i class="ti ti-clipboard-plus"></i></span>
+        <span class="ami-text"><strong>إضافة اختبار جماعي</strong><small>أضيفي درجات لعدة طالبات</small></span>
+      </button>
+      <button class="actions-menu-item" onclick="openDeleteExamModal();closeActionMenus()">
+        <span class="ami-icon" style="background:rgba(192,57,43,0.1);color:#c0392b"><i class="ti ti-trash"></i></span>
+        <span class="ami-text"><strong>حذف اختبار جماعي</strong><small>احذفي اختباراً من كل الطالبات</small></span>
+      </button>
+    </div>
+  </div>
 
-      <!-- ── مجموعة 1: الاختبارات ── -->
-      <div style="padding:6px 12px 4px;background:var(--beige2)">
-        <span style="font-size:10px;color:var(--text-mid);font-weight:700;letter-spacing:0.05em">الاختبارات</span>
-      </div>
-      <div style="padding:4px 6px 6px">
-        <button class="actions-menu-item" onclick="openBulkGradeModal();toggleActionsMenu()">
-          <span class="ami-icon" style="background:rgba(44,110,69,0.12);color:var(--green-dark)"><i class="ti ti-clipboard-plus"></i></span>
-          <span class="ami-text"><strong>إضافة اختبار جماعي</strong><small>أضيفي درجات لعدة طالبات</small></span>
-        </button>
-        <button class="actions-menu-item" onclick="openDeleteExamModal();toggleActionsMenu()">
-          <span class="ami-icon" style="background:rgba(192,57,43,0.1);color:#c0392b"><i class="ti ti-trash"></i></span>
-          <span class="ami-text"><strong>حذف اختبار جماعي</strong><small>احذفي اختباراً من كل الطالبات</small></span>
-        </button>
-      </div>
+  <div class="am-group" style="position:relative;display:inline-block">
+    <button class="btn-add-row am-menu-btn" id="attMenuBtn" onclick="toggleActionMenu('attMenu')" style="background:var(--beige2);border-color:var(--border)">
+      <i class="ti ti-calendar-stats"></i> الحضور ▾
+    </button>
+    <div id="attMenu" class="am-dropdown" style="display:none;position:absolute;bottom:110%;right:0;background:var(--white);border:1.5px solid var(--border);border-radius:14px;box-shadow:0 8px 32px rgba(44,26,14,0.15);padding:4px 6px 6px;min-width:250px;z-index:200;overflow:hidden">
+      <button class="actions-menu-item" onclick="openBulkAttModal();closeActionMenus()">
+        <span class="ami-icon" style="background:rgba(44,110,69,0.12);color:var(--green-dark)"><i class="ti ti-calendar-plus"></i></span>
+        <span class="ami-text"><strong>إضافة حضور جماعي</strong><small>سجّلي حضور عدة طالبات لجلسة واحدة</small></span>
+      </button>
+      <button class="actions-menu-item" onclick="openDeleteAttModal();closeActionMenus()">
+        <span class="ami-icon" style="background:rgba(192,57,43,0.1);color:#c0392b"><i class="ti ti-calendar-x"></i></span>
+        <span class="ami-text"><strong>حذف حضور جماعي</strong><small>احذفي جلسة حضور من كل الطالبات</small></span>
+      </button>
+      <button class="actions-menu-item" onclick="openPasteAttModal();closeActionMenus()">
+        <span class="ami-icon" style="background:rgba(155,89,182,0.12);color:#8e44ad"><i class="ti ti-message-2"></i></span>
+        <span class="ami-text"><strong>استيراد حضور من رسالة</strong><small>الصقي رسالة الحضور وهيتم تفريغها تلقائيًا</small></span>
+      </button>
+      <button class="actions-menu-item" onclick="openExcelAttModal();closeActionMenus()">
+        <span class="ami-icon" style="background:rgba(39,174,96,0.12);color:#1e8449"><i class="ti ti-file-spreadsheet"></i></span>
+        <span class="ami-text"><strong>استيراد حضور من Excel</strong><small>ملف أسبوعي: أعمدة = أيام الأسبوع</small></span>
+      </button>
+    </div>
+  </div>
 
-      <!-- ── مجموعة 2: الحضور ── -->
-      <div style="padding:6px 12px 4px;background:var(--beige2);border-top:1px solid var(--border)">
-        <span style="font-size:10px;color:var(--text-mid);font-weight:700;letter-spacing:0.05em">الحضور</span>
-      </div>
-      <div style="padding:4px 6px 6px">
-        <button class="actions-menu-item" onclick="openBulkAttModal();toggleActionsMenu()">
-          <span class="ami-icon" style="background:rgba(44,110,69,0.12);color:var(--green-dark)"><i class="ti ti-calendar-plus"></i></span>
-          <span class="ami-text"><strong>إضافة حضور جماعي</strong><small>سجّلي حضور عدة طالبات لجلسة واحدة</small></span>
-        </button>
-        <button class="actions-menu-item" onclick="openDeleteAttModal();toggleActionsMenu()">
-          <span class="ami-icon" style="background:rgba(192,57,43,0.1);color:#c0392b"><i class="ti ti-calendar-x"></i></span>
-          <span class="ami-text"><strong>حذف حضور جماعي</strong><small>احذفي جلسة حضور من كل الطالبات</small></span>
-        </button>
-        <button class="actions-menu-item" onclick="openPasteAttModal();toggleActionsMenu()">
-          <span class="ami-icon" style="background:rgba(155,89,182,0.12);color:#8e44ad"><i class="ti ti-message-2"></i></span>
-          <span class="ami-text"><strong>استيراد حضور من رسالة</strong><small>الصقي رسالة الحضور وهيتم تفريغها تلقائيًا</small></span>
-        </button>
-        <button class="actions-menu-item" onclick="openExcelAttModal();toggleActionsMenu()">
-          <span class="ami-icon" style="background:rgba(39,174,96,0.12);color:#1e8449"><i class="ti ti-file-spreadsheet"></i></span>
-          <span class="ami-text"><strong>استيراد حضور من Excel</strong><small>ملف أسبوعي: أعمدة = أيام الأسبوع</small></span>
-        </button>
-      </div>
+  <div class="am-group" style="position:relative;display:inline-block">
+    <button class="btn-add-row am-menu-btn" id="expMenuBtn" onclick="toggleActionMenu('expMenu')" style="background:var(--beige2);border-color:var(--border)">
+      <i class="ti ti-file-export"></i> التصدير ▾
+    </button>
+    <div id="expMenu" class="am-dropdown" style="display:none;position:absolute;bottom:110%;right:0;background:var(--white);border:1.5px solid var(--border);border-radius:14px;box-shadow:0 8px 32px rgba(44,26,14,0.15);padding:4px 6px 6px;min-width:230px;z-index:200;overflow:hidden">
+      <button class="actions-menu-item" onclick="openExportModal();closeActionMenus()">
+        <span class="ami-icon" style="background:rgba(30,100,180,0.1);color:#1a5fb4"><i class="ti ti-file-type-docx"></i></span>
+        <span class="ami-text"><strong>تصدير Word / PDF</strong><small>تقرير بيانات الطالبات</small></span>
+      </button>
+      <button class="actions-menu-item" onclick="openAttModal();closeActionMenus()">
+        <span class="ami-icon" style="background:rgba(39,174,96,0.1);color:#1e8449"><i class="ti ti-calendar-stats"></i></span>
+        <span class="ami-text"><strong>تصدير الحضور والغياب</strong><small>سجل الحضور كامل</small></span>
+      </button>
+    </div>
+  </div>
 
-      <!-- ── مجموعة 3: التصدير ── -->
-      <div style="padding:6px 12px 4px;background:var(--beige2);border-top:1px solid var(--border)">
-        <span style="font-size:10px;color:var(--text-mid);font-weight:700;letter-spacing:0.05em">التصدير</span>
-      </div>
-      <div style="padding:4px 6px 6px">
-        <button class="actions-menu-item" onclick="openExportModal();toggleActionsMenu()">
-          <span class="ami-icon" style="background:rgba(30,100,180,0.1);color:#1a5fb4"><i class="ti ti-file-type-docx"></i></span>
-          <span class="ami-text"><strong>تصدير Word / PDF</strong><small>تقرير بيانات الطالبات</small></span>
-        </button>
-        <button class="actions-menu-item" onclick="openAttModal();toggleActionsMenu()">
-          <span class="ami-icon" style="background:rgba(39,174,96,0.1);color:#1e8449"><i class="ti ti-calendar-stats"></i></span>
-          <span class="ami-text"><strong>تصدير الحضور والغياب</strong><small>سجل الحضور كامل</small></span>
-        </button>
-      </div>
+  <div class="am-group" style="position:relative;display:inline-block">
+    <button class="btn-add-row am-menu-btn" id="certMenuBtn" onclick="toggleActionMenu('certMenu')" style="background:var(--beige2);border-color:var(--border)">
+      <i class="ti ti-certificate"></i> الشهادات ▾
+    </button>
+    <div id="certMenu" class="am-dropdown" style="display:none;position:absolute;bottom:110%;right:0;background:var(--white);border:1.5px solid var(--border);border-radius:14px;box-shadow:0 8px 32px rgba(44,26,14,0.15);padding:4px 6px 6px;min-width:250px;z-index:200;overflow:hidden">
+      <button class="actions-menu-item" onclick="openBulkCertAwardModal('certificates');closeActionMenus()">
+        <span class="ami-icon" style="background:rgba(138,109,31,0.12);color:#8a6d1f"><i class="ti ti-certificate"></i></span>
+        <span class="ami-text"><strong>إضافة شهادة جماعية</strong><small>لعدة طالبات مرة واحدة</small></span>
+      </button>
+      <button class="actions-menu-item" onclick="openBulkCertAwardModal('awards');closeActionMenus()">
+        <span class="ami-icon" style="background:rgba(31,111,138,0.12);color:#1f6f8a"><i class="ti ti-award"></i></span>
+        <span class="ami-text"><strong>إضافة إجازة جماعية</strong><small>لعدة طالبات مرة واحدة</small></span>
+      </button>
+      <button class="actions-menu-item" onclick="openManageCertAwards();closeActionMenus()">
+        <span class="ami-icon" style="background:rgba(127,140,141,0.12);color:#7f8c8d"><i class="ti ti-folders"></i></span>
+        <span class="ami-text"><strong>إدارة الشهادات والإجازات</strong><small>عرض، بحث، وحذف</small></span>
+      </button>
+    </div>
+  </div>
 
-      <!-- ── مجموعة: الشهادات والإجازات ── -->
-      <div style="padding:6px 12px 4px;background:var(--beige2);border-top:1px solid var(--border)">
-        <span style="font-size:10px;color:var(--text-mid);font-weight:700;letter-spacing:0.05em">الشهادات والإجازات</span>
-      </div>
-      <div style="padding:4px 6px 6px">
-        <button class="actions-menu-item" onclick="openBulkCertAwardModal('certificates');toggleActionsMenu()">
-          <span class="ami-icon" style="background:rgba(138,109,31,0.12);color:#8a6d1f"><i class="ti ti-certificate"></i></span>
-          <span class="ami-text"><strong>إضافة شهادة جماعية</strong><small>لعدة طالبات مرة واحدة</small></span>
-        </button>
-        <button class="actions-menu-item" onclick="openBulkCertAwardModal('awards');toggleActionsMenu()">
-          <span class="ami-icon" style="background:rgba(31,111,138,0.12);color:#1f6f8a"><i class="ti ti-award"></i></span>
-          <span class="ami-text"><strong>إضافة إجازة جماعية</strong><small>لعدة طالبات مرة واحدة</small></span>
-        </button>
-        <button class="actions-menu-item" onclick="openManageCertAwards();toggleActionsMenu()">
-          <span class="ami-icon" style="background:rgba(127,140,141,0.12);color:#7f8c8d"><i class="ti ti-folders"></i></span>
-          <span class="ami-text"><strong>إدارة الشهادات والإجازات</strong><small>عرض، بحث، وحذف</small></span>
-        </button>
-      </div>
-
-      <!-- ── مجموعة 3: أخرى ── -->
-      <div style="padding:6px 12px 4px;background:var(--beige2);border-top:1px solid var(--border)">
-        <span style="font-size:10px;color:var(--text-mid);font-weight:700;letter-spacing:0.05em">أخرى</span>
-      </div>
-      <div style="padding:4px 6px 6px">
-        <button class="actions-menu-item" onclick="openBulkNotesModal();toggleActionsMenu()">
-          <span class="ami-icon" style="background:rgba(230,126,34,0.12);color:#d35400"><i class="ti ti-notes"></i></span>
-          <span class="ami-text"><strong>محرر الملاحظات الجماعي</strong><small>عدّلي ملاحظات عدة طالبات مرة واحدة</small></span>
-        </button>
-        <button class="actions-menu-item" onclick="showArchive();toggleActionsMenu()">
-          <span class="ami-icon" style="background:rgba(127,140,141,0.12);color:#7f8c8d"><i class="ti ti-archive"></i></span>
-          <span class="ami-text"><strong>الأرشيف</strong><small>الطالبات المؤرشفات</small></span>
-        </button>
-      </div>
-
+  <div class="am-group" style="position:relative;display:inline-block">
+    <button class="btn-add-row am-menu-btn" id="otherMenuBtn" onclick="toggleActionMenu('otherMenu')" style="background:var(--beige2);border-color:var(--border)">
+      <i class="ti ti-dots"></i> أخرى ▾
+    </button>
+    <div id="otherMenu" class="am-dropdown" style="display:none;position:absolute;bottom:110%;right:0;background:var(--white);border:1.5px solid var(--border);border-radius:14px;box-shadow:0 8px 32px rgba(44,26,14,0.15);padding:4px 6px 6px;min-width:230px;z-index:200;overflow:hidden">
+      <button class="actions-menu-item" onclick="openBulkNotesModal();closeActionMenus()">
+        <span class="ami-icon" style="background:rgba(230,126,34,0.12);color:#d35400"><i class="ti ti-notes"></i></span>
+        <span class="ami-text"><strong>محرر الملاحظات الجماعي</strong><small>عدّلي ملاحظات عدة طالبات مرة واحدة</small></span>
+      </button>
+      <button class="actions-menu-item" onclick="showArchive();closeActionMenus()">
+        <span class="ami-icon" style="background:rgba(127,140,141,0.12);color:#7f8c8d"><i class="ti ti-archive"></i></span>
+        <span class="ami-text"><strong>الأرشيف</strong><small>الطالبات المؤرشفات</small></span>
+      </button>
     </div>
   </div>
 </div>
@@ -1620,17 +1616,21 @@ window._updateAccountsBadge = function(count) {
 
 
 <script>
-window.toggleActionsMenu = function() {
-  const menu = document.getElementById('actionsMenu');
+window.closeActionMenus = function() {
+  document.querySelectorAll('.am-dropdown').forEach(m => m.style.display = 'none');
+};
+
+window.toggleActionMenu = function(id) {
+  const menu = document.getElementById(id);
   if (!menu) return;
   const isOpen = menu.style.display === 'block';
-  menu.style.display = isOpen ? 'none' : 'block';
+  closeActionMenus();
   if (!isOpen) {
-    // أقفل لما يضغط برا
+    menu.style.display = 'block';
     setTimeout(() => {
       document.addEventListener('click', function closeMenu(e) {
-        if (!e.target.closest('#actionsMenu') && !e.target.closest('#actionsMenuBtn')) {
-          menu.style.display = 'none';
+        if (!e.target.closest('.am-dropdown') && !e.target.closest('.am-menu-btn')) {
+          closeActionMenus();
           document.removeEventListener('click', closeMenu);
         }
       });
