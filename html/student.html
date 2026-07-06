@@ -99,6 +99,8 @@
       <button class="stu-tab active" id="tabBtn-info" onclick="switchTab('info')"><i class="ti ti-user"></i> بياناتي</button>
       <button class="stu-tab" id="tabBtn-attend" onclick="switchTab('attend')"><i class="ti ti-calendar"></i> حضوري</button>
       <button class="stu-tab" id="tabBtn-grades" onclick="switchTab('grades')"><i class="ti ti-school"></i> درجاتي</button>
+      <button class="stu-tab" id="tabBtn-certs" onclick="switchTab('certs')"><i class="ti ti-certificate"></i> شهاداتي</button>
+      <button class="stu-tab" id="tabBtn-awards" onclick="switchTab('awards')"><i class="ti ti-award"></i> إجازاتي</button>
       <button class="stu-tab" id="tabBtn-notes" onclick="switchTab('notes')"><i class="ti ti-notes"></i> ملاحظات</button>
     </div>
 
@@ -195,6 +197,74 @@
 
       <div id="gradesList" class="stu-list">
         <div class="stu-empty"><i class="ti ti-school-off"></i><span>لا توجد درجات مسجلة</span></div>
+      </div>
+    </div>
+
+    <!-- Tab: شهاداتي -->
+    <div class="stu-panel" id="tab-certs">
+      <!-- Form إضافة شهادة جديدة — يظهر للإدارة only -->
+      <div id="newCertWrap" style="display:none; margin-bottom:16px;">
+        <button class="btn-solid" id="newCertBtn" type="button" style="margin-bottom:10px">
+          <i class="ti ti-plus"></i> إضافة شهادة جديدة
+        </button>
+        <div id="newCertForm" style="display:none; border:1px solid var(--border); border-radius:12px; padding:14px; background:var(--white);">
+          <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px;">
+            <div style="flex:1; min-width:180px;">
+              <label style="font-size:12px; color:var(--text-mid)">اسم الشهادة</label><br/>
+              <input type="text" id="certTitle" placeholder="مثال: شهادة إتمام حفظ جزء عمّ" style="width:100%; padding:6px 10px; border:1px solid var(--border); border-radius:8px;"/>
+            </div>
+            <div>
+              <label style="font-size:12px; color:var(--text-mid)">التاريخ</label><br/>
+              <input type="date" id="certDate" style="padding:6px 10px; border:1px solid var(--border); border-radius:8px;"/>
+            </div>
+          </div>
+          <div style="margin-bottom:12px;">
+            <label style="font-size:12px; color:var(--text-mid)">ملاحظة / رابط الشهادة (اختياري)</label><br/>
+            <input type="text" id="certNote" placeholder="رابط الملف أو أي ملاحظة إضافية" style="width:100%; padding:6px 10px; border:1px solid var(--border); border-radius:8px;"/>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button class="btn-solid" id="saveCertBtn" type="button"><i class="ti ti-check"></i> حفظ الشهادة</button>
+            <button class="btn-outline" id="cancelCertBtn" type="button">إلغاء</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="certsList" class="stu-list">
+        <div class="stu-empty"><i class="ti ti-certificate-off"></i><span>لا توجد شهادات مسجلة بعد</span></div>
+      </div>
+    </div>
+
+    <!-- Tab: إجازاتي -->
+    <div class="stu-panel" id="tab-awards">
+      <!-- Form إضافة إجازة علمية جديدة — يظهر للإدارة only -->
+      <div id="newAwardWrap" style="display:none; margin-bottom:16px;">
+        <button class="btn-solid" id="newAwardBtn" type="button" style="margin-bottom:10px">
+          <i class="ti ti-plus"></i> إضافة إجازة جديدة
+        </button>
+        <div id="newAwardForm" style="display:none; border:1px solid var(--border); border-radius:12px; padding:14px; background:var(--white);">
+          <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px;">
+            <div style="flex:1; min-width:180px;">
+              <label style="font-size:12px; color:var(--text-mid)">اسم الإجازة</label><br/>
+              <input type="text" id="awardTitle" placeholder="مثال: إجازة في حفظ سورة البقرة" style="width:100%; padding:6px 10px; border:1px solid var(--border); border-radius:8px;"/>
+            </div>
+            <div>
+              <label style="font-size:12px; color:var(--text-mid)">التاريخ</label><br/>
+              <input type="date" id="awardDate" style="padding:6px 10px; border:1px solid var(--border); border-radius:8px;"/>
+            </div>
+          </div>
+          <div style="margin-bottom:12px;">
+            <label style="font-size:12px; color:var(--text-mid)">ملاحظة / رابط الإجازة (اختياري)</label><br/>
+            <input type="text" id="awardNote" placeholder="رابط الملف أو أي ملاحظة إضافية" style="width:100%; padding:6px 10px; border:1px solid var(--border); border-radius:8px;"/>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button class="btn-solid" id="saveAwardBtn" type="button"><i class="ti ti-check"></i> حفظ الإجازة</button>
+            <button class="btn-outline" id="cancelAwardBtn" type="button">إلغاء</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="awardsList" class="stu-list">
+        <div class="stu-empty"><i class="ti ti-award-off"></i><span>لا توجد إجازات مسجلة بعد</span></div>
       </div>
     </div>
 
