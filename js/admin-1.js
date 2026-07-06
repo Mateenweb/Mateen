@@ -1744,16 +1744,16 @@ window.openDeleteExamModal = async () => {
 
   try {
     // جيب كل الطالبات وكل الاختبارات بتاعتهم
-    const studSnap = await getDocs(query(collection(db, 'students'), where('archived', '!=', true)));
+    const activeStuds = allStudents.filter(s => !s.archived);
     const examMap = {}; // { label_subject: [ {studentId, gradeId} ] }
 
-    await Promise.all(studSnap.docs.map(async sDoc => {
-      const gradesSnap = await getDocs(collection(db, 'students', sDoc.id, 'grades'));
+    await Promise.all(activeStuds.map(async s => {
+      const gradesSnap = await getDocs(collection(db, 'students', s.id, 'grades'));
       gradesSnap.docs.forEach(g => {
         const data = g.data();
         const key = `${data.label || 'اختبار'}|||${data.subject || ''}`;
         if (!examMap[key]) examMap[key] = [];
-        examMap[key].push({ studentId: sDoc.id, gradeId: g.id });
+        examMap[key].push({ studentId: s.id, gradeId: g.id });
       });
     }));
 
@@ -1976,16 +1976,16 @@ window.openDeleteAttModal = async () => {
   list.innerHTML = '<div style="text-align:center;color:var(--text-mid);font-size:13px;padding:20px">جارٍ التحميل...</div>';
 
   try {
-    const studSnap = await getDocs(query(collection(db, 'students'), where('archived', '!=', true)));
+    const activeStuds = allStudents.filter(s => !s.archived);
     const attMap = {}; // { date|||day: [ {studentId, sessionId} ] }
 
-    await Promise.all(studSnap.docs.map(async sDoc => {
-      const sessSnap = await getDocs(collection(db, 'students', sDoc.id, 'sessions'));
+    await Promise.all(activeStuds.map(async s => {
+      const sessSnap = await getDocs(collection(db, 'students', s.id, 'sessions'));
       sessSnap.docs.forEach(se => {
         const data = se.data();
         const key = `${data.date || ''}|||${data.day || ''}`;
         if (!attMap[key]) attMap[key] = [];
-        attMap[key].push({ studentId: sDoc.id, sessionId: se.id });
+        attMap[key].push({ studentId: s.id, sessionId: se.id });
       });
     }));
 
@@ -2354,6 +2354,253 @@ window.confirmPasteAttendance = async () => {
     console.error('confirmPasteAttendance:', e);
   } finally {
     if (btn) { btn.disabled = false; btn.innerHTML = '<i class="ti ti-device-floppy"></i> تأكيد وحفظ الحضور'; }
+  }
+};
+
+// ══════════════════════════════════════════════════════════════
+//  استيراد حضور من ملف Excel
+// ══════════════════════════════════════════════════════════════
+function parseAttStatusValue(raw) {
+  const v = String(raw || '').trim();
+  if (!v) return null;
+  if (/^(✅|✔|1|present|p|حاضر|حاضرة)$/i.test(v)) return 'present';
+  if (/^(❌|✖|0|absent|a|غائب|غايب|غياب)$/i.test(v)) return 'absent';
+  if (/^(⭕|excused|e|معتذر|معتذرة|بعذر)$/i.test(v)) return 'excused';
+  // أي نص تاني غير معروف — اعتبريه ملاحظة حرة، ومبدئيًا حاضرة
+  return { status: 'present', note: v };
+}
+
+window.openExcelAttModal = () => {
+  document.getElementById('excelAttModal').style.display = 'flex';
+  document.getElementById('eaDate').value = new Date().toISOString().slice(0, 10);
+  document.getElementById('eaFile').value = '';
+  document.getElementById('eaStatus').style.display = 'none';
+  document.getElementById('eaPreviewSection').style.display = 'none';
+  window._eaParsed = null;
+};
+
+window.closeExcelAttModal = () => {
+  document.getElementById('excelAttModal').style.display = 'none';
+};
+
+window.parseAttendanceExcelUI = async () => {
+  const fileInput = document.getElementById('eaFile');
+  const file = fileInput.files[0];
+  if (!file) { showToast('اختاري ملف أولاً'); return; }
+
+  const status = document.getElementById('eaStatus');
+  status.style.display = 'block';
+  status.textContent = '⏳ جارٍ قراءة الملف...';
+
+  try {
+    const XLSXmod = await import('https://cdn.sheetjs.com/xlsx-0.20.3/package/xlsx.mjs');
+    const buffer = await file.arrayBuffer();
+    const wb = XLSXmod.read(buffer, { type: 'array' });
+    const sheet = wb.Sheets[wb.SheetNames[0]];
+    const rows = XLSXmod.utils.sheet_to_json(sheet, { header: 1, defval: '' });
+
+    if (!rows.length) { status.textContent = '❌ الملف فارغ'; return; }
+
+    const header = rows[0];
+    const subjectCols = [];
+    for (let c = 1; c < header.length; c++) {
+      const label = String(header[c] || '').trim();
+      if (label) subjectCols.push({ col: c, label });
+    }
+    if (!subjectCols.length) { status.textContent = '❌ مفيش أعمدة مواد في الصف الأول من الملف'; return; }
+
+    const students = allStudents.filter(s => s.name && s.name !== 'طالبة جديدة' && !s.archived);
+    const fullNameMap = new Map();
+    const firstNameMap = new Map();
+    students.forEach(s => {
+      fullNameMap.set(normalizeName(s.name), s);
+      const fn = firstNameNormalized(s.name);
+      if (!firstNameMap.has(fn)) firstNameMap.set(fn, []);
+      firstNameMap.get(fn).push(s);
+    });
+
+    const parsedRows = [];
+    for (let r = 1; r < rows.length; r++) {
+      const rawName = String(rows[r][0] || '').trim();
+      if (!rawName) continue;
+
+      const exact = fullNameMap.get(normalizeName(rawName));
+      let studentId = null, matchType = 'none';
+      if (exact) { studentId = exact.id; matchType = 'exact'; }
+      else {
+        const candidates = firstNameMap.get(firstNameNormalized(rawName)) || [];
+        if (candidates.length === 1) { studentId = candidates[0].id; matchType = 'suggested'; }
+        else if (candidates.length > 1) matchType = 'ambiguous';
+      }
+
+      const periods = [];
+      const notes = [];
+      subjectCols.forEach(({ col, label }) => {
+        const parsed = parseAttStatusValue(rows[r][col]);
+        if (parsed === null) return;
+        if (typeof parsed === 'string') periods.push({ label, status: parsed });
+        else { periods.push({ label, status: parsed.status }); notes.push(`${label}: ${parsed.note}`); }
+      });
+
+      parsedRows.push({ rawName, studentId, matchType, include: matchType !== 'none', periods, note: notes.join(' | ') });
+    }
+
+    window._eaParsed = parsedRows;
+    renderEAPreview(parsedRows);
+    document.getElementById('eaPreviewSection').style.display = 'block';
+    status.textContent = `✅ تم تحليل ${parsedRows.length} صف`;
+  } catch(e) {
+    console.error('parseAttendanceExcelUI:', e);
+    status.textContent = '❌ خطأ: ' + e.message;
+  }
+};
+
+function renderEAPreview(rows) {
+  const exact = rows.filter(r => r.matchType === 'exact').length;
+  const needsReview = rows.filter(r => r.matchType !== 'exact');
+  document.getElementById('eaSummary').innerHTML =
+    `✅ <strong>${exact}</strong> صف تطابق تلقائيًا` +
+    (needsReview.length ? ` — 🔶 <strong>${needsReview.length}</strong> محتاج مراجعة` : '');
+
+  const nmDiv = document.getElementById('eaNotMentioned');
+  if (needsReview.length) {
+    nmDiv.style.display = 'block';
+    nmDiv.innerHTML = `🔶 صفوف محتاجة اختيار الطالبة يدويًا (هتلاقي قايمة اختيار جنب كل واحدة تحت):<br>` +
+      needsReview.map(r => esc(r.rawName)).join('، ');
+  } else {
+    nmDiv.style.display = 'none';
+  }
+
+  document.getElementById('eaRowsList').innerHTML = rows.map((r, i) => {
+    const needsSelect = r.matchType !== 'exact';
+    const periodsHtml = r.periods.map(p => `${esc(p.label)}: ${p.status === 'present' ? '✔' : p.status === 'absent' ? '✖' : '⭕'}`).join('  |  ');
+    return `<div style="display:flex;align-items:flex-start;gap:10px;padding:8px 12px;border-bottom:1px solid var(--border);${needsSelect ? 'background:rgba(201,162,39,0.08)' : ''}">
+      <input type="checkbox" ${r.include ? 'checked' : ''} onchange="eaToggleInclude(${i}, this.checked)" style="width:16px;height:16px;cursor:pointer;margin-top:3px;flex-shrink:0"/>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:600">${esc(r.rawName)}</div>
+        ${needsSelect ? `<select onchange="eaSelectStudent(${i}, this.value)" style="width:100%;margin:4px 0;border:1px solid var(--border);border-radius:6px;padding:4px 6px;font-family:inherit;font-size:11px">${buildStudentOptions(r.studentId)}</select>` : ''}
+        <div style="font-size:11px;color:var(--text-mid)">${periodsHtml || '—'}${r.note ? ' — 📝 ' + esc(r.note) : ''}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+window.eaToggleInclude = (idx, checked) => {
+  if (window._eaParsed?.[idx]) window._eaParsed[idx].include = checked;
+};
+window.eaSelectStudent = (idx, studentId) => {
+  const row = window._eaParsed?.[idx];
+  if (!row) return;
+  row.studentId = studentId || null;
+  row.matchType = studentId ? 'manual' : 'none';
+  row.include = !!studentId;
+};
+
+window.confirmExcelAttendance = async () => {
+  const date   = document.getElementById('eaDate').value;
+  const period = document.getElementById('eaPeriod').value;
+  if (!date) { showToast('حددي التاريخ'); return; }
+
+  const rows = (window._eaParsed || []).filter(r => r.include && r.studentId);
+  if (!rows.length) { showToast('مفيش صفوف صالحة للحفظ'); return; }
+
+  const d = new Date(date + 'T00:00:00');
+  const day = ATT_MSG_DAY_NAMES[d.getDay()];
+
+  if (!confirm(`هيتم إنشاء ${rows.length} سجل حضور ليوم ${day} (${date}). متأكدة؟`)) return;
+
+  const btn = document.querySelector('[onclick="confirmExcelAttendance()"]');
+  if (btn) { btn.disabled = true; btn.textContent = 'جارٍ الحفظ...'; }
+
+  try {
+    await Promise.all(rows.map(r => {
+      const subjects = {};
+      r.periods.forEach(p => { subjects[p.label] = p.status; });
+      return addDoc(collection(db, 'students', r.studentId, 'sessions'), {
+        day: period ? `${day} (${period})` : day,
+        date, subjects, createdAt: Date.now(),
+      });
+    }));
+
+    const withNotes = rows.filter(r => r.note);
+    await Promise.all(withNotes.map(async r => {
+      const sSnap = await getDoc(doc(db, 'students', r.studentId));
+      const existing = sSnap.exists() ? (sSnap.data().notes || '') : '';
+      const combined = (existing ? existing + '\n' : '') + `[${date}] ${r.note}`;
+      await updateDoc(doc(db, 'students', r.studentId), { notes: combined });
+    }));
+
+    showToast(`✅ تم تسجيل حضور ${rows.length} طالبة${withNotes.length ? ` و${withNotes.length} ملاحظة` : ''}`);
+    closeExcelAttModal();
+  } catch(e) {
+    showToast('❌ خطأ: ' + e.message);
+    console.error('confirmExcelAttendance:', e);
+  } finally {
+    if (btn) { btn.disabled = false; btn.innerHTML = '<i class="ti ti-device-floppy"></i> تأكيد وحفظ الحضور'; }
+  }
+};
+
+// ══════════════════════════════════════════════════════════════
+//  ملاحظات جماعية
+// ══════════════════════════════════════════════════════════════
+window.openBulkNotesModal = () => {
+  document.getElementById('bulkNotesModal').style.display = 'flex';
+  document.getElementById('bnSharedNote').value = '';
+  renderBNStudents();
+};
+
+window.closeBulkNotesModal = () => {
+  document.getElementById('bulkNotesModal').style.display = 'none';
+};
+
+function renderBNStudents() {
+  const list = document.getElementById('bnStudentsList');
+  const students = allStudents.filter(s => s.name && s.name !== 'طالبة جديدة' && !s.archived)
+    .sort((a, b) => (a.name || '').localeCompare(b.name || '', 'ar'));
+  list.innerHTML = students.map(s => `
+    <div style="display:flex;align-items:flex-start;gap:10px;padding:9px 12px;border-bottom:1px solid var(--border)">
+      <input type="checkbox" class="bn-check" data-id="${s.id}" checked style="width:16px;height:16px;cursor:pointer;margin-top:6px;flex-shrink:0"/>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:600;margin-bottom:4px">${esc(s.name || '—')}</div>
+        <textarea class="bn-note" data-id="${s.id}" data-original="${esc(s.notes || '')}" rows="2" style="width:100%;border:1px solid var(--border);border-radius:6px;padding:6px 8px;font-family:inherit;font-size:12px;resize:vertical">${esc(s.notes || '')}</textarea>
+      </div>
+    </div>
+  `).join('');
+}
+
+window.bnSelectAll = () => document.querySelectorAll('.bn-check').forEach(cb => cb.checked = true);
+window.bnClearAll  = () => document.querySelectorAll('.bn-check').forEach(cb => cb.checked = false);
+
+window.bnApplySharedNote = () => {
+  const shared = document.getElementById('bnSharedNote').value.trim();
+  if (!shared) { showToast('اكتبي الملاحظة المشتركة أولاً'); return; }
+  const checkedIds = new Set([...document.querySelectorAll('.bn-check:checked')].map(cb => cb.dataset.id));
+  document.querySelectorAll('.bn-note').forEach(ta => {
+    if (!checkedIds.has(ta.dataset.id)) return;
+    ta.value = (ta.value ? ta.value + '\n' : '') + shared;
+  });
+  showToast(`✅ اتضافت الملاحظة لـ ${checkedIds.size} طالبة (متنسيش تدوسي "حفظ التعديلات")`);
+};
+
+window.saveBulkNotes = async () => {
+  const textareas = [...document.querySelectorAll('.bn-note')];
+  const changed = textareas.filter(ta => ta.value !== ta.dataset.original);
+  if (!changed.length) { showToast('مفيش أي تعديل جديد'); return; }
+
+  const btn = document.querySelector('[onclick="saveBulkNotes()"]');
+  if (btn) { btn.disabled = true; btn.textContent = 'جارٍ الحفظ...'; }
+
+  try {
+    await Promise.all(changed.map(ta =>
+      updateDoc(doc(db, 'students', ta.dataset.id), { notes: ta.value })
+    ));
+    showToast(`✅ تم حفظ ملاحظات ${changed.length} طالبة`);
+    closeBulkNotesModal();
+  } catch(e) {
+    showToast('❌ خطأ: ' + e.message);
+    console.error('saveBulkNotes:', e);
+  } finally {
+    if (btn) { btn.disabled = false; btn.innerHTML = '<i class="ti ti-device-floppy"></i> حفظ التعديلات'; }
   }
 };
 
