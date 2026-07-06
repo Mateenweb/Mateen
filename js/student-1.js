@@ -570,16 +570,22 @@ function renderCerts(items) {
     list.innerHTML = '<div class="stu-empty"><i class="ti ti-certificate-off"></i><span>لا توجد شهادات مسجلة بعد</span></div>';
     return;
   }
-  list.innerHTML = items.map(c => `<div class="grade-card">
+  list.innerHTML = items.map(c => {
+    const noteIsLink = c.note && /^https?:\/\//i.test(c.note.trim());
+    return `<div class="grade-card">
       <div class="grade-label-wrap">
         <div class="grade-label-text"><i class="ti ti-certificate"></i> ${c.title || 'شهادة'}</div>
         ${c.date ? `<span class="grade-subject-tag">${formatDate(c.date)}</span>` : ''}
-        ${c.note ? `<div style="font-size:12px;color:var(--text-mid);margin-top:4px">${c.note}</div>` : ''}
+        ${c.note ? (noteIsLink
+          ? `<div style="margin-top:4px"><a href="${c.note.trim()}" target="_blank" rel="noopener" style="font-size:12px;color:#1a5fb4;text-decoration:underline">${c.note.trim()}</a></div>`
+          : `<div style="font-size:12px;color:var(--text-mid);margin-top:4px">${c.note}</div>`) : ''}
+        ${c.fileUrl ? `<a href="${c.fileUrl}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:4px;margin-top:5px;font-size:12px;color:#1e8449;text-decoration:none;font-weight:600"><i class="ti ti-paperclip"></i> عرض الشهادة</a>` : ''}
       </div>
       <div class="grade-score-wrap">
         ${_isAdmin ? `<button onclick="deleteCert('${_studentId}','${c.id}')" style="background:none;border:none;color:#c0392b;cursor:pointer;font-size:15px;padding:0 4px;opacity:0.7" title="حذف"><i class="ti ti-trash"></i></button>` : ''}
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
 // ── Render Awards / إجازات علمية ───────────────
@@ -589,16 +595,22 @@ function renderAwards(items) {
     list.innerHTML = '<div class="stu-empty"><i class="ti ti-award-off"></i><span>لا توجد إجازات مسجلة بعد</span></div>';
     return;
   }
-  list.innerHTML = items.map(a => `<div class="grade-card">
+  list.innerHTML = items.map(a => {
+    const noteIsLink = a.note && /^https?:\/\//i.test(a.note.trim());
+    return `<div class="grade-card">
       <div class="grade-label-wrap">
         <div class="grade-label-text"><i class="ti ti-award"></i> ${a.title || 'إجازة'}</div>
         ${a.date ? `<span class="grade-subject-tag">${formatDate(a.date)}</span>` : ''}
-        ${a.note ? `<div style="font-size:12px;color:var(--text-mid);margin-top:4px">${a.note}</div>` : ''}
+        ${a.note ? (noteIsLink
+          ? `<div style="margin-top:4px"><a href="${a.note.trim()}" target="_blank" rel="noopener" style="font-size:12px;color:#1a5fb4;text-decoration:underline">${a.note.trim()}</a></div>`
+          : `<div style="font-size:12px;color:var(--text-mid);margin-top:4px">${a.note}</div>`) : ''}
+        ${a.fileUrl ? `<a href="${a.fileUrl}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:4px;margin-top:5px;font-size:12px;color:#1e8449;text-decoration:none;font-weight:600"><i class="ti ti-paperclip"></i> عرض الإجازة</a>` : ''}
       </div>
       <div class="grade-score-wrap">
         ${_isAdmin ? `<button onclick="deleteAward('${_studentId}','${a.id}')" style="background:none;border:none;color:#c0392b;cursor:pointer;font-size:15px;padding:0 4px;opacity:0.7" title="حذف"><i class="ti ti-trash"></i></button>` : ''}
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
 window.deleteCert = async (studentId, certId) => {

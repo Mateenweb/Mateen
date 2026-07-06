@@ -1377,12 +1377,22 @@ function formatSize(bytes) {
         <label style="font-size:12px;color:var(--text-mid);display:block;margin-bottom:4px">التاريخ</label>
         <input type="date" id="quickAddDateInput" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:inherit;font-size:13px"/>
       </div>
+      <div style="margin-bottom:12px">
+        <label style="font-size:12px;color:var(--text-mid);display:block;margin-bottom:4px">ملاحظة (اختياري)</label>
+        <textarea id="quickAddNoteInput" rows="2" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:inherit;font-size:13px;resize:vertical" placeholder="أي ملاحظة إضافية..."></textarea>
+      </div>
       <div style="margin-bottom:16px">
-        <label style="font-size:12px;color:var(--text-mid);display:block;margin-bottom:4px">ملاحظة / رابط (اختياري)</label>
-        <input type="text" id="quickAddNoteInput" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:inherit;font-size:13px" placeholder="رابط الملف أو أي ملاحظة"/>
+        <label style="font-size:12px;color:var(--text-mid);display:block;margin-bottom:4px">📎 صورة/ملف الشهادة أو الإجازة (اختياري)</label>
+        <input type="file" id="quickAddFileInput" accept="image/*,.pdf,.doc,.docx" style="width:100%;font-size:12px;border:1px solid var(--border);border-radius:8px;padding:7px 8px"/>
+        <div style="text-align:center;font-size:11px;color:var(--text-mid);margin:8px 0">— أو —</div>
+        <input type="text" id="quickAddLinkInput" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:inherit;font-size:13px" placeholder="الصقي رابط جاهز (Google Drive مثلاً)"/>
+        <div id="quickAddUploadStatus" style="display:none;align-items:center;gap:6px;font-size:11.5px;color:var(--text-mid);margin-top:6px">
+          <i class="ti ti-loader-2" style="animation:spin 0.8s linear infinite"></i>
+          <span>جارٍ رفع الملف...</span>
+        </div>
       </div>
       <div style="display:flex;gap:8px">
-        <button class="btn-solid" onclick="saveQuickAdd()"><i class="ti ti-check"></i> حفظ</button>
+        <button class="btn-solid" id="quickAddSaveBtn" onclick="saveQuickAdd()"><i class="ti ti-check"></i> حفظ</button>
         <button class="btn-outline" onclick="document.getElementById('quickAddModal').style.display='none'">إلغاء</button>
       </div>
     </div>
@@ -1405,9 +1415,19 @@ function formatSize(bytes) {
         <label style="font-size:12px;color:var(--text-mid);display:block;margin-bottom:4px">التاريخ</label>
         <input type="date" id="bulkCADateInput" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:inherit;font-size:13px"/>
       </div>
+      <div style="margin-bottom:12px">
+        <label style="font-size:12px;color:var(--text-mid);display:block;margin-bottom:4px">ملاحظة (اختياري)</label>
+        <textarea id="bulkCANoteInput" rows="2" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:inherit;font-size:13px;resize:vertical" placeholder="أي ملاحظة إضافية..."></textarea>
+      </div>
       <div style="margin-bottom:14px">
-        <label style="font-size:12px;color:var(--text-mid);display:block;margin-bottom:4px">ملاحظة / رابط (اختياري)</label>
-        <input type="text" id="bulkCANoteInput" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:inherit;font-size:13px" placeholder="رابط الملف أو أي ملاحظة"/>
+        <label style="font-size:12px;color:var(--text-mid);display:block;margin-bottom:4px">📎 صورة/ملف الشهادة أو الإجازة (اختياري — نفس الملف لكل المحددين)</label>
+        <input type="file" id="bulkCAFileInput" accept="image/*,.pdf,.doc,.docx" style="width:100%;font-size:12px;border:1px solid var(--border);border-radius:8px;padding:7px 8px"/>
+        <div style="text-align:center;font-size:11px;color:var(--text-mid);margin:8px 0">— أو —</div>
+        <input type="text" id="bulkCALinkInput" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:inherit;font-size:13px" placeholder="الصقي رابط جاهز (Google Drive مثلاً)"/>
+        <div id="bulkCAUploadStatus" style="display:none;align-items:center;gap:6px;font-size:11.5px;color:var(--text-mid);margin-top:6px">
+          <i class="ti ti-loader-2" style="animation:spin 0.8s linear infinite"></i>
+          <span>جارٍ رفع الملف...</span>
+        </div>
       </div>
       <hr class="m-hr">
       <div class="m-label-row">اختاري الطالبات:</div>

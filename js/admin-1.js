@@ -10,6 +10,7 @@ import { FIREBASE_CONFIG } from "./config.js";
 import { exportWord, exportPdf, exportAttendanceWord, exportAttendancePdf } from "./export.js";
 import { fullDeleteUser } from "./delete-account.js";
 import { loadSubjectsFor } from "./subjects.js";
+import { uploadToCloudinary } from "./cloud-upload.js";
 
 const app  = getApps().length ? getApp() : initializeApp(FIREBASE_CONFIG);
 const auth = getAuth(app);
@@ -916,6 +917,8 @@ window.openQuickAdd = (studentId, type) => {
     : 'مثال: إجازة في حفظ سورة البقرة';
   document.getElementById('quickAddDateInput').value = '';
   document.getElementById('quickAddNoteInput').value = '';
+  document.getElementById('quickAddFileInput').value = '';
+  document.getElementById('quickAddLinkInput').value = '';
   document.getElementById('quickAddModal').style.display = 'flex';
 };
 
@@ -923,14 +926,38 @@ window.saveQuickAdd = async () => {
   const title = document.getElementById('quickAddTitleInput').value.trim();
   const date  = document.getElementById('quickAddDateInput').value;
   const note  = document.getElementById('quickAddNoteInput').value.trim();
+  const file  = document.getElementById('quickAddFileInput').files[0];
+  const link  = document.getElementById('quickAddLinkInput').value.trim();
   if (!title) { showToast('من فضلك أدخلي الاسم'); return; }
   if (!_quickAddStudentId || !_quickAddType) return;
 
+  const saveBtn = document.getElementById('quickAddSaveBtn');
+  const statusEl = document.getElementById('quickAddUploadStatus');
+
+  let fileUrl = link || '';
+  try {
+    if (file) {
+      statusEl.style.display = 'flex';
+      if (saveBtn) saveBtn.disabled = true;
+      fileUrl = await uploadToCloudinary(file);
+    }
+  } catch (e) {
+    console.error('quick-add upload error:', e);
+    showToast('فشل رفع الملف: ' + (e.message || 'خطأ غير معروف'));
+    statusEl.style.display = 'none';
+    if (saveBtn) saveBtn.disabled = false;
+    return;
+  }
+  statusEl.style.display = 'none';
+  if (saveBtn) saveBtn.disabled = false;
+
   try {
     await addDoc(collection(db, 'students', _quickAddStudentId, _quickAddType), {
-      title, date, note, createdAt: serverTimestamp(),
+      title, date, note, fileUrl, createdAt: serverTimestamp(),
     });
     document.getElementById('quickAddModal').style.display = 'none';
+    document.getElementById('quickAddFileInput').value = '';
+    document.getElementById('quickAddLinkInput').value = '';
     showToast(_quickAddType === 'certificates' ? '✓ تمت إضافة الشهادة' : '✓ تمت إضافة الإجازة');
   } catch (e) {
     showToast('حدث خطأ أثناء الحفظ');
@@ -952,6 +979,8 @@ window.openBulkCertAwardModal = (type) => {
     : 'مثال: إجازة في حفظ سورة البقرة';
   document.getElementById('bulkCADateInput').value = '';
   document.getElementById('bulkCANoteInput').value = '';
+  document.getElementById('bulkCAFileInput').value = '';
+  document.getElementById('bulkCALinkInput').value = '';
   renderBulkCAStudents();
   document.getElementById('bulkCAModal').style.display = 'flex';
 };
@@ -979,17 +1008,37 @@ window.saveBulkCertAward = async () => {
   const title = document.getElementById('bulkCATitleInput').value.trim();
   const date  = document.getElementById('bulkCADateInput').value;
   const note  = document.getElementById('bulkCANoteInput').value.trim();
+  const file  = document.getElementById('bulkCAFileInput').files[0];
+  const link  = document.getElementById('bulkCALinkInput').value.trim();
   const ids   = [...document.querySelectorAll('.bulk-ca-check:checked')].map(cb => cb.dataset.id);
 
   if (!title) { showToast('من فضلك أدخلي الاسم'); return; }
   if (!ids.length) { showToast('اختاري طالبة واحدة على الأقل'); return; }
 
   const btn = document.querySelector('[onclick="saveBulkCertAward()"]');
+  const statusEl = document.getElementById('bulkCAUploadStatus');
+
+  let fileUrl = link || '';
+  if (file) {
+    try {
+      statusEl.style.display = 'flex';
+      if (btn) btn.disabled = true;
+      fileUrl = await uploadToCloudinary(file);
+    } catch (e) {
+      console.error('bulk cert/award upload error:', e);
+      showToast('فشل رفع الملف: ' + (e.message || 'خطأ غير معروف'));
+      statusEl.style.display = 'none';
+      if (btn) btn.disabled = false;
+      return;
+    }
+    statusEl.style.display = 'none';
+  }
+
   if (btn) { btn.disabled = true; btn.textContent = 'جارٍ الحفظ...'; }
 
   try {
     await Promise.all(ids.map(id =>
-      addDoc(collection(db, 'students', id, _bulkCAType), { title, date, note, createdAt: serverTimestamp() })
+      addDoc(collection(db, 'students', id, _bulkCAType), { title, date, note, fileUrl, createdAt: serverTimestamp() })
     ));
     showToast(`✓ تمت الإضافة لـ ${ids.length} طالبة`);
     closeBulkCAModal();
@@ -1052,18 +1101,24 @@ function renderManageCAList() {
     return;
   }
 
-  list.innerHTML = filtered.map(e => `
+  list.innerHTML = filtered.map(e => {
+    const noteIsLink = e.note && /^https?:\/\//i.test(e.note.trim());
+    return `
     <div style="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-bottom:1px solid var(--border)">
       <div style="flex:1">
         <div style="font-size:13px;font-weight:700;color:var(--green-dark)">${esc(e.title || '—')}</div>
         <div style="font-size:11.5px;color:var(--text-mid);margin-top:2px">${esc(e.studentName || '—')}${e.date ? ' · ' + esc(e.date) : ''}</div>
-        ${e.note ? `<div style="font-size:11.5px;color:var(--text-dark);margin-top:3px">${esc(e.note)}</div>` : ''}
+        ${e.note ? (noteIsLink
+          ? `<div style="margin-top:3px"><a href="${esc(e.note.trim())}" target="_blank" rel="noopener" style="font-size:11.5px;color:#1a5fb4;text-decoration:underline">${esc(e.note.trim())}</a></div>`
+          : `<div style="font-size:11.5px;color:var(--text-dark);margin-top:3px">${esc(e.note)}</div>`) : ''}
+        ${e.fileUrl ? `<a href="${esc(e.fileUrl)}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:4px;margin-top:5px;font-size:11.5px;color:#1e8449;text-decoration:none;font-weight:600"><i class="ti ti-paperclip"></i> عرض الملف</a>` : ''}
       </div>
       <button onclick="manageCADeleteEntry('${e.studentId}','${e.id}')" title="حذف" style="background:none;border:none;color:#c0392b;cursor:pointer;font-size:16px;flex-shrink:0">
         <i class="ti ti-trash"></i>
       </button>
     </div>
-  `).join('');
+  `;
+  }).join('');
 }
 
 window.filterManageCAList = () => renderManageCAList();
