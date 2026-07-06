@@ -2607,3 +2607,65 @@ window.confirmResetSelected = async () => {
     showToast('خطأ: ' + e.message);
   }
 };
+
+// ── محرر الملاحظات الجماعي ──────────────────────────────────
+window.openBulkNotesModal = () => {
+  document.getElementById('bulkNotesModal').style.display = 'flex';
+  document.getElementById('bnSharedNote').value = '';
+  renderBNStudents();
+};
+
+window.closeBulkNotesModal = () => {
+  document.getElementById('bulkNotesModal').style.display = 'none';
+};
+
+function renderBNStudents() {
+  const list = document.getElementById('bnStudentsList');
+  const students = allStudents.filter(s => s.name && s.name !== 'طالبة جديدة' && !s.archived)
+    .sort((a, b) => (a.name || '').localeCompare(b.name || '', 'ar'));
+  list.innerHTML = students.map(s => `
+    <div style="display:flex;align-items:flex-start;gap:10px;padding:9px 12px;border-bottom:1px solid var(--border)">
+      <input type="checkbox" class="bn-check" data-id="${s.id}" checked style="width:16px;height:16px;cursor:pointer;margin-top:6px;flex-shrink:0"/>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:600;margin-bottom:4px">${esc(s.name || '—')}</div>
+        <textarea class="bn-note" data-id="${s.id}" data-original="${esc(s.notes || '')}" rows="2" style="width:100%;border:1px solid var(--border);border-radius:6px;padding:6px 8px;font-family:inherit;font-size:12px;resize:vertical">${esc(s.notes || '')}</textarea>
+      </div>
+    </div>
+  `).join('');
+}
+
+window.bnSelectAll = () => document.querySelectorAll('.bn-check').forEach(cb => cb.checked = true);
+window.bnClearAll  = () => document.querySelectorAll('.bn-check').forEach(cb => cb.checked = false);
+
+window.bnApplySharedNote = () => {
+  const shared = document.getElementById('bnSharedNote').value.trim();
+  if (!shared) { showToast('اكتبي الملاحظة المشتركة أولاً'); return; }
+  const checkedIds = new Set([...document.querySelectorAll('.bn-check:checked')].map(cb => cb.dataset.id));
+  document.querySelectorAll('.bn-note').forEach(ta => {
+    if (!checkedIds.has(ta.dataset.id)) return;
+    ta.value = (ta.value ? ta.value + '\n' : '') + shared;
+  });
+  showToast(`✅ اتضافت الملاحظة لـ ${checkedIds.size} طالبة (متنسيش تدوسي "حفظ التعديلات")`);
+};
+
+window.saveBulkNotes = async () => {
+  const textareas = [...document.querySelectorAll('.bn-note')];
+  const changed = textareas.filter(ta => ta.value !== ta.dataset.original);
+  if (!changed.length) { showToast('مفيش أي تعديل جديد'); return; }
+
+  const btn = document.querySelector('[onclick="saveBulkNotes()"]');
+  if (btn) { btn.disabled = true; btn.textContent = 'جارٍ الحفظ...'; }
+
+  try {
+    await Promise.all(changed.map(ta =>
+      updateDoc(doc(db, 'students', ta.dataset.id), { notes: ta.value })
+    ));
+    showToast(`✅ تم حفظ ملاحظات ${changed.length} طالبة`);
+    closeBulkNotesModal();
+  } catch(e) {
+    showToast('❌ خطأ: ' + e.message);
+    console.error('saveBulkNotes:', e);
+  } finally {
+    if (btn) { btn.disabled = false; btn.innerHTML = '<i class="ti ti-device-floppy"></i> حفظ التعديلات'; }
+  }
+};
