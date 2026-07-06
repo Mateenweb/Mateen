@@ -10,6 +10,7 @@ import { getAuth, onAuthStateChanged, signOut,
          EmailAuthProvider, reauthenticateWithCredential, deleteUser }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
 import { FIREBASE_CONFIG } from './config.js';
+import { loadSubjectsFor } from './subjects.js';
 
 const app  = getApps().length ? getApp() : initializeApp(FIREBASE_CONFIG);
 let _isAdmin = false;
@@ -80,6 +81,14 @@ function showNoData() {
 async function initPage(studentId, user, role) {
   _isAdmin = role === 'admin';
   _studentId = studentId;
+
+  // ملء قايمة مادة الدرجة من نفس مصدر المواد الحقيقي بدل القايمة الثابتة
+  loadSubjectsFor('inExams').then(subjects => {
+    const sel = document.getElementById('gradeSubject');
+    if (sel && subjects.length) {
+      sel.innerHTML = subjects.map(s => `<option value="${s}">${s}</option>`).join('');
+    }
+  }).catch(e => console.error('loadSubjectsFor(inExams):', e));
 
   // Load student info
   const stuSnap = await getDoc(doc(db, 'students', studentId));
