@@ -301,6 +301,10 @@
         <span style="font-size:10px;color:var(--text-mid);font-weight:700;letter-spacing:0.05em">أخرى</span>
       </div>
       <div style="padding:4px 6px 6px">
+        <button class="actions-menu-item" onclick="openBulkNotesModal();toggleActionsMenu()">
+          <span class="ami-icon" style="background:rgba(230,126,34,0.12);color:#d35400"><i class="ti ti-notes"></i></span>
+          <span class="ami-text"><strong>محرر الملاحظات الجماعي</strong><small>عدّلي ملاحظات عدة طالبات مرة واحدة</small></span>
+        </button>
         <button class="actions-menu-item" onclick="showArchive();toggleActionsMenu()">
           <span class="ami-icon" style="background:rgba(127,140,141,0.12);color:#7f8c8d"><i class="ti ti-archive"></i></span>
           <span class="ami-text"><strong>الأرشيف</strong><small>الطالبات المؤرشفات</small></span>
@@ -1401,6 +1405,37 @@ function formatSize(bytes) {
       <button onclick="confirmResetSelected()" style="background:#e74c3c;color:white;border:none;border-radius:10px;padding:11px;font-family:inherit;font-size:14px;cursor:pointer;font-weight:700">
         🗑️ مسح البيانات للمحددين
       </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal محرر الملاحظات الجماعي -->
+<div id="bulkNotesModal" class="modal-overlay" style="display:none" onclick="if(event.target===this)this.style.display='none'">
+  <div class="modal-box" style="width:min(94vw,520px)">
+    <div class="modal-head">
+      <span class="m-title">📝 محرر الملاحظات الجماعي</span>
+      <button class="m-close" onclick="closeBulkNotesModal()">✕</button>
+    </div>
+    <div class="modal-body" style="display:flex;flex-direction:column;gap:12px">
+      <div>
+        <div class="m-label-row">ملاحظة مشتركة (اختياري)</div>
+        <textarea id="bnSharedNote" rows="2" placeholder="اكتبي ملاحظة تحبي تضيفيها لكل الطالبات المحددة..."
+          style="width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:inherit;font-size:13px;resize:vertical"></textarea>
+        <button onclick="bnApplySharedNote()" style="margin-top:6px;background:var(--beige2);border:1px solid var(--border);border-radius:8px;padding:6px 14px;font-family:inherit;font-size:12px;cursor:pointer">
+          ➕ إضافة الملاحظة دي للمحددين
+        </button>
+      </div>
+      <hr class="m-hr">
+      <div class="m-select-row">
+        <button onclick="bnSelectAll()" class="m-btn-select-all">✔ تحديد الكل</button>
+        <button onclick="bnClearAll()" class="m-btn-deselect-all">✖ إلغاء الكل</button>
+      </div>
+      <div id="bnStudentsList" style="max-height:340px;overflow-y:auto;border:1px solid var(--border);border-radius:10px"></div>
+    </div>
+    <div class="modal-body" style="border-top:1px solid var(--border);padding-top:12px;display:flex;justify-content:flex-end;gap:10px">
+      <button class="m-btn" style="background:var(--beige);color:var(--text-dark);border:1px solid var(--border)"
+        onclick="closeBulkNotesModal()">إلغاء</button>
+      <button class="m-btn" onclick="saveBulkNotes()"><i class="ti ti-device-floppy"></i> حفظ التعديلات</button>
     </div>
   </div>
 </div>
