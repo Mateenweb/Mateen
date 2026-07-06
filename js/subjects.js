@@ -25,11 +25,17 @@ let _subjectsCache = null; // كل المواد (raw objects)
 async function loadAllSubjectsRaw() {
   if (_subjectsCache) return _subjectsCache;
   try {
-    const snap = await getDocs(query(collection(db, 'subjects'), orderBy('createdAt', 'asc')));
+    // ملحوظة: صفحة المواد العلمية (courses.html) بتحفظ التاريخ في حقل addedAt،
+    // وده مختلف عن createdAt اللي كنا بنرتب بيه هنا — orderBy كان بيستبعد أي مادة
+    // من غير الحقل ده تمامًا. دلوقتي بنجيب الكل من غير استبعاد، ونرتب يدويًا بأي حقل تاريخ موجود.
+    const snap = await getDocs(collection(db, 'subjects'));
     if (snap.empty) {
       _subjectsCache = DEFAULT_SUBJECTS.map((s, i) => ({ id: 'default-' + i, ...s }));
     } else {
-      _subjectsCache = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      const toMillis = (v) => v?.toMillis?.() ?? 0;
+      _subjectsCache = snap.docs
+        .map(d => ({ id: d.id, ...d.data() }))
+        .sort((a, b) => (toMillis(a.addedAt) || toMillis(a.createdAt)) - (toMillis(b.addedAt) || toMillis(b.createdAt)));
     }
   } catch (e) {
     console.error('loadSubjects error:', e);
