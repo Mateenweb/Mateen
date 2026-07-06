@@ -938,6 +938,150 @@ window.saveQuickAdd = async () => {
   }
 };
 
+// ── إضافة جماعية لشهادة/إجازة لعدة طالبات مرة واحدة ─────────────
+let _bulkCAType = null; // 'certificates' | 'awards'
+
+window.openBulkCertAwardModal = (type) => {
+  _bulkCAType = type;
+  const isCert = type === 'certificates';
+  document.getElementById('bulkCATitle').textContent = isCert ? '🎓 إضافة شهادة جماعية' : '📜 إضافة إجازة جماعية';
+  document.getElementById('bulkCANameLabel').textContent = isCert ? 'اسم الشهادة *' : 'اسم الإجازة *';
+  document.getElementById('bulkCATitleInput').value = '';
+  document.getElementById('bulkCATitleInput').placeholder = isCert
+    ? 'مثال: شهادة إتمام حفظ جزء عمّ'
+    : 'مثال: إجازة في حفظ سورة البقرة';
+  document.getElementById('bulkCADateInput').value = '';
+  document.getElementById('bulkCANoteInput').value = '';
+  renderBulkCAStudents();
+  document.getElementById('bulkCAModal').style.display = 'flex';
+};
+
+window.closeBulkCAModal = () => {
+  document.getElementById('bulkCAModal').style.display = 'none';
+};
+
+function renderBulkCAStudents() {
+  const list = document.getElementById('bulkCAStudentsList');
+  const students = allStudents.filter(s => s.name && s.name !== 'طالبة جديدة' && !s.archived)
+    .sort((a, b) => (a.name || '').localeCompare(b.name || '', 'ar'));
+  list.innerHTML = students.map(s => `
+    <label style="display:flex;align-items:center;gap:8px;padding:7px 10px;border-bottom:1px solid var(--border);cursor:pointer;font-size:13px">
+      <input type="checkbox" class="bulk-ca-check" data-id="${s.id}"/>
+      <span>${esc(s.name || '—')}</span>
+    </label>
+  `).join('');
+}
+
+window.bulkCASelectAll = () => document.querySelectorAll('.bulk-ca-check').forEach(cb => cb.checked = true);
+window.bulkCAClearAll  = () => document.querySelectorAll('.bulk-ca-check').forEach(cb => cb.checked = false);
+
+window.saveBulkCertAward = async () => {
+  const title = document.getElementById('bulkCATitleInput').value.trim();
+  const date  = document.getElementById('bulkCADateInput').value;
+  const note  = document.getElementById('bulkCANoteInput').value.trim();
+  const ids   = [...document.querySelectorAll('.bulk-ca-check:checked')].map(cb => cb.dataset.id);
+
+  if (!title) { showToast('من فضلك أدخلي الاسم'); return; }
+  if (!ids.length) { showToast('اختاري طالبة واحدة على الأقل'); return; }
+
+  const btn = document.querySelector('[onclick="saveBulkCertAward()"]');
+  if (btn) { btn.disabled = true; btn.textContent = 'جارٍ الحفظ...'; }
+
+  try {
+    await Promise.all(ids.map(id =>
+      addDoc(collection(db, 'students', id, _bulkCAType), { title, date, note, createdAt: serverTimestamp() })
+    ));
+    showToast(`✓ تمت الإضافة لـ ${ids.length} طالبة`);
+    closeBulkCAModal();
+  } catch (e) {
+    showToast('حدث خطأ أثناء الحفظ');
+    console.error('saveBulkCertAward:', e);
+  } finally {
+    if (btn) { btn.disabled = false; btn.innerHTML = '<i class="ti ti-device-floppy"></i> حفظ للمحددين'; }
+  }
+};
+
+// ── عرض/إدارة كل الشهادات والإجازات في مكان واحد ────────────────
+let _manageCAType = 'certificates'; // التاب المفتوح حاليًا
+let _manageCAEntries = []; // كاش آخر تحميل
+
+window.openManageCertAwards = async () => {
+  document.getElementById('manageCAModal').style.display = 'flex';
+  document.getElementById('manageCASearch').value = '';
+  window.switchManageCATab(_manageCAType);
+};
+
+window.closeManageCAModal = () => {
+  document.getElementById('manageCAModal').style.display = 'none';
+};
+
+window.switchManageCATab = async (type) => {
+  _manageCAType = type;
+  document.getElementById('manageCATabCerts').classList.toggle('active', type === 'certificates');
+  document.getElementById('manageCATabAwards').classList.toggle('active', type === 'awards');
+  await loadManageCAEntries();
+};
+
+async function loadManageCAEntries() {
+  const list = document.getElementById('manageCAList');
+  list.innerHTML = '<div style="text-align:center;color:var(--text-mid);font-size:13px;padding:20px">جارٍ التحميل...</div>';
+
+  const students = allStudents.filter(s => s.name && s.name !== 'طالبة جديدة' && !s.archived);
+  try {
+    const results = await Promise.all(students.map(async s => {
+      const snap = await getDocs(collection(db, 'students', s.id, _manageCAType));
+      return snap.docs.map(d => ({ id: d.id, studentId: s.id, studentName: s.name, ...d.data() }));
+    }));
+    _manageCAEntries = results.flat().sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+    renderManageCAList();
+  } catch (e) {
+    console.error('loadManageCAEntries:', e);
+    list.innerHTML = '<div style="text-align:center;color:#c0392b;font-size:13px;padding:20px">حصل خطأ أثناء التحميل</div>';
+  }
+}
+
+function renderManageCAList() {
+  const list = document.getElementById('manageCAList');
+  const q = (document.getElementById('manageCASearch').value || '').trim().toLowerCase();
+  const filtered = q
+    ? _manageCAEntries.filter(e => (e.studentName || '').toLowerCase().includes(q) || (e.title || '').toLowerCase().includes(q))
+    : _manageCAEntries;
+
+  if (!filtered.length) {
+    list.innerHTML = `<div style="text-align:center;color:var(--text-mid);font-size:13px;padding:24px">لا توجد ${_manageCAType === 'certificates' ? 'شهادات' : 'إجازات'} مسجّلة</div>`;
+    return;
+  }
+
+  list.innerHTML = filtered.map(e => `
+    <div style="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-bottom:1px solid var(--border)">
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:700;color:var(--green-dark)">${esc(e.title || '—')}</div>
+        <div style="font-size:11.5px;color:var(--text-mid);margin-top:2px">${esc(e.studentName || '—')}${e.date ? ' · ' + esc(e.date) : ''}</div>
+        ${e.note ? `<div style="font-size:11.5px;color:var(--text-dark);margin-top:3px">${esc(e.note)}</div>` : ''}
+      </div>
+      <button onclick="manageCADeleteEntry('${e.studentId}','${e.id}')" title="حذف" style="background:none;border:none;color:#c0392b;cursor:pointer;font-size:16px;flex-shrink:0">
+        <i class="ti ti-trash"></i>
+      </button>
+    </div>
+  `).join('');
+}
+
+window.filterManageCAList = () => renderManageCAList();
+
+window.manageCADeleteEntry = async (studentId, entryId) => {
+  if (!confirm(`متأكدة إنك عاوزة تحذفي ${_manageCAType === 'certificates' ? 'الشهادة' : 'الإجازة'} دي؟`)) return;
+  try {
+    await deleteDoc(doc(db, 'students', studentId, _manageCAType, entryId));
+    _manageCAEntries = _manageCAEntries.filter(e => !(e.studentId === studentId && e.id === entryId));
+    renderManageCAList();
+    showToast('✓ تم الحذف');
+  } catch (e) {
+    console.error('manageCADeleteEntry:', e);
+    showToast('حدث خطأ أثناء الحذف');
+  }
+};
+
+
 window.addStudentRow = async () => { await addDoc(collection(db,'students'), stuDefault()); };
 
 window.addBulkNames = async () => {

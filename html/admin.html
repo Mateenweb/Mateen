@@ -300,6 +300,25 @@
         </button>
       </div>
 
+      <!-- ── مجموعة: الشهادات والإجازات ── -->
+      <div style="padding:6px 12px 4px;background:var(--beige2);border-top:1px solid var(--border)">
+        <span style="font-size:10px;color:var(--text-mid);font-weight:700;letter-spacing:0.05em">الشهادات والإجازات</span>
+      </div>
+      <div style="padding:4px 6px 6px">
+        <button class="actions-menu-item" onclick="openBulkCertAwardModal('certificates');toggleActionsMenu()">
+          <span class="ami-icon" style="background:rgba(138,109,31,0.12);color:#8a6d1f"><i class="ti ti-certificate"></i></span>
+          <span class="ami-text"><strong>إضافة شهادة جماعية</strong><small>لعدة طالبات مرة واحدة</small></span>
+        </button>
+        <button class="actions-menu-item" onclick="openBulkCertAwardModal('awards');toggleActionsMenu()">
+          <span class="ami-icon" style="background:rgba(31,111,138,0.12);color:#1f6f8a"><i class="ti ti-award"></i></span>
+          <span class="ami-text"><strong>إضافة إجازة جماعية</strong><small>لعدة طالبات مرة واحدة</small></span>
+        </button>
+        <button class="actions-menu-item" onclick="openManageCertAwards();toggleActionsMenu()">
+          <span class="ami-icon" style="background:rgba(127,140,141,0.12);color:#7f8c8d"><i class="ti ti-folders"></i></span>
+          <span class="ami-text"><strong>إدارة الشهادات والإجازات</strong><small>عرض، بحث، وحذف</small></span>
+        </button>
+      </div>
+
       <!-- ── مجموعة 3: أخرى ── -->
       <div style="padding:6px 12px 4px;background:var(--beige2);border-top:1px solid var(--border)">
         <span style="font-size:10px;color:var(--text-mid);font-weight:700;letter-spacing:0.05em">أخرى</span>
@@ -1370,6 +1389,60 @@ function formatSize(bytes) {
         <button class="btn-solid" onclick="saveQuickAdd()"><i class="ti ti-check"></i> حفظ</button>
         <button class="btn-outline" onclick="document.getElementById('quickAddModal').style.display='none'">إلغاء</button>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ Modal إضافة شهادة/إجازة جماعية ══ -->
+<div id="bulkCAModal" class="modal-overlay" style="display:none" onclick="if(event.target===this)this.style.display='none'">
+  <div class="modal-box" style="width:min(94vw,520px)">
+    <div class="modal-head">
+      <span class="m-title" id="bulkCATitle">🎓 إضافة شهادة جماعية</span>
+      <button class="m-close" onclick="closeBulkCAModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="margin-bottom:12px">
+        <label style="font-size:12px;color:var(--text-mid);display:block;margin-bottom:4px" id="bulkCANameLabel">اسم الشهادة *</label>
+        <input type="text" id="bulkCATitleInput" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:inherit;font-size:13px" placeholder="مثال: شهادة إتمام حفظ جزء عمّ"/>
+      </div>
+      <div style="margin-bottom:12px">
+        <label style="font-size:12px;color:var(--text-mid);display:block;margin-bottom:4px">التاريخ</label>
+        <input type="date" id="bulkCADateInput" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:inherit;font-size:13px"/>
+      </div>
+      <div style="margin-bottom:14px">
+        <label style="font-size:12px;color:var(--text-mid);display:block;margin-bottom:4px">ملاحظة / رابط (اختياري)</label>
+        <input type="text" id="bulkCANoteInput" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:inherit;font-size:13px" placeholder="رابط الملف أو أي ملاحظة"/>
+      </div>
+      <hr class="m-hr">
+      <div class="m-label-row">اختاري الطالبات:</div>
+      <div class="m-select-row">
+        <button onclick="bulkCASelectAll()" class="m-btn-select-all">✔ تحديد الكل</button>
+        <button onclick="bulkCAClearAll()" class="m-btn-deselect-all">✖ إلغاء الكل</button>
+      </div>
+      <div id="bulkCAStudentsList" style="max-height:280px;overflow-y:auto;border:1px solid var(--border);border-radius:10px;margin:8px 0 14px"></div>
+      <div style="display:flex;gap:8px">
+        <button class="btn-solid" onclick="saveBulkCertAward()"><i class="ti ti-device-floppy"></i> حفظ للمحددين</button>
+        <button class="btn-outline" onclick="closeBulkCAModal()">إلغاء</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ Modal إدارة الشهادات والإجازات ══ -->
+<div id="manageCAModal" class="modal-overlay" style="display:none" onclick="if(event.target===this)this.style.display='none'">
+  <div class="modal-box" style="width:min(94vw,560px);max-height:88vh;display:flex;flex-direction:column">
+    <div class="modal-head">
+      <span class="m-title">🗂️ إدارة الشهادات والإجازات</span>
+      <button class="m-close" onclick="closeManageCAModal()">✕</button>
+    </div>
+    <div class="modal-body" style="overflow-y:auto;flex:1">
+      <div style="display:flex;gap:8px;margin-bottom:12px">
+        <button id="manageCATabCerts" class="admin-tab active" style="flex:1;justify-content:center" onclick="switchManageCATab('certificates')">🎓 الشهادات</button>
+        <button id="manageCATabAwards" class="admin-tab" style="flex:1;justify-content:center" onclick="switchManageCATab('awards')">📜 الإجازات</button>
+      </div>
+      <input id="manageCASearch" type="text" oninput="filterManageCAList()" placeholder="🔍 بحث باسم الطالبة أو العنوان..."
+        style="width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:inherit;font-size:13px;margin-bottom:10px"/>
+      <div id="manageCAList" style="border:1px solid var(--border);border-radius:10px;min-height:120px"></div>
     </div>
   </div>
 </div>
