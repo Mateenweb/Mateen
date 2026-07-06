@@ -201,7 +201,7 @@ function renderModalMats() {
     const subjMats = allMats.filter(m => m.course === subj);
     const canAdd = isAdmin() || (currentUserRole === 'teacher' && currentUserSubjects.includes(subj));
     const addBtnHTML = canAdd ? `
-      <button onclick="document.getElementById('newCourseCat').value='${subj}';document.getElementById('addCourseModal').style.display='flex'"
+      <button onclick="document.getElementById('newCourseCat').value='${subj}';updateLectureOptions();document.getElementById('addCourseModal').style.display='flex'"
         style="display:flex;align-items:center;gap:6px;background:var(--green-dark);color:white;border:none;padding:8px 14px;border-radius:8px;font-family:inherit;font-size:13px;cursor:pointer;margin-bottom:10px;margin-top:8px;">
         <i class="ti ti-plus"></i> إضافة محتوى لـ${subj}
       </button>` : '';
@@ -214,11 +214,62 @@ function renderModalMats() {
         </div>
         ${addBtnHTML}
       </div>
-      <div style="display:flex;flex-direction:column;gap:8px;">
-        ${subjMats.map(matCardHTML).join('')}
-      </div>`;
+      ${matsGroupedHTML(subjMats)}`;
     subjMats.forEach(m => renderAssignmentsSection(m.id, m.course, 'asg-' + m.id));
   });
+}
+
+// ── رقم المحاضرة: تحديث القايمة حسب المادة المختارة ────────────
+window.updateLectureOptions = () => {
+  const course = document.getElementById('newCourseCat')?.value;
+  const sel = document.getElementById('newCourseLecture');
+  if (!sel) return;
+
+  const nums = [...new Set(
+    allMats.filter(m => m.course === course && m.lectureNumber != null).map(m => m.lectureNumber)
+  )].sort((a, b) => a - b);
+
+  sel.innerHTML = '<option value="">بدون محاضرة محددة</option>' +
+    nums.map(n => `<option value="${n}">المحاضرة ${n}</option>`).join('') +
+    `<option value="__new__">+ محاضرة جديدة</option>`;
+
+  sel.onchange = () => {
+    const wrap = document.getElementById('newLectureNumWrap');
+    if (sel.value === '__new__') {
+      wrap.style.display = 'block';
+      document.getElementById('newLectureNumInput').value = (nums.length ? Math.max(...nums) : 0) + 1;
+    } else {
+      wrap.style.display = 'none';
+    }
+  };
+};
+
+// ── تجميع المواد المضافة حسب رقم المحاضرة قبل عرضها ────────────
+function matsGroupedHTML(mats) {
+  const withLecture = mats.filter(m => m.lectureNumber != null);
+  const without = mats.filter(m => m.lectureNumber == null);
+  const lectureNums = [...new Set(withLecture.map(m => m.lectureNumber))].sort((a, b) => a - b);
+
+  let html = '';
+  lectureNums.forEach(n => {
+    const group = withLecture.filter(m => m.lectureNumber === n);
+    html += `
+      <div style="margin-bottom:14px">
+        <div style="font-size:13px;font-weight:700;color:var(--gold-dark,#b8860b);margin:10px 0 8px;display:flex;align-items:center;gap:6px">
+          <i class="ti ti-bookmark"></i> المحاضرة ${n}
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px">${group.map(matCardHTML).join('')}</div>
+      </div>`;
+  });
+  if (without.length) {
+    const withoutHTML = `<div style="display:flex;flex-direction:column;gap:8px">${without.map(matCardHTML).join('')}</div>`;
+    html += lectureNums.length ? `
+      <div style="margin-bottom:14px">
+        <div style="font-size:12px;font-weight:600;color:var(--text-mid);margin:10px 0 8px">📎 مواد غير مرتبطة بمحاضرة</div>
+        ${withoutHTML}
+      </div>` : withoutHTML;
+  }
+  return html;
 }
 
 window.filterMats = () => {
@@ -506,6 +557,16 @@ window.submitNewCourse = async () => {
   const notes = document.getElementById('newCourseNotes').value.trim();
   const err   = document.getElementById('addCourseErr');
 
+  // رقم المحاضرة (اختياري): من القايمة، أو رقم جديد لو اختارت "+ محاضرة جديدة"
+  const lectureSel = document.getElementById('newCourseLecture')?.value;
+  let lectureNumber = null;
+  if (lectureSel === '__new__') {
+    const n = parseInt(document.getElementById('newLectureNumInput')?.value, 10);
+    lectureNumber = isNaN(n) ? null : n;
+  } else if (lectureSel) {
+    lectureNumber = parseInt(lectureSel, 10);
+  }
+
   if (!title || !course || !url) {
     err.style.display = 'block';
     err.textContent = isAudio ? 'يرجى رفع الملف الصوتي أولاً' : 'يرجى تعبئة الحقول المطلوبة (الاسم، المادة، الرابط)';
@@ -532,19 +593,20 @@ window.submitNewCourse = async () => {
   try {
     await addDoc(collection(db, 'materials'), {
       title, course, type, url, notes,
+      ...(lectureNumber != null ? { lectureNumber } : {}),
       ...(assignment ? { assignment } : {}),
       ...(exam ? { exam } : {}),
       addedAt: Date.now(),
       addedBy: auth.currentUser.email,
     });
     // reset all fields
-    ['newCourseTitle','newCourseCat','newCourseUrl','newCourseNotes',
+    ['newCourseTitle','newCourseCat','newCourseUrl','newCourseNotes','newCourseLecture','newLectureNumInput',
      'asgTitle','asgDeadline','asgDesc','examTitle','examPath','examDeadline'].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.value = '';
     });
     // أغلق الأقسام الاختيارية
-    ['asgSection','examSection'].forEach(id => {
+    ['asgSection','examSection','newLectureNumWrap'].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.style.display = 'none';
     });
@@ -637,7 +699,7 @@ window.openDynModal = (id) => {
   const mats = allMats.filter(m => m.course === s.name);
 
   const addBtnHTML = isAdmin() ? `
-    <button onclick="document.getElementById('newCourseCat').value='${s.name}';document.getElementById('addCourseModal').style.display='flex'"
+    <button onclick="document.getElementById('newCourseCat').value='${s.name}';updateLectureOptions();document.getElementById('addCourseModal').style.display='flex'"
       style="display:flex;align-items:center;gap:6px;background:var(--green-dark);color:white;border:none;padding:8px 14px;border-radius:8px;font-family:inherit;font-size:13px;cursor:pointer;margin-bottom:10px;margin-top:12px;">
       <i class="ti ti-plus"></i> إضافة محتوى لـ${s.name}
     </button>` : '';
@@ -648,7 +710,7 @@ window.openDynModal = (id) => {
         <i class="ti ti-files" style="margin-left:4px;"></i> المواد المضافة (${mats.length})
       </div>
       ${addBtnHTML}
-      <div style="display:flex;flex-direction:column;gap:8px;">${mats.map(matCardHTML).join('')}</div>
+      ${matsGroupedHTML(mats)}
     </div>` : addBtnHTML ? `<div style="margin-top:8px">${addBtnHTML}</div>` : '';
 
   const modal = document.createElement('div');
