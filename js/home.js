@@ -393,6 +393,12 @@ onAuthStateChanged(auth, async user => {
     if (linkedId) {
       if (profileLink)   { profileLink.href = `student.html?id=${linkedId}`; profileLink.classList.remove('d-none'); }
       if (navProfileBtn) { navProfileBtn.href = `student.html?id=${linkedId}`; navProfileBtn.classList.remove('d-none'); }
+      const linkGradesEl = document.getElementById('linkGrades');
+      const linkCertsEl  = document.getElementById('linkCerts');
+      const linkAwardsEl = document.getElementById('linkAwards');
+      if (linkGradesEl) linkGradesEl.href = `student.html?id=${linkedId}#grades`;
+      if (linkCertsEl)  linkCertsEl.href  = `student.html?id=${linkedId}#certs`;
+      if (linkAwardsEl) linkAwardsEl.href = `student.html?id=${linkedId}#awards`;
     } else {
       if (navProfileBtn) navProfileBtn.classList.remove('d-none');
     }
