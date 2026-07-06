@@ -116,12 +116,22 @@
         </div>
         <div>
           <label style="font-size:13px;color:var(--text-dark);display:block;margin-bottom:6px">المادة <span style="color:#c0392b">*</span></label>
-          <select id="newCourseCat" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:14px;box-sizing:border-box;">
+          <select id="newCourseCat" onchange="updateLectureOptions()" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:14px;box-sizing:border-box;">
             <option value="">اختاري المادة</option>
             <option>التفسير</option><option>الفقه</option><option>العقيدة</option>
             <option>الحديث</option><option>مقرأة متين</option><option>السيرة النبوية</option>
             <option>التجويد والتلاوة</option><option>النحو</option><option>أخرى</option>
           </select>
+        </div>
+        <div>
+          <label style="font-size:13px;color:var(--text-dark);display:block;margin-bottom:6px">رقم المحاضرة (اختياري)</label>
+          <select id="newCourseLecture" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:14px;box-sizing:border-box;">
+            <option value="">بدون محاضرة محددة</option>
+          </select>
+          <div id="newLectureNumWrap" style="display:none;margin-top:8px">
+            <label style="font-size:12px;color:var(--text-mid);display:block;margin-bottom:4px">رقم المحاضرة الجديدة</label>
+            <input type="number" id="newLectureNumInput" min="1" style="width:120px;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:14px;box-sizing:border-box;">
+          </div>
         </div>
         <div>
           <label style="font-size:13px;color:var(--text-dark);display:block;margin-bottom:6px">نوع المحتوى</label>
