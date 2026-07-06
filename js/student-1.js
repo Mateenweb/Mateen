@@ -71,7 +71,7 @@ function showPage() {
 }
 
 function showNoData() {
-  ['attendanceList','gradesList'].forEach(id => {
+  ['attendanceList','gradesList','certsList','awardsList'].forEach(id => {
     document.getElementById(id).innerHTML =
       '<div class="stu-empty"><i class="ti ti-alert-circle"></i><span>لم يتم ربط حسابك ببيانات طالبة بعد. تواصلي مع الإدارة.</span></div>';
   });
@@ -133,6 +133,18 @@ async function initPage(studentId, user, role) {
     updateGradeAvg(grades);
   });
 
+  // Certificates (شهاداتي)
+  const certQ = query(collection(db,'students',studentId,'certificates'), orderBy('createdAt','desc'));
+  onSnapshot(certQ, snap => {
+    renderCerts(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+  });
+
+  // Awards / إجازات علمية (إجازاتي)
+  const awardQ = query(collection(db,'students',studentId,'awards'), orderBy('createdAt','desc'));
+  onSnapshot(awardQ, snap => {
+    renderAwards(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+  });
+
   // Hide Button Delete الحساب للأدمن/Teacher (f)/الnot/don'tرفة
   if (role !== 'student' && role !== 'mateen') {
     document.getElementById('deleteAccBtn')?.closest('.delete-acc-section')?.remove();
@@ -144,11 +156,15 @@ async function initPage(studentId, user, role) {
     const statsBar = document.getElementById('statsBar');
     if (statsBar) statsBar.style.display = 'none';
 
-    // إخفاء تبويبي "بياناتي" و"درجاتي" فقط — بس مش نشيلهم (hide مش remove)
+    // إخفاء تبويبي "بياناتي" و"درجاتي" و"شهاداتي" و"إجازاتي" فقط — بس مش نشيلهم (hide مش remove)
     const tabInfo   = document.getElementById('tabBtn-info');
     const tabGrades = document.getElementById('tabBtn-grades');
+    const tabCerts  = document.getElementById('tabBtn-certs');
+    const tabAwards = document.getElementById('tabBtn-awards');
     if (tabInfo)   tabInfo.style.display   = 'none';
     if (tabGrades) tabGrades.style.display = 'none';
+    if (tabCerts)  tabCerts.style.display  = 'none';
+    if (tabAwards) tabAwards.style.display = 'none';
 
     // إظهار نموذج تسجيل حضور جديد — بدون قايمة الجلسات القديمة
     document.getElementById('newSessionWrap').style.display = 'block';
@@ -168,11 +184,21 @@ async function initPage(studentId, user, role) {
   if (role === 'admin') {
     document.getElementById('newSessionWrap').style.display = 'block';
     document.getElementById('newGradeWrap').style.display   = 'block';
+    document.getElementById('newCertWrap').style.display    = 'block';
+    document.getElementById('newAwardWrap').style.display   = 'block';
     document.getElementById('notesEditWrap').style.display  = 'block';
     document.getElementById('notesTextarea').value = s.notes || '';
     setupSupervisorAttendance(studentId);
     setupAdminGrades(studentId);
+    setupAdminCerts(studentId);
+    setupAdminAwards(studentId);
     setupSupervisorNotes(studentId);
+  }
+
+  // لو مفتوحة من رابط فيه تحديد تاب معين (زي درجاتي/شهاداتي/إجازاتي من السايد بار)
+  const hashTab = (location.hash || '').replace('#', '');
+  if (['info','attend','grades','certs','awards','notes'].includes(hashTab)) {
+    switchTab(hashTab);
   }
 
   // Logout
@@ -352,6 +378,84 @@ function setupAdminGrades(studentId) {
   };
 }
 
+// ── الإدارة: إضافة شهادة جديدة ─────────────────
+function setupAdminCerts(studentId) {
+  const toggleBtn = document.getElementById('newCertBtn');
+  const form      = document.getElementById('newCertForm');
+
+  toggleBtn.onclick = () => {
+    form.style.display = form.style.display === 'none' ? 'block' : 'none';
+  };
+  document.getElementById('cancelCertBtn').onclick = () => {
+    form.style.display = 'none';
+  };
+
+  document.getElementById('saveCertBtn').onclick = async () => {
+    const title = document.getElementById('certTitle').value.trim();
+    const date  = document.getElementById('certDate').value;
+    const note  = document.getElementById('certNote').value.trim();
+
+    if (!title) {
+      alert('من فضلك أدخلي اسم الشهادة');
+      return;
+    }
+
+    try {
+      await addDoc(collection(db, 'students', studentId, 'certificates'), {
+        title, date, note,
+        createdAt: serverTimestamp(),
+      });
+      form.style.display = 'none';
+      document.getElementById('certTitle').value = '';
+      document.getElementById('certDate').value  = '';
+      document.getElementById('certNote').value  = '';
+      showSavedToast();
+    } catch (e) {
+      alert('حدث خطأ أثناء حفظ الشهادة');
+      console.error(e);
+    }
+  };
+}
+
+// ── الإدارة: إضافة إجازة علمية جديدة ───────────
+function setupAdminAwards(studentId) {
+  const toggleBtn = document.getElementById('newAwardBtn');
+  const form      = document.getElementById('newAwardForm');
+
+  toggleBtn.onclick = () => {
+    form.style.display = form.style.display === 'none' ? 'block' : 'none';
+  };
+  document.getElementById('cancelAwardBtn').onclick = () => {
+    form.style.display = 'none';
+  };
+
+  document.getElementById('saveAwardBtn').onclick = async () => {
+    const title = document.getElementById('awardTitle').value.trim();
+    const date  = document.getElementById('awardDate').value;
+    const note  = document.getElementById('awardNote').value.trim();
+
+    if (!title) {
+      alert('من فضلك أدخلي اسم الإجازة');
+      return;
+    }
+
+    try {
+      await addDoc(collection(db, 'students', studentId, 'awards'), {
+        title, date, note,
+        createdAt: serverTimestamp(),
+      });
+      form.style.display = 'none';
+      document.getElementById('awardTitle').value = '';
+      document.getElementById('awardDate').value  = '';
+      document.getElementById('awardNote').value  = '';
+      showSavedToast();
+    } catch (e) {
+      alert('حدث خطأ أثناء حفظ الإجازة');
+      console.error(e);
+    }
+  };
+}
+
 // ── الnot/don'tرفة: كتابة/Edit الNotes ────────────
 function setupSupervisorNotes(studentId) {
   document.getElementById('saveNotesBtn').onclick = async () => {
@@ -458,6 +562,64 @@ function renderGrades(grades) {
     </div>`;
   }).join('');
 }
+
+// ── Render Certificates ────────────────────────
+function renderCerts(items) {
+  const list = document.getElementById('certsList');
+  if (!items.length) {
+    list.innerHTML = '<div class="stu-empty"><i class="ti ti-certificate-off"></i><span>لا توجد شهادات مسجلة بعد</span></div>';
+    return;
+  }
+  list.innerHTML = items.map(c => `<div class="grade-card">
+      <div class="grade-label-wrap">
+        <div class="grade-label-text"><i class="ti ti-certificate"></i> ${c.title || 'شهادة'}</div>
+        ${c.date ? `<span class="grade-subject-tag">${formatDate(c.date)}</span>` : ''}
+        ${c.note ? `<div style="font-size:12px;color:var(--text-mid);margin-top:4px">${c.note}</div>` : ''}
+      </div>
+      <div class="grade-score-wrap">
+        ${_isAdmin ? `<button onclick="deleteCert('${_studentId}','${c.id}')" style="background:none;border:none;color:#c0392b;cursor:pointer;font-size:15px;padding:0 4px;opacity:0.7" title="حذف"><i class="ti ti-trash"></i></button>` : ''}
+      </div>
+    </div>`).join('');
+}
+
+// ── Render Awards / إجازات علمية ───────────────
+function renderAwards(items) {
+  const list = document.getElementById('awardsList');
+  if (!items.length) {
+    list.innerHTML = '<div class="stu-empty"><i class="ti ti-award-off"></i><span>لا توجد إجازات مسجلة بعد</span></div>';
+    return;
+  }
+  list.innerHTML = items.map(a => `<div class="grade-card">
+      <div class="grade-label-wrap">
+        <div class="grade-label-text"><i class="ti ti-award"></i> ${a.title || 'إجازة'}</div>
+        ${a.date ? `<span class="grade-subject-tag">${formatDate(a.date)}</span>` : ''}
+        ${a.note ? `<div style="font-size:12px;color:var(--text-mid);margin-top:4px">${a.note}</div>` : ''}
+      </div>
+      <div class="grade-score-wrap">
+        ${_isAdmin ? `<button onclick="deleteAward('${_studentId}','${a.id}')" style="background:none;border:none;color:#c0392b;cursor:pointer;font-size:15px;padding:0 4px;opacity:0.7" title="حذف"><i class="ti ti-trash"></i></button>` : ''}
+      </div>
+    </div>`).join('');
+}
+
+window.deleteCert = async (studentId, certId) => {
+  if (!confirm('هل أنتِ متأكدة من حذف هذه الشهادة؟')) return;
+  try {
+    await deleteDoc(doc(db, 'students', studentId, 'certificates', certId));
+  } catch (e) {
+    alert('حدث خطأ أثناء الحذف');
+    console.error(e);
+  }
+};
+
+window.deleteAward = async (studentId, awardId) => {
+  if (!confirm('هل أنتِ متأكدة من حذف هذه الإجازة؟')) return;
+  try {
+    await deleteDoc(doc(db, 'students', studentId, 'awards', awardId));
+  } catch (e) {
+    alert('حدث خطأ أثناء الحذف');
+    console.error(e);
+  }
+};
 
 // ── Stats ─────────────────────────────────────
 function updateStats(sessions) {
