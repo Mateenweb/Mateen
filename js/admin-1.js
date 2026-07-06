@@ -2608,6 +2608,237 @@ window.confirmResetSelected = async () => {
   }
 };
 
+// ══════════════════════════════════════════════════════════════
+//  استيراد حضور من ملف Excel (شكل أسبوعي: أعمدة = أيام)
+// ══════════════════════════════════════════════════════════════
+const EA_DAY_OFFSETS = { 'الأحد': 0, 'الاثنين': 1, 'الإثنين': 1, 'الثلاثاء': 2, 'الأربعاء': 3, 'الخميس': 4, 'الجمعة': 5, 'السبت': 6 };
+
+function eaAddDays(dateStr, days) {
+  const d = new Date(dateStr + 'T00:00:00');
+  d.setDate(d.getDate() + days);
+  return d.toISOString().slice(0, 10);
+}
+
+window.openExcelAttModal = () => {
+  document.getElementById('excelAttModal').style.display = 'flex';
+  document.getElementById('eaDate').value = '';
+  document.getElementById('eaFile').value = '';
+  document.getElementById('eaStatus').style.display = 'none';
+  document.getElementById('eaPreviewSection').style.display = 'none';
+  const subjList = document.getElementById('eaSubjectsList');
+  subjList.innerHTML = '';
+  eaAddSubjectRow(); eaAddSubjectRow(); eaAddSubjectRow();
+  window._eaParsed = null;
+};
+
+window.closeExcelAttModal = () => {
+  document.getElementById('excelAttModal').style.display = 'none';
+};
+
+window.eaAddSubjectRow = () => {
+  const container = document.getElementById('eaSubjectsList');
+  const div = document.createElement('div');
+  div.style.cssText = 'display:flex;gap:6px;align-items:center;margin-bottom:6px';
+  div.innerHTML = `
+    <select class="ea-subject-select" style="flex:1;border:1px solid var(--border);border-radius:6px;padding:6px 8px;font-family:inherit;font-size:12px">
+      <option value="">— اختاري مادة —</option>
+      ${_baAllSubjects.map(s => `<option>${s}</option>`).join('')}
+    </select>
+    <button type="button" onclick="this.parentElement.remove()" style="background:none;border:none;color:#c0392b;cursor:pointer;font-size:15px;padding:2px 8px">✕</button>
+  `;
+  container.appendChild(div);
+};
+
+function eaGetSubjectLabels() {
+  return [...document.querySelectorAll('.ea-subject-select')].map(s => s.value).filter(Boolean);
+}
+
+function eaPeriodLabel(subjNames, i) {
+  return subjNames[i] || ['الحصة الأولى', 'الحصة الثانية', 'الحصة الثالثة', 'الحصة الرابعة', 'الحصة الخامسة'][i] || `الحصة ${i + 1}`;
+}
+
+window.parseAttendanceExcelUI = async () => {
+  const fileInput   = document.getElementById('eaFile');
+  const file        = fileInput.files[0];
+  const weekStart   = document.getElementById('eaDate').value; // تاريخ يوم الأحد
+  const sheetFilter = document.getElementById('eaPeriod').value;
+
+  if (!file) { showToast('اختاري ملف أولاً'); return; }
+  if (!weekStart) { showToast('حددي تاريخ يوم الأحد لهذا الأسبوع'); return; }
+
+  const status = document.getElementById('eaStatus');
+  status.style.display = 'block';
+  status.textContent = '⏳ جارٍ قراءة الملف...';
+
+  try {
+    const XLSXmod = await import('https://cdn.sheetjs.com/xlsx-0.20.3/package/xlsx.mjs');
+    const buffer = await file.arrayBuffer();
+    const wb = XLSXmod.read(buffer, { type: 'array' });
+
+    let sheetNames = wb.SheetNames;
+    if (sheetFilter) {
+      const keyword = sheetFilter.includes('صباح') ? 'صباح' : 'مساء';
+      const filtered = wb.SheetNames.filter(n => n.includes(keyword));
+      if (filtered.length) sheetNames = filtered;
+    }
+
+    const students = allStudents.filter(s => s.name && s.name !== 'طالبة جديدة' && !s.archived);
+    const fullNameMap = new Map();
+    const firstNameMap = new Map();
+    students.forEach(s => {
+      fullNameMap.set(normalizeName(s.name), s);
+      const fn = firstNameNormalized(s.name);
+      if (!firstNameMap.has(fn)) firstNameMap.set(fn, []);
+      firstNameMap.get(fn).push(s);
+    });
+
+    const parsedRows = [];
+
+    sheetNames.forEach(sheetName => {
+      const ws = wb.Sheets[sheetName];
+      const rows = XLSXmod.utils.sheet_to_json(ws, { header: 1, defval: '' });
+      if (!rows.length) return;
+      const header = rows[0];
+      const dayCols = [];
+      for (let c = 1; c < header.length; c++) {
+        const label = String(header[c] || '').trim();
+        if (EA_DAY_OFFSETS[label] !== undefined) dayCols.push({ col: c, day: label });
+      }
+      if (!dayCols.length) return; // شيت مفيهوش أعمدة أيام معروفة — تجاهليه
+
+      for (let r = 1; r < rows.length; r++) {
+        const rawName = String(rows[r][0] || '').trim();
+        if (!rawName) continue;
+
+        const exact = fullNameMap.get(normalizeName(rawName));
+        let studentId = null, matchType = 'none';
+        if (exact) { studentId = exact.id; matchType = 'exact'; }
+        else {
+          const candidates = firstNameMap.get(firstNameNormalized(rawName)) || [];
+          if (candidates.length === 1) { studentId = candidates[0].id; matchType = 'suggested'; }
+          else if (candidates.length > 1) matchType = 'ambiguous';
+        }
+
+        dayCols.forEach(({ col, day }) => {
+          const raw = String(rows[r][col] || '').trim();
+          if (!raw) return;
+          const marks = raw.match(ATT_MSG_EMOJI_RE) || [];
+          const noteText = raw.replace(ATT_MSG_EMOJI_RE, '').trim();
+          const periods = marks.map(m => m.includes('✅') ? 'present' : m.includes('❌') ? 'absent' : 'excused');
+          const date = eaAddDays(weekStart, EA_DAY_OFFSETS[day]);
+          parsedRows.push({
+            sheet: sheetName, rawName, studentId, matchType,
+            day, date, periods, note: noteText,
+            suspicious: periods.length === 0 || periods.length > 5,
+          });
+        });
+      }
+    });
+
+    window._eaParsed = parsedRows;
+    renderEAPreview(parsedRows);
+    document.getElementById('eaPreviewSection').style.display = 'block';
+    status.textContent = `✅ تم تحليل ${parsedRows.length} خلية عبر ${sheetNames.length} شيت`;
+  } catch(e) {
+    console.error('parseAttendanceExcelUI:', e);
+    status.textContent = '❌ خطأ: ' + e.message;
+  }
+};
+
+function renderEAPreview(rows) {
+  const exactCount = rows.filter(r => r.matchType === 'exact').length;
+  const reviewRows = rows.filter(r => r.matchType !== 'exact');
+  document.getElementById('eaSummary').innerHTML =
+    `✅ <strong>${exactCount}</strong> خلية تطابقت تلقائيًا` +
+    (reviewRows.length ? ` — 🔶 <strong>${reviewRows.length}</strong> محتاجة مراجعة` : '');
+
+  const nmDiv = document.getElementById('eaNotMentioned');
+  const uniqueNames = [...new Set(reviewRows.map(r => r.rawName))];
+  if (uniqueNames.length) {
+    nmDiv.style.display = 'block';
+    nmDiv.innerHTML = `🔶 أسماء محتاجة اختيار الطالبة يدويًا:<br>` + uniqueNames.map(n => esc(n)).join('، ');
+  } else {
+    nmDiv.style.display = 'none';
+  }
+
+  // اجمعي الصفوف حسب (الاسم + الشيت) عشان العرض يبقى مختصر بدل صف لكل يوم
+  const grouped = {};
+  rows.forEach(r => {
+    const key = `${r.rawName}|||${r.sheet}`;
+    if (!grouped[key]) grouped[key] = { rawName: r.rawName, sheet: r.sheet, studentId: r.studentId, matchType: r.matchType, entries: [] };
+    grouped[key].entries.push(r);
+  });
+
+  const subjNames = eaGetSubjectLabels();
+  document.getElementById('eaRowsList').innerHTML = Object.values(grouped).map(g => {
+    const needsSelect = g.matchType !== 'exact';
+    const daysHtml = g.entries.map(e => {
+      const marksHtml = e.periods.map((p, pi) => `${esc(eaPeriodLabel(subjNames, pi))}:${p === 'present' ? '✔' : p === 'absent' ? '✖' : '⭕'}`).join(' ');
+      return `<span style="display:inline-block;margin:2px 10px 2px 0;${e.suspicious ? 'color:#c9852b;font-weight:700' : ''}">${esc(e.day)}${e.suspicious ? ' ⚠️' : ''}: ${marksHtml || '—'}${e.note ? ' 📝' + esc(e.note) : ''}</span>`;
+    }).join('');
+    return `<div style="padding:7px 10px;border-bottom:1px solid var(--border);font-size:11.5px;${needsSelect ? 'background:rgba(201,162,39,0.08)' : ''}">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px">
+        <span style="font-size:13px;font-weight:700">${esc(g.rawName)}</span>
+        <span style="font-size:10px;color:var(--text-mid)">(${esc(g.sheet)})</span>
+      </div>
+      ${needsSelect ? `<select onchange="eaSelectStudent('${esc(g.rawName).replace(/'/g, "\\'")}','${esc(g.sheet).replace(/'/g, "\\'")}', this.value)" style="width:100%;margin-bottom:4px;border:1px solid var(--border);border-radius:6px;padding:3px 6px;font-family:inherit;font-size:11px">${buildStudentOptions(g.studentId)}</select>` : ''}
+      <div style="color:var(--text-mid)">${daysHtml}</div>
+    </div>`;
+  }).join('');
+}
+
+window.eaSelectStudent = (rawName, sheet, studentId) => {
+  (window._eaParsed || []).forEach(r => {
+    if (r.rawName === rawName && r.sheet === sheet) {
+      r.studentId = studentId || null;
+      r.matchType = studentId ? 'manual' : 'none';
+    }
+  });
+};
+
+window.confirmExcelAttendance = async () => {
+  const rows = (window._eaParsed || []).filter(r => r.studentId);
+  if (!rows.length) { showToast('مفيش صفوف صالحة للحفظ (راجعي الأسماء المحتاجة اختيار يدوي)'); return; }
+
+  if (!confirm(`هيتم إنشاء ${rows.length} سجل حضور. متأكدة؟`)) return;
+
+  const btn = document.querySelector('[onclick="confirmExcelAttendance()"]');
+  if (btn) { btn.disabled = true; btn.textContent = 'جارٍ الحفظ...'; }
+
+  try {
+    const subjNames = eaGetSubjectLabels();
+    await Promise.all(rows.map(r => {
+      const subjects = {};
+      r.periods.forEach((status, i) => { subjects[eaPeriodLabel(subjNames, i)] = status; });
+      return addDoc(collection(db, 'students', r.studentId, 'sessions'), {
+        day: `${r.day} (${r.sheet})`,
+        date: r.date, subjects, createdAt: Date.now(),
+      });
+    }));
+
+    const notesByStudent = {};
+    rows.filter(r => r.note).forEach(r => {
+      if (!notesByStudent[r.studentId]) notesByStudent[r.studentId] = [];
+      notesByStudent[r.studentId].push(`[${r.date} ${r.day}] ${r.note}`);
+    });
+    await Promise.all(Object.entries(notesByStudent).map(async ([sid, lines]) => {
+      const sSnap = await getDoc(doc(db, 'students', sid));
+      const existing = sSnap.exists() ? (sSnap.data().notes || '') : '';
+      const combined = (existing ? existing + '\n' : '') + lines.join('\n');
+      await updateDoc(doc(db, 'students', sid), { notes: combined });
+    }));
+
+    showToast(`✅ تم تسجيل ${rows.length} سجل حضور${Object.keys(notesByStudent).length ? ` و${Object.keys(notesByStudent).length} ملاحظة` : ''}`);
+    closeExcelAttModal();
+  } catch(e) {
+    showToast('❌ خطأ: ' + e.message);
+    console.error('confirmExcelAttendance:', e);
+  } finally {
+    if (btn) { btn.disabled = false; btn.innerHTML = '<i class="ti ti-device-floppy"></i> تأكيد وحفظ الحضور'; }
+  }
+};
+
+
 // ── محرر الملاحظات الجماعي ──────────────────────────────────
 window.openBulkNotesModal = () => {
   document.getElementById('bulkNotesModal').style.display = 'flex';

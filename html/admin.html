@@ -279,6 +279,10 @@
           <span class="ami-icon" style="background:rgba(155,89,182,0.12);color:#8e44ad"><i class="ti ti-message-2"></i></span>
           <span class="ami-text"><strong>استيراد حضور من رسالة</strong><small>الصقي رسالة الحضور وهيتم تفريغها تلقائيًا</small></span>
         </button>
+        <button class="actions-menu-item" onclick="openExcelAttModal();toggleActionsMenu()">
+          <span class="ami-icon" style="background:rgba(39,174,96,0.12);color:#1e8449"><i class="ti ti-file-spreadsheet"></i></span>
+          <span class="ami-text"><strong>استيراد حضور من Excel</strong><small>ملف أسبوعي: أعمدة = أيام الأسبوع</small></span>
+        </button>
       </div>
 
       <!-- ── مجموعة 3: التصدير ── -->
@@ -1405,6 +1409,59 @@ function formatSize(bytes) {
       <button onclick="confirmResetSelected()" style="background:#e74c3c;color:white;border:none;border-radius:10px;padding:11px;font-family:inherit;font-size:14px;cursor:pointer;font-weight:700">
         🗑️ مسح البيانات للمحددين
       </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ مودال استيراد حضور من ملف Excel ══ -->
+<div id="excelAttModal" class="modal-overlay" style="display:none">
+  <div class="modal-box" style="max-width:760px;width:96vw">
+    <div class="modal-head">
+      <span class="m-title m-title-amber">📊 استيراد حضور من ملف Excel</span>
+      <button class="m-close" onclick="closeExcelAttModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:12px;color:var(--text-mid);margin-bottom:12px;background:rgba(92,61,46,0.05);border:1px solid var(--border);border-radius:8px;padding:10px">
+        📌 الملف لازم يكون: أول عمود = اسم الطالبة، وباقي الأعمدة = **أيام الأسبوع** (الأحد، الاثنين...). كل خلية ممكن تحتوي أكتر من رمز (لعدة حصص في نفس اليوم): ✅ / ❌ / ⭕، أو ملاحظة نصية، أو تتسيبها فاضية.
+      </p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+        <div>
+          <label style="font-size:12px;color:var(--text-mid);display:block;margin-bottom:4px">تاريخ يوم الأحد (بداية الأسبوع) *</label>
+          <input id="eaDate" type="date" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:inherit;font-size:13px"/>
+        </div>
+        <div>
+          <label style="font-size:12px;color:var(--text-mid);display:block;margin-bottom:4px">الفترة / الشيت (اختياري)</label>
+          <select id="eaPeriod" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:inherit;font-size:13px">
+            <option value="">كل الشيتات في الملف</option>
+            <option value="الفترة الصباحية">الفترة الصباحية فقط</option>
+            <option value="الفترة المسائية">الفترة المسائية فقط</option>
+          </select>
+        </div>
+      </div>
+
+      <label style="font-size:12px;color:var(--text-mid);display:block;margin-bottom:4px">مواد الحصص بترتيبها داخل اليوم الواحد (اختياري)</label>
+      <div id="eaSubjectsList" style="margin-bottom:6px"></div>
+      <button type="button" onclick="eaAddSubjectRow()" style="font-size:12px;background:var(--beige2);border:1px solid var(--border);border-radius:6px;padding:5px 12px;cursor:pointer;font-family:inherit;margin-bottom:12px">+ إضافة مادة</button>
+
+      <label style="font-size:12px;color:var(--text-mid);display:block;margin-bottom:4px">اختاري الملف *</label>
+      <input id="eaFile" type="file" accept=".xlsx,.xls,.csv" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:inherit;font-size:13px;cursor:pointer;margin-bottom:10px"/>
+
+      <div style="display:flex;justify-content:flex-end">
+        <button onclick="parseAttendanceExcelUI()" style="background:var(--green-dark);color:#fff;border:none;border-radius:8px;padding:9px 20px;font-family:inherit;font-weight:700;cursor:pointer"><i class="ti ti-wand"></i> تحليل الملف</button>
+      </div>
+
+      <div id="eaStatus" style="display:none;font-size:12px;color:var(--text-mid);margin-top:8px"></div>
+
+      <div id="eaPreviewSection" style="display:none;margin-top:18px;border-top:1px solid var(--border);padding-top:14px">
+        <div id="eaSummary" style="font-size:13px;margin-bottom:10px;font-weight:600"></div>
+        <div id="eaNotMentioned" style="display:none;margin-bottom:12px;background:rgba(201,162,39,0.1);border:1px solid rgba(201,162,39,0.3);border-radius:8px;padding:10px;font-size:12px"></div>
+        <div id="eaRowsList" style="max-height:340px;overflow-y:auto;border:1px solid var(--border);border-radius:10px;padding:4px"></div>
+
+        <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:16px">
+          <button onclick="closeExcelAttModal()" style="background:var(--beige2);border:1px solid var(--border);border-radius:8px;padding:9px 20px;font-family:inherit;cursor:pointer">إلغاء</button>
+          <button onclick="confirmExcelAttendance()" style="background:linear-gradient(135deg,#2c1a0e,#5c3d2e);color:#e8c96a;border:none;border-radius:8px;padding:9px 24px;font-family:inherit;font-weight:700;cursor:pointer"><i class="ti ti-device-floppy"></i> تأكيد وحفظ الحضور</button>
+        </div>
+      </div>
     </div>
   </div>
 </div>
