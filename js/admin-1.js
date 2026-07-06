@@ -200,17 +200,24 @@ const DEFAULT_SUBJECTS = ['التفسير', 'الفقه', 'العقيدة', 'ا�
 
 async function loadSubjectOptions() {
   try {
-    let snap = await getDocs(query(collection(db, 'subjects'), orderBy('createdAt', 'asc')));
+    // ملحوظة: courses.html بيحفظ تاريخ الإضافة في addedAt، مش createdAt — orderBy('createdAt')
+    // كان بيستبعد أي مادة اتضافت من هناك بالكامل. بنجيب الكل من غير استبعاد ونرتب يدويًا.
+    let snap = await getDocs(collection(db, 'subjects'));
 
-    // لو الـ collection فاضية — seed المواد الافتراضية
+    // لو الـ collection فاضية تمامًا — seed المواد الافتراضية
     if (snap.empty) {
       for (const name of DEFAULT_SUBJECTS) {
         await addDoc(collection(db, 'subjects'), { name, createdAt: serverTimestamp() });
       }
-      snap = await getDocs(query(collection(db, 'subjects'), orderBy('createdAt', 'asc')));
+      snap = await getDocs(collection(db, 'subjects'));
     }
 
-    const subjects = snap.docs.map(d => d.data().name).filter(Boolean);
+    const toMillis = v => v?.toMillis?.() ?? 0;
+    const subjects = snap.docs
+      .map(d => d.data())
+      .sort((a, b) => (toMillis(a.addedAt) || toMillis(a.createdAt)) - (toMillis(b.addedAt) || toMillis(b.createdAt)))
+      .map(d => d.name)
+      .filter(Boolean);
 
     // ملء fCourse
     const fCourse = document.getElementById('fCourse');
