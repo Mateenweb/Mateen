@@ -634,6 +634,7 @@ window.submitNewCourse = async () => {
       title: finalTitle, course, type, url, notes,
       ...(lectureNumber != null ? { lectureNumber } : {}),
       ...(exam ? { exam } : {}),
+      ...(assignment ? { assignment } : {}),
       addedAt: Date.now(),
       addedBy: auth.currentUser.email,
     });
