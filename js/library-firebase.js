@@ -13,9 +13,9 @@ const auth = getAuth(app);
 const db   = getFirestore(app);
 
 let currentRole = null;
-let allLibMats  = [];   // Library متين (من materials collection)
+let allLibMats  = [];   // Library متين (من libraryMaterials collection — منفصل تمامًا عن materials المواد العلمية)
 let allLibExtra = {};   // الأقسام الأخرى { enrichment:[], podcast:[], courses:[] }
-let allCourses  = [];   // الدورات (من courses collection) — كل دورة عندها موادها في materials عبر courseId
+let allCourses  = [];   // الدورات (من courses collection) — كل دورة عندها موادها في libraryMaterials عبر courseId
 
 const isAdmin = () => currentRole === 'admin' || currentRole === 'supervisor';
 
@@ -174,8 +174,8 @@ function renderCoursesGrid() {
 
 // ══ مستمعات Firestore ══
 
-// 1. Library متين — من materials collection (نفس المصدر تستخدمه الدورات كمان عبر courseId)
-onSnapshot(query(collection(db, 'materials'), orderBy('addedAt', 'desc')), snap => {
+// 1. Library متين — من libraryMaterials collection (منفصل تمامًا عن materials المواد العلمية)
+onSnapshot(query(collection(db, 'libraryMaterials'), orderBy('addedAt', 'desc')), snap => {
   allLibMats = snap.docs.map(d => ({ id: d.id, ...d.data() }));
   window.renderLibMats();
   if (window._openCourseId) window.openCourseDetailModal(window._openCourseId, true);
@@ -326,7 +326,7 @@ window.confirmDeleteCourse = async (courseId, name) => {
   if (!confirm(`هل أنتِ متأكدة من حذف دورة "${name}"؟ هيتم حذف كل محتواها كمان.`)) return;
   try {
     const mats = allLibMats.filter(m => m.courseId === courseId);
-    for (const m of mats) await deleteDoc(doc(db, 'materials', m.id));
+    for (const m of mats) await deleteDoc(doc(db, 'libraryMaterials', m.id));
     await deleteDoc(doc(db, 'courses', courseId));
     document.getElementById('courseDetailModal').style.display = 'none';
     window._openCourseId = null;
@@ -366,7 +366,7 @@ window.submitAddLib = async () => {
 
   try {
     if (section === 'mateen-lib') {
-      await addDoc(collection(db, 'materials'), {
+      await addDoc(collection(db, 'libraryMaterials'), {
         title, type, url, notes,
         course: document.getElementById('addLibSubject').value,
         ...(lectureNumber != null ? { lectureNumber } : {}),
@@ -374,7 +374,7 @@ window.submitAddLib = async () => {
       });
     } else if (section === 'courses') {
       const courseId = document.getElementById('addLibCourseId').value;
-      await addDoc(collection(db, 'materials'), {
+      await addDoc(collection(db, 'libraryMaterials'), {
         title, type, url, notes, courseId,
         ...(lectureNumber != null ? { lectureNumber } : {}),
         addedAt: Date.now(),
@@ -418,7 +418,7 @@ window.submitEditLib = async () => {
   btn.disabled = true; btn.innerHTML = '<i class="ti ti-loader"></i> جاري الحفظ...';
 
   try {
-    const colName = (editCache.section === 'mateen-lib' || editCache.section === 'courses') ? 'materials' : 'libraryItems';
+    const colName = (editCache.section === 'mateen-lib' || editCache.section === 'courses') ? 'libraryMaterials' : 'libraryItems';
     await updateDoc(doc(db, colName, id), { title, type, url, notes });
     document.getElementById('editLibModal').style.display = 'none';
   } catch(e) {
@@ -439,7 +439,7 @@ window.openDeleteLib = (id, title, section) => {
 
 window.executeDeleteLib = async () => {
   const id  = deleteCache.id;
-  const col = (deleteCache.section === 'mateen-lib' || deleteCache.section === 'courses') ? 'materials' : 'libraryItems';
+  const col = (deleteCache.section === 'mateen-lib' || deleteCache.section === 'courses') ? 'libraryMaterials' : 'libraryItems';
   const btn = document.getElementById('deleteLibConfirm');
   btn.disabled = true; btn.innerHTML = '<i class="ti ti-loader"></i>';
   try {
