@@ -355,47 +355,6 @@ window.doReset = async () => {
 };
 
 
-/* ══════════════════════════════════════
-   Delete الحساب من Page الدخول
-══════════════════════════════════════ */
-window.doDeleteAccount = async () => {
-  hideError();
-  const email = document.getElementById('emailInput').value.trim();
-  const pass  = document.getElementById('passInput').value;
-
-  if (!email || !pass) {
-    showError('أدخلي البريد الإلكتروني وكلمة المرور أولاً لتأكيد هويتك');
-    return;
-  }
-
-  const confirmed = confirm('هل أنتِ متأكدة من حذف حسابك نهائياً؟\nهذا الإجراء لا يمكن التراجع عنه.');
-  if (!confirmed) return;
-
-  setLoading('deleteAccountBtn', true);
-  try {
-    // Login أولاً للتحقق from the هوية
-    const cred = await signInWithEmailAndPassword(auth, email, pass);
-    const uid  = cred.user.uid;
-    const db2  = getFirestore(app);
-
-    // Delete بيانات User من Firestore
-    await deleteDoc(doc(db2, 'users', uid));
-
-    // Delete الحساب من Firebase Auth
-    await deleteUser(cred.user);
-
-    showSuccess('تم الحذف ✅', 'تم حذف حسابك بنجاح.');
-  } catch(e) {
-    showError(ERRORS[e.code] || 'تعذر حذف الحساب، تأكدي من البيانات وحاولي مجدداً');
-  } finally {
-    const btn = document.getElementById('deleteAccountBtn');
-    if (btn) {
-      btn.disabled = false;
-      btn.innerHTML = '<i class="ti ti-trash"></i> حذف حسابي';
-    }
-  }
-};
-
 /* Enter key */
 document.addEventListener('keydown', e => {
   if (e.key !== 'Enter') return;
