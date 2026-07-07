@@ -6,6 +6,7 @@ import { getFirestore, collection, onSnapshot, addDoc, updateDoc,
          deleteDoc, doc, getDoc, orderBy, query, serverTimestamp }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 import { FIREBASE_CONFIG } from "./config.js";
+import { renderAssignmentsSection } from "./assignments-ui.js";
 
 const app  = getApps().length ? getApp() : initializeApp(FIREBASE_CONFIG);
 const auth = getAuth(app);
@@ -17,6 +18,12 @@ let allLibExtra = {};   // الأقسام الأخرى { enrichment:[], podcast:
 let allCourses  = [];   // الدورات (من courses collection) — كل دورة عندها موادها في materials عبر courseId
 
 const isAdmin = () => currentRole === 'admin' || currentRole === 'supervisor';
+
+window.refreshAssignmentsFor = (materialId, course) => {
+  document.querySelectorAll(`[data-asg-container="${materialId}"]`).forEach(el => {
+    renderAssignmentsSection(materialId, course, el.id);
+  });
+};
 
 // ══ أيقونات اBecauseواع ══
 const TYPE_ICONS = { 'فيديو':'🎬','ملف PDF':'📄','مقال':'📝','حلقة صوتية':'🎙️','دورة':'🎓','أخرى':'📎' };
@@ -76,6 +83,10 @@ function cardHTML(item, section) {
       </button>
     </div>` : '';
 
+  const asgContainer = section === 'mateen-lib'
+    ? `<div id="asg-${item.id}" data-asg-container="${item.id}"></div>`
+    : '';
+
   return `
     <div class="lib-card">
       <a href="${item.url}" target="_blank" rel="noopener" style="text-decoration:none;display:block;">
@@ -86,6 +97,7 @@ function cardHTML(item, section) {
           ${item.notes ? `<div class="lib-card-notes">${item.notes}</div>` : ''}
         </div>
       </a>
+      ${asgContainer}
       ${editBtns}
     </div>`;
 }
@@ -108,6 +120,8 @@ window.renderLibMats = () => {
 
   const addBtn = document.getElementById('libAddBtn');
   if (addBtn) addBtn.style.display = isAdmin() ? 'block' : 'none';
+
+  mats.forEach(m => renderAssignmentsSection(m.id, m.course, 'asg-' + m.id));
 };
 
 // ══ رسم الأقسام الأخرى ══
