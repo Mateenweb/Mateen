@@ -102,10 +102,30 @@ function cardHTML(item, section) {
     </div>`;
 }
 
+// ══ رسم تابات فلتر المواد — ديناميكي حسب المواد المُضافة فعليًا ══
+function renderLibFilters() {
+  const row = document.getElementById('libFiltersRow');
+  if (!row) return;
+  const filter = window.currentLibFilter || 'all';
+
+  // أسماء المواد الفريدة الموجودة فعليًا في المحتوى المُضاف، بترتيب ظهورها
+  const subjects = [...new Set(allLibMats.map(m => m.course).filter(Boolean))];
+
+  // لو المادة النشطة اتشالت (اتمسح آخر محتوى ليها)، رجّعي الفلتر لـ"الكل"
+  if (filter !== 'all' && !subjects.includes(filter)) {
+    window.currentLibFilter = 'all';
+  }
+  const activeFilter = window.currentLibFilter || 'all';
+
+  row.innerHTML = `<button class="lib-btn${activeFilter === 'all' ? ' active' : ''}" onclick="filterLibMats(this,'all')">الكل</button>` +
+    subjects.map(s => `<button class="lib-btn${activeFilter === s ? ' active' : ''}" onclick="filterLibMats(this,'${s.replace(/'/g,"\\'")}')">${s}</button>`).join('');
+}
+
 // ══ رسم Library متين ══
 window.renderLibMats = () => {
   const grid = document.getElementById('libMatsGrid');
   if (!grid) return;
+  renderLibFilters();
   const filter = window.currentLibFilter || 'all';
   const mats = filter === 'all' ? allLibMats : allLibMats.filter(m => m.course === filter);
 
