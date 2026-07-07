@@ -592,10 +592,12 @@ window.submitNewCourse = async () => {
   }
 
   // واجب/اختبار (بنجيبهم هنا الأول عشان نستخدمهم في التحقق كمان)
-  const asgTitle    = document.getElementById('asgTitle')?.value.trim();
-  const asgDeadline = document.getElementById('asgDeadline')?.value;
-  const asgDesc     = document.getElementById('asgDesc')?.value.trim();
-  const assignment  = asgTitle ? { title: asgTitle, deadline: asgDeadline || null, desc: asgDesc || '' } : null;
+  const asgTitle     = document.getElementById('asgTitle')?.value.trim();
+  const asgDeadline  = document.getElementById('asgDeadline')?.value;
+  const asgDesc      = document.getElementById('asgDesc')?.value.trim();
+  const asgAllowFile = document.getElementById('asgAllowFileQuick')?.checked ?? true;
+  const asgAllowText = document.getElementById('asgAllowTextQuick')?.checked ?? true;
+  const assignment   = asgTitle ? { title: asgTitle, deadline: asgDeadline || null, desc: asgDesc || '', allowFile: asgAllowFile, allowText: asgAllowText } : null;
 
   const examTitle    = document.getElementById('examTitle')?.value.trim();
   const examPath     = document.getElementById('examPath')?.value.trim();
@@ -612,6 +614,11 @@ window.submitNewCourse = async () => {
   if (!assignment && !exam && (!title || !url)) {
     err.style.display = 'block';
     err.textContent = isAudio ? 'يرجى رفع الملف الصوتي أولاً' : 'يرجى تعبئة الحقول المطلوبة (الاسم، الرابط)، أو إضافة واجب/اختبار على الأقل';
+    return;
+  }
+  if (assignment && !assignment.allowFile && !assignment.allowText) {
+    err.style.display = 'block';
+    err.textContent = 'اختاري وسيلة تسليم واحدة على الأقل للواجب (رفع ملف أو كتابة نص)';
     return;
   }
   err.style.display = 'none';
@@ -638,8 +645,8 @@ window.submitNewCourse = async () => {
         course,
         title: assignment.title,
         description: assignment.desc,
-        allowFile: true,
-        allowText: true,
+        allowFile: assignment.allowFile,
+        allowText: assignment.allowText,
         deadline: assignment.deadline,
       });
     }
@@ -648,6 +655,10 @@ window.submitNewCourse = async () => {
      'asgTitle','asgDeadline','asgDesc','examTitle','examPath','examDeadline'].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.value = '';
+    });
+    ['asgAllowFileQuick','asgAllowTextQuick'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.checked = true;
     });
     // أغلق الأقسام الاختيارية
     ['asgSection','examSection','newLectureNumWrap'].forEach(id => {
