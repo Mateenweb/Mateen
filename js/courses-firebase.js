@@ -6,6 +6,7 @@ import { getFirestore, collection, query, orderBy, onSnapshot, addDoc, getDoc, d
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 import { FIREBASE_CONFIG } from "./config.js";
 import { renderAssignmentsSection } from "./assignments-ui.js";
+import { addAssignment } from "./assignments.js";
 window.refreshAssignmentsFor = (materialId, course) => {
   document.querySelectorAll(`[data-asg-container="${materialId}"]`).forEach(el => {
     renderAssignmentsSection(materialId, course, el.id);
@@ -606,14 +607,26 @@ window.submitNewCourse = async () => {
   const exam         = examTitle && examPath ? { title: examTitle, path: examPath, deadline: examDeadline || null } : null;
 
   try {
-    await addDoc(collection(db, 'materials'), {
+    const materialRef = await addDoc(collection(db, 'materials'), {
       title, course, type, url, notes,
       ...(lectureNumber != null ? { lectureNumber } : {}),
-      ...(assignment ? { assignment } : {}),
       ...(exam ? { exam } : {}),
       addedAt: Date.now(),
       addedBy: auth.currentUser.email,
     });
+
+    // الواجب (لو اتحط) لازم يتحفظ كواجب حقيقي قابل للتسليم، مش نص ثابت على المادة
+    if (assignment) {
+      await addAssignment({
+        materialId: materialRef.id,
+        course,
+        title: assignment.title,
+        description: assignment.desc,
+        allowFile: true,
+        allowText: true,
+        deadline: assignment.deadline,
+      });
+    }
     // reset all fields
     ['newCourseTitle','newCourseCat','newCourseUrl','newCourseNotes','newCourseLecture','newLectureNumInput',
      'asgTitle','asgDeadline','asgDesc','examTitle','examPath','examDeadline'].forEach(id => {
