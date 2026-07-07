@@ -245,6 +245,17 @@ window.updateLectureOptions = () => {
 };
 
 // ── تجميع المواد المضافة حسب رقم المحاضرة قبل عرضها ────────────
+// ترتيب ثابت لعناصر المحاضرة الواحدة: اختبار/واجب أولًا (لو موجودين)، ثم محاضرة، ثم ملخص، ثم الباقي
+function matPriority(m) {
+  if (m.exam?.title || m.assignment?.title) return 0;
+  if (m.type === 'محاضرة') return 1;
+  if (m.type === 'ملخص') return 2;
+  return 3;
+}
+function sortMatsForLecture(mats) {
+  return [...mats].sort((a, b) => matPriority(a) - matPriority(b));
+}
+
 function matsGroupedHTML(mats) {
   const withLecture = mats.filter(m => m.lectureNumber != null);
   const without = mats.filter(m => m.lectureNumber == null);
@@ -252,17 +263,21 @@ function matsGroupedHTML(mats) {
 
   let html = '';
   lectureNums.forEach(n => {
-    const group = withLecture.filter(m => m.lectureNumber === n);
+    const group = sortMatsForLecture(withLecture.filter(m => m.lectureNumber === n));
     html += `
-      <div style="margin-bottom:14px">
-        <div style="font-size:13px;font-weight:700;color:var(--gold-dark,#b8860b);margin:10px 0 8px;display:flex;align-items:center;gap:6px">
-          <i class="ti ti-bookmark"></i> المحاضرة ${n}
+      <div style="border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:14px">
+        <div onclick="const b=this.nextElementSibling;const open=b.style.display!=='none';b.style.display=open?'none':'flex';this.querySelector('.lec-chevron').style.transform=open?'rotate(-90deg)':'rotate(0deg)'"
+          style="background:rgba(201,162,39,0.1);padding:10px 14px;font-size:13px;font-weight:700;color:var(--gold-dark,#b8860b);display:flex;align-items:center;justify-content:space-between;cursor:pointer">
+          <span><i class="ti ti-bookmark"></i> المحاضرة ${n}</span>
+          <i class="ti ti-chevron-down lec-chevron" style="transition:.2s"></i>
         </div>
-        <div style="display:flex;flex-direction:column;gap:8px">${group.map(matCardHTML).join('')}</div>
+        <div style="display:flex;flex-direction:column;gap:8px;padding:12px;background:var(--beige,#faf6ee)">
+          ${group.map(matCardHTML).join('')}
+        </div>
       </div>`;
   });
   if (without.length) {
-    const withoutHTML = `<div style="display:flex;flex-direction:column;gap:8px">${without.map(matCardHTML).join('')}</div>`;
+    const withoutHTML = `<div style="display:flex;flex-direction:column;gap:8px">${sortMatsForLecture(without).map(matCardHTML).join('')}</div>`;
     html += lectureNums.length ? `
       <div style="margin-bottom:14px">
         <div style="font-size:12px;font-weight:600;color:var(--text-mid);margin:10px 0 8px">📎 مواد غير مرتبطة بمحاضرة</div>
