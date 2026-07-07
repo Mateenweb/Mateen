@@ -21,6 +21,17 @@ const isAdmin = () => currentRole === 'admin' || currentRole === 'supervisor';
 // ══ أيقونات اBecauseواع ══
 const TYPE_ICONS = { 'فيديو':'🎬','ملف PDF':'📄','مقال':'📝','حلقة صوتية':'🎙️','دورة':'🎓','أخرى':'📎' };
 
+// ترتيب ثابت لعناصر المحاضرة الواحدة: اختبار/واجب أولًا (لو موجودين)، ثم محاضرة، ثم ملخص، ثم الباقي
+function libMatPriority(m) {
+  if (m.exam?.title || m.assignment?.title) return 0;
+  if (m.type === 'محاضرة') return 1;
+  if (m.type === 'ملخص') return 2;
+  return 3;
+}
+function sortLibMatsForLecture(mats) {
+  return [...mats].sort((a, b) => libMatPriority(a) - libMatPriority(b));
+}
+
 // ── تجميع مواد حسب رقم المحاضرة (نفس فكرة courses.html) ─────────
 function libMatsGroupedHTML(mats, section) {
   const withLecture = mats.filter(m => m.lectureNumber != null);
@@ -29,17 +40,19 @@ function libMatsGroupedHTML(mats, section) {
 
   let html = '';
   lectureNums.forEach(n => {
-    const group = withLecture.filter(m => m.lectureNumber === n);
+    const group = sortLibMatsForLecture(withLecture.filter(m => m.lectureNumber === n));
     html += `
-      <div style="margin-bottom:14px;grid-column:1/-1">
-        <div style="font-size:13px;font-weight:700;color:var(--gold-dark,#b8860b);margin:10px 0 8px;display:flex;align-items:center;gap:6px">
-          <i class="ti ti-bookmark"></i> المحاضرة ${n}
+      <div style="border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:14px;grid-column:1/-1">
+        <div onclick="const b=this.nextElementSibling;const open=b.style.display!=='none';b.style.display=open?'none':'flex';this.querySelector('.lec-chevron').style.transform=open?'rotate(-90deg)':'rotate(0deg)'"
+          style="background:rgba(201,162,39,0.1);padding:10px 14px;font-size:13px;font-weight:700;color:var(--gold-dark,#b8860b);display:flex;align-items:center;justify-content:space-between;cursor:pointer">
+          <span><i class="ti ti-bookmark"></i> المحاضرة ${n}</span>
+          <i class="ti ti-chevron-down lec-chevron" style="transition:.2s"></i>
         </div>
-        <div class="lib-cards-grid" style="padding:0">${group.map(m => cardHTML(m, section)).join('')}</div>
+        <div class="lib-cards-grid" style="padding:12px;background:var(--beige,#faf6ee)">${group.map(m => cardHTML(m, section)).join('')}</div>
       </div>`;
   });
   if (without.length) {
-    const withoutHTML = `<div class="lib-cards-grid" style="padding:0">${without.map(m => cardHTML(m, section)).join('')}</div>`;
+    const withoutHTML = `<div class="lib-cards-grid" style="padding:0">${sortLibMatsForLecture(without).map(m => cardHTML(m, section)).join('')}</div>`;
     html += lectureNums.length ? `
       <div style="margin-bottom:14px;grid-column:1/-1">
         <div style="font-size:12px;font-weight:600;color:var(--text-mid);margin:10px 0 8px">📎 مواد غير مرتبطة بمحاضرة</div>
