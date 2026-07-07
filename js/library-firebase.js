@@ -14,11 +14,40 @@ const db   = getFirestore(app);
 let currentRole = null;
 let allLibMats  = [];   // Library متين (من materials collection)
 let allLibExtra = {};   // الأقسام الأخرى { enrichment:[], podcast:[], courses:[] }
+let allCourses  = [];   // الدورات (من courses collection) — كل دورة عندها موادها في materials عبر courseId
 
 const isAdmin = () => currentRole === 'admin' || currentRole === 'supervisor';
 
 // ══ أيقونات اBecauseواع ══
 const TYPE_ICONS = { 'فيديو':'🎬','ملف PDF':'📄','مقال':'📝','حلقة صوتية':'🎙️','دورة':'🎓','أخرى':'📎' };
+
+// ── تجميع مواد حسب رقم المحاضرة (نفس فكرة courses.html) ─────────
+function libMatsGroupedHTML(mats, section) {
+  const withLecture = mats.filter(m => m.lectureNumber != null);
+  const without = mats.filter(m => m.lectureNumber == null);
+  const lectureNums = [...new Set(withLecture.map(m => m.lectureNumber))].sort((a, b) => a - b);
+
+  let html = '';
+  lectureNums.forEach(n => {
+    const group = withLecture.filter(m => m.lectureNumber === n);
+    html += `
+      <div style="margin-bottom:14px;grid-column:1/-1">
+        <div style="font-size:13px;font-weight:700;color:var(--gold-dark,#b8860b);margin:10px 0 8px;display:flex;align-items:center;gap:6px">
+          <i class="ti ti-bookmark"></i> المحاضرة ${n}
+        </div>
+        <div class="lib-cards-grid" style="padding:0">${group.map(m => cardHTML(m, section)).join('')}</div>
+      </div>`;
+  });
+  if (without.length) {
+    const withoutHTML = `<div class="lib-cards-grid" style="padding:0">${without.map(m => cardHTML(m, section)).join('')}</div>`;
+    html += lectureNums.length ? `
+      <div style="margin-bottom:14px;grid-column:1/-1">
+        <div style="font-size:12px;font-weight:600;color:var(--text-mid);margin:10px 0 8px">📎 مواد غير مرتبطة بمحاضرة</div>
+        ${withoutHTML}
+      </div>` : withoutHTML;
+  }
+  return html;
+}
 
 // ══ رسم كارد ══
 function cardHTML(item, section) {
@@ -54,9 +83,15 @@ window.renderLibMats = () => {
   if (!grid) return;
   const filter = window.currentLibFilter || 'all';
   const mats = filter === 'all' ? allLibMats : allLibMats.filter(m => m.course === filter);
-  grid.innerHTML = mats.length
-    ? mats.map(m => cardHTML(m, 'mateen-lib')).join('')
-    : '<div class="lib-empty"><i class="ti ti-files-off" style="font-size:28px;"></i><div>لا يوجد محتوى</div></div>';
+
+  if (!mats.length) {
+    grid.innerHTML = '<div class="lib-empty"><i class="ti ti-files-off" style="font-size:28px;"></i><div>لا يوجد محتوى</div></div>';
+  } else if (filter === 'all') {
+    // مافيش تجميع بالمحاضرة لما يكون العرض "الكل" (مواد من مواد مختلفة)
+    grid.innerHTML = mats.map(m => cardHTML(m, 'mateen-lib')).join('');
+  } else {
+    grid.innerHTML = libMatsGroupedHTML(mats, 'mateen-lib');
+  }
 
   const addBtn = document.getElementById('libAddBtn');
   if (addBtn) addBtn.style.display = isAdmin() ? 'block' : 'none';
@@ -64,8 +99,9 @@ window.renderLibMats = () => {
 
 // ══ رسم الأقسام الأخرى ══
 function renderSection(section) {
-  const gridId  = { enrichment: 'enrichmentGrid', podcast: 'podcastGrid', courses: 'coursesGrid' }[section];
-  const addBtnId = { enrichment: 'enrichmentAddBtn', podcast: 'podcastAddBtn', courses: 'coursesAddBtn' }[section];
+  if (section === 'courses') { renderCoursesGrid(); return; }
+  const gridId  = { enrichment: 'enrichmentGrid', podcast: 'podcastGrid' }[section];
+  const addBtnId = { enrichment: 'enrichmentAddBtn', podcast: 'podcastAddBtn' }[section];
   const grid   = document.getElementById(gridId);
   const addBtn = document.getElementById(addBtnId);
   if (!grid) return;
@@ -78,22 +114,60 @@ function renderSection(section) {
   if (addBtn) addBtn.style.display = isAdmin() ? 'block' : 'none';
 }
 
+// ── كارت الدورة (تايل قابل للنقر يفتح تفاصيلها) ─────────────
+function courseTileHTML(course) {
+  const icon = course.iconData || course.iconUrl
+    ? `<img src="${course.iconData || course.iconUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:12px;">`
+    : `<i class="ti ti-certificate" style="font-size:26px;color:white"></i>`;
+  return `
+    <div class="lib-card" onclick="openCourseDetailModal('${course.id}')" style="cursor:pointer;padding:0;overflow:hidden">
+      <div style="height:70px;background:${course.color || 'linear-gradient(135deg,#5c3d2e,#8a5e3c)'};display:flex;align-items:center;padding:0 14px;gap:10px">
+        <div style="width:44px;height:44px;border-radius:10px;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0">${icon}</div>
+        <div style="color:white;font-weight:700;font-size:14px">${course.name}</div>
+      </div>
+      <div class="lib-card-body" style="padding:12px">
+        <div class="lib-card-notes" style="margin:0">${course.desc || ''}</div>
+        <div style="font-size:11px;color:var(--text-mid);margin-top:6px;display:flex;gap:10px">
+          ${course.meetings ? `<span><i class="ti ti-calendar-event"></i> ${course.meetings}</span>` : ''}
+          ${course.weeks ? `<span><i class="ti ti-hourglass"></i> ${course.weeks}</span>` : ''}
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderCoursesGrid() {
+  const grid = document.getElementById('coursesGrid');
+  const addBtn = document.getElementById('coursesAddBtn');
+  if (!grid) return;
+  grid.innerHTML = allCourses.length
+    ? allCourses.map(courseTileHTML).join('')
+    : '<div class="lib-empty"><i class="ti ti-files-off" style="font-size:28px;"></i><div>لا توجد دورات مضافة بعد</div></div>';
+  if (addBtn) addBtn.style.display = isAdmin() ? 'block' : 'none';
+}
+
 // ══ مستمعات Firestore ══
 
-// 1. Library متين — من materials collection
+// 1. Library متين — من materials collection (نفس المصدر تستخدمه الدورات كمان عبر courseId)
 onSnapshot(query(collection(db, 'materials'), orderBy('addedAt', 'desc')), snap => {
   allLibMats = snap.docs.map(d => ({ id: d.id, ...d.data() }));
   window.renderLibMats();
+  if (window._openCourseId) window.openCourseDetailModal(window._openCourseId, true);
 });
 
 // 2. الأقسام الأخرى — من libraryItems collection
 onSnapshot(query(collection(db, 'libraryItems'), orderBy('addedAt', 'desc')), snap => {
-  allLibExtra = { enrichment: [], podcast: [], courses: [] };
+  allLibExtra = { enrichment: [], podcast: [] };
   snap.docs.forEach(d => {
     const data = { id: d.id, ...d.data() };
     if (allLibExtra[data.section] !== undefined) allLibExtra[data.section].push(data);
   });
-  ['enrichment', 'podcast', 'courses'].forEach(renderSection);
+  ['enrichment', 'podcast'].forEach(renderSection);
+});
+
+// 3. الدورات — من courses collection (كل دورة زي مادة مصغّرة بموادها الخاصة)
+onSnapshot(query(collection(db, 'courses'), orderBy('addedAt', 'asc')), snap => {
+  allCourses = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  renderCoursesGrid();
 });
 
 // ══ Auth ══
@@ -104,8 +178,135 @@ onAuthStateChanged(auth, async user => {
     currentRole = snap.exists() ? (snap.data().role || null) : null;
   }
   window.renderLibMats();
-  ['enrichment', 'podcast', 'courses'].forEach(renderSection);
+  ['enrichment', 'podcast'].forEach(renderSection);
+  renderCoursesGrid();
 });
+
+// ── رقم المحاضرة: تحديث القايمة حسب المادة/الدورة المختارة ────
+window.updateLibLectureOptions = () => {
+  const section = document.getElementById('addLibSection')?.value;
+  const sel = document.getElementById('addLibLecture');
+  if (!sel) return;
+
+  let relevantMats = [];
+  if (section === 'mateen-lib') {
+    const subj = document.getElementById('addLibSubject')?.value;
+    relevantMats = allLibMats.filter(m => m.course === subj && m.lectureNumber != null);
+  } else if (section === 'courses') {
+    const courseId = document.getElementById('addLibCourseId')?.value;
+    relevantMats = allLibMats.filter(m => m.courseId === courseId && m.lectureNumber != null);
+  }
+  const nums = [...new Set(relevantMats.map(m => m.lectureNumber))].sort((a, b) => a - b);
+
+  sel.innerHTML = '<option value="">بدون محاضرة محددة</option>' +
+    nums.map(n => `<option value="${n}">المحاضرة ${n}</option>`).join('') +
+    `<option value="__new__">+ محاضرة جديدة</option>`;
+
+  sel.onchange = () => {
+    const wrap = document.getElementById('libLectureNumWrap');
+    if (sel.value === '__new__') {
+      wrap.style.display = 'block';
+      document.getElementById('libLectureNumInput').value = (nums.length ? Math.max(...nums) : 0) + 1;
+    } else {
+      wrap.style.display = 'none';
+    }
+  };
+};
+
+// ── الدورات: إنشاء دورة جديدة (نفس حقول المادة الرئيسية) ──────
+window.openAddCourseContainerModal = () => {
+  ['crsName','crsIconData','crsIconUrl','crsDesc','crsMeetings','crsWeeks','crsLevel'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
+  document.getElementById('crsIconPreview').innerHTML = '<i class="ti ti-photo" style="font-size:24px;color:var(--text-mid);"></i>';
+  document.getElementById('addCourseContainerErr').style.display = 'none';
+  document.getElementById('addCourseContainerModal').style.display = 'flex';
+};
+
+window.submitNewCourseContainer = async () => {
+  const name = document.getElementById('crsName').value.trim();
+  const desc = document.getElementById('crsDesc').value.trim();
+  const err  = document.getElementById('addCourseContainerErr');
+  if (!name || !desc) {
+    err.style.display = 'block'; err.textContent = 'يرجى تعبئة اسم الدورة والوصف على الأقل';
+    return;
+  }
+  err.style.display = 'none';
+  const btn = document.getElementById('addCourseContainerSubmit');
+  btn.disabled = true; btn.innerHTML = '<i class="ti ti-loader"></i> جاري الإضافة...';
+
+  try {
+    await addDoc(collection(db, 'courses'), {
+      name,
+      desc,
+      iconData: document.getElementById('crsIconData').value || '',
+      iconUrl:  document.getElementById('crsIconUrl').value.trim() || '',
+      color:    document.getElementById('crsColorVal').value,
+      meetings: document.getElementById('crsMeetings').value.trim(),
+      weeks:    document.getElementById('crsWeeks').value.trim(),
+      level:    document.getElementById('crsLevel').value.trim(),
+      addedAt: Date.now(),
+      addedBy: auth.currentUser?.email || '',
+    });
+    document.getElementById('addCourseContainerModal').style.display = 'none';
+  } catch (e) {
+    err.style.display = 'block'; err.textContent = 'حدث خطأ، حاولي مرة أخرى';
+  }
+  btn.disabled = false; btn.innerHTML = '<i class="ti ti-plus"></i> إضافة الدورة';
+};
+
+// ── الدورات: فتح تفاصيل دورة معينة وموادها مقسّمة لمحاضرات ────
+window.openCourseDetailModal = (courseId, keepOpenSilent) => {
+  const course = allCourses.find(c => c.id === courseId);
+  if (!course) return;
+  window._openCourseId = courseId;
+
+  const mats = allLibMats.filter(m => m.courseId === courseId);
+  const icon = course.iconData || course.iconUrl
+    ? `<img src="${course.iconData || course.iconUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:12px;">`
+    : `<i class="ti ti-certificate" style="font-size:30px;color:white"></i>`;
+
+  const matsHTML = mats.length
+    ? libMatsGroupedHTML(mats, 'courses')
+    : '<div class="lib-empty"><i class="ti ti-files-off" style="font-size:24px;"></i><div>لا يوجد محتوى في هذه الدورة بعد</div></div>';
+
+  document.getElementById('courseDetailModalBody').innerHTML = `
+    <div style="background:${course.color || 'linear-gradient(135deg,#5c3d2e,#8a5e3c)'};padding:20px;border-radius:16px 16px 0 0;display:flex;align-items:center;gap:14px;position:relative">
+      <button onclick="document.getElementById('courseDetailModal').style.display='none';window._openCourseId=null" style="position:absolute;top:12px;left:12px;background:rgba(255,255,255,0.2);border:none;color:white;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:16px">✕</button>
+      <div style="width:56px;height:56px;border-radius:12px;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0">${icon}</div>
+      <div>
+        <div style="color:white;font-weight:700;font-size:17px;font-family:Amiri,serif">${course.name}</div>
+        <div style="color:rgba(255,255,255,0.85);font-size:12px;margin-top:2px">${course.desc || ''}</div>
+      </div>
+    </div>
+    <div style="padding:18px">
+      ${isAdmin() ? `
+        <button onclick="openAddLibModal('courses','${courseId}')" class="btn-add-lib" style="margin-bottom:16px">
+          <i class="ti ti-plus"></i> إضافة محتوى لهذه الدورة
+        </button>` : ''}
+      <div class="lib-cards-grid" style="padding:0">${mats.length ? '' : ''}</div>
+      ${matsHTML}
+      ${isAdmin() ? `
+        <button onclick="confirmDeleteCourse('${courseId}','${course.name.replace(/'/g,"\\'")}')" style="margin-top:16px;width:100%;padding:8px;border:1px solid #c0392b;background:transparent;color:#c0392b;border-radius:8px;font-family:inherit;font-size:13px;cursor:pointer">
+          <i class="ti ti-trash"></i> حذف الدورة بالكامل
+        </button>` : ''}
+    </div>`;
+
+  if (!keepOpenSilent) document.getElementById('courseDetailModal').style.display = 'flex';
+};
+
+window.confirmDeleteCourse = async (courseId, name) => {
+  if (!confirm(`هل أنتِ متأكدة من حذف دورة "${name}"؟ هيتم حذف كل محتواها كمان.`)) return;
+  try {
+    const mats = allLibMats.filter(m => m.courseId === courseId);
+    for (const m of mats) await deleteDoc(doc(db, 'materials', m.id));
+    await deleteDoc(doc(db, 'courses', courseId));
+    document.getElementById('courseDetailModal').style.display = 'none';
+    window._openCourseId = null;
+  } catch (e) {
+    alert('حدث خطأ أثناء الحذف: ' + e.message);
+  }
+};
 
 // ══ Add Content ══
 window.submitAddLib = async () => {
@@ -118,13 +319,39 @@ window.submitAddLib = async () => {
   const btn     = document.getElementById('addLibSubmit');
 
   if (!title || !url) { err.style.display='block'; err.textContent='العنوان والرابط مطلوبان'; return; }
+  if (section === 'mateen-lib' && !document.getElementById('addLibSubject').value) {
+    err.style.display='block'; err.textContent='اختاري المادة'; return;
+  }
   err.style.display = 'none';
   btn.disabled = true; btn.innerHTML = '<i class="ti ti-loader"></i> جاري الإضافة...';
 
+  // رقم المحاضرة (لو الحقل ظاهر)
+  let lectureNumber = null;
+  const lecSel = document.getElementById('addLibLecture');
+  if (lecSel && document.getElementById('libLectureWrap').style.display !== 'none') {
+    if (lecSel.value === '__new__') {
+      const n = parseInt(document.getElementById('libLectureNumInput')?.value, 10);
+      lectureNumber = isNaN(n) ? null : n;
+    } else if (lecSel.value) {
+      lectureNumber = parseInt(lecSel.value, 10);
+    }
+  }
+
   try {
-    // Library متين تتضاف في materials
     if (section === 'mateen-lib') {
-      await addDoc(collection(db, 'materials'), { title, type, url, notes, course: window.currentLibFilter === 'all' ? '' : window.currentLibFilter, addedAt: Date.now() });
+      await addDoc(collection(db, 'materials'), {
+        title, type, url, notes,
+        course: document.getElementById('addLibSubject').value,
+        ...(lectureNumber != null ? { lectureNumber } : {}),
+        addedAt: Date.now(),
+      });
+    } else if (section === 'courses') {
+      const courseId = document.getElementById('addLibCourseId').value;
+      await addDoc(collection(db, 'materials'), {
+        title, type, url, notes, courseId,
+        ...(lectureNumber != null ? { lectureNumber } : {}),
+        addedAt: Date.now(),
+      });
     } else {
       await addDoc(collection(db, 'libraryItems'), { title, type, url, notes, section, addedAt: Date.now() });
     }
@@ -164,7 +391,7 @@ window.submitEditLib = async () => {
   btn.disabled = true; btn.innerHTML = '<i class="ti ti-loader"></i> جاري الحفظ...';
 
   try {
-    const colName = editCache.section === 'mateen-lib' ? 'materials' : 'libraryItems';
+    const colName = (editCache.section === 'mateen-lib' || editCache.section === 'courses') ? 'materials' : 'libraryItems';
     await updateDoc(doc(db, colName, id), { title, type, url, notes });
     document.getElementById('editLibModal').style.display = 'none';
   } catch(e) {
@@ -185,7 +412,7 @@ window.openDeleteLib = (id, title, section) => {
 
 window.executeDeleteLib = async () => {
   const id  = deleteCache.id;
-  const col = deleteCache.section === 'mateen-lib' ? 'materials' : 'libraryItems';
+  const col = (deleteCache.section === 'mateen-lib' || deleteCache.section === 'courses') ? 'materials' : 'libraryItems';
   const btn = document.getElementById('deleteLibConfirm');
   btn.disabled = true; btn.innerHTML = '<i class="ti ti-loader"></i>';
   try {
