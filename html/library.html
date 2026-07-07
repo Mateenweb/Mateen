@@ -69,17 +69,6 @@
   <div class="lib-section active" id="section-mateen-lib">
     <div class="section-header">
       <div class="section-title"><i class="ti ti-books"></i> مكتبة متين</div>
-      <div class="section-desc">المواد العلمية المضافة من قِبل الأدمن والمعلمات</div>
-    </div>
-
-    <!-- فلتر اWhenدة -->
-    <div class="lib-filters">
-      <button class="lib-btn active" onclick="filterLibMats(this,'all')">الكل</button>
-      <button class="lib-btn" onclick="filterLibMats(this,'التفسير')">التفسير</button>
-      <button class="lib-btn" onclick="filterLibMats(this,'الفقه')">الفقه</button>
-      <button class="lib-btn" onclick="filterLibMats(this,'العقيدة')">العقيدة</button>
-      <button class="lib-btn" onclick="filterLibMats(this,'الحديث')">الحديث</button>
-      <button class="lib-btn" onclick="filterLibMats(this,'مقرأة متين')">مقرأة متين</button>
     </div>
 
     <div id="libMatsGrid" class="lib-cards-grid">
@@ -163,11 +152,7 @@
       <input type="hidden" id="addLibCourseId"/>
       <div id="libSubjectWrap" style="display:none">
         <label style="font-size:13px;color:var(--text-dark);display:block;margin-bottom:6px;">المادة <span style="color:#c0392b">*</span></label>
-        <select id="addLibSubject" onchange="updateLibLectureOptions()" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:14px;box-sizing:border-box;">
-          <option value="">اختاري المادة</option>
-          <option>التفسير</option><option>الفقه</option><option>العقيدة</option>
-          <option>الحديث</option><option>مقرأة متين</option>
-        </select>
+        <input id="addLibSubject" type="text" oninput="updateLibLectureOptions()" placeholder="اكتبي اسم المادة" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:14px;box-sizing:border-box;">
       </div>
       <div id="libLectureWrap" style="display:none">
         <label style="font-size:13px;color:var(--text-dark);display:block;margin-bottom:6px;">رقم المحاضرة (اختياري)</label>
