@@ -118,7 +118,7 @@ function matCardHTML(m) {
             </div>
           </div>
         </div>
-        ` : `
+        ` : (m.url ? `
         <a href="${m.url}" target="_blank" rel="noopener" style="text-decoration:none;display:block;">
           <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
             <span style="font-size:20px">${TYPE_ICONS[m.type] || '📎'}</span>
@@ -129,7 +129,15 @@ function matCardHTML(m) {
           </div>
           ${m.notes ? `<div style="font-size:12px;color:var(--text-mid);background:var(--beige);padding:7px 10px;border-radius:8px;margin-bottom:8px">${m.notes}</div>` : ''}
           <div style="font-size:12px;color:var(--gold-dark)">${LINK_LABELS[detectLinkType(m.url)]}</div>
-        </a>`}
+        </a>` : `
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+          <span style="font-size:20px">${m.assignment?.title ? '📝' : (m.exam?.title ? '✍️' : '📎')}</span>
+          <div>
+            <div style="font-size:13px;font-weight:700;color:var(--green-dark)">${m.title}</div>
+            <div style="font-size:11px;color:var(--text-mid);margin-top:2px">${m.assignment?.title || m.exam?.title ? 'بدون محتوى مرفق — واجب/اختبار فقط' : (m.type || '')}</div>
+          </div>
+        </div>
+        ${m.notes ? `<div style="font-size:12px;color:var(--text-mid);background:var(--beige);padding:7px 10px;border-radius:8px;margin-bottom:8px">${m.notes}</div>` : ''}`)}
         ${m.assignment?.title ? `
         <div style="margin-top:8px;background:rgba(201,162,39,0.08);border:1px solid rgba(201,162,39,0.25);border-radius:8px;padding:8px 10px;">
           <div style="font-size:12px;font-weight:700;color:var(--green-dark);margin-bottom:3px;"><i class="ti ti-clipboard-list"></i> واجب: ${m.assignment.title}</div>
@@ -583,32 +591,40 @@ window.submitNewCourse = async () => {
     lectureNumber = parseInt(lectureSel, 10);
   }
 
-  if (!title || !course || !url) {
-    err.style.display = 'block';
-    err.textContent = isAudio ? 'يرجى رفع الملف الصوتي أولاً' : 'يرجى تعبئة الحقول المطلوبة (الاسم، المادة، الرابط)';
-    return;
-  }
-  err.style.display = 'none';
-
-  const btn = document.getElementById('addCourseSubmit');
-  btn.disabled = true;
-  btn.innerHTML = '<i class="ti ti-loader"></i> جاري الإضافة...';
-
-  // واجب اختياري
+  // واجب/اختبار (بنجيبهم هنا الأول عشان نستخدمهم في التحقق كمان)
   const asgTitle    = document.getElementById('asgTitle')?.value.trim();
   const asgDeadline = document.getElementById('asgDeadline')?.value;
   const asgDesc     = document.getElementById('asgDesc')?.value.trim();
   const assignment  = asgTitle ? { title: asgTitle, deadline: asgDeadline || null, desc: asgDesc || '' } : null;
 
-  // اختبار اختياري
   const examTitle    = document.getElementById('examTitle')?.value.trim();
   const examPath     = document.getElementById('examPath')?.value.trim();
   const examDeadline = document.getElementById('examDeadline')?.value;
   const exam         = examTitle && examPath ? { title: examTitle, path: examPath, deadline: examDeadline || null } : null;
 
+  // لو مفيش واجب ولا اختبار، لازم اسم المادة والرابط يتملوا زي الأول
+  // لو فيه واجب أو اختبار، مش شرط يبقى فيه محتوى/رابط معاهم
+  if (!course) {
+    err.style.display = 'block';
+    err.textContent = 'يرجى اختيار المادة';
+    return;
+  }
+  if (!assignment && !exam && (!title || !url)) {
+    err.style.display = 'block';
+    err.textContent = isAudio ? 'يرجى رفع الملف الصوتي أولاً' : 'يرجى تعبئة الحقول المطلوبة (الاسم، الرابط)، أو إضافة واجب/اختبار على الأقل';
+    return;
+  }
+  err.style.display = 'none';
+
+  const finalTitle = title || assignment?.title || exam?.title || 'بدون عنوان';
+
+  const btn = document.getElementById('addCourseSubmit');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="ti ti-loader"></i> جاري الإضافة...';
+
   try {
     const materialRef = await addDoc(collection(db, 'materials'), {
-      title, course, type, url, notes,
+      title: finalTitle, course, type, url, notes,
       ...(lectureNumber != null ? { lectureNumber } : {}),
       ...(exam ? { exam } : {}),
       addedAt: Date.now(),
