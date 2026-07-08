@@ -103,63 +103,71 @@
   </div>
 
   <!-- ADD COURSE MODAL (admin only) -->
-  <div id="addCourseModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;padding:16px;overflow-y:auto;">
-    <div style="background:var(--white);border-radius:16px;padding:28px;width:90%;max-width:480px;direction:rtl;max-height:90vh;overflow-y:auto;margin:auto;">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
-        <div style="font-family:Amiri,serif;font-size:18px;color:var(--green-dark);font-weight:700">إضافة مادة جديدة</div>
+  <div id="addCourseModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9999;align-items:center;justify-content:center;padding:16px;overflow-y:auto;">
+    <div style="background:var(--white);border-radius:18px;width:90%;max-width:480px;direction:rtl;max-height:90vh;overflow-y:auto;margin:auto;box-shadow:0 20px 50px rgba(0,0,0,0.25);">
+
+      <div style="position:sticky;top:0;background:var(--white);z-index:2;display:flex;justify-content:space-between;align-items:center;padding:20px 26px 16px;border-bottom:1px solid var(--border);">
+        <div style="font-family:Amiri,serif;font-size:19px;color:var(--green-dark);font-weight:700;display:flex;align-items:center;gap:8px">
+          <i class="ti ti-circle-plus"></i> إضافة مادة جديدة
+        </div>
         <button onclick="document.getElementById('addCourseModal').style.display='none'" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-mid)">✕</button>
       </div>
-      <div style="display:flex;flex-direction:column;gap:18px;">
 
-        <!-- ── 📌 التصنيف ── -->
-        <div>
-          <div style="font-size:12px;font-weight:700;color:var(--gold-dark,#b8860b);margin-bottom:10px;display:flex;align-items:center;gap:6px">📌 التصنيف</div>
-          <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="padding:20px 26px 26px;display:flex;flex-direction:column;gap:18px;">
+
+        <!-- ── التصنيف ── -->
+        <div style="background:var(--beige,#f7f0e5);border-radius:14px;padding:16px 18px;">
+          <div style="font-size:12px;font-weight:700;color:var(--gold-dark,#b8860b);margin-bottom:14px;display:flex;align-items:center;gap:6px">
+            <i class="ti ti-bookmark"></i> التصنيف
+          </div>
+          <div style="display:flex;flex-direction:column;gap:14px">
             <div>
               <label style="font-size:13px;color:var(--text-dark);display:block;margin-bottom:6px">المادة <span style="color:#c0392b">*</span></label>
-              <select id="newCourseCat" onchange="updateLectureOptions()" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:14px;box-sizing:border-box;">
+              <select id="newCourseCat" onchange="updateLectureOptions()" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:14px;box-sizing:border-box;background:var(--white);">
                 <option value="">اختاري المادة</option>
                 <option>التفسير</option><option>الفقه</option><option>العقيدة</option>
                 <option>الحديث</option><option>مقرأة متين</option><option>السيرة النبوية</option>
                 <option>التجويد والتلاوة</option><option>النحو</option><option>أخرى</option>
               </select>
             </div>
-            <div>
-              <label style="font-size:13px;color:var(--text-dark);display:block;margin-bottom:6px">رقم المحاضرة (اختياري)</label>
-              <select id="newCourseLecture" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:14px;box-sizing:border-box;">
-                <option value="">بدون محاضرة محددة</option>
-              </select>
-              <div id="newLectureNumWrap" style="display:none;margin-top:8px">
-                <label style="font-size:12px;color:var(--text-mid);display:block;margin-bottom:4px">رقم المحاضرة الجديدة</label>
-                <input type="number" id="newLectureNumInput" min="1" style="width:120px;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:14px;box-sizing:border-box;">
+            <div style="display:flex;gap:10px;">
+              <div style="flex:1;min-width:0">
+                <label style="font-size:13px;color:var(--text-dark);display:block;margin-bottom:6px">رقم المحاضرة</label>
+                <select id="newCourseLecture" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:14px;box-sizing:border-box;background:var(--white);">
+                  <option value="">بدون تحديد</option>
+                </select>
+              </div>
+              <div style="flex:1;min-width:0">
+                <label style="font-size:13px;color:var(--text-dark);display:block;margin-bottom:6px">نوع المحتوى</label>
+                <select id="newCourseType" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:14px;box-sizing:border-box;background:var(--white);">
+                  <option value="محاضرة">محاضرة</option>
+                  <option value="ملخص">ملخص</option>
+                  <option value="مرجع">مرجع علمي</option>
+                  <option value="فيديو">فيديو</option>
+                  <option value="تسجيل صوتي">تسجيل صوتي</option>
+                  <option value="أخرى">أخرى</option>
+                </select>
               </div>
             </div>
-            <div>
-              <label style="font-size:13px;color:var(--text-dark);display:block;margin-bottom:6px">نوع المحتوى</label>
-              <select id="newCourseType" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:14px;box-sizing:border-box;">
-                <option value="محاضرة">محاضرة</option>
-                <option value="ملخص">ملخص</option>
-                <option value="مرجع">مرجع علمي</option>
-                <option value="فيديو">فيديو</option>
-                <option value="تسجيل صوتي">تسجيل صوتي</option>
-                <option value="أخرى">أخرى</option>
-              </select>
-              <div style="font-size:11px;color:var(--text-mid);margin-top:4px">الواجب والاختبار بقى ليهم قسم مستقل تحت 👇، مش هنا</div>
+            <div id="newLectureNumWrap" style="display:none">
+              <label style="font-size:12px;color:var(--text-mid);display:block;margin-bottom:4px">رقم المحاضرة الجديدة</label>
+              <input type="number" id="newLectureNumInput" min="1" style="width:120px;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:14px;box-sizing:border-box;">
             </div>
           </div>
         </div>
 
-        <!-- ── 📄 المحتوى ── -->
-        <div>
-          <div style="font-size:12px;font-weight:700;color:var(--gold-dark,#b8860b);margin-bottom:10px;display:flex;align-items:center;gap:6px">📄 المحتوى</div>
-          <div style="font-size:11px;color:var(--text-mid);margin-bottom:10px">لو هتضيفي واجب أو اختبار بس (من غير محاضرة/محتوى)، سيبي الحقول دي فاضية 👇</div>
-          <div style="display:flex;flex-direction:column;gap:12px">
+        <!-- ── المحتوى ── -->
+        <div style="background:var(--beige,#f7f0e5);border-radius:14px;padding:16px 18px;">
+          <div style="font-size:12px;font-weight:700;color:var(--gold-dark,#b8860b);margin-bottom:14px;display:flex;align-items:center;gap:6px">
+            <i class="ti ti-file-text"></i> المحتوى
+          </div>
+          <div style="display:flex;flex-direction:column;gap:14px">
             <div>
-              <label style="font-size:13px;color:var(--text-dark);display:block;margin-bottom:6px">اسم المادة</label>
+              <label style="font-size:13px;color:var(--text-dark);display:block;margin-bottom:6px">اسم المادة <span style="color:#c0392b">*</span></label>
               <input id="newCourseTitle" type="text" placeholder="مثال: محاضرة تفسير سورة الفاتحة" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:14px;box-sizing:border-box;">
             </div>
             <div>
-              <label style="font-size:13px;color:var(--text-dark);display:block;margin-bottom:6px">رابط الملف / الصوت</label>
+              <label style="font-size:13px;color:var(--text-dark);display:block;margin-bottom:6px">رابط الملف / الصوت <span style="color:#c0392b">*</span></label>
               <!-- حقل الرابط العادي -->
               <div id="urlFieldWrap">
                 <input id="newCourseUrl" type="url" placeholder="https://drive.google.com/..." style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:14px;box-sizing:border-box;">
@@ -167,7 +175,7 @@
               </div>
               <!-- حقل رفع صوت مباشر على Cloudinary -->
               <div id="audioUploadWrap" style="display:none">
-                <div id="audioUploadBox" onclick="document.getElementById('audioFileInput').click()" style="border:2px dashed var(--border);border-radius:10px;padding:20px;text-align:center;cursor:pointer;background:var(--beige)">
+                <div id="audioUploadBox" onclick="document.getElementById('audioFileInput').click()" style="border:2px dashed var(--border);border-radius:10px;padding:20px;text-align:center;cursor:pointer;background:var(--white)">
                   <i class="ti ti-upload" style="font-size:24px;color:var(--green-dark)"></i>
                   <div style="font-size:13px;color:var(--text-mid);margin-top:6px">اضغطي لرفع الملف الصوتي</div>
                   <div style="font-size:11px;color:var(--text-mid);margin-top:2px">MP3 · WAV · M4A · OGG</div>
@@ -189,72 +197,22 @@
           </div>
         </div>
 
-        <!-- ── ➕ إضافات اختيارية ── -->
-        <div>
-          <div style="font-size:12px;font-weight:700;color:var(--gold-dark,#b8860b);margin-bottom:10px;display:flex;align-items:center;gap:6px">➕ إضافات اختيارية (لو المحتوى ده مربوط بواجب أو اختبار)</div>
-          <div style="display:flex;flex-direction:column;gap:10px">
-            <!-- ── واجب اختياري ── -->
-            <div style="border:1px dashed var(--border);border-radius:10px;overflow:hidden;">
-              <button type="button" onclick="toggleSection('asgSection','asgToggleIcon')" style="width:100%;background:var(--beige2);border:none;padding:10px 14px;font-family:inherit;font-size:13px;font-weight:600;color:var(--green-dark);cursor:pointer;display:flex;align-items:center;gap:8px;justify-content:space-between;">
-                <span><i class="ti ti-clipboard-list"></i> إضافة واجب</span>
-                <i id="asgToggleIcon" class="ti ti-chevron-down" style="transition:.2s"></i>
-              </button>
-              <div id="asgSection" style="display:none;padding:14px;display:none;flex-direction:column;gap:10px;">
-                <div>
-                  <label style="font-size:12px;color:var(--text-mid);display:block;margin-bottom:5px">عنوان الواجب</label>
-                  <input id="asgTitle" type="text" placeholder="مثال: واجب الدرس الثالث" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:13px;box-sizing:border-box;">
-                </div>
-                <div>
-                  <label style="font-size:12px;color:var(--text-mid);display:block;margin-bottom:5px">آخر موعد للتسليم</label>
-                  <input id="asgDeadline" type="datetime-local" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:13px;box-sizing:border-box;">
-                </div>
-                <div>
-                  <label style="font-size:12px;color:var(--text-mid);display:block;margin-bottom:5px">تفاصيل الواجب</label>
-                  <textarea id="asgDesc" placeholder="اكتبي تعليمات الواجب هنا..." style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:13px;box-sizing:border-box;resize:vertical;height:70px;"></textarea>
-                </div>
-                <div>
-                  <label style="font-size:12px;color:var(--text-mid);display:block;margin-bottom:5px">وسيلة التسليم المسموحة</label>
-                  <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;margin-bottom:4px">
-                    <input type="checkbox" id="asgAllowFileQuick" checked/> 📎 رفع ملف/صورة
-                  </label>
-                  <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer">
-                    <input type="checkbox" id="asgAllowTextQuick" checked/> ✍️ كتابة نص
-                  </label>
-                </div>
-              </div>
-            </div>
-
-            <!-- ── اختبار اختياري ── -->
-            <div style="border:1px dashed var(--border);border-radius:10px;overflow:hidden;">
-              <button type="button" onclick="toggleSection('examSection','examToggleIcon')" style="width:100%;background:var(--beige2);border:none;padding:10px 14px;font-family:inherit;font-size:13px;font-weight:600;color:var(--green-dark);cursor:pointer;display:flex;align-items:center;gap:8px;justify-content:space-between;">
-                <span><i class="ti ti-pencil-check"></i> إضافة اختبار</span>
-                <i id="examToggleIcon" class="ti ti-chevron-down" style="transition:.2s"></i>
-              </button>
-              <div id="examSection" style="display:none;flex-direction:column;gap:10px;padding:14px;">
-                <div>
-                  <label style="font-size:12px;color:var(--text-mid);display:block;margin-bottom:5px">عنوان الاختبار</label>
-                  <input id="examTitle" type="text" placeholder="مثال: اختبار الوحدة الأولى" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:13px;box-sizing:border-box;">
-                </div>
-                <div>
-                  <label style="font-size:12px;color:var(--text-mid);display:block;margin-bottom:5px">رابط الاختبار</label>
-                  <input id="examPath" type="url" placeholder="https://..." style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:13px;box-sizing:border-box;">
-                </div>
-                <div>
-                  <label style="font-size:12px;color:var(--text-mid);display:block;margin-bottom:5px">آخر موعد للاختبار (اختياري)</label>
-                  <input id="examDeadline" type="datetime-local" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:13px;box-sizing:border-box;">
-                </div>
-              </div>
-            </div>
+        <!-- ── تنبيه: الواجب والاختبار من هنا ── -->
+        <div style="display:flex;gap:10px;align-items:flex-start;background:rgba(184,134,11,0.08);border:1px solid rgba(184,134,11,0.25);border-radius:12px;padding:12px 14px;">
+          <i class="ti ti-bulb" style="color:var(--gold-dark,#b8860b);font-size:18px;margin-top:1px"></i>
+          <div style="font-size:12px;color:var(--text-mid);line-height:1.7">
+            عايزة تضيفي <b>واجب</b> أو <b>اختبار</b> على المادة دي؟ احفظي المادة الأول، وهيظهر تحتها زرار <b>"➕ إضافة واجب"</b> تقدري من خلاله تحددي الموعد النهائي ووسيلة التسليم، وتتابعي ردود الطالبات وتقييمها.
           </div>
         </div>
 
         <div id="addCourseErr" style="display:none;color:#c0392b;font-size:13px;"></div>
-        <button id="addCourseSubmit" onclick="window.submitNewCourse()" style="background:var(--green-dark);color:white;border:none;padding:12px;border-radius:10px;font-family:inherit;font-size:15px;cursor:pointer;font-weight:700;">
+        <button id="addCourseSubmit" onclick="window.submitNewCourse()" style="background:var(--green-dark);color:white;border:none;padding:13px;border-radius:12px;font-family:inherit;font-size:15px;cursor:pointer;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;">
           <i class="ti ti-circle-plus"></i> إضافة المادة
         </button>
       </div>
     </div>
   </div>
+
 
   <!-- كل Subjects تيجي من Firebase thisناميكياً -->
   <div id="dynamicSubjectsGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:24px;">
@@ -788,14 +746,6 @@
       if (!url) return;
       const prev = document.getElementById(previewId);
       prev.innerHTML = `<img src="${url}" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.innerHTML='<i class=ti ti-photo-off style=font-size:24px;color:red; loading="lazy"></i>'">`;
-    }
-    function toggleSection(sectionId, iconId) {
-      const section = document.getElementById(sectionId);
-      const icon = document.getElementById(iconId);
-      const isOpen = section.style.display === 'flex';
-      section.style.display = isOpen ? 'none' : 'flex';
-      section.style.flexDirection = 'column';
-      if (icon) icon.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
     }
   </script>
   <script src="../js/courses.js"></script>
