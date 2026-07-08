@@ -19,6 +19,7 @@ const db   = getFirestore(app);
 assignments/{assignmentId}
   - materialId: string  (ربط بالمحاضرة/المادة من materials collection)
   - course: string      (اسم المادة — التفسير، الفقه...)
+  - kind: 'homework' | 'exam'
   - title: string
   - description: string
   - allowFile: bool
@@ -39,14 +40,15 @@ assignments/{assignmentId}/submissions/{studentUid}
   - gradedBy: uid | null
 */
 
-// ── إضافة واجب جديد (معلمة/أدمن فقط) ──────────────────────────
-export async function addAssignment({ materialId, course, title, description, allowFile, allowText, deadline }) {
+// ── إضافة واجب أو اختبار جديد (معلمة/أدمن فقط) ────────────────
+export async function addAssignment({ materialId, course, title, description, allowFile, allowText, deadline, kind }) {
   const user = auth.currentUser;
   if (!user) throw new Error('يجب تسجيل الدخول');
   if (!allowFile && !allowText) throw new Error('اختاري وسيلة تسليم واحدة على الأقل');
 
   return await addDoc(collection(db, 'assignments'), {
     materialId, course, title, description: description || '',
+    kind: kind === 'exam' ? 'exam' : 'homework',
     allowFile: !!allowFile, allowText: !!allowText,
     deadline: deadline ? Timestamp.fromDate(new Date(deadline)) : null,
     createdBy: user.uid,
