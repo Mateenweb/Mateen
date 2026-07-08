@@ -60,13 +60,13 @@ export async function renderAssignmentsSection(materialId, course, containerId) 
   const canManage = canManageAssignments(course);
   const assignments = await getAssignmentsForMaterial(materialId);
 
-  const container = document.getElementById(containerId);
-  if (!container) return;
+  const containers = document.querySelectorAll(`#${CSS.escape(containerId)}, [data-asg-container="${materialId}"]`);
+  if (!containers.length) return;
 
   let html = `<div style="margin-top:10px;border-top:1px dashed var(--border);padding-top:10px">`;
 
   if (assignments.length === 0 && !canManage) {
-    container.innerHTML = '';
+    containers.forEach(c => c.innerHTML = '');
     return;
   }
 
@@ -97,7 +97,7 @@ export async function renderAssignmentsSection(materialId, course, containerId) 
   }
 
   html += `</div>`;
-  container.innerHTML = html;
+  containers.forEach(c => c.innerHTML = html);
 }
 
 // ── شارة واجب/اختبار مختصرة جنب رقم المحاضرة (مش مرتبطة بمادة معينة) ──
@@ -106,11 +106,11 @@ export async function renderLectureAssignmentControls(lectureId, course, contain
   const canManage = canManageAssignments(course);
   const assignments = await getAssignmentsForMaterial(lectureId);
 
-  const container = document.getElementById(containerId);
-  if (!container) return;
+  const containers = document.querySelectorAll(`#${CSS.escape(containerId)}, [data-lec-asg-container="${lectureId}"]`);
+  if (!containers.length) return;
 
   if (assignments.length === 0 && !canManage) {
-    container.innerHTML = '';
+    containers.forEach(c => c.innerHTML = '');
     return;
   }
 
@@ -134,8 +134,9 @@ export async function renderLectureAssignmentControls(lectureId, course, contain
       </span>`;
   }
 
-  container.innerHTML = html;
+  containers.forEach(c => c.innerHTML = html);
 }
+
 
 window.toggleLecAsgMenu = (lectureId) => {
   document.querySelectorAll('[id^="lecAsgMenu-"]').forEach(el => {
