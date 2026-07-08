@@ -124,7 +124,7 @@ export async function renderLectureAssignmentControls(lectureId, course, contain
     html += `
       <span style="position:relative;display:inline-flex">
         <button onclick="event.stopPropagation();window.toggleLecAsgMenu('${lectureId}')"
-          style="background:transparent;border:1px dashed var(--gold);color:var(--green-dark);border-radius:6px;width:20px;height:20px;font-size:12px;line-height:1;cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center">+</button>
+          style="background:var(--green-dark,#5c3d2e);border:none;color:#fff;border-radius:6px;width:22px;height:22px;font-size:14px;font-weight:700;line-height:1;cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,0.25)">+</button>
         <div id="lecAsgMenu-${lectureId}" style="display:none;position:absolute;top:24px;right:0;background:var(--bg-card,#fff);border:1px solid var(--border);border-radius:8px;box-shadow:0 4px 14px rgba(0,0,0,0.15);z-index:60;min-width:130px;overflow:hidden">
           <div onclick="event.stopPropagation();document.getElementById('lecAsgMenu-${lectureId}').style.display='none';window.openAddAssignmentModal('${lectureId}','${course}','homework')"
             style="padding:8px 12px;font-size:12px;cursor:pointer;white-space:nowrap;color:var(--text-mid)">📝 إضافة واجب</div>
