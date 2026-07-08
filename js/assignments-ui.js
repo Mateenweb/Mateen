@@ -100,6 +100,55 @@ export async function renderAssignmentsSection(materialId, course, containerId) 
   container.innerHTML = html;
 }
 
+// ── شارة واجب/اختبار مختصرة جنب رقم المحاضرة (مش مرتبطة بمادة معينة) ──
+export async function renderLectureAssignmentControls(lectureId, course, containerId) {
+  await roleReady;
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  const canManage = canManageAssignments(course);
+  const assignments = await getAssignmentsForMaterial(lectureId);
+
+  if (assignments.length === 0 && !canManage) {
+    container.innerHTML = '';
+    return;
+  }
+
+  let html = assignments.map(a => `
+    <span style="display:inline-flex;align-items:center;gap:2px;background:rgba(201,162,39,0.15);border-radius:6px;padding:1px 4px;">
+      <span onclick="event.stopPropagation();window.openAssignmentDetail('${a.id}','${course}')" title="${a.kind === 'exam' ? 'اختبار' : 'واجب'}: ${a.title}" style="cursor:pointer;font-size:13px">${a.kind === 'exam' ? '✅' : '📝'}</span>
+      ${canManage ? `<span onclick="event.stopPropagation();window.removeAssignment('${a.id}','${lectureId}','${course}')" title="حذف" style="cursor:pointer;color:#e74c3c;font-size:10px;font-weight:700">✕</span>` : ''}
+    </span>`).join('');
+
+  if (canManage) {
+    html += `
+      <span style="position:relative;display:inline-flex">
+        <button onclick="event.stopPropagation();window.toggleLecAsgMenu('${lectureId}')"
+          style="background:transparent;border:1px dashed var(--gold);color:var(--green-dark);border-radius:6px;width:20px;height:20px;font-size:12px;line-height:1;cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center">+</button>
+        <div id="lecAsgMenu-${lectureId}" style="display:none;position:absolute;top:24px;right:0;background:var(--bg-card,#fff);border:1px solid var(--border);border-radius:8px;box-shadow:0 4px 14px rgba(0,0,0,0.15);z-index:60;min-width:130px;overflow:hidden">
+          <div onclick="event.stopPropagation();document.getElementById('lecAsgMenu-${lectureId}').style.display='none';window.openAddAssignmentModal('${lectureId}','${course}','homework')"
+            style="padding:8px 12px;font-size:12px;cursor:pointer;white-space:nowrap;color:var(--text-mid)">📝 إضافة واجب</div>
+          <div onclick="event.stopPropagation();document.getElementById('lecAsgMenu-${lectureId}').style.display='none';window.openAddAssignmentModal('${lectureId}','${course}','exam')"
+            style="padding:8px 12px;font-size:12px;cursor:pointer;white-space:nowrap;border-top:1px solid var(--border);color:var(--text-mid)">✅ إضافة اختبار</div>
+        </div>
+      </span>`;
+  }
+
+  container.innerHTML = html;
+}
+
+window.toggleLecAsgMenu = (lectureId) => {
+  document.querySelectorAll('[id^="lecAsgMenu-"]').forEach(el => {
+    if (el.id !== `lecAsgMenu-${lectureId}`) el.style.display = 'none';
+  });
+  const menu = document.getElementById(`lecAsgMenu-${lectureId}`);
+  if (menu) menu.style.display = (!menu.style.display || menu.style.display === 'none') ? 'block' : 'none';
+};
+
+document.addEventListener('click', () => {
+  document.querySelectorAll('[id^="lecAsgMenu-"]').forEach(el => el.style.display = 'none');
+});
+
 // ── Modal إضافة واجب ───────────────────────────────────────────
 function ensureModalsExist() {
   if (document.getElementById('addAssignmentModal')) return;
