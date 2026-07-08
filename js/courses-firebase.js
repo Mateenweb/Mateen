@@ -5,11 +5,14 @@ import { getAuth, onAuthStateChanged }
 import { getFirestore, collection, query, orderBy, onSnapshot, addDoc, getDoc, doc, updateDoc, deleteDoc, arrayUnion, getDocs, setDoc }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 import { FIREBASE_CONFIG } from "./config.js";
-import { renderAssignmentsSection } from "./assignments-ui.js";
+import { renderAssignmentsSection, renderLectureAssignmentControls } from "./assignments-ui.js";
 import { deleteAssignmentsForMaterial } from "./assignments.js";
 window.refreshAssignmentsFor = (materialId, course) => {
   document.querySelectorAll(`[data-asg-container="${materialId}"]`).forEach(el => {
     renderAssignmentsSection(materialId, course, el.id);
+  });
+  document.querySelectorAll(`[data-lec-asg-container="${materialId}"]`).forEach(el => {
+    renderLectureAssignmentControls(materialId, course, el.id);
   });
 };
 
@@ -219,6 +222,7 @@ function renderModalMats() {
       </div>
       ${matsGroupedHTML(subjMats)}`;
     subjMats.forEach(m => renderAssignmentsSection(m.id, m.course, 'asg-' + m.id));
+    renderLectureControls(subjMats);
   });
 }
 
@@ -259,6 +263,18 @@ function sortMatsForLecture(mats) {
   return [...mats].sort((a, b) => matPriority(a) - matPriority(b));
 }
 
+// بعد إدراج matsGroupedHTML في الـ DOM، ناديها عشان تملى شارات الاختبار/الواجب جنب كل محاضرة
+function renderLectureControls(mats) {
+  const withLecture = mats.filter(m => m.lectureNumber != null);
+  const lectureNums = [...new Set(withLecture.map(m => m.lectureNumber))];
+  lectureNums.forEach(n => {
+    const group = withLecture.filter(m => m.lectureNumber === n);
+    const course = group[0]?.course || '';
+    const lectureId = `lecture-${course}-${n}`;
+    renderLectureAssignmentControls(lectureId, course, 'lecAsgControls-' + lectureId);
+  });
+}
+
 function matsGroupedHTML(mats) {
   const withLecture = mats.filter(m => m.lectureNumber != null);
   const without = mats.filter(m => m.lectureNumber == null);
@@ -267,11 +283,15 @@ function matsGroupedHTML(mats) {
   let html = '';
   lectureNums.forEach(n => {
     const group = sortMatsForLecture(withLecture.filter(m => m.lectureNumber === n));
+    const course = group[0]?.course || '';
+    const lectureId = `lecture-${course}-${n}`;
     html += `
       <div style="border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:14px">
         <div onclick="const b=this.nextElementSibling;const open=b.style.display!=='none';b.style.display=open?'none':'flex';this.querySelector('.lec-chevron').style.transform=open?'rotate(-90deg)':'rotate(0deg)'"
           style="background:rgba(201,162,39,0.1);padding:10px 14px;font-size:13px;font-weight:700;color:var(--gold-dark,#b8860b);display:flex;align-items:center;justify-content:space-between;cursor:pointer">
-          <span><i class="ti ti-bookmark"></i> المحاضرة ${n}</span>
+          <span style="display:flex;align-items:center;gap:6px"><i class="ti ti-bookmark"></i> المحاضرة ${n}
+            <span id="lecAsgControls-${lectureId}" data-lec-asg-container="${lectureId}" onclick="event.stopPropagation()" style="display:inline-flex;align-items:center;gap:4px"></span>
+          </span>
           <i class="ti ti-chevron-down lec-chevron" style="transition:.2s"></i>
         </div>
         <div style="display:flex;flex-direction:column;gap:8px;padding:12px;background:var(--beige,#faf6ee)">
@@ -763,6 +783,7 @@ window.openDynModal = (id) => {
     </div>`;
   document.body.appendChild(modal);
   mats.forEach(m => renderAssignmentsSection(m.id, m.course, 'asg-' + m.id));
+  renderLectureControls(mats);
 };
 
 // Add مادة رئيسية
