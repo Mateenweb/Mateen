@@ -41,14 +41,20 @@ assignments/{assignmentId}/submissions/{studentUid}
 */
 
 // ── إضافة واجب أو اختبار جديد (معلمة/أدمن فقط) ────────────────
-export async function addAssignment({ materialId, course, title, description, allowFile, allowText, deadline, kind }) {
+export async function addAssignment({ materialId, course, title, description, allowFile, allowText, deadline, kind, examLink }) {
   const user = auth.currentUser;
   if (!user) throw new Error('يجب تسجيل الدخول');
-  if (!allowFile && !allowText) throw new Error('اختاري وسيلة تسليم واحدة على الأقل');
+  const isExam = kind === 'exam';
+  if (isExam) {
+    if (!examLink) throw new Error('اكتبي رابط الاختبار');
+  } else if (!allowFile && !allowText) {
+    throw new Error('اختاري وسيلة تسليم واحدة على الأقل');
+  }
 
   return await addDoc(collection(db, 'assignments'), {
     materialId, course, title, description: description || '',
-    kind: kind === 'exam' ? 'exam' : 'homework',
+    kind: isExam ? 'exam' : 'homework',
+    examLink: isExam ? examLink : null,
     allowFile: !!allowFile, allowText: !!allowText,
     deadline: deadline ? Timestamp.fromDate(new Date(deadline)) : null,
     createdBy: user.uid,
