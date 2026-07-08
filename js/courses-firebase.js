@@ -762,6 +762,7 @@ window.openDynModal = (id) => {
       </div>
     </div>`;
   document.body.appendChild(modal);
+  mats.forEach(m => renderAssignmentsSection(m.id, m.course, 'asg-' + m.id));
 };
 
 // Add مادة رئيسية
