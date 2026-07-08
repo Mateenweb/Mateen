@@ -57,11 +57,11 @@ async function uploadFile(file) {
 // ── HTML قسم الواجبات جوه كارت المادة ─────────────────────────
 export async function renderAssignmentsSection(materialId, course, containerId) {
   await roleReady;
-  const container = document.getElementById(containerId);
-  if (!container) return;
-
   const canManage = canManageAssignments(course);
   const assignments = await getAssignmentsForMaterial(materialId);
+
+  const container = document.getElementById(containerId);
+  if (!container) return;
 
   let html = `<div style="margin-top:10px;border-top:1px dashed var(--border);padding-top:10px">`;
 
@@ -103,11 +103,11 @@ export async function renderAssignmentsSection(materialId, course, containerId) 
 // ── شارة واجب/اختبار مختصرة جنب رقم المحاضرة (مش مرتبطة بمادة معينة) ──
 export async function renderLectureAssignmentControls(lectureId, course, containerId) {
   await roleReady;
-  const container = document.getElementById(containerId);
-  if (!container) return;
-
   const canManage = canManageAssignments(course);
   const assignments = await getAssignmentsForMaterial(lectureId);
+
+  const container = document.getElementById(containerId);
+  if (!container) return;
 
   if (assignments.length === 0 && !canManage) {
     container.innerHTML = '';
