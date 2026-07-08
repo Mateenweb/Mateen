@@ -164,7 +164,7 @@ function ensureModalsExist() {
       <div style="display:flex;flex-direction:column;gap:12px">
         <input id="asgTitle" type="text" placeholder="عنوان الواجب" style="padding:10px;border:1px solid var(--border);border-radius:8px;font-family:inherit"/>
         <textarea id="asgDesc" rows="3" placeholder="وصف الواجب (اختياري)" style="padding:10px;border:1px solid var(--border);border-radius:8px;font-family:inherit"></textarea>
-        <div style="display:flex;flex-direction:column;gap:6px">
+        <div id="asgSubmissionOptions" style="display:flex;flex-direction:column;gap:6px">
           <label style="font-size:12px;color:var(--text-mid)">وسيلة التسليم المسموحة</label>
           <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer">
             <input type="checkbox" id="asgAllowFile" checked/> 📎 رفع ملف/صورة
@@ -172,6 +172,10 @@ function ensureModalsExist() {
           <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer">
             <input type="checkbox" id="asgAllowText" checked/> ✍️ كتابة نص
           </label>
+        </div>
+        <div id="asgExamLinkWrap" style="display:none">
+          <label style="font-size:12px;color:var(--text-mid)">رابط الاختبار</label>
+          <input id="asgExamLink" type="url" placeholder="https://..." style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;font-family:inherit;margin-top:4px;box-sizing:border-box"/>
         </div>
         <div>
           <label style="font-size:12px;color:var(--text-mid)">الموعد النهائي للتسليم</label>
@@ -211,6 +215,9 @@ window.openAddAssignmentModal = (materialId, course, kind = 'homework') => {
   document.getElementById('asgAllowFile').checked = true;
   document.getElementById('asgAllowText').checked = true;
   document.getElementById('asgDeadline').value = '';
+  document.getElementById('asgExamLink').value = '';
+  document.getElementById('asgSubmissionOptions').style.display = isExam ? 'none' : 'flex';
+  document.getElementById('asgExamLinkWrap').style.display = isExam ? 'block' : 'none';
   document.getElementById('addAssignmentModalTitle').textContent = isExam ? 'إضافة اختبار جديد' : 'إضافة واجب جديد';
   document.getElementById('addAssignmentSubmitBtn').textContent = isExam ? 'نشر الاختبار' : 'نشر الواجب';
   document.getElementById('addAssignmentModal').dataset.materialId = materialId;
@@ -225,9 +232,17 @@ window.submitAddAssignment = async () => {
   const label = kind === 'exam' ? 'الاختبار' : 'الواجب';
   const title = document.getElementById('asgTitle').value.trim();
   if (!title) { alert('اكتبي عنوان ' + label); return; }
-  const allowFile = document.getElementById('asgAllowFile').checked;
-  const allowText = document.getElementById('asgAllowText').checked;
-  if (!allowFile && !allowText) { alert('اختاري وسيلة تسليم واحدة على الأقل'); return; }
+
+  let allowFile = false, allowText = false, examLink = '';
+  if (kind === 'exam') {
+    examLink = document.getElementById('asgExamLink').value.trim();
+    if (!examLink) { alert('اكتبي رابط الاختبار'); return; }
+    if (!/^https?:\/\//i.test(examLink)) { alert('الرابط لازم يبدأ بـ https:// أو http://'); return; }
+  } else {
+    allowFile = document.getElementById('asgAllowFile').checked;
+    allowText = document.getElementById('asgAllowText').checked;
+    if (!allowFile && !allowText) { alert('اختاري وسيلة تسليم واحدة على الأقل'); return; }
+  }
   const deadline = document.getElementById('asgDeadline').value;
 
   try {
@@ -236,7 +251,7 @@ window.submitAddAssignment = async () => {
       course: modal.dataset.course,
       title,
       description: document.getElementById('asgDesc').value.trim(),
-      allowFile, allowText, deadline, kind
+      allowFile, allowText, deadline, kind, examLink
     });
     modal.classList.remove('show');
     if (window.refreshAssignmentsFor) window.refreshAssignmentsFor(modal.dataset.materialId, modal.dataset.course);
@@ -271,6 +286,19 @@ window.openAssignmentDetail = async (assignmentId, course) => {
 
   document.getElementById('asgDetailTitle').textContent = (isExam ? '✍️ ' : '📝 ') + asg.title;
   const dl = getDeadlineStatus(asg.deadline);
+
+  if (isExam) {
+    // ── الاختبار: مجرد رابط بره المنصة، مفيش تسليم ولا تقييم ──
+    body.innerHTML = `
+      <div style="font-size:13px;color:var(--text-mid);margin-bottom:10px">${asg.description || ''}</div>
+      <div style="font-size:12px;color:${dl.color};margin-bottom:14px">⏰ ${dl.text}</div>
+      <a href="${asg.examLink}" target="_blank" rel="noopener"
+        style="display:flex;align-items:center;justify-content:center;gap:8px;background:linear-gradient(135deg,#2c1a0e,#5c3d2e);color:#e8c96a;border:none;border-radius:10px;padding:12px;font-family:inherit;font-size:14px;cursor:pointer;font-weight:600;text-decoration:none">
+        <i class="ti ti-external-link"></i> ابدئي الاختبار
+      </a>
+      ${canManage ? `<button onclick="window.removeAssignment('${asg.id}','${asg.materialId}','${course}');document.getElementById('assignmentDetailModal').classList.remove('show')" style="width:100%;margin-top:10px;background:none;border:1px solid #e74c3c;color:#e74c3c;border-radius:10px;padding:9px;font-family:inherit;font-size:13px;cursor:pointer">حذف الاختبار</button>` : ''}`;
+    return;
+  }
 
   if (canManage) {
     // ── واجهة المعلمة: كل الردود ──
