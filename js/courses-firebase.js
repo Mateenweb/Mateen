@@ -693,7 +693,7 @@ function subjectCardHTML(s) {
         <div class="card-badge">أساسية</div>
         <div class="card-icon" style="display:flex;align-items:center;justify-content:center;${s.iconData || s.iconUrl ? 'position:absolute;inset:0;width:100%;height:100%;' : 'width:64px;height:64px;'}">
           ${s.iconData || s.iconUrl
-            ? `<img src="${s.iconData || s.iconUrl}" style="width:100%;height:100%;object-fit:cover;display:block;">`
+            ? `<img src="${s.iconData || s.iconUrl}" style="width:100%;height:100%;object-fit:contain;display:block;background:rgba(0,0,0,0.08);">`
             : `<span style="font-size:40px">${s.icon || '📚'}</span>`}
         </div>
       </div>
@@ -758,7 +758,7 @@ window.openDynModal = (id) => {
         <button class="modal-close" onclick="document.getElementById('dynModal-${id}').remove()">✕</button>
         <div class="modal-icon" style="${s.iconData || s.iconUrl ? 'position:absolute;inset:0;width:100%;height:100%;display:flex;' : 'display:flex;align-items:center;justify-content:center;width:72px;height:72px;'}">
           ${s.iconData || s.iconUrl
-            ? `<img src="${s.iconData || s.iconUrl}" style="width:100%;height:100%;object-fit:cover;display:block;">`
+            ? `<img src="${s.iconData || s.iconUrl}" style="width:100%;height:100%;object-fit:contain;display:block;background:rgba(0,0,0,0.08);">`
             : `<span style="font-size:48px">${s.icon || '📚'}</span>`}
         </div>
       </div>
@@ -850,7 +850,7 @@ window.openEditSubjectModal = (id) => {
   const editPrev = document.getElementById('editSbjIconPreview');
   const imgSrc = s.iconData || s.iconUrl;
   editPrev.innerHTML = imgSrc
-    ? `<img src="${imgSrc}" style="width:100%;height:100%;object-fit:cover;">`
+    ? `<img src="${imgSrc}" style="width:100%;height:100%;object-fit:contain;background:rgba(0,0,0,0.08);">`
     : '<i class="ti ti-photo" style="font-size:24px;color:var(--text-mid);"></i>';
   // ضبط Colors
   const colorMatch = (s.color || '').match(/#[0-9a-fA-F]{6}/g);
