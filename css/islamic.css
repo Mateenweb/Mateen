@@ -38,10 +38,6 @@ body::before {
 }
 
 /* ════════════════════════════════════════════════
-   2. (تم حذف زخرفة الحافة اليمنى بناءً على طلب رحمة)
-   ════════════════════════════════════════════════ */
-
-/* ════════════════════════════════════════════════
    3. شريط Basmala — dark brown dark (الأقل مساحة)
    ════════════════════════════════════════════════ */
 .basmala-bar {
@@ -65,11 +61,11 @@ body::before {
     opacity: 0.55;
     mix-blend-mode: multiply;
     background-image:
-        url("../images/star-ornament.png"),
-        url("../images/star-ornament.png"),
-        url("../images/star-ornament.png"),
-        url("../images/star-ornament.png"),
-        url("../images/star-ornament.png");
+        url("../star-ornament.png"),
+        url("../star-ornament.png"),
+        url("../star-ornament.png"),
+        url("../star-ornament.png"),
+        url("../star-ornament.png");
     background-repeat: no-repeat;
     background-position:
         3% 50%,
