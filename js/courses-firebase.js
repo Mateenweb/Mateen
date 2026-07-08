@@ -9,10 +9,12 @@ import { renderAssignmentsSection, renderLectureAssignmentControls } from "./ass
 import { deleteAssignmentsForMaterial } from "./assignments.js";
 window.refreshAssignmentsFor = (materialId, course) => {
   document.querySelectorAll(`[data-asg-container="${materialId}"]`).forEach(el => {
-    renderAssignmentsSection(materialId, course, el.id);
+    renderAssignmentsSection(materialId, course, el.id, false);
   });
   document.querySelectorAll(`[data-lec-asg-container="${materialId}"]`).forEach(el => {
-    renderLectureAssignmentControls(materialId, course, el.id);
+    const group = allMats.filter(m => `lecture-${m.course}-${m.lectureNumber}` === materialId);
+    const targets = group.map(m => ({ id: m.id, title: m.title }));
+    renderLectureAssignmentControls(materialId, course, el.id, targets);
   });
 };
 
@@ -171,7 +173,7 @@ function renderMats(mats) {
   } else {
     section.style.display = 'block';
     container.innerHTML = mats.map(matCardHTML).join('');
-    mats.forEach(m => renderAssignmentsSection(m.id, m.course, 'asg-' + m.id));
+    mats.forEach(m => renderAssignmentsSection(m.id, m.course, 'asg-' + m.id, false));
   }
 }
 
@@ -221,7 +223,7 @@ function renderModalMats() {
         ${addBtnHTML}
       </div>
       ${matsGroupedHTML(subjMats)}`;
-    subjMats.forEach(m => renderAssignmentsSection(m.id, m.course, 'asg-' + m.id));
+    subjMats.forEach(m => renderAssignmentsSection(m.id, m.course, 'asg-' + m.id, false));
     renderLectureControls(subjMats);
   });
 }
@@ -271,7 +273,8 @@ function renderLectureControls(mats) {
     const group = withLecture.filter(m => m.lectureNumber === n);
     const course = group[0]?.course || '';
     const lectureId = `lecture-${course}-${n}`;
-    renderLectureAssignmentControls(lectureId, course, 'lecAsgControls-' + lectureId);
+    const targets = group.map(m => ({ id: m.id, title: m.title }));
+    renderLectureAssignmentControls(lectureId, course, 'lecAsgControls-' + lectureId, targets);
   });
 }
 
@@ -782,7 +785,7 @@ window.openDynModal = (id) => {
       </div>
     </div>`;
   document.body.appendChild(modal);
-  mats.forEach(m => renderAssignmentsSection(m.id, m.course, 'asg-' + m.id));
+  mats.forEach(m => renderAssignmentsSection(m.id, m.course, 'asg-' + m.id, false));
   renderLectureControls(mats);
 };
 
