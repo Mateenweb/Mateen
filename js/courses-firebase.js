@@ -6,6 +6,7 @@ import { getFirestore, collection, query, orderBy, onSnapshot, addDoc, getDoc, d
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 import { FIREBASE_CONFIG } from "./config.js";
 import { renderAssignmentsSection } from "./assignments-ui.js";
+import { deleteAssignmentsForMaterial } from "./assignments.js";
 window.refreshAssignmentsFor = (materialId, course) => {
   document.querySelectorAll(`[data-asg-container="${materialId}"]`).forEach(el => {
     renderAssignmentsSection(materialId, course, el.id);
@@ -480,6 +481,7 @@ window.executeDeleteMat = async () => {
   btn.innerHTML = '<i class="ti ti-loader"></i> جاري الحذف...';
 
   try {
+    await deleteAssignmentsForMaterial(id);
     await deleteDoc(doc(db, 'materials', id));
     document.getElementById('deleteConfirmModal').style.display = 'none';
   } catch(e) {
@@ -904,12 +906,15 @@ window.executeDeleteSubject = async () => {
     // 1. اDelete اWhenدة الرئيسية
     await deleteDoc(doc(db, 'subjects', id));
 
-    // 2. اDelete كل Content المرتبط بها من materials collection
+    // 2. اDelete كل Content المرتبط بها من materials collection (+ أي واجبات وتسليمات مرتبطة بيها)
     const matsSnap = await getDocs(query(
       collection(db, 'materials'),
       where('course', '==', subjectName)
     ));
-    const deletePromises = matsSnap.docs.map(d => deleteDoc(d.ref));
+    const deletePromises = matsSnap.docs.map(async d => {
+      await deleteAssignmentsForMaterial(d.id);
+      await deleteDoc(d.ref);
+    });
     await Promise.all(deletePromises);
     console.log(`[حذف] تم حذف ${matsSnap.docs.length} ملف مرتبط بـ "${subjectName}"`);
 
