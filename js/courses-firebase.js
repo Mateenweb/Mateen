@@ -791,6 +791,7 @@ window.openDynModal = (id) => {
 
 // Add مادة رئيسية
 window.submitNewSubject = async () => {
+  if (window._iconUploadInProgress) { alert('استني لحظة، الصورة لسه بترفع...'); return; }
   const name  = document.getElementById('sbjName').value.trim();
   const desc  = document.getElementById('sbjDesc').value.trim();
   const meetings = document.getElementById('sbjMeetings').value.trim();
@@ -873,6 +874,7 @@ window.openEditSubjectModal = (id) => {
 };
 
 window.submitEditSubject = async () => {
+  if (window._iconUploadInProgress) { alert('استني لحظة، الصورة لسه بترفع...'); return; }
   const id    = document.getElementById('editSbjId').value;
   const name  = document.getElementById('editSbjName').value.trim();
   const desc  = document.getElementById('editSbjDesc').value.trim();
