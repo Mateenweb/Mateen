@@ -22,6 +22,9 @@ let _currentUserRole = null;
 let _currentUserSubjects = [];
 let _currentUserId = null;
 
+// خريطة: lectureId -> [{id, title}, ...] المواد اللي جوه كل محاضرة (لعرضها كخيارات هدف في مودال الإضافة)
+const lecTargetsMap = {};
+
 let _resolveRoleReady;
 const roleReady = new Promise(res => { _resolveRoleReady = res; });
 
@@ -55,7 +58,8 @@ async function uploadFile(file) {
 }
 
 // ── HTML قسم الواجبات جوه كارت المادة ─────────────────────────
-export async function renderAssignmentsSection(materialId, course, containerId) {
+// showAddButtons=false: يعرض الواجبات/الاختبارات الموجودة فقط بدون أزرار إضافة (لما الإضافة بقت مركزية من زرار المحاضرة)
+export async function renderAssignmentsSection(materialId, course, containerId, showAddButtons = true) {
   await roleReady;
   const canManage = canManageAssignments(course);
   const assignments = await getAssignmentsForMaterial(materialId);
@@ -65,12 +69,12 @@ export async function renderAssignmentsSection(materialId, course, containerId) 
 
   let html = `<div style="margin-top:10px;border-top:1px dashed var(--border);padding-top:10px">`;
 
-  if (assignments.length === 0 && !canManage) {
+  if (assignments.length === 0 && (!canManage || !showAddButtons)) {
     containers.forEach(c => c.innerHTML = '');
     return;
   }
 
-  if (canManage) {
+  if (canManage && showAddButtons) {
     html += `<div style="display:flex;gap:8px;margin-bottom:8px">
       <button onclick="window.openAddAssignmentModal('${materialId}','${course}','homework')"
         style="flex:1;padding:8px;border:1px dashed var(--gold);background:transparent;color:var(--green-dark);border-radius:8px;font-family:inherit;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px">
@@ -101,8 +105,10 @@ export async function renderAssignmentsSection(materialId, course, containerId) 
 }
 
 // ── شارة واجب/اختبار مختصرة جنب رقم المحاضرة (مش مرتبطة بمادة معينة) ──
-export async function renderLectureAssignmentControls(lectureId, course, containerId) {
+// targets: [{id, title}, ...] المواد المكوّنة لهذه المحاضرة — تتحفظ عشان تستخدم كخيارات هدف لما تتفتح مودال الإضافة
+export async function renderLectureAssignmentControls(lectureId, course, containerId, targets = []) {
   await roleReady;
+  lecTargetsMap[lectureId] = targets;
   const canManage = canManageAssignments(course);
   const assignments = await getAssignmentsForMaterial(lectureId);
 
@@ -161,6 +167,10 @@ function ensureModalsExist() {
         <button onclick="document.getElementById('addAssignmentModal').classList.remove('show')" style="background:none;border:none;font-size:20px;cursor:pointer">✕</button>
       </div>
       <div style="display:flex;flex-direction:column;gap:12px">
+        <div id="asgTargetWrap" style="display:none">
+          <label style="font-size:12px;color:var(--text-mid)">إضافة لـ</label>
+          <select id="asgTarget" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;font-family:inherit;margin-top:4px;box-sizing:border-box"></select>
+        </div>
         <input id="asgTitle" type="text" placeholder="عنوان الواجب" style="padding:10px;border:1px solid var(--border);border-radius:8px;font-family:inherit"/>
         <textarea id="asgDesc" rows="3" placeholder="وصف الواجب (اختياري)" style="padding:10px;border:1px solid var(--border);border-radius:8px;font-family:inherit"></textarea>
         <div id="asgSubmissionOptions" style="display:flex;flex-direction:column;gap:6px">
@@ -207,6 +217,19 @@ function ensureModalsExist() {
 window.openAddAssignmentModal = (materialId, course, kind = 'homework') => {
   ensureModalsExist();
   const isExam = kind === 'exam';
+
+  const targets = lecTargetsMap[materialId] || [];
+  const targetWrap = document.getElementById('asgTargetWrap');
+  const targetSel  = document.getElementById('asgTarget');
+  if (targets.length) {
+    targetSel.innerHTML = `<option value="${materialId}">🗂️ المحاضرة كاملة</option>` +
+      targets.map(t => `<option value="${t.id}">${(t.title || 'بدون عنوان').replace(/</g,'&lt;')}</option>`).join('');
+    targetWrap.style.display = 'block';
+  } else {
+    targetSel.innerHTML = '';
+    targetWrap.style.display = 'none';
+  }
+
   document.getElementById('asgTitle').value = '';
   document.getElementById('asgTitle').placeholder = isExam ? 'عنوان الاختبار' : 'عنوان الواجب';
   document.getElementById('asgDesc').value = '';
@@ -229,6 +252,8 @@ window.submitAddAssignment = async () => {
   const modal = document.getElementById('addAssignmentModal');
   const kind = modal.dataset.kind === 'exam' ? 'exam' : 'homework';
   const label = kind === 'exam' ? 'الاختبار' : 'الواجب';
+  const targetSel = document.getElementById('asgTarget');
+  const materialId = (targetSel && targetSel.options.length) ? targetSel.value : modal.dataset.materialId;
   const title = document.getElementById('asgTitle').value.trim();
   if (!title) { alert('اكتبي عنوان ' + label); return; }
 
@@ -246,14 +271,18 @@ window.submitAddAssignment = async () => {
 
   try {
     await addAssignment({
-      materialId: modal.dataset.materialId,
+      materialId,
       course: modal.dataset.course,
       title,
       description: document.getElementById('asgDesc').value.trim(),
       allowFile, allowText, deadline, kind, examLink
     });
     modal.classList.remove('show');
-    if (window.refreshAssignmentsFor) window.refreshAssignmentsFor(modal.dataset.materialId, modal.dataset.course);
+    if (window.refreshAssignmentsFor) window.refreshAssignmentsFor(materialId, modal.dataset.course);
+    // لو الهدف كان محاضرة كاملة والمادة المختارة فعليًا مختلفة، حدّثي شارة المحاضرة كمان
+    if (window.refreshAssignmentsFor && materialId !== modal.dataset.materialId) {
+      window.refreshAssignmentsFor(modal.dataset.materialId, modal.dataset.course);
+    }
     alert('✅ تم نشر ' + label);
   } catch (e) {
     alert('خطأ: ' + e.message);
