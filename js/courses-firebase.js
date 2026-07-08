@@ -6,7 +6,6 @@ import { getFirestore, collection, query, orderBy, onSnapshot, addDoc, getDoc, d
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 import { FIREBASE_CONFIG } from "./config.js";
 import { renderAssignmentsSection } from "./assignments-ui.js";
-import { addAssignment } from "./assignments.js";
 window.refreshAssignmentsFor = (materialId, course) => {
   document.querySelectorAll(`[data-asg-container="${materialId}"]`).forEach(el => {
     renderAssignmentsSection(materialId, course, el.id);
@@ -591,81 +590,41 @@ window.submitNewCourse = async () => {
     lectureNumber = parseInt(lectureSel, 10);
   }
 
-  // واجب/اختبار (بنجيبهم هنا الأول عشان نستخدمهم في التحقق كمان)
-  const asgTitle     = document.getElementById('asgTitle')?.value.trim();
-  const asgDeadline  = document.getElementById('asgDeadline')?.value;
-  const asgDesc      = document.getElementById('asgDesc')?.value.trim();
-  const asgAllowFile = document.getElementById('asgAllowFileQuick')?.checked ?? true;
-  const asgAllowText = document.getElementById('asgAllowTextQuick')?.checked ?? true;
-  const assignment   = asgTitle ? { title: asgTitle, deadline: asgDeadline || null, desc: asgDesc || '', allowFile: asgAllowFile, allowText: asgAllowText } : null;
+  // واجب/اختبار بقى ليهم مسار مستقل (زرار "➕ إضافة واجب" اللي بيظهر تحت المادة بعد إضافتها)
 
-  const examTitle    = document.getElementById('examTitle')?.value.trim();
-  const examPath     = document.getElementById('examPath')?.value.trim();
-  const examDeadline = document.getElementById('examDeadline')?.value;
-  const exam         = examTitle && examPath ? { title: examTitle, path: examPath, deadline: examDeadline || null } : null;
-
-  // لو مفيش واجب ولا اختبار، لازم اسم المادة والرابط يتملوا زي الأول
-  // لو فيه واجب أو اختبار، مش شرط يبقى فيه محتوى/رابط معاهم
   if (!course) {
     err.style.display = 'block';
     err.textContent = 'يرجى اختيار المادة';
     return;
   }
-  if (!assignment && !exam && (!title || !url)) {
+  if (!title || !url) {
     err.style.display = 'block';
-    err.textContent = isAudio ? 'يرجى رفع الملف الصوتي أولاً' : 'يرجى تعبئة الحقول المطلوبة (الاسم، الرابط)، أو إضافة واجب/اختبار على الأقل';
-    return;
-  }
-  if (assignment && !assignment.allowFile && !assignment.allowText) {
-    err.style.display = 'block';
-    err.textContent = 'اختاري وسيلة تسليم واحدة على الأقل للواجب (رفع ملف أو كتابة نص)';
+    err.textContent = isAudio ? 'يرجى رفع الملف الصوتي أولاً' : 'يرجى تعبئة الحقول المطلوبة (الاسم، الرابط)';
     return;
   }
   err.style.display = 'none';
 
-  const finalTitle = title || assignment?.title || exam?.title || 'بدون عنوان';
+  const finalTitle = title || 'بدون عنوان';
 
   const btn = document.getElementById('addCourseSubmit');
   btn.disabled = true;
   btn.innerHTML = '<i class="ti ti-loader"></i> جاري الإضافة...';
 
   try {
-    const materialRef = await addDoc(collection(db, 'materials'), {
+    await addDoc(collection(db, 'materials'), {
       title: finalTitle, course, type, url, notes,
       ...(lectureNumber != null ? { lectureNumber } : {}),
-      ...(exam ? { exam } : {}),
-      ...(assignment ? { assignment } : {}),
       addedAt: Date.now(),
       addedBy: auth.currentUser.email,
     });
 
-    // الواجب (لو اتحط) لازم يتحفظ كواجب حقيقي قابل للتسليم، مش نص ثابت على المادة
-    if (assignment) {
-      await addAssignment({
-        materialId: materialRef.id,
-        course,
-        title: assignment.title,
-        description: assignment.desc,
-        allowFile: assignment.allowFile,
-        allowText: assignment.allowText,
-        deadline: assignment.deadline,
-      });
-    }
     // reset all fields
-    ['newCourseTitle','newCourseCat','newCourseUrl','newCourseNotes','newCourseLecture','newLectureNumInput',
-     'asgTitle','asgDeadline','asgDesc','examTitle','examPath','examDeadline'].forEach(id => {
+    ['newCourseTitle','newCourseCat','newCourseUrl','newCourseNotes','newCourseLecture','newLectureNumInput'].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.value = '';
     });
-    ['asgAllowFileQuick','asgAllowTextQuick'].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.checked = true;
-    });
-    // أغلق الأقسام الاختيارية
-    ['asgSection','examSection','newLectureNumWrap'].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.style.display = 'none';
-    });
+    const lectureWrap = document.getElementById('newLectureNumWrap');
+    if (lectureWrap) lectureWrap.style.display = 'none';
     document.getElementById('addCourseModal').style.display = 'none';
   } catch(e) {
     err.style.display = 'block';
