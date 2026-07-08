@@ -131,10 +131,10 @@ function matCardHTML(m) {
           <div style="font-size:12px;color:var(--gold-dark)">${LINK_LABELS[detectLinkType(m.url)]}</div>
         </a>` : `
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
-          <span style="font-size:20px">${m.assignment?.title ? '📝' : (m.exam?.title ? '✍️' : '📎')}</span>
+          <span style="font-size:20px">${m.assignment?.title ? '📝' : '📎'}</span>
           <div>
             <div style="font-size:13px;font-weight:700;color:var(--green-dark)">${m.title}</div>
-            <div style="font-size:11px;color:var(--text-mid);margin-top:2px">${m.assignment?.title || m.exam?.title ? 'بدون محتوى مرفق — واجب/اختبار فقط' : (m.type || '')}</div>
+            <div style="font-size:11px;color:var(--text-mid);margin-top:2px">${m.assignment?.title ? 'بدون محتوى مرفق — واجب/اختبار فقط' : (m.type || '')}</div>
           </div>
         </div>
         ${m.notes ? `<div style="font-size:12px;color:var(--text-mid);background:var(--beige);padding:7px 10px;border-radius:8px;margin-bottom:8px">${m.notes}</div>` : ''}`)}
@@ -144,12 +144,6 @@ function matCardHTML(m) {
           ${m.assignment.deadline ? `<div style="font-size:11px;color:var(--text-mid)">⏰ آخر موعد: ${new Date(m.assignment.deadline).toLocaleString('ar-EG',{dateStyle:'medium',timeStyle:'short'})}</div>` : ''}
           ${m.assignment.desc ? `<div style="font-size:11px;color:var(--text-mid);margin-top:3px">${m.assignment.desc}</div>` : ''}
         </div>` : ''}
-        ${m.exam?.title ? `
-        <a href="${m.exam.path}" target="_blank" rel="noopener" style="text-decoration:none;display:block;margin-top:8px;background:rgba(45,110,69,0.06);border:1px solid rgba(45,110,69,0.2);border-radius:8px;padding:8px 10px;">
-          <div style="font-size:12px;font-weight:700;color:var(--green-dark);margin-bottom:3px;"><i class="ti ti-pencil-check"></i> اختبار: ${m.exam.title}</div>
-          ${m.exam.deadline ? `<div style="font-size:11px;color:var(--text-mid)">⏰ آخر موعد: ${new Date(m.exam.deadline).toLocaleString('ar-EG',{dateStyle:'medium',timeStyle:'short'})}</div>` : ''}
-          <div style="font-size:11px;color:var(--green-dark);margin-top:4px;font-weight:600">ابدئي الاختبار ←</div>
-        </a>` : ''}
         ${editBtns}
         <div id="asg-${m.id}" data-asg-container="${m.id}"></div>
       </div>
@@ -256,7 +250,7 @@ window.updateLectureOptions = () => {
 // ── تجميع المواد المضافة حسب رقم المحاضرة قبل عرضها ────────────
 // ترتيب ثابت لعناصر المحاضرة الواحدة: اختبار/واجب أولًا (لو موجودين)، ثم محاضرة، ثم ملخص، ثم الباقي
 function matPriority(m) {
-  if (m.exam?.title || m.assignment?.title) return 0;
+  if (m.assignment?.title) return 0;
   if (m.type === 'محاضرة') return 1;
   if (m.type === 'ملخص') return 2;
   return 3;
