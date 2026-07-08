@@ -7,6 +7,7 @@ import { getFirestore, collection, onSnapshot, addDoc, updateDoc,
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 import { FIREBASE_CONFIG } from "./config.js";
 import { renderAssignmentsSection } from "./assignments-ui.js";
+import { deleteAssignmentsForMaterial } from "./assignments.js";
 
 const app  = getApps().length ? getApp() : initializeApp(FIREBASE_CONFIG);
 const auth = getAuth(app);
@@ -346,7 +347,10 @@ window.confirmDeleteCourse = async (courseId, name) => {
   if (!confirm(`هل أنتِ متأكدة من حذف دورة "${name}"؟ هيتم حذف كل محتواها كمان.`)) return;
   try {
     const mats = allLibMats.filter(m => m.courseId === courseId);
-    for (const m of mats) await deleteDoc(doc(db, 'libraryMaterials', m.id));
+    for (const m of mats) {
+      await deleteAssignmentsForMaterial(m.id);
+      await deleteDoc(doc(db, 'libraryMaterials', m.id));
+    }
     await deleteDoc(doc(db, 'courses', courseId));
     document.getElementById('courseDetailModal').style.display = 'none';
     window._openCourseId = null;
@@ -463,6 +467,7 @@ window.executeDeleteLib = async () => {
   const btn = document.getElementById('deleteLibConfirm');
   btn.disabled = true; btn.innerHTML = '<i class="ti ti-loader"></i>';
   try {
+    await deleteAssignmentsForMaterial(id);
     await deleteDoc(doc(db, col, id));
     document.getElementById('deleteLibModal').style.display = 'none';
   } catch(e) { alert('خطأ في الحذف: ' + e.message); }
