@@ -68,9 +68,27 @@ export async function getAssignmentsForCourse(course) {
   return snap.docs.map(d => ({ id: d.id, ...d.data() }));
 }
 
-// ── حذف واجب ──────────────────────────────────────────────────
+// ── حذف كل تسليمات واجب معين (مساعدة داخلية) ──────────────────
+async function deleteSubmissionsFor(assignmentId) {
+  const snap = await getDocs(collection(db, 'assignments', assignmentId, 'submissions'));
+  await Promise.all(snap.docs.map(d => deleteDoc(d.ref)));
+}
+
+// ── حذف واجب (بيمسح تسليماته الأول عشان محدش يفضل يتيم) ───────
 export async function deleteAssignment(assignmentId) {
+  await deleteSubmissionsFor(assignmentId);
   await deleteDoc(doc(db, 'assignments', assignmentId));
+}
+
+// ── حذف كل الواجبات (+تسليماتها) المرتبطة بمادة معينة ─────────
+// يُستخدم عند حذف المادة نفسها من courses/library عشان محدش يفضل واجب يتيم
+export async function deleteAssignmentsForMaterial(materialId) {
+  const q = query(collection(db, 'assignments'), where('materialId', '==', materialId));
+  const snap = await getDocs(q);
+  await Promise.all(snap.docs.map(async d => {
+    await deleteSubmissionsFor(d.id);
+    await deleteDoc(d.ref);
+  }));
 }
 
 // ── تسليم رد الطالبة على الواجب ──────────────────────────────
