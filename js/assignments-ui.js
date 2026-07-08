@@ -123,12 +123,12 @@ export async function renderLectureAssignmentControls(lectureId, course, contain
   if (canManage) {
     html += `
       <span style="position:relative;display:inline-flex">
-        <button onclick="event.stopPropagation();window.toggleLecAsgMenu('${lectureId}')"
+        <button onclick="event.stopPropagation();window.toggleLecAsgMenu(this)"
           style="background:var(--green-dark,#5c3d2e);border:none;color:#fff;border-radius:6px;width:22px;height:22px;font-size:14px;font-weight:700;line-height:1;cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,0.25)">+</button>
-        <div id="lecAsgMenu-${lectureId}" style="display:none;position:absolute;top:24px;right:0;background:var(--bg-card,#fff);border:1px solid var(--border);border-radius:8px;box-shadow:0 4px 14px rgba(0,0,0,0.15);z-index:60;min-width:130px;overflow:hidden">
-          <div onclick="event.stopPropagation();document.getElementById('lecAsgMenu-${lectureId}').style.display='none';window.openAddAssignmentModal('${lectureId}','${course}','homework')"
+        <div class="lec-asg-menu" style="display:none;position:absolute;top:24px;right:0;background:var(--bg-card,#fff);border:1px solid var(--border);border-radius:8px;box-shadow:0 4px 14px rgba(0,0,0,0.15);z-index:60;min-width:130px;overflow:hidden">
+          <div onclick="event.stopPropagation();this.parentElement.style.display='none';window.openAddAssignmentModal('${lectureId}','${course}','homework')"
             style="padding:8px 12px;font-size:12px;cursor:pointer;white-space:nowrap;color:var(--text-mid)">📝 إضافة واجب</div>
-          <div onclick="event.stopPropagation();document.getElementById('lecAsgMenu-${lectureId}').style.display='none';window.openAddAssignmentModal('${lectureId}','${course}','exam')"
+          <div onclick="event.stopPropagation();this.parentElement.style.display='none';window.openAddAssignmentModal('${lectureId}','${course}','exam')"
             style="padding:8px 12px;font-size:12px;cursor:pointer;white-space:nowrap;border-top:1px solid var(--border);color:var(--text-mid)">✅ إضافة اختبار</div>
         </div>
       </span>`;
@@ -138,16 +138,15 @@ export async function renderLectureAssignmentControls(lectureId, course, contain
 }
 
 
-window.toggleLecAsgMenu = (lectureId) => {
-  document.querySelectorAll('[id^="lecAsgMenu-"]').forEach(el => {
-    if (el.id !== `lecAsgMenu-${lectureId}`) el.style.display = 'none';
-  });
-  const menu = document.getElementById(`lecAsgMenu-${lectureId}`);
-  if (menu) menu.style.display = (!menu.style.display || menu.style.display === 'none') ? 'block' : 'none';
+window.toggleLecAsgMenu = (btn) => {
+  const menu = btn.nextElementSibling;
+  const wasOpen = menu && menu.style.display === 'block';
+  document.querySelectorAll('.lec-asg-menu').forEach(el => el.style.display = 'none');
+  if (menu) menu.style.display = wasOpen ? 'none' : 'block';
 };
 
 document.addEventListener('click', () => {
-  document.querySelectorAll('[id^="lecAsgMenu-"]').forEach(el => el.style.display = 'none');
+  document.querySelectorAll('.lec-asg-menu').forEach(el => el.style.display = 'none');
 });
 
 // ── Modal إضافة واجب ───────────────────────────────────────────
