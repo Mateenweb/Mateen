@@ -605,10 +605,27 @@
           <option value="⚠️ تنبيه">⚠️ تنبيه</option>
           <option value="📅 موعد">📅 موعد</option>
         </select>
-        <select id="anVisibility" class="m-select-news" style="flex:1">
+        <select id="anVisibility" class="m-select-news" style="flex:1" onchange="anToggleRolesBox()">
           <option value="public">🌐 للجميع (بدون تسجيل)</option>
           <option value="members">🔒 للمسجلات فقط</option>
         </select>
+      </div>
+      <div id="anRolesBox" style="display:none;flex-direction:column;gap:6px;background:var(--beige2);border:1px solid var(--border);border-radius:8px;padding:10px">
+        <span style="font-size:12px;color:var(--text-mid)">أنواع المستخدمين اللي يوصلهم الخبر (اتركي الكل بدون تحديد ليوصل للجميع):</span>
+        <div style="display:flex;gap:14px;flex-wrap:wrap">
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer">
+            <input type="checkbox" class="an-role-check" value="student"/> 🎓 طالبات
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer">
+            <input type="checkbox" class="an-role-check" value="teacher"/> 👩‍🏫 معلمات
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer">
+            <input type="checkbox" class="an-role-check" value="supervisor"/> 🧑‍💼 مشرفات
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer">
+            <input type="checkbox" class="an-role-check" value="admin"/> 🛡️ أدمن
+          </label>
+        </div>
       </div>
       <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer">
         <input type="checkbox" id="anPinned"> تثبيت الخبر في الأعلى
@@ -1045,6 +1062,7 @@
           <button onclick="baClearAll()" style="font-size:12px;background:var(--beige2);border:1px solid var(--border);border-radius:6px;padding:4px 12px;cursor:pointer;font-family:inherit">إلغاء الكل</button>
           <button onclick="baMarkAllPresent()" style="font-size:12px;background:rgba(39,174,96,0.1);color:#1e8449;border:1px solid rgba(39,174,96,0.3);border-radius:6px;padding:4px 12px;cursor:pointer;font-family:inherit">الكل حاضرة</button>
           <button onclick="baMarkAllAbsent()" style="font-size:12px;background:rgba(192,57,43,0.1);color:#c0392b;border:1px solid rgba(192,57,43,0.3);border-radius:6px;padding:4px 12px;cursor:pointer;font-family:inherit">الكل غائبة</button>
+          <button onclick="baMarkAllExcused()" style="font-size:12px;background:rgba(201,162,39,0.1);color:#a3801d;border:1px solid rgba(201,162,39,0.3);border-radius:6px;padding:4px 12px;cursor:pointer;font-family:inherit">الكل معتذرة</button>
         </div>
       </div>
 
@@ -1082,26 +1100,22 @@
       <button class="m-close" onclick="closePasteAttModal()">✕</button>
     </div>
     <div class="modal-body">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
-        <div>
-          <label style="font-size:12px;color:var(--text-mid);display:block;margin-bottom:4px">التاريخ *</label>
-          <input id="paDate" type="date" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:inherit;font-size:13px"/>
-        </div>
-        <div>
-          <label style="font-size:12px;color:var(--text-mid);display:block;margin-bottom:4px">الفترة (اختياري)</label>
-          <select id="paPeriod" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:inherit;font-size:13px">
-            <option value="">—</option>
-            <option value="الفترة الصباحية">الفترة الصباحية</option>
-            <option value="الفترة المسائية">الفترة المسائية</option>
-          </select>
-        </div>
+      <div>
+        <label style="font-size:12px;color:var(--text-mid);display:block;margin-bottom:4px">التاريخ *</label>
+        <input id="paDate" type="date" onchange="paUpdateDayInfo()" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:inherit;font-size:13px"/>
       </div>
 
-      <label style="font-size:12px;color:var(--text-mid);display:block;margin-bottom:4px">مواد اليوم بترتيب الحصص (اختياري — لو فاضي هيتسجل "الحصة الأولى/الثانية..")</label>
-      <div id="paSubjectsList" style="margin-bottom:10px"></div>
-      <button type="button" onclick="paAddSubjectRow()" style="font-size:12px;background:var(--beige2);border:1px solid var(--border);border-radius:6px;padding:5px 12px;cursor:pointer;font-family:inherit;margin-bottom:12px">+ إضافة مادة</button>
+      <div id="paDayInfo" style="display:none;margin-top:10px"></div>
 
-      <label style="font-size:12px;color:var(--text-mid);display:block;margin-bottom:4px">الصقي نص الرسالة هنا *</label>
+      <div style="margin-top:8px;display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+        <select id="paExtraSubjectSelect" style="flex:1;min-width:140px;border:1px solid var(--border);border-radius:6px;padding:5px 8px;font-family:inherit;font-size:12px">
+          <option value="">— اختاري مادة تضيفيها يدويًا —</option>
+        </select>
+        <button type="button" onclick="paAddExtraSubject()" style="font-size:12px;background:var(--beige2);border:1px solid var(--border);border-radius:6px;padding:5px 12px;cursor:pointer;font-family:inherit">+ إضافة</button>
+      </div>
+      <div id="paExtraSubjectsList" style="margin-top:6px"></div>
+
+      <label style="font-size:12px;color:var(--text-mid);display:block;margin:12px 0 4px">الصقي نص الرسالة هنا *</label>
       <textarea id="paMessage" rows="8" placeholder="أسماء محمد سليمان ✅️✅️✅️ أميرة بشير خلف✅️✅️✅️ ..." style="width:100%;border:1px solid var(--border);border-radius:8px;padding:10px;font-family:inherit;font-size:13px;resize:vertical"></textarea>
 
       <div style="display:flex;justify-content:flex-end;margin-top:10px">
@@ -1513,24 +1527,20 @@ function formatSize(bytes) {
       <p style="font-size:12px;color:var(--text-mid);margin-bottom:12px;background:rgba(92,61,46,0.05);border:1px solid var(--border);border-radius:8px;padding:10px">
         📌 الملف لازم يكون: أول عمود = اسم الطالبة، وباقي الأعمدة = **أيام الأسبوع** (الأحد، الاثنين...). كل خلية ممكن تحتوي أكتر من رمز (لعدة حصص في نفس اليوم): ✅ / ❌ / ⭕، أو ملاحظة نصية، أو تتسيبها فاضية.
       </p>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
-        <div>
-          <label style="font-size:12px;color:var(--text-mid);display:block;margin-bottom:4px">تاريخ يوم الأحد (بداية الأسبوع) *</label>
-          <input id="eaDate" type="date" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:inherit;font-size:13px"/>
-        </div>
-        <div>
-          <label style="font-size:12px;color:var(--text-mid);display:block;margin-bottom:4px">الفترة / الشيت (اختياري)</label>
-          <select id="eaPeriod" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:inherit;font-size:13px">
-            <option value="">كل الشيتات في الملف</option>
-            <option value="الفترة الصباحية">الفترة الصباحية فقط</option>
-            <option value="الفترة المسائية">الفترة المسائية فقط</option>
-          </select>
-        </div>
+      <div style="margin-bottom:12px">
+        <label style="font-size:12px;color:var(--text-mid);display:block;margin-bottom:4px">تاريخ يوم الأحد (بداية الأسبوع) *</label>
+        <input id="eaDate" type="date" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:inherit;font-size:13px"/>
       </div>
 
-      <label style="font-size:12px;color:var(--text-mid);display:block;margin-bottom:4px">مواد الحصص بترتيبها داخل اليوم الواحد (اختياري)</label>
-      <div id="eaSubjectsList" style="margin-bottom:6px"></div>
-      <button type="button" onclick="eaAddSubjectRow()" style="font-size:12px;background:var(--beige2);border:1px solid var(--border);border-radius:6px;padding:5px 12px;cursor:pointer;font-family:inherit;margin-bottom:12px">+ إضافة مادة</button>
+      <div id="eaDaySubjectsInfo" style="margin-bottom:8px"></div>
+
+      <div style="margin-bottom:8px;display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+        <select id="eaExtraSubjectSelect" style="flex:1;min-width:140px;border:1px solid var(--border);border-radius:6px;padding:5px 8px;font-family:inherit;font-size:12px">
+          <option value="">— اختاري مادة تضيفيها يدويًا —</option>
+        </select>
+        <button type="button" onclick="eaAddExtraSubject()" style="font-size:12px;background:var(--beige2);border:1px solid var(--border);border-radius:6px;padding:5px 12px;cursor:pointer;font-family:inherit">+ إضافة</button>
+      </div>
+      <div id="eaExtraSubjectsList" style="margin-bottom:12px"></div>
 
       <label style="font-size:12px;color:var(--text-mid);display:block;margin-bottom:4px">اختاري الملف *</label>
       <input id="eaFile" type="file" accept=".xlsx,.xls,.csv" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:inherit;font-size:13px;cursor:pointer;margin-bottom:10px"/>
