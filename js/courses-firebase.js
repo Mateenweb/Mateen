@@ -9,12 +9,10 @@ import { renderAssignmentsSection, renderLectureAssignmentControls } from "./ass
 import { deleteAssignmentsForMaterial } from "./assignments.js";
 window.refreshAssignmentsFor = (materialId, course) => {
   document.querySelectorAll(`[data-asg-container="${materialId}"]`).forEach(el => {
-    renderAssignmentsSection(materialId, course, el.id, false);
+    renderAssignmentsSection(materialId, course, el.id);
   });
   document.querySelectorAll(`[data-lec-asg-container="${materialId}"]`).forEach(el => {
-    const group = allMats.filter(m => `lecture-${m.course}-${m.lectureNumber}` === materialId);
-    const targets = group.map(m => ({ id: m.id, title: m.title }));
-    renderLectureAssignmentControls(materialId, course, el.id, targets);
+    renderLectureAssignmentControls(materialId, course, el.id);
   });
 };
 
@@ -173,7 +171,7 @@ function renderMats(mats) {
   } else {
     section.style.display = 'block';
     container.innerHTML = mats.map(matCardHTML).join('');
-    mats.forEach(m => renderAssignmentsSection(m.id, m.course, 'asg-' + m.id, false));
+    mats.forEach(m => renderAssignmentsSection(m.id, m.course, 'asg-' + m.id));
   }
 }
 
@@ -223,7 +221,7 @@ function renderModalMats() {
         ${addBtnHTML}
       </div>
       ${matsGroupedHTML(subjMats)}`;
-    subjMats.forEach(m => renderAssignmentsSection(m.id, m.course, 'asg-' + m.id, false));
+    subjMats.forEach(m => renderAssignmentsSection(m.id, m.course, 'asg-' + m.id));
     renderLectureControls(subjMats);
   });
 }
@@ -273,8 +271,7 @@ function renderLectureControls(mats) {
     const group = withLecture.filter(m => m.lectureNumber === n);
     const course = group[0]?.course || '';
     const lectureId = `lecture-${course}-${n}`;
-    const targets = group.map(m => ({ id: m.id, title: m.title }));
-    renderLectureAssignmentControls(lectureId, course, 'lecAsgControls-' + lectureId, targets);
+    renderLectureAssignmentControls(lectureId, course, 'lecAsgControls-' + lectureId);
   });
 }
 
@@ -689,11 +686,11 @@ function subjectCardHTML(s) {
   const safeId = 'dyn-' + s.id;
   return `
     <div class="course-card" onclick="openDynModal('${s.id}')">
-      <div class="card-banner" style="background:var(--beige,#f7efe3)">
+      <div class="card-banner" style="background:${s.color || 'linear-gradient(135deg,#5c3d2e,#8a5e3c)'}">
         <div class="card-badge">أساسية</div>
         <div class="card-icon" style="display:flex;align-items:center;justify-content:center;${s.iconData || s.iconUrl ? 'position:absolute;inset:0;width:100%;height:100%;' : 'width:64px;height:64px;'}">
           ${s.iconData || s.iconUrl
-            ? `<img src="${s.iconData || s.iconUrl}" style="width:100%;height:100%;object-fit:contain;display:block;background:transparent;">`
+            ? `<img src="${s.iconData || s.iconUrl}" style="width:100%;height:100%;object-fit:contain;display:block;">`
             : `<span style="font-size:40px">${s.icon || '📚'}</span>`}
         </div>
       </div>
@@ -754,11 +751,11 @@ window.openDynModal = (id) => {
   modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
   modal.innerHTML = `
     <div class="modal-box">
-      <div class="modal-banner" style="background:var(--beige,#f7efe3)">
+      <div class="modal-banner" style="background:${s.color || 'linear-gradient(135deg,#5c3d2e,#8a5e3c)'}">
         <button class="modal-close" onclick="document.getElementById('dynModal-${id}').remove()">✕</button>
         <div class="modal-icon" style="${s.iconData || s.iconUrl ? 'position:absolute;inset:0;width:100%;height:100%;display:flex;' : 'display:flex;align-items:center;justify-content:center;width:72px;height:72px;'}">
           ${s.iconData || s.iconUrl
-            ? `<img src="${s.iconData || s.iconUrl}" style="width:100%;height:100%;object-fit:contain;display:block;background:transparent;">`
+            ? `<img src="${s.iconData || s.iconUrl}" style="width:100%;height:100%;object-fit:contain;display:block;">`
             : `<span style="font-size:48px">${s.icon || '📚'}</span>`}
         </div>
       </div>
@@ -785,13 +782,12 @@ window.openDynModal = (id) => {
       </div>
     </div>`;
   document.body.appendChild(modal);
-  mats.forEach(m => renderAssignmentsSection(m.id, m.course, 'asg-' + m.id, false));
+  mats.forEach(m => renderAssignmentsSection(m.id, m.course, 'asg-' + m.id));
   renderLectureControls(mats);
 };
 
 // Add مادة رئيسية
 window.submitNewSubject = async () => {
-  if (window._iconUploadInProgress) { alert('استني لحظة، الصورة لسه بترفع...'); return; }
   const name  = document.getElementById('sbjName').value.trim();
   const desc  = document.getElementById('sbjDesc').value.trim();
   const meetings = document.getElementById('sbjMeetings').value.trim();
@@ -850,7 +846,7 @@ window.openEditSubjectModal = (id) => {
   const editPrev = document.getElementById('editSbjIconPreview');
   const imgSrc = s.iconData || s.iconUrl;
   editPrev.innerHTML = imgSrc
-    ? `<img src="${imgSrc}" style="width:100%;height:100%;object-fit:contain;background:transparent;">`
+    ? `<img src="${imgSrc}" style="width:100%;height:100%;object-fit:cover;">`
     : '<i class="ti ti-photo" style="font-size:24px;color:var(--text-mid);"></i>';
   // ضبط Colors
   const colorMatch = (s.color || '').match(/#[0-9a-fA-F]{6}/g);
@@ -874,7 +870,6 @@ window.openEditSubjectModal = (id) => {
 };
 
 window.submitEditSubject = async () => {
-  if (window._iconUploadInProgress) { alert('استني لحظة، الصورة لسه بترفع...'); return; }
   const id    = document.getElementById('editSbjId').value;
   const name  = document.getElementById('editSbjName').value.trim();
   const desc  = document.getElementById('editSbjDesc').value.trim();
