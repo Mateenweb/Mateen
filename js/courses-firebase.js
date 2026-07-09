@@ -673,6 +673,16 @@ onSnapshot(query(collection(db, 'materials'), orderBy('addedAt', 'desc')), snap 
 
 let allSubjects = [];
 
+// الصور بتترفع بحجمها الأصلي على Cloudinary من غير ضغط، فبتاخد وقت كبير عشان تحمّل خصوصًا في الكروت الصغيرة.
+// الدالة دي بتضيف تحويل تلقائي (w=العرض المطلوب, ضغط تلقائي, أفضل صيغة زي webp) لو الرابط من Cloudinary.
+function optimizedImg(url, width = 500) {
+  if (!url) return url;
+  if (url.includes('res.cloudinary.com') && url.includes('/upload/')) {
+    return url.replace('/upload/', `/upload/w_${width},q_auto,f_auto,c_limit/`);
+  }
+  return url;
+}
+
 function subjectCardHTML(s) {
   const adminActions = isAdmin() ? `
     <div style="display:flex;gap:8px;padding:10px 16px;border-top:1px solid var(--border);" onclick="event.stopPropagation()">
@@ -693,7 +703,7 @@ function subjectCardHTML(s) {
         <div class="card-badge">أساسية</div>
         <div class="card-icon" style="display:flex;align-items:center;justify-content:center;${s.iconData || s.iconUrl ? 'position:absolute;inset:0;width:100%;height:100%;' : 'width:64px;height:64px;'}">
           ${s.iconData || s.iconUrl
-            ? `<img src="${s.iconData || s.iconUrl}" style="width:100%;height:100%;object-fit:contain;display:block;background:transparent;">`
+            ? `<img src="${optimizedImg(s.iconData || s.iconUrl, 400)}" style="width:100%;height:100%;object-fit:contain;display:block;background:transparent;" loading="lazy">`
             : `<span style="font-size:40px">${s.icon || '📚'}</span>`}
         </div>
       </div>
@@ -758,7 +768,7 @@ window.openDynModal = (id) => {
         <button class="modal-close" onclick="document.getElementById('dynModal-${id}').remove()">✕</button>
         <div class="modal-icon" style="${s.iconData || s.iconUrl ? 'position:absolute;inset:0;width:100%;height:100%;display:flex;' : 'display:flex;align-items:center;justify-content:center;width:72px;height:72px;'}">
           ${s.iconData || s.iconUrl
-            ? `<img src="${s.iconData || s.iconUrl}" style="width:100%;height:100%;object-fit:contain;display:block;background:transparent;">`
+            ? `<img src="${optimizedImg(s.iconData || s.iconUrl, 700)}" style="width:100%;height:100%;object-fit:contain;display:block;background:transparent;" loading="lazy">`
             : `<span style="font-size:48px">${s.icon || '📚'}</span>`}
         </div>
       </div>
@@ -850,7 +860,7 @@ window.openEditSubjectModal = (id) => {
   const editPrev = document.getElementById('editSbjIconPreview');
   const imgSrc = s.iconData || s.iconUrl;
   editPrev.innerHTML = imgSrc
-    ? `<img src="${imgSrc}" style="width:100%;height:100%;object-fit:contain;background:transparent;">`
+    ? `<img src="${optimizedImg(imgSrc, 200)}" style="width:100%;height:100%;object-fit:contain;background:transparent;">`
     : '<i class="ti ti-photo" style="font-size:24px;color:var(--text-mid);"></i>';
   // ضبط Colors
   const colorMatch = (s.color || '').match(/#[0-9a-fA-F]{6}/g);
