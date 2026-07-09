@@ -137,10 +137,19 @@
       </div>
       <div>
         <label class="m-field-label">الظهور</label>
-        <select id="newsVisibility" class="m-select-news">
+        <select id="newsVisibility" class="m-select-news" onchange="toggleNewsRolesBox('news')">
           <option value="members">🧕‍💻 للمسجلات فقط</option>
           <option value="public">🌐 للجميع</option>
         </select>
+      </div>
+      <div id="newsRolesBox" style="display:none;flex-direction:column;gap:6px;background:var(--beige2,#f0e8d8);border:1px solid var(--border,#c9a22744);border-radius:8px;padding:10px">
+        <span style="font-size:12px;color:var(--text-mid,#8a6a52)">أنواع المستخدمين اللي يوصلهم الخبر (اتركي الكل بدون تحديد ليوصل للجميع):</span>
+        <div style="display:flex;gap:14px;flex-wrap:wrap">
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer"><input type="checkbox" class="news-role-check" value="student"/> 🎓 طالبات</label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer"><input type="checkbox" class="news-role-check" value="teacher"/> 👩‍🏫 معلمات</label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer"><input type="checkbox" class="news-role-check" value="supervisor"/> 🧑‍💼 مشرفات</label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer"><input type="checkbox" class="news-role-check" value="admin"/> 🛡️ أدمن</label>
+        </div>
       </div>
     </div>
 
@@ -183,10 +192,19 @@
           <input type="checkbox" id="editPinned" class="m-pin-checkbox"/> تثبيت
         </label>
       </div>
-      <select id="editVisibility" class="m-select-news">
+      <select id="editVisibility" class="m-select-news" onchange="toggleNewsRolesBox('edit')">
         <option value="members">للمسجلات فقط</option>
         <option value="public">للجميع</option>
       </select>
+      <div id="editRolesBox" style="display:none;flex-direction:column;gap:6px;background:var(--beige2,#f0e8d8);border:1px solid var(--border,#c9a22744);border-radius:8px;padding:10px;margin-top:10px">
+        <span style="font-size:12px;color:var(--text-mid,#8a6a52)">أنواع المستخدمين اللي يوصلهم الخبر (اتركي الكل بدون تحديد ليوصل للجميع):</span>
+        <div style="display:flex;gap:14px;flex-wrap:wrap">
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer"><input type="checkbox" class="edit-role-check" value="student"/> 🎓 طالبات</label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer"><input type="checkbox" class="edit-role-check" value="teacher"/> 👩‍🏫 معلمات</label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer"><input type="checkbox" class="edit-role-check" value="supervisor"/> 🧑‍💼 مشرفات</label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer"><input type="checkbox" class="edit-role-check" value="admin"/> 🛡️ أدمن</label>
+        </div>
+      </div>
     </div>
     <div class="m-foot-news">
       <button onclick="document.getElementById('editNewsModal').classList.remove('show')"
@@ -228,7 +246,8 @@ onSnapshot(query(collection(db,'events'), orderBy('order','asc')), snap => {
   }).join('');
 });
 
-// ── تحميل الأخبار (public للجميع، members للمسجلات) ──────────
+// ── تحميل الأخبار (public للجميع، members للمسجلات، وفلترة حسب الدور المستهدف لو محدد) ──────────
+let _currentUserRoleForNews = '';
 function loadNews(showAll) {
   const q = query(collection(db, 'news'), orderBy('createdAt', 'desc'));
   onSnapshot(q, snap => {
@@ -236,10 +255,15 @@ function loadNews(showAll) {
     const list = document.getElementById('newsList');
 
     const visibleDocs = snap.docs.filter(d => {
-      const v = d.data().visibility;
+      const data = d.data();
+      const v = data.visibility;
       if (v === 'public') return true;       // للجميع دائماً
-      if (!v || v === 'members') return showAll; // للمسجلات فقط
-      return showAll;
+      const membersVisible = (!v || v === 'members') ? showAll : showAll;
+      if (!membersVisible) return false;
+      // لو الخبر محدد له أدوار معينة، لازم دور المستخدم الحالي يكون من ضمنها
+      const targetRoles = data.targetRoles || [];
+      if (targetRoles.length && !targetRoles.includes(_currentUserRoleForNews)) return false;
+      return true;
     });
 
     if (!visibleDocs.length) {
@@ -286,6 +310,7 @@ onAuthStateChanged(auth, async user => {
     localStorage.setItem(`news_last_seen_${user.uid}`, Date.now().toString());
     const snap = await getDoc(doc(db, 'users', user.uid));
     const role = snap.exists() ? snap.data().role : '';
+    _currentUserRoleForNews = role || '';
     isMember = true;
     if (['admin', 'supervisor', 'teacher'].includes(role)) {
       isAdmin = true;
@@ -316,6 +341,16 @@ window.deleteNews = async id => {
   await deleteDoc(doc(db, 'news', id));
 };
 
+window.toggleNewsRolesBox = (which) => {
+  if (which === 'news') {
+    document.getElementById('newsRolesBox').style.display =
+      document.getElementById('newsVisibility').value === 'members' ? 'flex' : 'none';
+  } else {
+    document.getElementById('editRolesBox').style.display =
+      document.getElementById('editVisibility').value === 'members' ? 'flex' : 'none';
+  }
+};
+
 let _editingId = null;
 
 window.editNews = (id, data) => {
@@ -325,6 +360,9 @@ window.editNews = (id, data) => {
   document.getElementById('editTag').value        = data.tag        || '📝 خبر';
   document.getElementById('editPinned').checked   = data.pinned     || false;
   document.getElementById('editVisibility').value = data.visibility || 'members';
+  const targetRoles = data.targetRoles || [];
+  document.querySelectorAll('.edit-role-check').forEach(cb => cb.checked = targetRoles.includes(cb.value));
+  toggleNewsRolesBox('edit');
   document.getElementById('editNewsModal').classList.add('show');
 };
 
@@ -335,12 +373,15 @@ window.submitEditNews = async () => {
   const tag        = document.getElementById('editTag').value;
   const pinned     = document.getElementById('editPinned').checked;
   const visibility = document.getElementById('editVisibility').value;
+  const targetRoles = visibility === 'members'
+    ? [...document.querySelectorAll('.edit-role-check:checked')].map(cb => cb.value)
+    : [];
 
   if (!title) { alert('يرجى إدخال العنوان'); return; }
 
   const { updateDoc, serverTimestamp: st2 } = await import("https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js");
   await updateDoc(doc(db, 'news', _editingId), {
-    title, body, tag, pinned, visibility,
+    title, body, tag, pinned, visibility, targetRoles,
     updatedAt: st2()
   });
 
@@ -356,6 +397,9 @@ window.submitNews = async () => {
   const tag        = document.getElementById('newsTag').value;
   const pinned     = document.getElementById('newsPinned').checked;
   const visibility = document.getElementById('newsVisibility').value;
+  const targetRoles = visibility === 'members'
+    ? [...document.querySelectorAll('.news-role-check:checked')].map(cb => cb.value)
+    : [];
   const submitBtn  = document.getElementById('newsSubmitBtn');
   if (!submitBtn) { alert('خطأ: لم يتم تحميل الصفحة بشكل صحيح، أعيدي التحميل'); return; }
   const editId     = submitBtn.dataset.editId;
@@ -364,13 +408,13 @@ window.submitNews = async () => {
 
   if (editId) {
     // تعديل خبر موجود
-    await updateDoc(doc(db, 'news', editId), { title, body, tag, pinned, visibility });
+    await updateDoc(doc(db, 'news', editId), { title, body, tag, pinned, visibility, targetRoles });
     delete submitBtn.dataset.editId;
     submitBtn.textContent = '📤 نشر الخبر';
   } else {
     // إضافة خبر جديد
     await addDoc(collection(db, 'news'), {
-      title, body, tag, pinned, visibility,
+      title, body, tag, pinned, visibility, targetRoles,
       createdAt: serverTimestamp()
     });
   }
@@ -380,6 +424,8 @@ window.submitNews = async () => {
   document.getElementById('newsBody').value   = '';
   document.getElementById('newsPinned').checked = false;
   document.getElementById('newsVisibility').value = 'members';
+  document.querySelectorAll('.news-role-check').forEach(cb => cb.checked = false);
+  toggleNewsRolesBox('news');
   document.getElementById('addNewsModal').classList.remove('show');
 };
 </script>
