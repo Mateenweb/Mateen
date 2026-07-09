@@ -2094,25 +2094,31 @@ window.closeBulkAttModal = () => {
 function baBtnHtml(sid, status) {
   const presentActive = status === 'present';
   const absentActive  = status === 'absent';
+  const excusedActive = status === 'excused';
   return `
     <button type="button" onclick="baSetStatus('${sid}','present')"
       style="font-size:12px;padding:5px 10px;border-radius:6px;cursor:pointer;font-family:inherit;border:1px solid ${presentActive ? '#1e8449' : 'var(--border)'};background:${presentActive ? 'rgba(39,174,96,0.15)' : 'var(--beige2)'};color:${presentActive ? '#1e8449' : 'var(--text-mid)'}">✔ حاضرة</button>
     <button type="button" onclick="baSetStatus('${sid}','absent')"
-      style="font-size:12px;padding:5px 10px;border-radius:6px;cursor:pointer;font-family:inherit;border:1px solid ${absentActive ? '#c0392b' : 'var(--border)'};background:${absentActive ? 'rgba(192,57,43,0.12)' : 'var(--beige2)'};color:${absentActive ? '#c0392b' : 'var(--text-mid)'}">✖ غائبة</button>`;
+      style="font-size:12px;padding:5px 10px;border-radius:6px;cursor:pointer;font-family:inherit;border:1px solid ${absentActive ? '#c0392b' : 'var(--border)'};background:${absentActive ? 'rgba(192,57,43,0.12)' : 'var(--beige2)'};color:${absentActive ? '#c0392b' : 'var(--text-mid)'}">✖ غائبة</button>
+    <button type="button" onclick="baSetStatus('${sid}','excused')"
+      style="font-size:12px;padding:5px 10px;border-radius:6px;cursor:pointer;font-family:inherit;border:1px solid ${excusedActive ? '#c9a227' : 'var(--border)'};background:${excusedActive ? 'rgba(201,162,39,0.15)' : 'var(--beige2)'};color:${excusedActive ? '#a3801d' : 'var(--text-mid)'}">⭕ معتذرة</button>`;
 }
 
 function baSubjBtnsHtml(status) {
   const presentActive = status === 'present';
   const absentActive  = status === 'absent';
+  const excusedActive = status === 'excused';
   return `
     <button type="button" onclick="baToggleSubjStatus(this,'present')"
       style="font-size:11px;padding:3px 8px;border-radius:5px;cursor:pointer;font-family:inherit;border:1px solid ${presentActive ? '#1e8449' : 'var(--border)'};background:${presentActive ? 'rgba(39,174,96,0.15)' : 'var(--beige2)'};color:${presentActive ? '#1e8449' : 'var(--text-mid)'}">✔</button>
     <button type="button" onclick="baToggleSubjStatus(this,'absent')"
-      style="font-size:11px;padding:3px 8px;border-radius:5px;cursor:pointer;font-family:inherit;border:1px solid ${absentActive ? '#c0392b' : 'var(--border)'};background:${absentActive ? 'rgba(192,57,43,0.12)' : 'var(--beige2)'};color:${absentActive ? '#c0392b' : 'var(--text-mid)'}">✖</button>`;
+      style="font-size:11px;padding:3px 8px;border-radius:5px;cursor:pointer;font-family:inherit;border:1px solid ${absentActive ? '#c0392b' : 'var(--border)'};background:${absentActive ? 'rgba(192,57,43,0.12)' : 'var(--beige2)'};color:${absentActive ? '#c0392b' : 'var(--text-mid)'}">✖</button>
+    <button type="button" onclick="baToggleSubjStatus(this,'excused')"
+      style="font-size:11px;padding:3px 8px;border-radius:5px;cursor:pointer;font-family:inherit;border:1px solid ${excusedActive ? '#c9a227' : 'var(--border)'};background:${excusedActive ? 'rgba(201,162,39,0.15)' : 'var(--beige2)'};color:${excusedActive ? '#a3801d' : 'var(--text-mid)'}">⭕</button>`;
 }
 
-function baSubjRowHtml(sid, subj, status = 'present') {
-  return `<div class="ba-subj-wrap" data-id="${sid}" data-subject="${esc(subj)}" data-status="${status}" style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+function baSubjRowHtml(sid, subj, status = null) {
+  return `<div class="ba-subj-wrap" data-id="${sid}" data-subject="${esc(subj)}" data-status="${status || ''}" style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
     <span style="font-size:11px;color:var(--text-mid);min-width:78px;flex-shrink:0">${esc(subj)}</span>
     <div class="ba-subj-btns" style="display:flex;gap:4px">${baSubjBtnsHtml(status)}</div>
   </div>`;
@@ -2121,8 +2127,9 @@ function baSubjRowHtml(sid, subj, status = 'present') {
 window.baToggleSubjStatus = (btnEl, status) => {
   const wrap = btnEl.closest('.ba-subj-wrap');
   if (!wrap) return;
-  wrap.dataset.status = status;
-  wrap.querySelector('.ba-subj-btns').innerHTML = baSubjBtnsHtml(status);
+  const newStatus = wrap.dataset.status === status ? null : status;
+  wrap.dataset.status = newStatus || '';
+  wrap.querySelector('.ba-subj-btns').innerHTML = baSubjBtnsHtml(newStatus);
 };
 
 window.renderBAStudents = renderBAStudents;
@@ -2137,8 +2144,8 @@ function renderBAStudents() {
       <input type="checkbox" class="ba-check" data-id="${s.id}" data-name="${esc(s.name||'')}" checked style="width:16px;height:16px;cursor:pointer;margin-top:${allMode ? '2px' : '0'}"/>
       <span style="flex:1;font-size:13px;font-weight:600">${esc(s.name||'—')}</span>
       ${allMode
-        ? `<div style="display:flex;flex-direction:column;gap:2px">${baSubjectsForCurrentDay().map(subj => baSubjRowHtml(s.id, subj, 'present')).join('')}</div>`
-        : `<div class="ba-status-wrap" data-id="${s.id}" data-status="present" style="display:flex;gap:6px">${baBtnHtml(s.id, 'present')}</div>`
+        ? `<div style="display:flex;flex-direction:column;gap:2px">${baSubjectsForCurrentDay().map(subj => baSubjRowHtml(s.id, subj, null)).join('')}</div>`
+        : `<div class="ba-status-wrap" data-id="${s.id}" data-status="" style="display:flex;gap:6px">${baBtnHtml(s.id, null)}</div>`
       }
     </div>
   `).join('');
@@ -2150,24 +2157,38 @@ window.baClearAll  = () => document.querySelectorAll('.ba-check').forEach(cb => 
 window.baSetStatus = (sid, status) => {
   const wrap = document.querySelector(`.ba-status-wrap[data-id="${sid}"]`);
   if (!wrap) return;
-  wrap.dataset.status = status;
-  wrap.innerHTML = baBtnHtml(sid, status);
+  const newStatus = wrap.dataset.status === status ? null : status;
+  wrap.dataset.status = newStatus || '';
+  wrap.innerHTML = baBtnHtml(sid, newStatus);
 };
 
 window.baMarkAllPresent = () => {
-  document.querySelectorAll('.ba-status-wrap').forEach(el => baSetStatus(el.dataset.id, 'present'));
+  document.querySelectorAll('.ba-status-wrap').forEach(el => baSetStatusForce(el.dataset.id, 'present'));
   document.querySelectorAll('.ba-subj-wrap').forEach(el => {
     el.dataset.status = 'present';
     el.querySelector('.ba-subj-btns').innerHTML = baSubjBtnsHtml('present');
   });
 };
 window.baMarkAllAbsent = () => {
-  document.querySelectorAll('.ba-status-wrap').forEach(el => baSetStatus(el.dataset.id, 'absent'));
+  document.querySelectorAll('.ba-status-wrap').forEach(el => baSetStatusForce(el.dataset.id, 'absent'));
   document.querySelectorAll('.ba-subj-wrap').forEach(el => {
     el.dataset.status = 'absent';
     el.querySelector('.ba-subj-btns').innerHTML = baSubjBtnsHtml('absent');
   });
 };
+window.baMarkAllExcused = () => {
+  document.querySelectorAll('.ba-status-wrap').forEach(el => baSetStatusForce(el.dataset.id, 'excused'));
+  document.querySelectorAll('.ba-subj-wrap').forEach(el => {
+    el.dataset.status = 'excused';
+    el.querySelector('.ba-subj-btns').innerHTML = baSubjBtnsHtml('excused');
+  });
+};
+function baSetStatusForce(sid, status) {
+  const wrap = document.querySelector(`.ba-status-wrap[data-id="${sid}"]`);
+  if (!wrap) return;
+  wrap.dataset.status = status;
+  wrap.innerHTML = baBtnHtml(sid, status);
+}
 
 window.saveBulkAttendance = async () => {
   const day     = document.getElementById('baDay').value;
@@ -2187,16 +2208,29 @@ window.saveBulkAttendance = async () => {
   if (btn) { btn.disabled = true; btn.textContent = 'جارٍ الحفظ...'; }
 
   try {
-    await Promise.all(checked.map(cb => {
+    let skippedCount = 0;
+    const toSave = checked.filter(cb => {
+      const sid = cb.dataset.id;
+      if (allMode) {
+        const anyStatus = [...document.querySelectorAll(`.ba-subj-wrap[data-id="${sid}"]`)].some(w => w.dataset.status);
+        if (!anyStatus) { skippedCount++; return false; }
+        return true;
+      }
+      const status = document.querySelector(`.ba-status-wrap[data-id="${sid}"]`)?.dataset.status;
+      if (!status) { skippedCount++; return false; }
+      return true;
+    });
+
+    await Promise.all(toSave.map(cb => {
       const sid = cb.dataset.id;
       let subjectsMap;
       if (allMode) {
         subjectsMap = {};
         document.querySelectorAll(`.ba-subj-wrap[data-id="${sid}"]`).forEach(w => {
-          subjectsMap[w.dataset.subject] = w.dataset.status;
+          if (w.dataset.status) subjectsMap[w.dataset.subject] = w.dataset.status;
         });
       } else {
-        const status = document.querySelector(`.ba-status-wrap[data-id="${sid}"]`)?.dataset.status || 'present';
+        const status = document.querySelector(`.ba-status-wrap[data-id="${sid}"]`)?.dataset.status;
         subjectsMap = { [subject]: status };
       }
       return addDoc(collection(db, 'students', sid, 'sessions'), {
@@ -2205,7 +2239,8 @@ window.saveBulkAttendance = async () => {
         createdAt: Date.now(),
       });
     }));
-    showToast(`✅ تم تسجيل الحضور لـ ${checked.length} طالبة`);
+    const skipMsg = skippedCount ? ` (تم تجاهل ${skippedCount} بدون تحديد حالة)` : '';
+    showToast(`✅ تم تسجيل الحضور لـ ${toSave.length} طالبة${skipMsg}`);
     closeBulkAttModal();
   } catch(e) {
     showToast('خطأ: ' + e.message);
@@ -2298,7 +2333,6 @@ window.openPasteAttModal = () => {
   document.getElementById('paDate').value = new Date().toISOString().slice(0, 10);
   document.getElementById('paMessage').value = '';
   document.getElementById('paPreviewSection').style.display = 'none';
-  document.getElementById('paAutoSubjectsToggle').checked = true;
   window._paParsed = null;
   window._paExtraSubjects = [];
   document.getElementById('paExtraSubjectSelect').innerHTML =
@@ -2308,21 +2342,27 @@ window.openPasteAttModal = () => {
   window.paUpdateDayInfo();
 };
 
-// بتحسب اسم اليوم ومواده من BA_DAY_SUBJECTS تلقائيًا حسب التاريخ المختار (لو التحديد التلقائي مفعّل)، وتعرضهم للمعلومية بس
+// بتحسب اسم اليوم ومواده من BA_DAY_SUBJECTS حسب التاريخ المختار، وتعرضهم كمربعات اختيار فردية (كل مادة تتحدد لوحدها)
 window.paUpdateDayInfo = () => {
   const date = document.getElementById('paDate').value;
   const info = document.getElementById('paDayInfo');
-  const autoOn = document.getElementById('paAutoSubjectsToggle')?.checked;
-  if (!date) { info.style.display = 'none'; return; }
+  if (!date) { info.style.display = 'none'; info.innerHTML = ''; return; }
   const d = new Date(date + 'T00:00:00');
   const day = ATT_MSG_DAY_NAMES[d.getDay()];
+  const subjects = BA_DAY_SUBJECTS[day] || _baAllSubjects;
   info.style.display = 'block';
-  if (!autoOn) {
-    info.innerHTML = `📅 اليوم: <strong>${day}</strong> — التحديد التلقائي متوقف، هيتم الاعتماد على المواد المُضافة يدويًا فقط.`;
+  if (!subjects.length) {
+    info.innerHTML = `<div style="font-size:12px;color:var(--text-mid)">📅 اليوم: <strong>${day}</strong> — لا توجد مواد مُعتمدة لهذا اليوم.</div>`;
     return;
   }
-  const subjects = BA_DAY_SUBJECTS[day] || _baAllSubjects;
-  info.innerHTML = `📅 اليوم: <strong>${day}</strong> — المواد: <strong>${subjects.join('، ') || '—'}</strong>`;
+  info.innerHTML = `
+    <div style="font-size:12px;color:var(--text-mid);margin-bottom:6px">📅 اليوم: <strong>${day}</strong> — اختاري مواد اليوم اللي عايزة تدخليها (مش لازم كلها). ⚠️ ترتيب اختيارك هنا لازم يطابق ترتيب الرموز في الرسالة لكل طالبة.</div>
+    <div style="display:flex;flex-wrap:wrap;gap:10px;background:var(--beige2);border:1px solid var(--border);border-radius:8px;padding:8px 10px">
+      ${subjects.map((s, i) => `
+        <label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer">
+          <input type="checkbox" class="pa-day-subject-check" value="${esc(s)}" checked/> ${esc(s)}
+        </label>`).join('')}
+    </div>`;
 };
 
 window.paAddExtraSubject = () => {
@@ -2347,18 +2387,8 @@ function paRenderExtraSubjects() {
 }
 
 function paGetSubjectLabels() {
-  const date = document.getElementById('paDate')?.value;
-  const autoOn = document.getElementById('paAutoSubjectsToggle')?.checked;
-  let base = [];
-  if (autoOn) {
-    base = _baAllSubjects;
-    if (date) {
-      const d = new Date(date + 'T00:00:00');
-      const day = ATT_MSG_DAY_NAMES[d.getDay()];
-      base = BA_DAY_SUBJECTS[day] || _baAllSubjects;
-    }
-  }
-  return [...base, ...(window._paExtraSubjects || [])];
+  const checkedSubjects = [...document.querySelectorAll('.pa-day-subject-check:checked')].map(cb => cb.value);
+  return [...checkedSubjects, ...(window._paExtraSubjects || [])];
 }
 
 function paPeriodLabel(subjNames, i) {
@@ -2861,14 +2891,33 @@ window.openExcelAttModal = () => {
   document.getElementById('eaFile').value = '';
   document.getElementById('eaStatus').style.display = 'none';
   document.getElementById('eaPreviewSection').style.display = 'none';
-  document.getElementById('eaAutoSubjectsToggle').checked = true;
   window._eaParsed = null;
   window._eaExtraSubjects = [];
   document.getElementById('eaExtraSubjectSelect').innerHTML =
     `<option value="">— اختاري مادة تضيفيها يدويًا —</option>` +
     _baAllSubjects.map(s => `<option>${s}</option>`).join('');
   eaRenderExtraSubjects();
+  eaRenderDaySubjects();
 };
+
+// مربعات اختيار فردية لمواد كل يوم (بدل الكل/ولا حاجة) — كل يوم بمواده المعتمدة من الجدول
+function eaRenderDaySubjects() {
+  const c = document.getElementById('eaDaySubjectsInfo');
+  if (!c) return;
+  const days = Object.keys(BA_DAY_SUBJECTS);
+  c.innerHTML = `
+    <div style="font-size:12px;color:var(--text-mid);margin-bottom:6px">اختاري مواد كل يوم اللي عايزة تدخليها من الملف (مش لازم كلها). ⚠️ ترتيب اختيارك لازم يطابق ترتيب الرموز في خلية كل يوم بالملف.</div>
+    <div style="display:flex;flex-direction:column;gap:6px;background:var(--beige2);border:1px solid var(--border);border-radius:8px;padding:8px 10px">
+      ${days.map(day => `
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <span style="font-size:12px;font-weight:600;min-width:60px;flex-shrink:0">${esc(day)}</span>
+          ${BA_DAY_SUBJECTS[day].map(s => `
+            <label style="display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer">
+              <input type="checkbox" class="ea-day-subject-check" data-day="${esc(day)}" value="${esc(s)}" checked/> ${esc(s)}
+            </label>`).join('')}
+        </div>`).join('')}
+    </div>`;
+}
 
 window.closeExcelAttModal = () => {
   document.getElementById('excelAttModal').style.display = 'none';
@@ -2895,10 +2944,9 @@ function eaRenderExtraSubjects() {
   ).join('');
 }
 
-// بتاخد اسم المادة المناسب لليوم ده تلقائيًا من BA_DAY_SUBJECTS (لو التحديد التلقائي مفعّل) + أي مواد إضافية اتضافت يدويًا
+// بتاخد اسم المادة المناسب لليوم ده من المربعات المختارة فرديًا + أي مواد إضافية اتضافت يدويًا
 function eaPeriodLabel(day, i) {
-  const autoOn = document.getElementById('eaAutoSubjectsToggle')?.checked;
-  const base = autoOn ? (BA_DAY_SUBJECTS[day] || _baAllSubjects) : [];
+  const base = [...document.querySelectorAll(`.ea-day-subject-check[data-day="${CSS.escape(day)}"]:checked`)].map(cb => cb.value);
   const subjNames = [...base, ...(window._eaExtraSubjects || [])];
   return subjNames[i] || ['الحصة الأولى', 'الحصة الثانية', 'الحصة الثالثة', 'الحصة الرابعة', 'الحصة الخامسة'][i] || `الحصة ${i + 1}`;
 }
