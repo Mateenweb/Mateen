@@ -866,6 +866,9 @@ body { background: var(--beige); min-height: 100vh; display: flex; flex-directio
   overflow: hidden;
   box-shadow: 0 8px 40px rgba(44,26,14,0.18);
   border: 1.5px solid var(--border);
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
 }
 .modal-head {
   display: flex;
@@ -873,8 +876,9 @@ body { background: var(--beige); min-height: 100vh; display: flex; flex-directio
   justify-content: space-between;
   padding: 18px 20px;
   border-bottom: 1.5px solid var(--border);
+  flex-shrink: 0;
 }
-.modal-body { padding: 16px 20px; }
+.modal-body { padding: 16px 20px; overflow-y: auto; flex: 1; min-height: 0; }
 .m-input-news,
 .m-textarea-news {
   width: 100%;
