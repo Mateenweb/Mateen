@@ -1501,24 +1501,12 @@ function formatSize(bytes) {
       <p style="font-size:12px;color:var(--text-mid);margin-bottom:12px;background:rgba(92,61,46,0.05);border:1px solid var(--border);border-radius:8px;padding:10px">
         📌 الملف لازم يكون: أول عمود = اسم الطالبة، وباقي الأعمدة = **أيام الأسبوع** (الأحد، الاثنين...). كل خلية ممكن تحتوي أكتر من رمز (لعدة حصص في نفس اليوم): ✅ / ❌ / ⭕، أو ملاحظة نصية، أو تتسيبها فاضية.
       </p>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
-        <div>
-          <label style="font-size:12px;color:var(--text-mid);display:block;margin-bottom:4px">تاريخ يوم الأحد (بداية الأسبوع) *</label>
-          <input id="eaDate" type="date" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:inherit;font-size:13px"/>
-        </div>
-        <div>
-          <label style="font-size:12px;color:var(--text-mid);display:block;margin-bottom:4px">الفترة / الشيت (اختياري)</label>
-          <select id="eaPeriod" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:inherit;font-size:13px">
-            <option value="">كل الشيتات في الملف</option>
-            <option value="الفترة الصباحية">الفترة الصباحية فقط</option>
-            <option value="الفترة المسائية">الفترة المسائية فقط</option>
-          </select>
-        </div>
+      <div style="margin-bottom:12px">
+        <label style="font-size:12px;color:var(--text-mid);display:block;margin-bottom:4px">تاريخ يوم الأحد (بداية الأسبوع) *</label>
+        <input id="eaDate" type="date" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:inherit;font-size:13px"/>
       </div>
 
-      <label style="font-size:12px;color:var(--text-mid);display:block;margin-bottom:4px">مواد الحصص بترتيبها داخل اليوم الواحد (اختياري)</label>
-      <div id="eaSubjectsList" style="margin-bottom:6px"></div>
-      <button type="button" onclick="eaAddSubjectRow()" style="font-size:12px;background:var(--beige2);border:1px solid var(--border);border-radius:6px;padding:5px 12px;cursor:pointer;font-family:inherit;margin-bottom:12px">+ إضافة مادة</button>
+      <p style="font-size:11.5px;color:var(--text-mid);margin-bottom:12px">📌 مواد كل يوم بتتاخد أوتوماتيك من جدول المواد المُعتمد لكل يوم في نظام الحضور.</p>
 
       <label style="font-size:12px;color:var(--text-mid);display:block;margin-bottom:4px">اختاري الملف *</label>
       <input id="eaFile" type="file" accept=".xlsx,.xls,.csv" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:inherit;font-size:13px;cursor:pointer;margin-bottom:10px"/>
