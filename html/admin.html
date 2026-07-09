@@ -1045,6 +1045,7 @@
           <button onclick="baClearAll()" style="font-size:12px;background:var(--beige2);border:1px solid var(--border);border-radius:6px;padding:4px 12px;cursor:pointer;font-family:inherit">إلغاء الكل</button>
           <button onclick="baMarkAllPresent()" style="font-size:12px;background:rgba(39,174,96,0.1);color:#1e8449;border:1px solid rgba(39,174,96,0.3);border-radius:6px;padding:4px 12px;cursor:pointer;font-family:inherit">الكل حاضرة</button>
           <button onclick="baMarkAllAbsent()" style="font-size:12px;background:rgba(192,57,43,0.1);color:#c0392b;border:1px solid rgba(192,57,43,0.3);border-radius:6px;padding:4px 12px;cursor:pointer;font-family:inherit">الكل غائبة</button>
+          <button onclick="baMarkAllExcused()" style="font-size:12px;background:rgba(201,162,39,0.1);color:#a3801d;border:1px solid rgba(201,162,39,0.3);border-radius:6px;padding:4px 12px;cursor:pointer;font-family:inherit">الكل معتذرة</button>
         </div>
       </div>
 
@@ -1087,11 +1088,7 @@
         <input id="paDate" type="date" onchange="paUpdateDayInfo()" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:inherit;font-size:13px"/>
       </div>
 
-      <div id="paDayInfo" style="display:none;margin-top:10px;font-size:12px;color:var(--text-mid);background:var(--beige2);border:1px solid var(--border);border-radius:8px;padding:8px 10px"></div>
-
-      <label style="display:flex;align-items:center;gap:6px;margin-top:8px;font-size:12px;color:var(--text-mid);cursor:pointer">
-        <input type="checkbox" id="paAutoSubjectsToggle" checked onchange="paUpdateDayInfo()"/> تحديد مواد اليوم تلقائيًا (إلغِ التحديد للاعتماد على الإضافة اليدوية فقط)
-      </label>
+      <div id="paDayInfo" style="display:none;margin-top:10px"></div>
 
       <div style="margin-top:8px;display:flex;gap:6px;align-items:center;flex-wrap:wrap">
         <select id="paExtraSubjectSelect" style="flex:1;min-width:140px;border:1px solid var(--border);border-radius:6px;padding:5px 8px;font-family:inherit;font-size:12px">
@@ -1518,9 +1515,7 @@ function formatSize(bytes) {
         <input id="eaDate" type="date" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:inherit;font-size:13px"/>
       </div>
 
-      <label style="display:flex;align-items:center;gap:6px;margin-bottom:8px;font-size:12px;color:var(--text-mid);cursor:pointer">
-        <input type="checkbox" id="eaAutoSubjectsToggle" checked/> تحديد مواد كل يوم تلقائيًا من الجدول المُعتمد (إلغِ التحديد للاعتماد على الإضافة اليدوية فقط)
-      </label>
+      <div id="eaDaySubjectsInfo" style="margin-bottom:8px"></div>
 
       <div style="margin-bottom:8px;display:flex;gap:6px;align-items:center;flex-wrap:wrap">
         <select id="eaExtraSubjectSelect" style="flex:1;min-width:140px;border:1px solid var(--border);border-radius:6px;padding:5px 8px;font-family:inherit;font-size:12px">
