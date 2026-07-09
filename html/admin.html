@@ -1089,6 +1089,14 @@
 
       <div id="paDayInfo" style="display:none;margin-top:10px;font-size:12px;color:var(--text-mid);background:var(--beige2);border:1px solid var(--border);border-radius:8px;padding:8px 10px"></div>
 
+      <div style="margin-top:8px;display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+        <select id="paExtraSubjectSelect" style="flex:1;min-width:140px;border:1px solid var(--border);border-radius:6px;padding:5px 8px;font-family:inherit;font-size:12px">
+          <option value="">— اختاري مادة تضيفيها يدويًا (فوق مواد اليوم) —</option>
+        </select>
+        <button type="button" onclick="paAddExtraSubject()" style="font-size:12px;background:var(--beige2);border:1px solid var(--border);border-radius:6px;padding:5px 12px;cursor:pointer;font-family:inherit">+ إضافة</button>
+      </div>
+      <div id="paExtraSubjectsList" style="margin-top:6px"></div>
+
       <label style="font-size:12px;color:var(--text-mid);display:block;margin:12px 0 4px">الصقي نص الرسالة هنا *</label>
       <textarea id="paMessage" rows="8" placeholder="أسماء محمد سليمان ✅️✅️✅️ أميرة بشير خلف✅️✅️✅️ ..." style="width:100%;border:1px solid var(--border);border-radius:8px;padding:10px;font-family:inherit;font-size:13px;resize:vertical"></textarea>
 
@@ -1506,7 +1514,15 @@ function formatSize(bytes) {
         <input id="eaDate" type="date" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:inherit;font-size:13px"/>
       </div>
 
-      <p style="font-size:11.5px;color:var(--text-mid);margin-bottom:12px">📌 مواد كل يوم بتتاخد أوتوماتيك من جدول المواد المُعتمد لكل يوم في نظام الحضور.</p>
+      <p style="font-size:11.5px;color:var(--text-mid);margin-bottom:8px">📌 مواد كل يوم بتتاخد أوتوماتيك من جدول المواد المُعتمد لكل يوم في نظام الحضور.</p>
+
+      <div style="margin-bottom:8px;display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+        <select id="eaExtraSubjectSelect" style="flex:1;min-width:140px;border:1px solid var(--border);border-radius:6px;padding:5px 8px;font-family:inherit;font-size:12px">
+          <option value="">— اختاري مادة تضيفيها يدويًا (فوق مواد كل يوم) —</option>
+        </select>
+        <button type="button" onclick="eaAddExtraSubject()" style="font-size:12px;background:var(--beige2);border:1px solid var(--border);border-radius:6px;padding:5px 12px;cursor:pointer;font-family:inherit">+ إضافة</button>
+      </div>
+      <div id="eaExtraSubjectsList" style="margin-bottom:12px"></div>
 
       <label style="font-size:12px;color:var(--text-mid);display:block;margin-bottom:4px">اختاري الملف *</label>
       <input id="eaFile" type="file" accept=".xlsx,.xls,.csv" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:inherit;font-size:13px;cursor:pointer;margin-bottom:10px"/>
