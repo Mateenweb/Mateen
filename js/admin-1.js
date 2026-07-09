@@ -1488,12 +1488,16 @@ onSnapshot(query(collection(db,'news'), orderBy('createdAt','desc')), snap => {
       ? '<span style="background:#dcfce7;color:#15803d;font-size:11px;padding:2px 8px;border-radius:8px">🌐 للجميع</span>'
       : '<span style="background:#f1f5f9;color:#64748b;font-size:11px;padding:2px 8px;border-radius:8px">🔒 للمسجلات</span>';
     const pinBadge = n.pinned ? '<span style="background:#fef9c3;color:#854d0e;font-size:11px;padding:2px 8px;border-radius:8px">📌 مثبت</span>' : '';
+    const roleLabels = { student: '🎓 طالبات', teacher: '👩‍🏫 معلمات', supervisor: '🧑‍💼 مشرفات', admin: '🛡️ أدمن' };
+    const rolesBadge = (n.targetRoles && n.targetRoles.length)
+      ? `<span style="background:#ede0cc;color:#5c3d2e;font-size:11px;padding:2px 8px;border-radius:8px">${n.targetRoles.map(r => roleLabels[r] || r).join('، ')}</span>`
+      : '';
     return `<div style="background:var(--white);border:1px solid var(--border);border-radius:10px;padding:12px 14px">
       <div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:6px">
         <div style="flex:1">
           <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:4px">
             <span style="font-size:12px;background:var(--beige2);padding:2px 8px;border-radius:6px">${n.tag||'خبر'}</span>
-            ${vis} ${pinBadge}
+            ${vis} ${pinBadge} ${rolesBadge}
             <span style="font-size:11px;color:var(--text-mid);margin-right:auto">${date}</span>
           </div>
           <div style="font-weight:600;font-size:14px;color:var(--text-dark)">${n.title||''}</div>
@@ -1567,7 +1571,15 @@ window.openAddNewsModal = () => {
   document.getElementById('anTag').value   = '📢 إعلان';
   document.getElementById('anVisibility').value = 'public';
   document.getElementById('anPinned').checked   = false;
+  document.querySelectorAll('.an-role-check').forEach(cb => cb.checked = false);
+  anToggleRolesBox();
   document.getElementById('adminNewsModal').classList.add('show');
+};
+
+// صندوق اختيار الأدوار يظهر بس لما الخبر "للمسجلات فقط" — الزوار (public) مفيش لهم دور أصلاً
+window.anToggleRolesBox = () => {
+  const box = document.getElementById('anRolesBox');
+  box.style.display = document.getElementById('anVisibility').value === 'members' ? 'flex' : 'none';
 };
 
 window.openEditNewsModal = async id => {
@@ -1581,6 +1593,9 @@ window.openEditNewsModal = async id => {
   document.getElementById('anTag').value         = n.tag        || '📢 إعلان';
   document.getElementById('anVisibility').value  = n.visibility || 'public';
   document.getElementById('anPinned').checked    = n.pinned     || false;
+  const targetRoles = n.targetRoles || [];
+  document.querySelectorAll('.an-role-check').forEach(cb => cb.checked = targetRoles.includes(cb.value));
+  anToggleRolesBox();
   document.getElementById('adminNewsModal').classList.add('show');
 };
 
@@ -1590,12 +1605,16 @@ window.submitAdminNews = async () => {
   const tag        = document.getElementById('anTag').value;
   const visibility = document.getElementById('anVisibility').value;
   const pinned     = document.getElementById('anPinned').checked;
+  // فاضي = يوصل لكل الأدوار (زي السلوك الافتراضي القديم قبل الميزة دي)
+  const targetRoles = visibility === 'members'
+    ? [...document.querySelectorAll('.an-role-check:checked')].map(cb => cb.value)
+    : [];
   if (!title) { showToast('أدخلي عنوان الخبر','err'); return; }
   if (_editingNewsId) {
-    await updateDoc(doc(db,'news',_editingNewsId), {title,body,tag,visibility,pinned});
+    await updateDoc(doc(db,'news',_editingNewsId), {title,body,tag,visibility,pinned,targetRoles});
     showToast('✅ تم تحديث الخبر');
   } else {
-    await addDoc(collection(db,'news'), {title,body,tag,visibility,pinned, createdAt: serverTimestamp()});
+    await addDoc(collection(db,'news'), {title,body,tag,visibility,pinned,targetRoles, createdAt: serverTimestamp()});
     showToast('✅ تم نشر الخبر');
   }
   document.getElementById('adminNewsModal').classList.remove('show');
