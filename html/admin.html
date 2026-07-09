@@ -605,10 +605,27 @@
           <option value="⚠️ تنبيه">⚠️ تنبيه</option>
           <option value="📅 موعد">📅 موعد</option>
         </select>
-        <select id="anVisibility" class="m-select-news" style="flex:1">
+        <select id="anVisibility" class="m-select-news" style="flex:1" onchange="anToggleRolesBox()">
           <option value="public">🌐 للجميع (بدون تسجيل)</option>
           <option value="members">🔒 للمسجلات فقط</option>
         </select>
+      </div>
+      <div id="anRolesBox" style="display:none;flex-direction:column;gap:6px;background:var(--beige2);border:1px solid var(--border);border-radius:8px;padding:10px">
+        <span style="font-size:12px;color:var(--text-mid)">أنواع المستخدمين اللي يوصلهم الخبر (اتركي الكل بدون تحديد ليوصل للجميع):</span>
+        <div style="display:flex;gap:14px;flex-wrap:wrap">
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer">
+            <input type="checkbox" class="an-role-check" value="student"/> 🎓 طالبات
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer">
+            <input type="checkbox" class="an-role-check" value="teacher"/> 👩‍🏫 معلمات
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer">
+            <input type="checkbox" class="an-role-check" value="supervisor"/> 🧑‍💼 مشرفات
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer">
+            <input type="checkbox" class="an-role-check" value="admin"/> 🛡️ أدمن
+          </label>
+        </div>
       </div>
       <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer">
         <input type="checkbox" id="anPinned"> تثبيت الخبر في الأعلى
