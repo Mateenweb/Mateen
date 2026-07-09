@@ -2298,24 +2298,30 @@ window.openPasteAttModal = () => {
   document.getElementById('paDate').value = new Date().toISOString().slice(0, 10);
   document.getElementById('paMessage').value = '';
   document.getElementById('paPreviewSection').style.display = 'none';
+  document.getElementById('paAutoSubjectsToggle').checked = true;
   window._paParsed = null;
   window._paExtraSubjects = [];
   document.getElementById('paExtraSubjectSelect').innerHTML =
-    `<option value="">— اختاري مادة تضيفيها يدويًا (فوق مواد اليوم) —</option>` +
+    `<option value="">— اختاري مادة تضيفيها يدويًا —</option>` +
     _baAllSubjects.map(s => `<option>${s}</option>`).join('');
   paRenderExtraSubjects();
   window.paUpdateDayInfo();
 };
 
-// بتحسب اسم اليوم ومواده من BA_DAY_SUBJECTS تلقائيًا حسب التاريخ المختار، وتعرضهم للمعلومية بس
+// بتحسب اسم اليوم ومواده من BA_DAY_SUBJECTS تلقائيًا حسب التاريخ المختار (لو التحديد التلقائي مفعّل)، وتعرضهم للمعلومية بس
 window.paUpdateDayInfo = () => {
   const date = document.getElementById('paDate').value;
   const info = document.getElementById('paDayInfo');
+  const autoOn = document.getElementById('paAutoSubjectsToggle')?.checked;
   if (!date) { info.style.display = 'none'; return; }
   const d = new Date(date + 'T00:00:00');
   const day = ATT_MSG_DAY_NAMES[d.getDay()];
-  const subjects = BA_DAY_SUBJECTS[day] || _baAllSubjects;
   info.style.display = 'block';
+  if (!autoOn) {
+    info.innerHTML = `📅 اليوم: <strong>${day}</strong> — التحديد التلقائي متوقف، هيتم الاعتماد على المواد المُضافة يدويًا فقط.`;
+    return;
+  }
+  const subjects = BA_DAY_SUBJECTS[day] || _baAllSubjects;
   info.innerHTML = `📅 اليوم: <strong>${day}</strong> — المواد: <strong>${subjects.join('، ') || '—'}</strong>`;
 };
 
@@ -2342,11 +2348,15 @@ function paRenderExtraSubjects() {
 
 function paGetSubjectLabels() {
   const date = document.getElementById('paDate')?.value;
-  let base = _baAllSubjects;
-  if (date) {
-    const d = new Date(date + 'T00:00:00');
-    const day = ATT_MSG_DAY_NAMES[d.getDay()];
-    base = BA_DAY_SUBJECTS[day] || _baAllSubjects;
+  const autoOn = document.getElementById('paAutoSubjectsToggle')?.checked;
+  let base = [];
+  if (autoOn) {
+    base = _baAllSubjects;
+    if (date) {
+      const d = new Date(date + 'T00:00:00');
+      const day = ATT_MSG_DAY_NAMES[d.getDay()];
+      base = BA_DAY_SUBJECTS[day] || _baAllSubjects;
+    }
   }
   return [...base, ...(window._paExtraSubjects || [])];
 }
@@ -2851,10 +2861,11 @@ window.openExcelAttModal = () => {
   document.getElementById('eaFile').value = '';
   document.getElementById('eaStatus').style.display = 'none';
   document.getElementById('eaPreviewSection').style.display = 'none';
+  document.getElementById('eaAutoSubjectsToggle').checked = true;
   window._eaParsed = null;
   window._eaExtraSubjects = [];
   document.getElementById('eaExtraSubjectSelect').innerHTML =
-    `<option value="">— اختاري مادة تضيفيها يدويًا (فوق مواد كل يوم) —</option>` +
+    `<option value="">— اختاري مادة تضيفيها يدويًا —</option>` +
     _baAllSubjects.map(s => `<option>${s}</option>`).join('');
   eaRenderExtraSubjects();
 };
@@ -2884,9 +2895,11 @@ function eaRenderExtraSubjects() {
   ).join('');
 }
 
-// بتاخد اسم المادة المناسب لليوم ده تلقائيًا من BA_DAY_SUBJECTS + أي مواد إضافية اتضافت يدويًا
+// بتاخد اسم المادة المناسب لليوم ده تلقائيًا من BA_DAY_SUBJECTS (لو التحديد التلقائي مفعّل) + أي مواد إضافية اتضافت يدويًا
 function eaPeriodLabel(day, i) {
-  const subjNames = [...(BA_DAY_SUBJECTS[day] || _baAllSubjects), ...(window._eaExtraSubjects || [])];
+  const autoOn = document.getElementById('eaAutoSubjectsToggle')?.checked;
+  const base = autoOn ? (BA_DAY_SUBJECTS[day] || _baAllSubjects) : [];
+  const subjNames = [...base, ...(window._eaExtraSubjects || [])];
   return subjNames[i] || ['الحصة الأولى', 'الحصة الثانية', 'الحصة الثالثة', 'الحصة الرابعة', 'الحصة الخامسة'][i] || `الحصة ${i + 1}`;
 }
 
