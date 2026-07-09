@@ -1082,26 +1082,14 @@
       <button class="m-close" onclick="closePasteAttModal()">✕</button>
     </div>
     <div class="modal-body">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
-        <div>
-          <label style="font-size:12px;color:var(--text-mid);display:block;margin-bottom:4px">التاريخ *</label>
-          <input id="paDate" type="date" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:inherit;font-size:13px"/>
-        </div>
-        <div>
-          <label style="font-size:12px;color:var(--text-mid);display:block;margin-bottom:4px">الفترة (اختياري)</label>
-          <select id="paPeriod" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:inherit;font-size:13px">
-            <option value="">—</option>
-            <option value="الفترة الصباحية">الفترة الصباحية</option>
-            <option value="الفترة المسائية">الفترة المسائية</option>
-          </select>
-        </div>
+      <div>
+        <label style="font-size:12px;color:var(--text-mid);display:block;margin-bottom:4px">التاريخ *</label>
+        <input id="paDate" type="date" onchange="paUpdateDayInfo()" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:inherit;font-size:13px"/>
       </div>
 
-      <label style="font-size:12px;color:var(--text-mid);display:block;margin-bottom:4px">مواد اليوم بترتيب الحصص (اختياري — لو فاضي هيتسجل "الحصة الأولى/الثانية..")</label>
-      <div id="paSubjectsList" style="margin-bottom:10px"></div>
-      <button type="button" onclick="paAddSubjectRow()" style="font-size:12px;background:var(--beige2);border:1px solid var(--border);border-radius:6px;padding:5px 12px;cursor:pointer;font-family:inherit;margin-bottom:12px">+ إضافة مادة</button>
+      <div id="paDayInfo" style="display:none;margin-top:10px;font-size:12px;color:var(--text-mid);background:var(--beige2);border:1px solid var(--border);border-radius:8px;padding:8px 10px"></div>
 
-      <label style="font-size:12px;color:var(--text-mid);display:block;margin-bottom:4px">الصقي نص الرسالة هنا *</label>
+      <label style="font-size:12px;color:var(--text-mid);display:block;margin:12px 0 4px">الصقي نص الرسالة هنا *</label>
       <textarea id="paMessage" rows="8" placeholder="أسماء محمد سليمان ✅️✅️✅️ أميرة بشير خلف✅️✅️✅️ ..." style="width:100%;border:1px solid var(--border);border-radius:8px;padding:10px;font-family:inherit;font-size:13px;resize:vertical"></textarea>
 
       <div style="display:flex;justify-content:flex-end;margin-top:10px">
