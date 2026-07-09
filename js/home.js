@@ -336,11 +336,9 @@ onAuthStateChanged(auth, async user => {
   }
 
   if (role === 'admin') {
-    console.log('✅ Showing links for ADMIN');
     show('linkAdmin');
     show('linkNews');
   } else if (role === 'supervisor') {
-    console.log('✅ Showing links for SUPERVISOR');
     const linkAdminEl = document.getElementById('linkAdmin');
     if (linkAdminEl) {
       linkAdminEl.href = 'supervisor.html';
@@ -357,14 +355,12 @@ onAuthStateChanged(auth, async user => {
     show('linkAdmin');
     show('linkNews');
   } else if (role === 'teacher') {
-    console.log('✅ Showing links for TEACHER');
     show('linkNews');
     show('linkTeacher');
     show('linkSchedule');
     const schedLink = document.getElementById('linkSchedule');
     if (schedLink) schedLink.href = 'teacher-schedule.html';
   } else if (role === 'mateen') {
-    console.log('✅ Showing links for MATEEN');
     show('linkCerts');
     show('linkAwards');
     show('linkGrades');
