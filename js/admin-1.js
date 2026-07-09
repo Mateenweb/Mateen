@@ -2299,6 +2299,11 @@ window.openPasteAttModal = () => {
   document.getElementById('paMessage').value = '';
   document.getElementById('paPreviewSection').style.display = 'none';
   window._paParsed = null;
+  window._paExtraSubjects = [];
+  document.getElementById('paExtraSubjectSelect').innerHTML =
+    `<option value="">— اختاري مادة تضيفيها يدويًا (فوق مواد اليوم) —</option>` +
+    _baAllSubjects.map(s => `<option>${s}</option>`).join('');
+  paRenderExtraSubjects();
   window.paUpdateDayInfo();
 };
 
@@ -2314,12 +2319,36 @@ window.paUpdateDayInfo = () => {
   info.innerHTML = `📅 اليوم: <strong>${day}</strong> — المواد: <strong>${subjects.join('، ') || '—'}</strong>`;
 };
 
+window.paAddExtraSubject = () => {
+  const sel = document.getElementById('paExtraSubjectSelect');
+  const name = sel.value;
+  if (!name) return;
+  window._paExtraSubjects = window._paExtraSubjects || [];
+  window._paExtraSubjects.push(name);
+  sel.value = '';
+  paRenderExtraSubjects();
+};
+window.paRemoveExtraSubject = (i) => {
+  window._paExtraSubjects.splice(i, 1);
+  paRenderExtraSubjects();
+};
+function paRenderExtraSubjects() {
+  const c = document.getElementById('paExtraSubjectsList');
+  if (!c) return;
+  c.innerHTML = (window._paExtraSubjects || []).map((s, i) =>
+    `<span style="display:inline-flex;align-items:center;gap:4px;background:var(--beige2);border:1px solid var(--border);border-radius:14px;padding:3px 10px;font-size:11px;margin:2px 4px 2px 0">${esc(s)} <button type="button" onclick="paRemoveExtraSubject(${i})" style="background:none;border:none;color:#c0392b;cursor:pointer;font-size:12px;padding:0;line-height:1">✕</button></span>`
+  ).join('');
+}
+
 function paGetSubjectLabels() {
   const date = document.getElementById('paDate')?.value;
-  if (!date) return _baAllSubjects;
-  const d = new Date(date + 'T00:00:00');
-  const day = ATT_MSG_DAY_NAMES[d.getDay()];
-  return BA_DAY_SUBJECTS[day] || _baAllSubjects;
+  let base = _baAllSubjects;
+  if (date) {
+    const d = new Date(date + 'T00:00:00');
+    const day = ATT_MSG_DAY_NAMES[d.getDay()];
+    base = BA_DAY_SUBJECTS[day] || _baAllSubjects;
+  }
+  return [...base, ...(window._paExtraSubjects || [])];
 }
 
 function paPeriodLabel(subjNames, i) {
@@ -2823,15 +2852,41 @@ window.openExcelAttModal = () => {
   document.getElementById('eaStatus').style.display = 'none';
   document.getElementById('eaPreviewSection').style.display = 'none';
   window._eaParsed = null;
+  window._eaExtraSubjects = [];
+  document.getElementById('eaExtraSubjectSelect').innerHTML =
+    `<option value="">— اختاري مادة تضيفيها يدويًا (فوق مواد كل يوم) —</option>` +
+    _baAllSubjects.map(s => `<option>${s}</option>`).join('');
+  eaRenderExtraSubjects();
 };
 
 window.closeExcelAttModal = () => {
   document.getElementById('excelAttModal').style.display = 'none';
 };
 
-// بتاخد اسم المادة المناسب لليوم ده تلقائيًا من BA_DAY_SUBJECTS بدل قايمة ثابتة واحدة لكل الأيام
+window.eaAddExtraSubject = () => {
+  const sel = document.getElementById('eaExtraSubjectSelect');
+  const name = sel.value;
+  if (!name) return;
+  window._eaExtraSubjects = window._eaExtraSubjects || [];
+  window._eaExtraSubjects.push(name);
+  sel.value = '';
+  eaRenderExtraSubjects();
+};
+window.eaRemoveExtraSubject = (i) => {
+  window._eaExtraSubjects.splice(i, 1);
+  eaRenderExtraSubjects();
+};
+function eaRenderExtraSubjects() {
+  const c = document.getElementById('eaExtraSubjectsList');
+  if (!c) return;
+  c.innerHTML = (window._eaExtraSubjects || []).map((s, i) =>
+    `<span style="display:inline-flex;align-items:center;gap:4px;background:var(--beige2);border:1px solid var(--border);border-radius:14px;padding:3px 10px;font-size:11px;margin:2px 4px 2px 0">${esc(s)} <button type="button" onclick="eaRemoveExtraSubject(${i})" style="background:none;border:none;color:#c0392b;cursor:pointer;font-size:12px;padding:0;line-height:1">✕</button></span>`
+  ).join('');
+}
+
+// بتاخد اسم المادة المناسب لليوم ده تلقائيًا من BA_DAY_SUBJECTS + أي مواد إضافية اتضافت يدويًا
 function eaPeriodLabel(day, i) {
-  const subjNames = BA_DAY_SUBJECTS[day] || _baAllSubjects;
+  const subjNames = [...(BA_DAY_SUBJECTS[day] || _baAllSubjects), ...(window._eaExtraSubjects || [])];
   return subjNames[i] || ['الحصة الأولى', 'الحصة الثانية', 'الحصة الثالثة', 'الحصة الرابعة', 'الحصة الخامسة'][i] || `الحصة ${i + 1}`;
 }
 
