@@ -56,7 +56,7 @@
   <button class="nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')">
     <i class="ti ti-menu-2"></i>
   </button>
-    <button onclick="history.length > 1 ? history.back() : window.location.href="home.html"" class="nav-back-btn" aria-label="رجوع">
+    <button onclick="history.length > 1 ? history.back() : window.location.href='home.html'" class="nav-back-btn" aria-label="رجوع">
       <i class="ti ti-arrow-right"></i>
     </button>
     <button onclick="startPageTour()" title="جولة تعريفية"
@@ -730,36 +730,16 @@
       updateColorPreview(c1Id, c2Id, previewId, valId);
     }
     // Image preview helpers
-    window._iconUploadInProgress = false;
-    async function previewIcon(input, previewId, dataId) {
+    function previewIcon(input, previewId, dataId) {
       const file = input.files[0];
       if (!file) return;
-      const prev = document.getElementById(previewId);
       const reader = new FileReader();
       reader.onload = (e) => {
-        prev.innerHTML = `<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover;opacity:0.5;" loading="lazy">`;
+        const prev = document.getElementById(previewId);
+        prev.innerHTML = `<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover;" loading="lazy">`;
+        if (dataId) document.getElementById(dataId).value = e.target.result;
       };
       reader.readAsDataURL(file);
-
-      // الصورة بترفع فعليًا على Cloudinary ويتحفظ الرابط بس (مش الصورة نفسها) — Firestore بيرفض المستندات اللي حجمها أكبر من 1 ميجا
-      if (dataId) document.getElementById(dataId).value = '';
-      window._iconUploadInProgress = true;
-      try {
-        const fd = new FormData();
-        fd.append('file', file);
-        fd.append('upload_preset', 'mateen_uploads');
-        const res = await fetch('https://api.cloudinary.com/v1_1/dqqtznoqt/image/upload', { method: 'POST', body: fd });
-        const data = await res.json();
-        if (!data.secure_url) throw new Error(data.error?.message || 'فشل رفع الصورة');
-        if (dataId) document.getElementById(dataId).value = data.secure_url;
-        const img = prev.querySelector('img');
-        if (img) img.style.opacity = '1';
-      } catch (err) {
-        alert('حصل خطأ في رفع الصورة: ' + err.message);
-        prev.innerHTML = '<i class="ti ti-photo" style="font-size:24px;color:var(--text-mid);"></i>';
-      } finally {
-        window._iconUploadInProgress = false;
-      }
     }
     function previewIconUrl(input, previewId) {
       const url = input.value.trim();
