@@ -2298,28 +2298,28 @@ window.openPasteAttModal = () => {
   document.getElementById('paDate').value = new Date().toISOString().slice(0, 10);
   document.getElementById('paMessage').value = '';
   document.getElementById('paPreviewSection').style.display = 'none';
-  const subjList = document.getElementById('paSubjectsList');
-  subjList.innerHTML = '';
-  paAddSubjectRow(); paAddSubjectRow(); paAddSubjectRow(); // 3 صفوف افتراضية
   window._paParsed = null;
+  window.paUpdateDayInfo();
 };
 
-window.paAddSubjectRow = () => {
-  const container = document.getElementById('paSubjectsList');
-  const div = document.createElement('div');
-  div.style.cssText = 'display:flex;gap:6px;align-items:center;margin-bottom:6px';
-  div.innerHTML = `
-    <select class="pa-subject-select" style="flex:1;border:1px solid var(--border);border-radius:6px;padding:6px 8px;font-family:inherit;font-size:12px">
-      <option value="">— اختاري مادة —</option>
-      ${_baAllSubjects.map(s => `<option>${s}</option>`).join('')}
-    </select>
-    <button type="button" onclick="this.parentElement.remove()" style="background:none;border:none;color:#c0392b;cursor:pointer;font-size:15px;padding:2px 8px">✕</button>
-  `;
-  container.appendChild(div);
+// بتحسب اسم اليوم ومواده من BA_DAY_SUBJECTS تلقائيًا حسب التاريخ المختار، وتعرضهم للمعلومية بس
+window.paUpdateDayInfo = () => {
+  const date = document.getElementById('paDate').value;
+  const info = document.getElementById('paDayInfo');
+  if (!date) { info.style.display = 'none'; return; }
+  const d = new Date(date + 'T00:00:00');
+  const day = ATT_MSG_DAY_NAMES[d.getDay()];
+  const subjects = BA_DAY_SUBJECTS[day] || _baAllSubjects;
+  info.style.display = 'block';
+  info.innerHTML = `📅 اليوم: <strong>${day}</strong> — المواد: <strong>${subjects.join('، ') || '—'}</strong>`;
 };
 
 function paGetSubjectLabels() {
-  return [...document.querySelectorAll('.pa-subject-select')].map(s => s.value).filter(Boolean);
+  const date = document.getElementById('paDate')?.value;
+  if (!date) return _baAllSubjects;
+  const d = new Date(date + 'T00:00:00');
+  const day = ATT_MSG_DAY_NAMES[d.getDay()];
+  return BA_DAY_SUBJECTS[day] || _baAllSubjects;
 }
 
 function paPeriodLabel(subjNames, i) {
@@ -2564,7 +2564,6 @@ window.paToggleInclude = (idx, checked) => {
 
 window.confirmPasteAttendance = async () => {
   const date   = document.getElementById('paDate').value;
-  const period = document.getElementById('paPeriod').value;
   const segments = (window._paParsed || []).filter(s => s.include);
   if (!segments.length) { showToast('مفيش صفوف متحددة للحفظ'); return; }
 
@@ -2584,8 +2583,7 @@ window.confirmPasteAttendance = async () => {
         subjects[paPeriodLabel(subjNames, i)] = status;
       });
       return addDoc(collection(db, 'students', s.studentId, 'sessions'), {
-        day: period ? `${day} (${period})` : day,
-        date, subjects, createdAt: Date.now(),
+        day, date, subjects, createdAt: Date.now(),
       });
     }));
 
