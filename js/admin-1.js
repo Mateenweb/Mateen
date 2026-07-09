@@ -2822,9 +2822,6 @@ window.openExcelAttModal = () => {
   document.getElementById('eaFile').value = '';
   document.getElementById('eaStatus').style.display = 'none';
   document.getElementById('eaPreviewSection').style.display = 'none';
-  const subjList = document.getElementById('eaSubjectsList');
-  subjList.innerHTML = '';
-  eaAddSubjectRow(); eaAddSubjectRow(); eaAddSubjectRow();
   window._eaParsed = null;
 };
 
@@ -2832,25 +2829,9 @@ window.closeExcelAttModal = () => {
   document.getElementById('excelAttModal').style.display = 'none';
 };
 
-window.eaAddSubjectRow = () => {
-  const container = document.getElementById('eaSubjectsList');
-  const div = document.createElement('div');
-  div.style.cssText = 'display:flex;gap:6px;align-items:center;margin-bottom:6px';
-  div.innerHTML = `
-    <select class="ea-subject-select" style="flex:1;border:1px solid var(--border);border-radius:6px;padding:6px 8px;font-family:inherit;font-size:12px">
-      <option value="">— اختاري مادة —</option>
-      ${_baAllSubjects.map(s => `<option>${s}</option>`).join('')}
-    </select>
-    <button type="button" onclick="this.parentElement.remove()" style="background:none;border:none;color:#c0392b;cursor:pointer;font-size:15px;padding:2px 8px">✕</button>
-  `;
-  container.appendChild(div);
-};
-
-function eaGetSubjectLabels() {
-  return [...document.querySelectorAll('.ea-subject-select')].map(s => s.value).filter(Boolean);
-}
-
-function eaPeriodLabel(subjNames, i) {
+// بتاخد اسم المادة المناسب لليوم ده تلقائيًا من BA_DAY_SUBJECTS بدل قايمة ثابتة واحدة لكل الأيام
+function eaPeriodLabel(day, i) {
+  const subjNames = BA_DAY_SUBJECTS[day] || _baAllSubjects;
   return subjNames[i] || ['الحصة الأولى', 'الحصة الثانية', 'الحصة الثالثة', 'الحصة الرابعة', 'الحصة الخامسة'][i] || `الحصة ${i + 1}`;
 }
 
@@ -2858,7 +2839,6 @@ window.parseAttendanceExcelUI = async () => {
   const fileInput   = document.getElementById('eaFile');
   const file        = fileInput.files[0];
   const weekStart   = document.getElementById('eaDate').value; // تاريخ يوم الأحد
-  const sheetFilter = document.getElementById('eaPeriod').value;
 
   if (!file) { showToast('اختاري ملف أولاً'); return; }
   if (!weekStart) { showToast('حددي تاريخ يوم الأحد لهذا الأسبوع'); return; }
@@ -2872,12 +2852,7 @@ window.parseAttendanceExcelUI = async () => {
     const buffer = await file.arrayBuffer();
     const wb = XLSXmod.read(buffer, { type: 'array' });
 
-    let sheetNames = wb.SheetNames;
-    if (sheetFilter) {
-      const keyword = sheetFilter.includes('صباح') ? 'صباح' : 'مساء';
-      const filtered = wb.SheetNames.filter(n => n.includes(keyword));
-      if (filtered.length) sheetNames = filtered;
-    }
+    const sheetNames = wb.SheetNames;
 
     const students = allStudents.filter(s => s.name && s.name !== 'طالبة جديدة' && !s.archived);
     const fullNameMap = new Map();
@@ -2966,11 +2941,10 @@ function renderEAPreview(rows) {
     grouped[key].entries.push(r);
   });
 
-  const subjNames = eaGetSubjectLabels();
   document.getElementById('eaRowsList').innerHTML = Object.values(grouped).map(g => {
     const needsSelect = g.matchType !== 'exact';
     const daysHtml = g.entries.map(e => {
-      const marksHtml = e.periods.map((p, pi) => `${esc(eaPeriodLabel(subjNames, pi))}:${p === 'present' ? '✔' : p === 'absent' ? '✖' : '⭕'}`).join(' ');
+      const marksHtml = e.periods.map((p, pi) => `${esc(eaPeriodLabel(e.day, pi))}:${p === 'present' ? '✔' : p === 'absent' ? '✖' : '⭕'}`).join(' ');
       return `<span style="display:inline-block;margin:2px 10px 2px 0;${e.suspicious ? 'color:#c9852b;font-weight:700' : ''}">${esc(e.day)}${e.suspicious ? ' ⚠️' : ''}: ${marksHtml || '—'}${e.note ? ' 📝' + esc(e.note) : ''}</span>`;
     }).join('');
     return `<div style="padding:7px 10px;border-bottom:1px solid var(--border);font-size:11.5px;${needsSelect ? 'background:rgba(201,162,39,0.08)' : ''}">
@@ -3003,10 +2977,9 @@ window.confirmExcelAttendance = async () => {
   if (btn) { btn.disabled = true; btn.textContent = 'جارٍ الحفظ...'; }
 
   try {
-    const subjNames = eaGetSubjectLabels();
     await Promise.all(rows.map(r => {
       const subjects = {};
-      r.periods.forEach((status, i) => { subjects[eaPeriodLabel(subjNames, i)] = status; });
+      r.periods.forEach((status, i) => { subjects[eaPeriodLabel(r.day, i)] = status; });
       return addDoc(collection(db, 'students', r.studentId, 'sessions'), {
         day: `${r.day} (${r.sheet})`,
         date: r.date, subjects, createdAt: Date.now(),
