@@ -1089,9 +1089,13 @@
 
       <div id="paDayInfo" style="display:none;margin-top:10px;font-size:12px;color:var(--text-mid);background:var(--beige2);border:1px solid var(--border);border-radius:8px;padding:8px 10px"></div>
 
+      <label style="display:flex;align-items:center;gap:6px;margin-top:8px;font-size:12px;color:var(--text-mid);cursor:pointer">
+        <input type="checkbox" id="paAutoSubjectsToggle" checked onchange="paUpdateDayInfo()"/> تحديد مواد اليوم تلقائيًا (إلغِ التحديد للاعتماد على الإضافة اليدوية فقط)
+      </label>
+
       <div style="margin-top:8px;display:flex;gap:6px;align-items:center;flex-wrap:wrap">
         <select id="paExtraSubjectSelect" style="flex:1;min-width:140px;border:1px solid var(--border);border-radius:6px;padding:5px 8px;font-family:inherit;font-size:12px">
-          <option value="">— اختاري مادة تضيفيها يدويًا (فوق مواد اليوم) —</option>
+          <option value="">— اختاري مادة تضيفيها يدويًا —</option>
         </select>
         <button type="button" onclick="paAddExtraSubject()" style="font-size:12px;background:var(--beige2);border:1px solid var(--border);border-radius:6px;padding:5px 12px;cursor:pointer;font-family:inherit">+ إضافة</button>
       </div>
@@ -1514,11 +1518,13 @@ function formatSize(bytes) {
         <input id="eaDate" type="date" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:inherit;font-size:13px"/>
       </div>
 
-      <p style="font-size:11.5px;color:var(--text-mid);margin-bottom:8px">📌 مواد كل يوم بتتاخد أوتوماتيك من جدول المواد المُعتمد لكل يوم في نظام الحضور.</p>
+      <label style="display:flex;align-items:center;gap:6px;margin-bottom:8px;font-size:12px;color:var(--text-mid);cursor:pointer">
+        <input type="checkbox" id="eaAutoSubjectsToggle" checked/> تحديد مواد كل يوم تلقائيًا من الجدول المُعتمد (إلغِ التحديد للاعتماد على الإضافة اليدوية فقط)
+      </label>
 
       <div style="margin-bottom:8px;display:flex;gap:6px;align-items:center;flex-wrap:wrap">
         <select id="eaExtraSubjectSelect" style="flex:1;min-width:140px;border:1px solid var(--border);border-radius:6px;padding:5px 8px;font-family:inherit;font-size:12px">
-          <option value="">— اختاري مادة تضيفيها يدويًا (فوق مواد كل يوم) —</option>
+          <option value="">— اختاري مادة تضيفيها يدويًا —</option>
         </select>
         <button type="button" onclick="eaAddExtraSubject()" style="font-size:12px;background:var(--beige2);border:1px solid var(--border);border-radius:6px;padding:5px 12px;cursor:pointer;font-family:inherit">+ إضافة</button>
       </div>
