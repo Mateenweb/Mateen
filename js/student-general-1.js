@@ -4,6 +4,7 @@ import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/fi
 import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 import { FIREBASE_CONFIG } from "./config.js";
 import { effectiveRole, mountTestModeSwitcher } from "./test-mode.js";
+import { applyCustomTheme } from "./custom-theme.js";
 
 const app  = getApps().length ? getApp() : initializeApp(FIREBASE_CONFIG);
 const auth = getAuth(app);
@@ -16,6 +17,7 @@ onAuthStateChanged(auth, async user => {
   const role = effectiveRole(data, user.email);
   if (role !== 'student') { window.location.href = '../html/login.html'; return; }
   mountTestModeSwitcher(data, user.email);
+  applyCustomTheme(data);
   const name = data.name || user.email.split('@')[0];
   document.getElementById('navUserName').textContent = name;
   document.getElementById('heroName').textContent    = `أهلاً بكِ، ${name}`;
