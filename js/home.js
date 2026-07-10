@@ -15,6 +15,7 @@ import { getFirestore, doc, getDoc, getDocs, addDoc, setDoc,
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 import { FIREBASE_CONFIG } from "./config.js";
 import { effectiveRole, mountTestModeSwitcher } from "./test-mode.js";
+import { applyCustomTheme } from "./custom-theme.js";
 
 const app  = getApps().length ? getApp() : initializeApp(FIREBASE_CONFIG);
 const auth = getAuth(app);
@@ -310,6 +311,7 @@ onAuthStateChanged(auth, async user => {
   const subject = userData.subject || '';
   const name = (snap.exists() && userData.name) || user.displayName || user.email.split('@')[0];
   mountTestModeSwitcher(userData, user.email);
+  applyCustomTheme(userData);
 
   const sidebarNameEl = document.getElementById('sidebarName');
   if (sidebarNameEl) sidebarNameEl.textContent = 'مرحباً، ' + name;
