@@ -7,6 +7,7 @@ import { FIREBASE_CONFIG } from "./config.js";
 import { fullDeleteUser } from "./delete-account.js";
 import { loadSubjectsFor } from "./subjects.js";
 import { effectiveRole, mountTestModeSwitcher } from "./test-mode.js";
+import { applyCustomTheme } from "./custom-theme.js";
 
 const app  = getApps().length ? getApp() : initializeApp(FIREBASE_CONFIG);
 const auth = getAuth(app);
@@ -20,6 +21,7 @@ onAuthStateChanged(auth, async user => {
   window._userRole = role;
   if (role !== 'supervisor' && role !== 'admin') { window.location.href = '../html/login.html'; return; }
   mountTestModeSwitcher(userData, user.email);
+  applyCustomTheme(userData);
   document.getElementById('navUserName').textContent   = snap.data().name || user.email.split('@')[0];
   document.getElementById('authGate').style.display    = 'none';
   document.getElementById('mainContent').style.display = 'flex';
