@@ -13,9 +13,9 @@ onAuthStateChanged(auth, async user => {
   if (!user) { window.location.href = '../html/login.html'; return; }
   const snap = await getDoc(doc(db,'users',user.uid));
   const data = snap.exists() ? snap.data() : {};
-  const role = effectiveRole(data);
+  const role = effectiveRole(data, user.email);
   if (role !== 'student') { window.location.href = '../html/login.html'; return; }
-  mountTestModeSwitcher(data);
+  mountTestModeSwitcher(data, user.email);
   const name = data.name || user.email.split('@')[0];
   document.getElementById('navUserName').textContent = name;
   document.getElementById('heroName').textContent    = `أهلاً بكِ، ${name}`;
