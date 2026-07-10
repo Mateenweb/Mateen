@@ -1,9 +1,17 @@
 // ══════════════════════════════════════════════════════════════
-// وضع "الاختبار الشامل" — يسمح لحساب دعم واحد (عليه testRoles في
-// Firestore) إنه يتنقل بين كل الأدوار (أدمن/معلمة/مشرفة/طالبة)
-// وينفذ حاجات حقيقية في كل دور، من غير ما يعمل logout/login.
-// الحساب لازم يكون عليه role الأساسي + مصفوفة testRoles في users/{uid}.
+// وضع "الاختبار الشامل" — حساب دعم محدد بالإيميل (مكتوب في الكود
+// مباشرة، مش زرار ظاهر في لوحة الأدمن) يقدر يتنقل بين كل الأدوار
+// (أدمن/معلمة/مشرفة/طالبة) وينفذ حاجات حقيقية في كل دور، من غير
+// ما يعمل logout/login.
 // ══════════════════════════════════════════════════════════════
+
+// الحسابات المسموح لها بوضع الاختبار — الإضافة هنا في الكود بس،
+// مفيش أي واجهة أو زرار في لوحة الأدمن يفعّلها أو يوريها لحد.
+const TEST_MODE_EMAILS = [
+  'ra7matest@gmail.com',
+];
+
+const TEST_MODE_ROLES = ['admin', 'teacher', 'supervisor', 'student'];
 
 const ROLE_HOME = {
   admin:      '../html/admin.html',
@@ -19,23 +27,27 @@ const ROLE_LABELS = {
   student:    '🎓 طالبة'
 };
 
+function isTestAccount(email) {
+  return !!email && TEST_MODE_EMAILS.includes(email.toLowerCase());
+}
+
 // الدور الفعلي اللي المفروض تتعامل بيه الصفحة — بيرجع الدور الحقيقي
-// إلا لو الحساب مفعّل عليه وضع الاختبار ومختار دور تاني من القائمة
-export function effectiveRole(userData) {
-  const testRoles = (userData && userData.testRoles) || [];
+// إلا لو الإيميل من ضمن حسابات الاختبار ومختار دور تاني من القائمة
+export function effectiveRole(userData, email) {
+  const realRole = (userData && userData.role) || '';
+  if (!isTestAccount(email)) return realRole;
   const override = localStorage.getItem('mateenTestRole');
-  if (override && testRoles.includes(override)) return override;
-  return (userData && userData.role) || '';
+  if (override && TEST_MODE_ROLES.includes(override)) return override;
+  return realRole;
 }
 
 // بتركّب أداة صغيرة ثابتة في زاوية الشاشة لاختيار الدور — بتظهر بس
-// للحسابات اللي معاها testRoles فيها أكتر من دور واحد
-export function mountTestModeSwitcher(userData) {
-  const testRoles = (userData && userData.testRoles) || [];
-  if (testRoles.length < 2) return;
+// لحسابات الاختبار المحددة بالإيميل في الكود فوق
+export function mountTestModeSwitcher(userData, email) {
+  if (!isTestAccount(email)) return;
   if (document.getElementById('testModeSwitcher')) return;
 
-  const current = effectiveRole(userData);
+  const current = effectiveRole(userData, email);
   const box = document.createElement('div');
   box.id = 'testModeSwitcher';
   box.style.cssText = `
@@ -47,7 +59,7 @@ export function mountTestModeSwitcher(userData) {
   box.innerHTML = `
     <span style="opacity:0.75">🧪 اختبار كـ:</span>
     <select id="testModeSelect" style="background:#2a2a2a;color:#fff;border:1px solid #444;border-radius:6px;padding:4px 8px;font-family:inherit;font-size:13px;cursor:pointer">
-      ${testRoles.map(r => `<option value="${r}" ${r === current ? 'selected' : ''}>${ROLE_LABELS[r] || r}</option>`).join('')}
+      ${TEST_MODE_ROLES.map(r => `<option value="${r}" ${r === current ? 'selected' : ''}>${ROLE_LABELS[r] || r}</option>`).join('')}
     </select>
   `;
   document.body.appendChild(box);
