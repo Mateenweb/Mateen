@@ -306,10 +306,10 @@ onAuthStateChanged(auth, async user => {
 
   const snap = await getDoc(doc(db, 'users', user.uid));
   const userData = snap.exists() ? snap.data() : {};
-  const role    = effectiveRole(userData) || 'student';
+  const role    = effectiveRole(userData, user.email) || 'student';
   const subject = userData.subject || '';
   const name = (snap.exists() && userData.name) || user.displayName || user.email.split('@')[0];
-  mountTestModeSwitcher(userData);
+  mountTestModeSwitcher(userData, user.email);
 
   const sidebarNameEl = document.getElementById('sidebarName');
   if (sidebarNameEl) sidebarNameEl.textContent = 'مرحباً، ' + name;
