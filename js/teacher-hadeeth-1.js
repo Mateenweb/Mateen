@@ -5,6 +5,7 @@ import { getFirestore, collection, addDoc, doc, getDoc, query, where, getDocs } 
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
 import { FIREBASE_CONFIG } from "./config.js";
 import { effectiveRole, mountTestModeSwitcher } from "./test-mode.js";
+import { applyCustomTheme } from "./custom-theme.js";
 
 const app = getApps().length ? getApp() : initializeApp(FIREBASE_CONFIG);
 const db  = getFirestore(app);
@@ -24,6 +25,7 @@ onAuthStateChanged(auth, async user => {
     window.location.href = '../html/login.html'; return;
   }
   mountTestModeSwitcher(userData, user.email);
+  applyCustomTheme(userData);
   if (status === 'pending' || status === 'suspended') {
     window.location.href = '../html/login.html'; return;
   }
