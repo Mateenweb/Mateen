@@ -18,12 +18,12 @@ onAuthStateChanged(auth, async user => {
   if (!user) { window.location.href = '../html/login.html'; return; }
   const snap = await getDoc(doc(db, 'users', user.uid));
   const userData = snap.exists() ? snap.data() : {};
-  const role   = effectiveRole(userData);
+  const role   = effectiveRole(userData, user.email);
   const status = userData.status || '';
   if (role !== 'teacher' && role !== 'admin' && role !== 'supervisor') {
     window.location.href = '../html/login.html'; return;
   }
-  mountTestModeSwitcher(userData);
+  mountTestModeSwitcher(userData, user.email);
   if (status === 'pending' || status === 'suspended') {
     window.location.href = '../html/login.html'; return;
   }
