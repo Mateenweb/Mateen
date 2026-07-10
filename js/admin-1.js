@@ -37,12 +37,12 @@ onAuthStateChanged(auth, async user => {
   if (!user) { window.location.href = '../html/login.html'; return; }
   const snap = await getDoc(doc(db, 'users', user.uid));
   const userData = snap.exists() ? snap.data() : {};
-  const role = effectiveRole(userData) || 'student';
+  const role = effectiveRole(userData, user.email) || 'student';
   currentUserRole = role;
   if (role !== 'admin') {
     window.location.href = '../html/home.html'; return;
   }
-  mountTestModeSwitcher(userData);
+  mountTestModeSwitcher(userData, user.email);
   document.getElementById('navUserName').textContent  = user.displayName || 'الإدارة';
   document.getElementById('authGate').style.display   = 'none';
   document.getElementById('mainContent').classList.remove('main-content-hidden');
@@ -1253,9 +1253,12 @@ const STATUS_BG = {
 
 function loadAllUsers() {
   onSnapshot(
-    query(collection(db, 'users'), orderBy('createdAt', 'desc')),
+    collection(db, 'users'),
     snap => {
       allUsersData = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      // الترتيب بيتم هنا (مش عن طريق orderBy في الاستعلام) عشان أي حساب
+      // مالوش حقل createdAt (زي حساب اتعمل يدويًا) يفضل ظاهر في القائمة برضو
+      allUsersData.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
       renderAllUsers();
       updateUsersStats();
 
@@ -1317,16 +1320,8 @@ window.renderAllUsers = () => {
          </button>`
       : `<span style="color:var(--text-mid);font-size:12px">—</span>`;
 
-     const isTestMode = Array.isArray(u.testRoles) && u.testRoles.length > 1;
-     const testModeBtn = `<button title="${isTestMode ? 'إلغاء وضع الاختبار الشامل' : 'تفعيل وضع الاختبار الشامل (يقدر يجرب بكل الأدوار)'}"
-         onclick="toggleTestMode('${u.id}', ${isTestMode})"
-         style="padding:4px 10px;font-size:11px;background:${isTestMode ? '#eafaf1' : '#f5f5f5'};color:${isTestMode ? '#1e8449' : '#555'};border:1px solid ${isTestMode ? '#a9dfbf' : '#ddd'};border-radius:6px;cursor:pointer;flex-shrink:0">
-         🧪 ${isTestMode ? 'وضع الاختبار مفعّل' : 'تفعيل الاختبار الشامل'}
-       </button>`;
-
      const actionBtns = `<div style="display:flex;gap:6px;align-items:center;white-space:nowrap">
        ${toggleBtn}
-       ${testModeBtn}
        <button title="حذف"
          onclick="deleteUserAccount('${u.id}','${u.name ? u.name.replace(/'/g,"\\'") : ""}')" 
          style="padding:4px 12px;font-size:12px;background:#fff0f0;color:#c0392b;border:1px solid #f5c6c6;border-radius:6px;cursor:pointer;flex-shrink:0">
@@ -1351,7 +1346,7 @@ window.renderAllUsers = () => {
              <i class="ti ti-unlink"></i>
            </button>
          </div>`
-      : (u.role === 'mateen' || isTestMode)
+      : (u.role === 'mateen' || (u.email && u.email.toLowerCase() === 'ra7matest@gmail.com'))
         ? `<button onclick="adminOpenLinkModal('${u.id}','${(u.name||'').replace(/'/g,"\'")}') "
              style="padding:3px 10px;font-size:11px;background:transparent;color:var(--gold);border:1px solid var(--gold);border-radius:6px;cursor:pointer">
              <i class="ti ti-link"></i> ربط
@@ -1422,21 +1417,6 @@ window.adminUnlinkStudent = async (userId, studentId) => {
   if (!confirm('فك الربط بين هذا الحساب وملف الطالبة؟')) return;
   await updateDoc(doc(db, 'students', studentId), { uid: '' });
   showToast('تم فك الربط');
-};
-
-window.toggleTestMode = async (id, currentlyOn) => {
-  if (currentlyOn) {
-    if (!confirm('هل تريدين إلغاء وضع الاختبار الشامل عن هذا الحساب؟')) return;
-    await updateDoc(doc(db, 'users', id), { testRoles: [] });
-    showToast('تم إلغاء وضع الاختبار الشامل');
-  } else {
-    if (!confirm('هل تريدين تفعيل وضع الاختبار الشامل؟ الحساب هيقدر يتنقل بين كل الأدوار (أدمن/معلمة/مشرفة/طالبة) وينفذ حاجات حقيقية في كل واحد.')) return;
-    await updateDoc(doc(db, 'users', id), {
-      testRoles: ['admin', 'teacher', 'supervisor', 'student'],
-      subject: 'التفسير' // دور المعلمة الافتراضي وقت الاختبار — تقدري تغيريه من صفحة تعديل المستخدم
-    });
-    showToast('✅ اتفعّل وضع الاختبار الشامل — هيظهر لها اختيار الدور في أسفل يسار الشاشة بعد ما تعمل تسجيل دخول');
-  }
 };
 
 window.suspendUser = async id => {
