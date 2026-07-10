@@ -16,10 +16,10 @@ onAuthStateChanged(auth, async user => {
   if (!user) { window.location.href = '../html/login.html'; return; }
   const snap = await getDoc(doc(db, 'users', user.uid));
   const userData = snap.exists() ? snap.data() : {};
-  const role = effectiveRole(userData);
+  const role = effectiveRole(userData, user.email);
   window._userRole = role;
   if (role !== 'supervisor' && role !== 'admin') { window.location.href = '../html/login.html'; return; }
-  mountTestModeSwitcher(userData);
+  mountTestModeSwitcher(userData, user.email);
   document.getElementById('navUserName').textContent   = snap.data().name || user.email.split('@')[0];
   document.getElementById('authGate').style.display    = 'none';
   document.getElementById('mainContent').style.display = 'flex';
