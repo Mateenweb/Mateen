@@ -3130,11 +3130,16 @@ function renderEAPreview(rows) {
             <option value="absent" ${p === 'absent' ? 'selected' : ''}>❌ غياب</option>
             <option value="excused" ${p === 'excused' ? 'selected' : ''}>⭕ عذر</option>
           </select>
+          <button type="button" onclick="eaRemovePeriod(${e._idx}, ${pi})" title="حذف المادة دي من الصف"
+            style="background:none;border:none;color:#c0392b;cursor:pointer;font-size:12px;padding:0 2px;line-height:1">✕</button>
         </span>`).join('');
       return `
         <div style="display:flex;align-items:center;flex-wrap:wrap;gap:6px;padding:6px 8px;border-bottom:1px dashed var(--border);${e.suspicious ? 'background:rgba(201,133,43,0.1)' : ''}">
           <span style="font-size:11.5px;font-weight:700;min-width:64px;flex-shrink:0">${esc(e.day)}${e.suspicious ? ' ⚠️' : ''}</span>
-          <div style="display:flex;flex-wrap:wrap;flex:1">${periodsHtml || '<span style="font-size:11px;color:var(--text-mid)">مفيش حصص</span>'}</div>
+          <div style="display:flex;flex-wrap:wrap;flex:1;align-items:center">${periodsHtml || '<span style="font-size:11px;color:var(--text-mid)">مفيش حصص</span>'}
+            <button type="button" onclick="eaAddPeriod(${e._idx})" title="إضافة مادة لهذا اليوم"
+              style="font-size:10px;background:var(--beige2);border:1px solid var(--border);border-radius:5px;padding:2px 7px;cursor:pointer;font-family:inherit;margin-inline-end:6px">+ مادة</button>
+          </div>
           <input type="text" value="${esc(e.note || '')}" placeholder="ملاحظة..." oninput="eaEditNote(${e._idx}, this.value)"
             style="width:120px;font-size:11px;border:1px solid var(--border);border-radius:5px;padding:3px 6px;font-family:inherit">
         </div>`;
@@ -3154,6 +3159,22 @@ function renderEAPreview(rows) {
 window.eaEditPeriod = (idx, periodIdx, value) => {
   const row = (window._eaParsed || [])[idx];
   if (row) row.periods[periodIdx] = value;
+};
+
+// إضافة مادة (حصة) جديدة لصف معين — بتتحط افتراضيًا "حضور" وتقدري تغيريها بعدين
+window.eaAddPeriod = (idx) => {
+  const row = (window._eaParsed || [])[idx];
+  if (!row) return;
+  row.periods.push('present');
+  renderEAPreview(window._eaParsed);
+};
+
+// حذف مادة (حصة) معينة من صف — لو الطالبة ماحضرتش المادة دي أصلاً أو اتكتبت غلط
+window.eaRemovePeriod = (idx, periodIdx) => {
+  const row = (window._eaParsed || [])[idx];
+  if (!row) return;
+  row.periods.splice(periodIdx, 1);
+  renderEAPreview(window._eaParsed);
 };
 
 // تعديل ملاحظة صف معين مباشرة من المعاينة قبل الحفظ
