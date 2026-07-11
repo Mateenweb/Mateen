@@ -1526,9 +1526,10 @@ function formatSize(bytes) {
     <div class="modal-body">
       <p style="font-size:12px;color:var(--text-mid);margin-bottom:12px;background:rgba(92,61,46,0.05);border:1px solid var(--border);border-radius:8px;padding:10px">
         📌 الملف لازم يكون: أول عمود = اسم الطالبة، وباقي الأعمدة = **أيام الأسبوع** (الأحد، الاثنين...). كل خلية ممكن تحتوي أكتر من رمز (لعدة حصص في نفس اليوم): ✅ / ❌ / ⭕، أو ملاحظة نصية، أو تتسيبها فاضية.
+        لو الملف فيه أكتر من شيت، كل شيت هيتعامل معاه كأسبوع تالي (يعني الشيت التاني = الأسبوع اللي بعد التاريخ اللي هتحطيه بأسبوع، والشيت التالت أسبوعين بعده، وهكذا) — بشرط إن ترتيب الشيتات في الملف يكون بنفس ترتيب الأسابيع فعليًا.
       </p>
       <div style="margin-bottom:12px">
-        <label style="font-size:12px;color:var(--text-mid);display:block;margin-bottom:4px">تاريخ يوم الأحد (بداية الأسبوع) *</label>
+        <label style="font-size:12px;color:var(--text-mid);display:block;margin-bottom:4px">تاريخ يوم الأحد لأول أسبوع في الملف *</label>
         <input id="eaDate" type="date" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:inherit;font-size:13px"/>
       </div>
 

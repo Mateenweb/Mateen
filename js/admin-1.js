@@ -3012,7 +3012,7 @@ window.parseAttendanceExcelUI = async () => {
 
     const parsedRows = [];
 
-    sheetNames.forEach(sheetName => {
+    sheetNames.forEach((sheetName, sheetIdx) => {
       const ws = wb.Sheets[sheetName];
       const rows = XLSXmod.utils.sheet_to_json(ws, { header: 1, defval: '' });
       if (!rows.length) return;
@@ -3023,6 +3023,10 @@ window.parseAttendanceExcelUI = async () => {
         if (EA_DAY_OFFSETS[label] !== undefined) dayCols.push({ col: c, day: label });
       }
       if (!dayCols.length) return; // شيت مفيهوش أعمدة أيام معروفة — تجاهليه
+
+      // كل شيت بيمثل أسبوع تاني — نزود 7 أيام لكل شيت بعد الأول
+      // (بافتراض إن ترتيب الشيتات في الملف هو نفسه الترتيب الزمني للأسابيع)
+      const sheetWeekStart = eaAddDays(weekStart, sheetIdx * 7);
 
       for (let r = 1; r < rows.length; r++) {
         const rawName = String(rows[r][0] || '').trim();
@@ -3043,7 +3047,7 @@ window.parseAttendanceExcelUI = async () => {
           const marks = raw.match(ATT_MSG_EMOJI_RE) || [];
           const noteText = raw.replace(ATT_MSG_EMOJI_RE, '').trim();
           const periods = marks.map(m => m.includes('✅') ? 'present' : m.includes('❌') ? 'absent' : 'excused');
-          const date = eaAddDays(weekStart, EA_DAY_OFFSETS[day]);
+          const date = eaAddDays(sheetWeekStart, EA_DAY_OFFSETS[day]);
           parsedRows.push({
             sheet: sheetName, rawName, studentId, matchType,
             day, date, periods, note: noteText,
