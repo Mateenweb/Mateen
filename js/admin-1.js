@@ -27,9 +27,27 @@ const BA_DAY_SUBJECTS = {
   'الأربعاء': ['الفقه', 'الحديث', 'مقرأة متين'],
   'الخميس':   ['التفسير', 'العقيدة', 'مقرأة متين'],
 };
+// بتوحّد اختلافات كتابة الهمزة على الألف (الإثنين/الاثنين/الأثنين) والمسافات الزايدة،
+// عشان اسم اليوم/الشيت لو اتكتب بتهجئة مختلفة شوية يفضل يتطابق صح مع جدول المواد
+function normalizeDayKey(day) {
+  return (day || '').trim().replace(/[أإآ]/g, 'ا').replace(/\s+/g, '');
+}
+const BA_DAY_SUBJECTS_LOOKUP = {};
+Object.keys(BA_DAY_SUBJECTS).forEach(k => { BA_DAY_SUBJECTS_LOOKUP[normalizeDayKey(k)] = BA_DAY_SUBJECTS[k]; });
+function getDaySubjects(day) {
+  return BA_DAY_SUBJECTS_LOOKUP[normalizeDayKey(day)] || BA_DAY_SUBJECTS[day] || _baAllSubjects;
+}
+// بترجع أقرب اسم يوم رسمي معروف (من ATT_MSG_DAY_NAMES) لأي تهجئة قريبة (زي "الإثنين" ← "الاثنين")،
+// عشان اسم اليوم يفضل موحّد في كل مكان (العرض، مطابقة المواد، الحفظ في قاعدة البيانات)
+function canonicalDayName(day) {
+  const norm = normalizeDayKey(day);
+  const known = (typeof ATT_MSG_DAY_NAMES !== 'undefined' ? ATT_MSG_DAY_NAMES : Object.keys(BA_DAY_SUBJECTS));
+  const match = known.find(d => normalizeDayKey(d) === norm);
+  return match || day;
+}
 function baSubjectsForCurrentDay() {
   const day = document.getElementById('baDay')?.value || '';
-  return BA_DAY_SUBJECTS[day] || _baAllSubjects;
+  return getDaySubjects(day);
 }
 
 // ── AUTH GUARD ────────────────────────────────────────
@@ -2380,7 +2398,7 @@ window.paUpdateDayInfo = () => {
   if (!date) { info.style.display = 'none'; info.innerHTML = ''; return; }
   const d = new Date(date + 'T00:00:00');
   const day = ATT_MSG_DAY_NAMES[d.getDay()];
-  const subjects = BA_DAY_SUBJECTS[day] || _baAllSubjects;
+  const subjects = getDaySubjects(day);
   info.style.display = 'block';
   if (!subjects.length) {
     info.innerHTML = `<div style="font-size:12px;color:var(--text-mid)">📅 اليوم: <strong>${day}</strong> — لا توجد مواد مُعتمدة لهذا اليوم.</div>`;
@@ -3021,7 +3039,7 @@ window.parseAttendanceExcelUI = async () => {
       const dayCols = [];
       for (let c = 1; c < header.length; c++) {
         const label = String(header[c] || '').trim();
-        if (EA_DAY_OFFSETS[label] !== undefined) dayCols.push({ col: c, day: label });
+        if (EA_DAY_OFFSETS[label] !== undefined) dayCols.push({ col: c, day: canonicalDayName(label) });
       }
       if (!dayCols.length) return; // شيت مفيهوش أعمدة أيام معروفة — تجاهليه
 
