@@ -3049,6 +3049,7 @@ window.parseAttendanceExcelUI = async () => {
           const periods = marks.map(m => m.includes('✅') ? 'present' : m.includes('❌') ? 'absent' : 'excused');
           const date = eaAddDays(sheetWeekStart, EA_DAY_OFFSETS[day]);
           parsedRows.push({
+            _idx: parsedRows.length,
             sheet: sheetName, rawName, studentId, matchType,
             day, date, periods, note: noteText,
             suspicious: periods.length === 0 || periods.length > 5,
@@ -3092,21 +3093,46 @@ function renderEAPreview(rows) {
   });
 
   document.getElementById('eaRowsList').innerHTML = Object.values(grouped).map(g => {
-    const needsSelect = g.matchType !== 'exact';
     const daysHtml = g.entries.map(e => {
-      const marksHtml = e.periods.map((p, pi) => `${esc(eaPeriodLabel(e.day, pi))}:${p === 'present' ? '✔' : p === 'absent' ? '✖' : '⭕'}`).join(' ');
-      return `<span style="display:inline-block;margin:2px 10px 2px 0;${e.suspicious ? 'color:#c9852b;font-weight:700' : ''}">${esc(e.day)}${e.suspicious ? ' ⚠️' : ''}: ${marksHtml || '—'}${e.note ? ' 📝' + esc(e.note) : ''}</span>`;
+      const periodsHtml = e.periods.map((p, pi) => `
+        <span style="display:inline-flex;align-items:center;gap:3px;margin-inline-end:10px;margin-bottom:3px">
+          <span style="font-size:10px;color:var(--text-mid)">${esc(eaPeriodLabel(e.day, pi))}</span>
+          <select onchange="eaEditPeriod(${e._idx}, ${pi}, this.value)" style="font-size:11px;border:1px solid var(--border);border-radius:5px;padding:1px 3px;cursor:pointer">
+            <option value="present" ${p === 'present' ? 'selected' : ''}>✅ حضور</option>
+            <option value="absent" ${p === 'absent' ? 'selected' : ''}>❌ غياب</option>
+            <option value="excused" ${p === 'excused' ? 'selected' : ''}>⭕ عذر</option>
+          </select>
+        </span>`).join('');
+      return `
+        <div style="display:flex;align-items:center;flex-wrap:wrap;gap:6px;padding:6px 8px;border-bottom:1px dashed var(--border);${e.suspicious ? 'background:rgba(201,133,43,0.1)' : ''}">
+          <span style="font-size:11.5px;font-weight:700;min-width:64px;flex-shrink:0">${esc(e.day)}${e.suspicious ? ' ⚠️' : ''}</span>
+          <div style="display:flex;flex-wrap:wrap;flex:1">${periodsHtml || '<span style="font-size:11px;color:var(--text-mid)">مفيش حصص</span>'}</div>
+          <input type="text" value="${esc(e.note || '')}" placeholder="ملاحظة..." oninput="eaEditNote(${e._idx}, this.value)"
+            style="width:120px;font-size:11px;border:1px solid var(--border);border-radius:5px;padding:3px 6px;font-family:inherit">
+        </div>`;
     }).join('');
-    return `<div style="padding:7px 10px;border-bottom:1px solid var(--border);font-size:11.5px;${needsSelect ? 'background:rgba(201,162,39,0.08)' : ''}">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px">
+    return `<div style="padding:8px 10px;border-bottom:2px solid var(--border);font-size:11.5px;${g.matchType !== 'exact' ? 'background:rgba(201,162,39,0.08)' : ''}">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px">
         <span style="font-size:13px;font-weight:700">${esc(g.rawName)}</span>
         <span style="font-size:10px;color:var(--text-mid)">(${esc(g.sheet)})</span>
       </div>
-      ${needsSelect ? `<select onchange="eaSelectStudent('${esc(g.rawName).replace(/'/g, "\\'")}','${esc(g.sheet).replace(/'/g, "\\'")}', this.value)" style="width:100%;margin-bottom:4px;border:1px solid var(--border);border-radius:6px;padding:3px 6px;font-family:inherit;font-size:11px">${buildStudentOptions(g.studentId)}</select>` : ''}
-      <div style="color:var(--text-mid)">${daysHtml}</div>
+      <select onchange="eaSelectStudent('${esc(g.rawName).replace(/'/g, "\\'")}','${esc(g.sheet).replace(/'/g, "\\'")}', this.value)" style="width:100%;margin-bottom:6px;border:1px solid var(--border);border-radius:6px;padding:4px 6px;font-family:inherit;font-size:11px">${buildStudentOptions(g.studentId)}</select>
+      <div style="display:flex;flex-direction:column">${daysHtml}</div>
     </div>`;
   }).join('');
 }
+
+// تعديل حالة حصة معينة (حضور/غياب/عذر) مباشرة من المعاينة قبل الحفظ
+window.eaEditPeriod = (idx, periodIdx, value) => {
+  const row = (window._eaParsed || [])[idx];
+  if (row) row.periods[periodIdx] = value;
+};
+
+// تعديل ملاحظة صف معين مباشرة من المعاينة قبل الحفظ
+window.eaEditNote = (idx, value) => {
+  const row = (window._eaParsed || [])[idx];
+  if (row) row.note = value;
+};
 
 window.eaSelectStudent = (rawName, sheet, studentId) => {
   (window._eaParsed || []).forEach(r => {
