@@ -16,6 +16,24 @@ const db   = getFirestore(app);
 // ضمان حفظ Session في localStorage
 setPersistence(auth, browserLocalPersistence);
 
+// ══════════════════════════════════════════════════════════════
+// دالتين مشتركتين بين إعادة التوجيه التلقائي (auto-redirect) وتسجيل
+// الدخول اليدوي — عشان الاتنين يفضلوا متطابقين دايمًا ومايحصلش
+// تعارض بينهم زي المشكلة اللي حصلت قبل كده (حساب موقوف كان بيتحول
+// للـ home.html بدل ما يتوقف).
+// ══════════════════════════════════════════════════════════════
+function checkAccountStatus(status) {
+  if (status === 'pending')   return { blocked: true, pending: true, message: 'حسابك قيد المراجعة، انتظري الموافقة من الإدارة' };
+  if (status === 'rejected')  return { blocked: true, message: 'تم رفض طلبك، تواصلي مع الإدارة للاستفسار' };
+  if (status === 'suspended') return { blocked: true, message: 'حسابك موقوف، تواصلي مع الإدارة' };
+  return { blocked: false };
+}
+
+function computeBaseRedirect(role, subject) {
+  if (role === 'teacher') return subject ? `teacher-${subject}.html` : 'home.html';
+  return 'home.html'; // student, mateen, admin, supervisor
+}
+
 // If Userة مسجلة دخول بالفعل — حوّليها بعيداً عن Page الدخول
 onAuthStateChanged(auth, async user => {
   if (!user) return;
@@ -24,23 +42,17 @@ onAuthStateChanged(auth, async user => {
     const snap = await getDoc(doc(db, 'users', user.uid));
     const data = snap.exists() ? snap.data() : {};
     const status = data.status || 'active';
-    // If الحساب معلق أو موقوف أو مرفوض — لا تعمل redirect، وسجّلي خروجها لو موقوفة/مرفوضة
-    if (status === 'pending') return;
-    if (status === 'suspended' || status === 'rejected') {
-      await auth.signOut();
+
+    const check = checkAccountStatus(status);
+    if (check.blocked) {
+      // pending: سيبيها زي ما هي من غير signOut ولا redirect (بيتم التعامل معاها في doRegister)
+      // rejected/suspended: سجّلي خروجها فورًا عشان محدش يوصل للـ home.html بالغلط
+      if (!check.pending) await auth.signOut();
       return;
     }
-    const role = data.role || 'student';
-    let redirect = 'home.html';
 
-    if (role === 'student' || role === 'mateen') {
-      redirect = 'home.html';
-    } else if (role === 'teacher') {
-      const subjectId = data.subject || '';
-      redirect = subjectId ? `teacher-${subjectId}.html` : 'home.html';
-    } else if (role === 'admin' || role === 'supervisor') {
-      redirect = 'home.html';
-    }
+    const role = data.role || 'student';
+    const redirect = computeBaseRedirect(role, data.subject || '');
 
     // وجّهيه for the  onboarding دايماً بعد Login
     localStorage.setItem('userRole', role);
@@ -175,30 +187,19 @@ window.doLogin = async () => {
       return;
     }
 
-    /* Validation من حالة الحساب */
-    if (status === 'pending') {
+    /* Validation من حالة الحساب — نفس الدالة المستخدمة في إعادة التوجيه التلقائي */
+    const check = checkAccountStatus(status);
+    if (check.blocked) {
       await auth.signOut();
-      showError('حسابك قيد المراجعة، انتظري الموافقة من الإدارة');
-      setLoading('loginBtn', false, '<i class="ti ti-login"></i> دخول');
-      return;
-    }
-    if (status === 'rejected') {
-      await auth.signOut();
-      showError('تم رفض طلبك، تواصلي مع الإدارة للاستفسار');
-      setLoading('loginBtn', false, '<i class="ti ti-login"></i> دخول');
-      return;
-    }
-    if (status === 'suspended') {
-      await auth.signOut();
-      showError('حسابك موقوف، تواصلي مع الإدارة');
+      showError(check.message);
       setLoading('loginBtn', false, '<i class="ti ti-login"></i> دخول');
       return;
     }
 
-    /* التوجيه حسب الـ role */
-    let redirect = ROLE_CONFIG[role]?.redirect || 'home.html';
+    /* التوجيه حسب الـ role — نفس الدالة المستخدمة في إعادة التوجيه التلقائي */
+    let redirect = computeBaseRedirect(role, data.subject || '');
 
-    /* Student (f) العاthisة (student): اSearch عنها في students collection */
+    /* Student (f) العاثية (student): البحث عنها في students collection */
     if (role === 'student') {
       const fullName  = (data.name || '').trim();
       const firstName = fullName.split(/\s+/)[0].toLowerCase();
@@ -213,12 +214,6 @@ window.doLogin = async () => {
         });
         if (foundId) redirect = `student.html?id=${foundId}`;
       }
-    }
-
-    /* Teacher (f): توجيه لRowحتها بناءً على subject المحفوظ */
-    if (role === 'teacher') {
-      const subjectId = data.subject || '';
-      redirect = subjectId ? `teacher-${subjectId}.html` : 'home.html';
     }
 
     showSuccess('أهلاً بكِ! 🎉', 'تم الدخول بنجاح، جارٍ التحويل...');
