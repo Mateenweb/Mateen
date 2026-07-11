@@ -1494,12 +1494,16 @@ onSnapshot(query(collection(db,'news'), orderBy('createdAt','desc')), snap => {
       ? '<span style="background:#dcfce7;color:#15803d;font-size:11px;padding:2px 8px;border-radius:8px">🌐 للجميع</span>'
       : '<span style="background:#f1f5f9;color:#64748b;font-size:11px;padding:2px 8px;border-radius:8px">🔒 للمسجلات</span>';
     const pinBadge = n.pinned ? '<span style="background:#fef9c3;color:#854d0e;font-size:11px;padding:2px 8px;border-radius:8px">📌 مثبت</span>' : '';
+    const roleLabels = { student: '🎓 طالبات', teacher: '👩‍🏫 معلمات', supervisor: '🧑‍💼 مشرفات', admin: '🛡️ أدمن' };
+    const rolesBadge = (n.targetRoles && n.targetRoles.length)
+      ? `<span style="background:#ede0cc;color:#5c3d2e;font-size:11px;padding:2px 8px;border-radius:8px">${n.targetRoles.map(r => roleLabels[r] || r).join('، ')}</span>`
+      : '';
     return `<div style="background:var(--white);border:1px solid var(--border);border-radius:10px;padding:12px 14px">
       <div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:6px">
         <div style="flex:1">
           <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:4px">
             <span style="font-size:12px;background:var(--beige2);padding:2px 8px;border-radius:6px">${n.tag||'خبر'}</span>
-            ${vis} ${pinBadge}
+            ${vis} ${pinBadge} ${rolesBadge}
             <span style="font-size:11px;color:var(--text-mid);margin-right:auto">${date}</span>
           </div>
           <div style="font-weight:600;font-size:14px;color:var(--text-dark)">${n.title||''}</div>
@@ -1573,7 +1577,15 @@ window.openAddNewsModal = () => {
   document.getElementById('anTag').value   = '📢 إعلان';
   document.getElementById('anVisibility').value = 'public';
   document.getElementById('anPinned').checked   = false;
+  document.querySelectorAll('.an-role-check').forEach(cb => cb.checked = false);
+  anToggleRolesBox();
   document.getElementById('adminNewsModal').classList.add('show');
+};
+
+// صندوق اختيار الأدوار يظهر بس لما الخبر "للمسجلات فقط" — الزوار (public) مفيش لهم دور أصلاً
+window.anToggleRolesBox = () => {
+  const box = document.getElementById('anRolesBox');
+  box.style.display = document.getElementById('anVisibility').value === 'members' ? 'flex' : 'none';
 };
 
 window.openEditNewsModal = async id => {
@@ -1587,6 +1599,9 @@ window.openEditNewsModal = async id => {
   document.getElementById('anTag').value         = n.tag        || '📢 إعلان';
   document.getElementById('anVisibility').value  = n.visibility || 'public';
   document.getElementById('anPinned').checked    = n.pinned     || false;
+  const targetRoles = n.targetRoles || [];
+  document.querySelectorAll('.an-role-check').forEach(cb => cb.checked = targetRoles.includes(cb.value));
+  anToggleRolesBox();
   document.getElementById('adminNewsModal').classList.add('show');
 };
 
@@ -1596,12 +1611,16 @@ window.submitAdminNews = async () => {
   const tag        = document.getElementById('anTag').value;
   const visibility = document.getElementById('anVisibility').value;
   const pinned     = document.getElementById('anPinned').checked;
+  // فاضي = يوصل لكل الأدوار (زي السلوك الافتراضي القديم قبل الميزة دي)
+  const targetRoles = visibility === 'members'
+    ? [...document.querySelectorAll('.an-role-check:checked')].map(cb => cb.value)
+    : [];
   if (!title) { showToast('أدخلي عنوان الخبر','err'); return; }
   if (_editingNewsId) {
-    await updateDoc(doc(db,'news',_editingNewsId), {title,body,tag,visibility,pinned});
+    await updateDoc(doc(db,'news',_editingNewsId), {title,body,tag,visibility,pinned,targetRoles});
     showToast('✅ تم تحديث الخبر');
   } else {
-    await addDoc(collection(db,'news'), {title,body,tag,visibility,pinned, createdAt: serverTimestamp()});
+    await addDoc(collection(db,'news'), {title,body,tag,visibility,pinned,targetRoles, createdAt: serverTimestamp()});
     showToast('✅ تم نشر الخبر');
   }
   document.getElementById('adminNewsModal').classList.remove('show');
@@ -2100,25 +2119,31 @@ window.closeBulkAttModal = () => {
 function baBtnHtml(sid, status) {
   const presentActive = status === 'present';
   const absentActive  = status === 'absent';
+  const excusedActive = status === 'excused';
   return `
     <button type="button" onclick="baSetStatus('${sid}','present')"
       style="font-size:12px;padding:5px 10px;border-radius:6px;cursor:pointer;font-family:inherit;border:1px solid ${presentActive ? '#1e8449' : 'var(--border)'};background:${presentActive ? 'rgba(39,174,96,0.15)' : 'var(--beige2)'};color:${presentActive ? '#1e8449' : 'var(--text-mid)'}">✔ حاضرة</button>
     <button type="button" onclick="baSetStatus('${sid}','absent')"
-      style="font-size:12px;padding:5px 10px;border-radius:6px;cursor:pointer;font-family:inherit;border:1px solid ${absentActive ? '#c0392b' : 'var(--border)'};background:${absentActive ? 'rgba(192,57,43,0.12)' : 'var(--beige2)'};color:${absentActive ? '#c0392b' : 'var(--text-mid)'}">✖ غائبة</button>`;
+      style="font-size:12px;padding:5px 10px;border-radius:6px;cursor:pointer;font-family:inherit;border:1px solid ${absentActive ? '#c0392b' : 'var(--border)'};background:${absentActive ? 'rgba(192,57,43,0.12)' : 'var(--beige2)'};color:${absentActive ? '#c0392b' : 'var(--text-mid)'}">✖ غائبة</button>
+    <button type="button" onclick="baSetStatus('${sid}','excused')"
+      style="font-size:12px;padding:5px 10px;border-radius:6px;cursor:pointer;font-family:inherit;border:1px solid ${excusedActive ? '#c9a227' : 'var(--border)'};background:${excusedActive ? 'rgba(201,162,39,0.15)' : 'var(--beige2)'};color:${excusedActive ? '#a3801d' : 'var(--text-mid)'}">⭕ معتذرة</button>`;
 }
 
 function baSubjBtnsHtml(status) {
   const presentActive = status === 'present';
   const absentActive  = status === 'absent';
+  const excusedActive = status === 'excused';
   return `
     <button type="button" onclick="baToggleSubjStatus(this,'present')"
       style="font-size:11px;padding:3px 8px;border-radius:5px;cursor:pointer;font-family:inherit;border:1px solid ${presentActive ? '#1e8449' : 'var(--border)'};background:${presentActive ? 'rgba(39,174,96,0.15)' : 'var(--beige2)'};color:${presentActive ? '#1e8449' : 'var(--text-mid)'}">✔</button>
     <button type="button" onclick="baToggleSubjStatus(this,'absent')"
-      style="font-size:11px;padding:3px 8px;border-radius:5px;cursor:pointer;font-family:inherit;border:1px solid ${absentActive ? '#c0392b' : 'var(--border)'};background:${absentActive ? 'rgba(192,57,43,0.12)' : 'var(--beige2)'};color:${absentActive ? '#c0392b' : 'var(--text-mid)'}">✖</button>`;
+      style="font-size:11px;padding:3px 8px;border-radius:5px;cursor:pointer;font-family:inherit;border:1px solid ${absentActive ? '#c0392b' : 'var(--border)'};background:${absentActive ? 'rgba(192,57,43,0.12)' : 'var(--beige2)'};color:${absentActive ? '#c0392b' : 'var(--text-mid)'}">✖</button>
+    <button type="button" onclick="baToggleSubjStatus(this,'excused')"
+      style="font-size:11px;padding:3px 8px;border-radius:5px;cursor:pointer;font-family:inherit;border:1px solid ${excusedActive ? '#c9a227' : 'var(--border)'};background:${excusedActive ? 'rgba(201,162,39,0.15)' : 'var(--beige2)'};color:${excusedActive ? '#a3801d' : 'var(--text-mid)'}">⭕</button>`;
 }
 
-function baSubjRowHtml(sid, subj, status = 'present') {
-  return `<div class="ba-subj-wrap" data-id="${sid}" data-subject="${esc(subj)}" data-status="${status}" style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+function baSubjRowHtml(sid, subj, status = null) {
+  return `<div class="ba-subj-wrap" data-id="${sid}" data-subject="${esc(subj)}" data-status="${status || ''}" style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
     <span style="font-size:11px;color:var(--text-mid);min-width:78px;flex-shrink:0">${esc(subj)}</span>
     <div class="ba-subj-btns" style="display:flex;gap:4px">${baSubjBtnsHtml(status)}</div>
   </div>`;
@@ -2127,8 +2152,9 @@ function baSubjRowHtml(sid, subj, status = 'present') {
 window.baToggleSubjStatus = (btnEl, status) => {
   const wrap = btnEl.closest('.ba-subj-wrap');
   if (!wrap) return;
-  wrap.dataset.status = status;
-  wrap.querySelector('.ba-subj-btns').innerHTML = baSubjBtnsHtml(status);
+  const newStatus = wrap.dataset.status === status ? null : status;
+  wrap.dataset.status = newStatus || '';
+  wrap.querySelector('.ba-subj-btns').innerHTML = baSubjBtnsHtml(newStatus);
 };
 
 window.renderBAStudents = renderBAStudents;
@@ -2143,8 +2169,8 @@ function renderBAStudents() {
       <input type="checkbox" class="ba-check" data-id="${s.id}" data-name="${esc(s.name||'')}" checked style="width:16px;height:16px;cursor:pointer;margin-top:${allMode ? '2px' : '0'}"/>
       <span style="flex:1;font-size:13px;font-weight:600">${esc(s.name||'—')}</span>
       ${allMode
-        ? `<div style="display:flex;flex-direction:column;gap:2px">${baSubjectsForCurrentDay().map(subj => baSubjRowHtml(s.id, subj, 'present')).join('')}</div>`
-        : `<div class="ba-status-wrap" data-id="${s.id}" data-status="present" style="display:flex;gap:6px">${baBtnHtml(s.id, 'present')}</div>`
+        ? `<div style="display:flex;flex-direction:column;gap:2px">${baSubjectsForCurrentDay().map(subj => baSubjRowHtml(s.id, subj, null)).join('')}</div>`
+        : `<div class="ba-status-wrap" data-id="${s.id}" data-status="" style="display:flex;gap:6px">${baBtnHtml(s.id, null)}</div>`
       }
     </div>
   `).join('');
@@ -2156,24 +2182,38 @@ window.baClearAll  = () => document.querySelectorAll('.ba-check').forEach(cb => 
 window.baSetStatus = (sid, status) => {
   const wrap = document.querySelector(`.ba-status-wrap[data-id="${sid}"]`);
   if (!wrap) return;
-  wrap.dataset.status = status;
-  wrap.innerHTML = baBtnHtml(sid, status);
+  const newStatus = wrap.dataset.status === status ? null : status;
+  wrap.dataset.status = newStatus || '';
+  wrap.innerHTML = baBtnHtml(sid, newStatus);
 };
 
 window.baMarkAllPresent = () => {
-  document.querySelectorAll('.ba-status-wrap').forEach(el => baSetStatus(el.dataset.id, 'present'));
+  document.querySelectorAll('.ba-status-wrap').forEach(el => baSetStatusForce(el.dataset.id, 'present'));
   document.querySelectorAll('.ba-subj-wrap').forEach(el => {
     el.dataset.status = 'present';
     el.querySelector('.ba-subj-btns').innerHTML = baSubjBtnsHtml('present');
   });
 };
 window.baMarkAllAbsent = () => {
-  document.querySelectorAll('.ba-status-wrap').forEach(el => baSetStatus(el.dataset.id, 'absent'));
+  document.querySelectorAll('.ba-status-wrap').forEach(el => baSetStatusForce(el.dataset.id, 'absent'));
   document.querySelectorAll('.ba-subj-wrap').forEach(el => {
     el.dataset.status = 'absent';
     el.querySelector('.ba-subj-btns').innerHTML = baSubjBtnsHtml('absent');
   });
 };
+window.baMarkAllExcused = () => {
+  document.querySelectorAll('.ba-status-wrap').forEach(el => baSetStatusForce(el.dataset.id, 'excused'));
+  document.querySelectorAll('.ba-subj-wrap').forEach(el => {
+    el.dataset.status = 'excused';
+    el.querySelector('.ba-subj-btns').innerHTML = baSubjBtnsHtml('excused');
+  });
+};
+function baSetStatusForce(sid, status) {
+  const wrap = document.querySelector(`.ba-status-wrap[data-id="${sid}"]`);
+  if (!wrap) return;
+  wrap.dataset.status = status;
+  wrap.innerHTML = baBtnHtml(sid, status);
+}
 
 window.saveBulkAttendance = async () => {
   const day     = document.getElementById('baDay').value;
@@ -2193,16 +2233,29 @@ window.saveBulkAttendance = async () => {
   if (btn) { btn.disabled = true; btn.textContent = 'جارٍ الحفظ...'; }
 
   try {
-    await Promise.all(checked.map(cb => {
+    let skippedCount = 0;
+    const toSave = checked.filter(cb => {
+      const sid = cb.dataset.id;
+      if (allMode) {
+        const anyStatus = [...document.querySelectorAll(`.ba-subj-wrap[data-id="${sid}"]`)].some(w => w.dataset.status);
+        if (!anyStatus) { skippedCount++; return false; }
+        return true;
+      }
+      const status = document.querySelector(`.ba-status-wrap[data-id="${sid}"]`)?.dataset.status;
+      if (!status) { skippedCount++; return false; }
+      return true;
+    });
+
+    await Promise.all(toSave.map(cb => {
       const sid = cb.dataset.id;
       let subjectsMap;
       if (allMode) {
         subjectsMap = {};
         document.querySelectorAll(`.ba-subj-wrap[data-id="${sid}"]`).forEach(w => {
-          subjectsMap[w.dataset.subject] = w.dataset.status;
+          if (w.dataset.status) subjectsMap[w.dataset.subject] = w.dataset.status;
         });
       } else {
-        const status = document.querySelector(`.ba-status-wrap[data-id="${sid}"]`)?.dataset.status || 'present';
+        const status = document.querySelector(`.ba-status-wrap[data-id="${sid}"]`)?.dataset.status;
         subjectsMap = { [subject]: status };
       }
       return addDoc(collection(db, 'students', sid, 'sessions'), {
@@ -2211,7 +2264,8 @@ window.saveBulkAttendance = async () => {
         createdAt: Date.now(),
       });
     }));
-    showToast(`✅ تم تسجيل الحضور لـ ${checked.length} طالبة`);
+    const skipMsg = skippedCount ? ` (تم تجاهل ${skippedCount} بدون تحديد حالة)` : '';
+    showToast(`✅ تم تسجيل الحضور لـ ${toSave.length} طالبة${skipMsg}`);
     closeBulkAttModal();
   } catch(e) {
     showToast('خطأ: ' + e.message);
@@ -2304,28 +2358,62 @@ window.openPasteAttModal = () => {
   document.getElementById('paDate').value = new Date().toISOString().slice(0, 10);
   document.getElementById('paMessage').value = '';
   document.getElementById('paPreviewSection').style.display = 'none';
-  const subjList = document.getElementById('paSubjectsList');
-  subjList.innerHTML = '';
-  paAddSubjectRow(); paAddSubjectRow(); paAddSubjectRow(); // 3 صفوف افتراضية
   window._paParsed = null;
+  window._paExtraSubjects = [];
+  document.getElementById('paExtraSubjectSelect').innerHTML =
+    `<option value="">— اختاري مادة تضيفيها يدويًا —</option>` +
+    _baAllSubjects.map(s => `<option>${s}</option>`).join('');
+  paRenderExtraSubjects();
+  window.paUpdateDayInfo();
 };
 
-window.paAddSubjectRow = () => {
-  const container = document.getElementById('paSubjectsList');
-  const div = document.createElement('div');
-  div.style.cssText = 'display:flex;gap:6px;align-items:center;margin-bottom:6px';
-  div.innerHTML = `
-    <select class="pa-subject-select" style="flex:1;border:1px solid var(--border);border-radius:6px;padding:6px 8px;font-family:inherit;font-size:12px">
-      <option value="">— اختاري مادة —</option>
-      ${_baAllSubjects.map(s => `<option>${s}</option>`).join('')}
-    </select>
-    <button type="button" onclick="this.parentElement.remove()" style="background:none;border:none;color:#c0392b;cursor:pointer;font-size:15px;padding:2px 8px">✕</button>
-  `;
-  container.appendChild(div);
+// بتحسب اسم اليوم ومواده من BA_DAY_SUBJECTS حسب التاريخ المختار، وتعرضهم كمربعات اختيار فردية (كل مادة تتحدد لوحدها)
+window.paUpdateDayInfo = () => {
+  const date = document.getElementById('paDate').value;
+  const info = document.getElementById('paDayInfo');
+  if (!date) { info.style.display = 'none'; info.innerHTML = ''; return; }
+  const d = new Date(date + 'T00:00:00');
+  const day = ATT_MSG_DAY_NAMES[d.getDay()];
+  const subjects = BA_DAY_SUBJECTS[day] || _baAllSubjects;
+  info.style.display = 'block';
+  if (!subjects.length) {
+    info.innerHTML = `<div style="font-size:12px;color:var(--text-mid)">📅 اليوم: <strong>${day}</strong> — لا توجد مواد مُعتمدة لهذا اليوم.</div>`;
+    return;
+  }
+  info.innerHTML = `
+    <div style="font-size:12px;color:var(--text-mid);margin-bottom:6px">📅 اليوم: <strong>${day}</strong> — اختاري مواد اليوم اللي عايزة تدخليها (مش لازم كلها). ⚠️ ترتيب اختيارك هنا لازم يطابق ترتيب الرموز في الرسالة لكل طالبة.</div>
+    <div style="display:flex;flex-wrap:wrap;gap:10px;background:var(--beige2);border:1px solid var(--border);border-radius:8px;padding:8px 10px">
+      ${subjects.map((s, i) => `
+        <label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer">
+          <input type="checkbox" class="pa-day-subject-check" value="${esc(s)}" checked/> ${esc(s)}
+        </label>`).join('')}
+    </div>`;
 };
+
+window.paAddExtraSubject = () => {
+  const sel = document.getElementById('paExtraSubjectSelect');
+  const name = sel.value;
+  if (!name) return;
+  window._paExtraSubjects = window._paExtraSubjects || [];
+  window._paExtraSubjects.push(name);
+  sel.value = '';
+  paRenderExtraSubjects();
+};
+window.paRemoveExtraSubject = (i) => {
+  window._paExtraSubjects.splice(i, 1);
+  paRenderExtraSubjects();
+};
+function paRenderExtraSubjects() {
+  const c = document.getElementById('paExtraSubjectsList');
+  if (!c) return;
+  c.innerHTML = (window._paExtraSubjects || []).map((s, i) =>
+    `<span style="display:inline-flex;align-items:center;gap:4px;background:var(--beige2);border:1px solid var(--border);border-radius:14px;padding:3px 10px;font-size:11px;margin:2px 4px 2px 0">${esc(s)} <button type="button" onclick="paRemoveExtraSubject(${i})" style="background:none;border:none;color:#c0392b;cursor:pointer;font-size:12px;padding:0;line-height:1">✕</button></span>`
+  ).join('');
+}
 
 function paGetSubjectLabels() {
-  return [...document.querySelectorAll('.pa-subject-select')].map(s => s.value).filter(Boolean);
+  const checkedSubjects = [...document.querySelectorAll('.pa-day-subject-check:checked')].map(cb => cb.value);
+  return [...checkedSubjects, ...(window._paExtraSubjects || [])];
 }
 
 function paPeriodLabel(subjNames, i) {
@@ -2570,7 +2658,6 @@ window.paToggleInclude = (idx, checked) => {
 
 window.confirmPasteAttendance = async () => {
   const date   = document.getElementById('paDate').value;
-  const period = document.getElementById('paPeriod').value;
   const segments = (window._paParsed || []).filter(s => s.include);
   if (!segments.length) { showToast('مفيش صفوف متحددة للحفظ'); return; }
 
@@ -2590,8 +2677,7 @@ window.confirmPasteAttendance = async () => {
         subjects[paPeriodLabel(subjNames, i)] = status;
       });
       return addDoc(collection(db, 'students', s.studentId, 'sessions'), {
-        day: period ? `${day} (${period})` : day,
-        date, subjects, createdAt: Date.now(),
+        day, date, subjects, createdAt: Date.now(),
       });
     }));
 
@@ -2830,35 +2916,63 @@ window.openExcelAttModal = () => {
   document.getElementById('eaFile').value = '';
   document.getElementById('eaStatus').style.display = 'none';
   document.getElementById('eaPreviewSection').style.display = 'none';
-  const subjList = document.getElementById('eaSubjectsList');
-  subjList.innerHTML = '';
-  eaAddSubjectRow(); eaAddSubjectRow(); eaAddSubjectRow();
   window._eaParsed = null;
+  window._eaExtraSubjects = [];
+  document.getElementById('eaExtraSubjectSelect').innerHTML =
+    `<option value="">— اختاري مادة تضيفيها يدويًا —</option>` +
+    _baAllSubjects.map(s => `<option>${s}</option>`).join('');
+  eaRenderExtraSubjects();
+  eaRenderDaySubjects();
 };
+
+// مربعات اختيار فردية لمواد كل يوم (بدل الكل/ولا حاجة) — كل يوم بمواده المعتمدة من الجدول
+function eaRenderDaySubjects() {
+  const c = document.getElementById('eaDaySubjectsInfo');
+  if (!c) return;
+  const days = Object.keys(BA_DAY_SUBJECTS);
+  c.innerHTML = `
+    <div style="font-size:12px;color:var(--text-mid);margin-bottom:6px">اختاري مواد كل يوم اللي عايزة تدخليها من الملف (مش لازم كلها). ⚠️ ترتيب اختيارك لازم يطابق ترتيب الرموز في خلية كل يوم بالملف.</div>
+    <div style="display:flex;flex-direction:column;gap:6px;background:var(--beige2);border:1px solid var(--border);border-radius:8px;padding:8px 10px">
+      ${days.map(day => `
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <span style="font-size:12px;font-weight:600;min-width:60px;flex-shrink:0">${esc(day)}</span>
+          ${BA_DAY_SUBJECTS[day].map(s => `
+            <label style="display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer">
+              <input type="checkbox" class="ea-day-subject-check" data-day="${esc(day)}" value="${esc(s)}" checked/> ${esc(s)}
+            </label>`).join('')}
+        </div>`).join('')}
+    </div>`;
+}
 
 window.closeExcelAttModal = () => {
   document.getElementById('excelAttModal').style.display = 'none';
 };
 
-window.eaAddSubjectRow = () => {
-  const container = document.getElementById('eaSubjectsList');
-  const div = document.createElement('div');
-  div.style.cssText = 'display:flex;gap:6px;align-items:center;margin-bottom:6px';
-  div.innerHTML = `
-    <select class="ea-subject-select" style="flex:1;border:1px solid var(--border);border-radius:6px;padding:6px 8px;font-family:inherit;font-size:12px">
-      <option value="">— اختاري مادة —</option>
-      ${_baAllSubjects.map(s => `<option>${s}</option>`).join('')}
-    </select>
-    <button type="button" onclick="this.parentElement.remove()" style="background:none;border:none;color:#c0392b;cursor:pointer;font-size:15px;padding:2px 8px">✕</button>
-  `;
-  container.appendChild(div);
+window.eaAddExtraSubject = () => {
+  const sel = document.getElementById('eaExtraSubjectSelect');
+  const name = sel.value;
+  if (!name) return;
+  window._eaExtraSubjects = window._eaExtraSubjects || [];
+  window._eaExtraSubjects.push(name);
+  sel.value = '';
+  eaRenderExtraSubjects();
 };
-
-function eaGetSubjectLabels() {
-  return [...document.querySelectorAll('.ea-subject-select')].map(s => s.value).filter(Boolean);
+window.eaRemoveExtraSubject = (i) => {
+  window._eaExtraSubjects.splice(i, 1);
+  eaRenderExtraSubjects();
+};
+function eaRenderExtraSubjects() {
+  const c = document.getElementById('eaExtraSubjectsList');
+  if (!c) return;
+  c.innerHTML = (window._eaExtraSubjects || []).map((s, i) =>
+    `<span style="display:inline-flex;align-items:center;gap:4px;background:var(--beige2);border:1px solid var(--border);border-radius:14px;padding:3px 10px;font-size:11px;margin:2px 4px 2px 0">${esc(s)} <button type="button" onclick="eaRemoveExtraSubject(${i})" style="background:none;border:none;color:#c0392b;cursor:pointer;font-size:12px;padding:0;line-height:1">✕</button></span>`
+  ).join('');
 }
 
-function eaPeriodLabel(subjNames, i) {
+// بتاخد اسم المادة المناسب لليوم ده من المربعات المختارة فرديًا + أي مواد إضافية اتضافت يدويًا
+function eaPeriodLabel(day, i) {
+  const base = [...document.querySelectorAll(`.ea-day-subject-check[data-day="${CSS.escape(day)}"]:checked`)].map(cb => cb.value);
+  const subjNames = [...base, ...(window._eaExtraSubjects || [])];
   return subjNames[i] || ['الحصة الأولى', 'الحصة الثانية', 'الحصة الثالثة', 'الحصة الرابعة', 'الحصة الخامسة'][i] || `الحصة ${i + 1}`;
 }
 
@@ -2866,7 +2980,6 @@ window.parseAttendanceExcelUI = async () => {
   const fileInput   = document.getElementById('eaFile');
   const file        = fileInput.files[0];
   const weekStart   = document.getElementById('eaDate').value; // تاريخ يوم الأحد
-  const sheetFilter = document.getElementById('eaPeriod').value;
 
   if (!file) { showToast('اختاري ملف أولاً'); return; }
   if (!weekStart) { showToast('حددي تاريخ يوم الأحد لهذا الأسبوع'); return; }
@@ -2880,12 +2993,7 @@ window.parseAttendanceExcelUI = async () => {
     const buffer = await file.arrayBuffer();
     const wb = XLSXmod.read(buffer, { type: 'array' });
 
-    let sheetNames = wb.SheetNames;
-    if (sheetFilter) {
-      const keyword = sheetFilter.includes('صباح') ? 'صباح' : 'مساء';
-      const filtered = wb.SheetNames.filter(n => n.includes(keyword));
-      if (filtered.length) sheetNames = filtered;
-    }
+    const sheetNames = wb.SheetNames;
 
     const students = allStudents.filter(s => s.name && s.name !== 'طالبة جديدة' && !s.archived);
     const fullNameMap = new Map();
@@ -2974,11 +3082,10 @@ function renderEAPreview(rows) {
     grouped[key].entries.push(r);
   });
 
-  const subjNames = eaGetSubjectLabels();
   document.getElementById('eaRowsList').innerHTML = Object.values(grouped).map(g => {
     const needsSelect = g.matchType !== 'exact';
     const daysHtml = g.entries.map(e => {
-      const marksHtml = e.periods.map((p, pi) => `${esc(eaPeriodLabel(subjNames, pi))}:${p === 'present' ? '✔' : p === 'absent' ? '✖' : '⭕'}`).join(' ');
+      const marksHtml = e.periods.map((p, pi) => `${esc(eaPeriodLabel(e.day, pi))}:${p === 'present' ? '✔' : p === 'absent' ? '✖' : '⭕'}`).join(' ');
       return `<span style="display:inline-block;margin:2px 10px 2px 0;${e.suspicious ? 'color:#c9852b;font-weight:700' : ''}">${esc(e.day)}${e.suspicious ? ' ⚠️' : ''}: ${marksHtml || '—'}${e.note ? ' 📝' + esc(e.note) : ''}</span>`;
     }).join('');
     return `<div style="padding:7px 10px;border-bottom:1px solid var(--border);font-size:11.5px;${needsSelect ? 'background:rgba(201,162,39,0.08)' : ''}">
@@ -3011,10 +3118,9 @@ window.confirmExcelAttendance = async () => {
   if (btn) { btn.disabled = true; btn.textContent = 'جارٍ الحفظ...'; }
 
   try {
-    const subjNames = eaGetSubjectLabels();
     await Promise.all(rows.map(r => {
       const subjects = {};
-      r.periods.forEach((status, i) => { subjects[eaPeriodLabel(subjNames, i)] = status; });
+      r.periods.forEach((status, i) => { subjects[eaPeriodLabel(r.day, i)] = status; });
       return addDoc(collection(db, 'students', r.studentId, 'sessions'), {
         day: `${r.day} (${r.sheet})`,
         date: r.date, subjects, createdAt: Date.now(),
