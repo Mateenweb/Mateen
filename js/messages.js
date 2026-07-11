@@ -1025,7 +1025,7 @@ window.toggleRecording = async () => {
 // ══════════════════════════════════════════════════════════════
 //  رسالة جماعية — للطاقم الإداري بس (معلمة/مشرفة/إدارة/دعم فني)
 // ══════════════════════════════════════════════════════════════
-const BROADCAST_ROLES = ['teacher', 'supervisor', 'admin', 'support'];
+const BROADCAST_ROLES = ['teacher', 'supervisor', 'admin', 'support', 'mateen', 'student'];
 let broadcastSelected   = new Set();
 let broadcastAudioUrl   = null;
 let bcMediaRecorder     = null;
@@ -1050,7 +1050,7 @@ window.closeBroadcastModal = () => {
 
 function renderBroadcastRecipients() {
   const el = document.getElementById('broadcastRecipients');
-  // نفس الطاقم الإداري بس (مش الطالبات) — زي ما طلبت
+  // كل المستخدمين المسموح تراسلهم (طاقم + طالبات)
   const staff = allUsers.filter(u => BROADCAST_ROLES.includes(u.role));
 
   if (!staff.length) {
@@ -1060,7 +1060,7 @@ function renderBroadcastRecipients() {
 
   const groups = {};
   staff.forEach(u => { (groups[u.role] ||= []).push(u); });
-  const roleOrder = ['admin', 'support', 'supervisor', 'teacher'];
+  const roleOrder = ['admin', 'support', 'supervisor', 'teacher', 'mateen', 'student'];
 
   el.innerHTML = roleOrder.filter(r => groups[r]).map(r => `
     <div style="font-size:11px;font-weight:700;color:var(--text-mid);margin:6px 0 4px">${ROLE_LABELS[r] || r}</div>
