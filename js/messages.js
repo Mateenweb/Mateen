@@ -131,6 +131,12 @@ onAuthStateChanged(auth, async user => {
       if (viewOnceBtn) viewOnceBtn.style.display = 'none';
     }
   }
+
+  // زرار "رسالة جماعية" — للطاقم الإداري بس (معلمة/مشرفة/إدارة/دعم فني)
+  const broadcastBtn = document.getElementById('broadcastBtn');
+  if (broadcastBtn) {
+    broadcastBtn.style.display = ['teacher','supervisor','admin','support'].includes(data.role) ? 'flex' : 'none';
+  }
   if (convUnsub) { convUnsub(); convUnsub = null; }
   if (msgUnsub)  { msgUnsub();  msgUnsub  = null; }
   activeConvId = null;
@@ -166,6 +172,8 @@ function activateViewOnlyUi() {
 
   const composeBtn = document.querySelector('.compose-btn');
   if (composeBtn) composeBtn.style.display = 'none';
+  const broadcastBtn = document.getElementById('broadcastBtn');
+  if (broadcastBtn) broadcastBtn.style.display = 'none';
 }
 
 window.doLogout = () => signOut(auth).then(() => window.location.href = '../html/login.html');
@@ -1012,5 +1020,190 @@ window.toggleRecording = async () => {
   } catch(e) {
     alert('لم يتم السماح بالوصول للميكروفون');
   }
+};
+
+// ══════════════════════════════════════════════════════════════
+//  رسالة جماعية — للطاقم الإداري بس (معلمة/مشرفة/إدارة/دعم فني)
+// ══════════════════════════════════════════════════════════════
+const BROADCAST_ROLES = ['teacher', 'supervisor', 'admin', 'support'];
+let broadcastSelected   = new Set();
+let broadcastAudioUrl   = null;
+let bcMediaRecorder     = null;
+let bcAudioChunks       = [];
+let bcRecordInterval    = null;
+let bcRecordSeconds     = 0;
+
+window.showBroadcastModal = () => {
+  if (viewOnlyMode) return;
+  broadcastSelected = new Set();
+  broadcastAudioUrl = null;
+  document.getElementById('broadcastText').value = '';
+  document.getElementById('broadcastErr').style.display = 'none';
+  document.getElementById('broadcastAudioChip').style.display = 'none';
+  renderBroadcastRecipients();
+  document.getElementById('broadcastModal').style.display = 'flex';
+};
+
+window.closeBroadcastModal = () => {
+  document.getElementById('broadcastModal').style.display = 'none';
+};
+
+function renderBroadcastRecipients() {
+  const el = document.getElementById('broadcastRecipients');
+  // نفس الطاقم الإداري بس (مش الطالبات) — زي ما طلبت
+  const staff = allUsers.filter(u => BROADCAST_ROLES.includes(u.role));
+
+  if (!staff.length) {
+    el.innerHTML = '<div style="font-size:12px;color:var(--text-mid);padding:8px">لا يوجد أعضاء طاقم آخرين</div>';
+    return;
+  }
+
+  const groups = {};
+  staff.forEach(u => { (groups[u.role] ||= []).push(u); });
+  const roleOrder = ['admin', 'support', 'supervisor', 'teacher'];
+
+  el.innerHTML = roleOrder.filter(r => groups[r]).map(r => `
+    <div style="font-size:11px;font-weight:700;color:var(--text-mid);margin:6px 0 4px">${ROLE_LABELS[r] || r}</div>
+    ${groups[r].map(u => `
+      <label style="display:flex;align-items:center;gap:8px;padding:5px 4px;cursor:pointer;font-size:13px">
+        <input type="checkbox" ${broadcastSelected.has(u.id) ? 'checked' : ''} onchange="toggleBroadcastRecipient('${u.id}')">
+        ${avatarHtml(u.name || 'مستخدم', u.role, 26)}
+        <span>${u.role === 'admin' ? 'إدارة متين' : (u.name || 'مستخدم')}</span>
+      </label>`).join('')}
+  `).join('');
+}
+
+window.toggleBroadcastRecipient = (uid) => {
+  if (broadcastSelected.has(uid)) broadcastSelected.delete(uid);
+  else broadcastSelected.add(uid);
+};
+
+window.toggleBroadcastSelectAll = () => {
+  const staff = allUsers.filter(u => BROADCAST_ROLES.includes(u.role));
+  const allSelected = staff.length > 0 && staff.every(u => broadcastSelected.has(u.id));
+  broadcastSelected = allSelected ? new Set() : new Set(staff.map(u => u.id));
+  renderBroadcastRecipients();
+};
+
+window.clearBroadcastAudio = () => {
+  broadcastAudioUrl = null;
+  document.getElementById('broadcastAudioChip').style.display = 'none';
+};
+
+window.toggleBroadcastRecording = async () => {
+  const btn = document.getElementById('broadcastRecordBtn');
+  const indicator = document.getElementById('broadcastRecordingIndicator');
+  const timerEl = document.getElementById('broadcastRecordTimer');
+
+  if (bcMediaRecorder && bcMediaRecorder.state === 'recording') {
+    bcMediaRecorder.stop();
+    btn.classList.remove('recording');
+    btn.innerHTML = '<i class="ti ti-microphone"></i>';
+    indicator.style.display = 'none';
+    clearInterval(bcRecordInterval);
+    bcRecordSeconds = 0;
+    return;
+  }
+
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    bcAudioChunks = [];
+    bcMediaRecorder = new MediaRecorder(stream);
+    bcMediaRecorder.ondataavailable = e => bcAudioChunks.push(e.data);
+    bcMediaRecorder.onstop = async () => {
+      stream.getTracks().forEach(t => t.stop());
+      if (bcAudioChunks.length === 0) return;
+      const blob = new Blob(bcAudioChunks, { type: 'audio/webm' });
+      const chip = document.getElementById('broadcastAudioChip');
+      chip.style.display = 'flex';
+      chip.innerHTML = '⏳ جارٍ رفع التسجيل...';
+      try {
+        broadcastAudioUrl = await uploadMedia(blob, 'audio');
+        chip.innerHTML = '🎙️ تم تسجيل رسالة صوتية <span onclick="clearBroadcastAudio()" style="cursor:pointer;color:#c0392b;font-weight:700;margin-right:4px">✕</span>';
+      } catch (e) {
+        chip.style.display = 'none';
+        alert('فشل رفع التسجيل الصوتي: ' + (e.message || 'خطأ غير معروف'));
+      }
+    };
+    bcMediaRecorder.start();
+    btn.classList.add('recording');
+    btn.innerHTML = '<i class="ti ti-player-stop"></i>';
+    indicator.style.display = 'flex';
+    bcRecordSeconds = 0;
+    bcRecordInterval = setInterval(() => {
+      bcRecordSeconds++;
+      const m = Math.floor(bcRecordSeconds / 60);
+      const s = bcRecordSeconds % 60;
+      timerEl.textContent = `${m}:${s.toString().padStart(2, '0')}`;
+      if (bcRecordSeconds >= 120) window.toggleBroadcastRecording();
+    }, 1000);
+  } catch (e) {
+    alert('لم يتم السماح بالوصول للميكروفون');
+  }
+};
+
+window.sendBroadcast = async () => {
+  const err = document.getElementById('broadcastErr');
+  const text = document.getElementById('broadcastText').value.trim();
+  const btn = document.getElementById('broadcastSendBtn');
+
+  if (broadcastSelected.size === 0) {
+    err.style.display = 'block'; err.textContent = 'اختاري مستلم واحد على الأقل';
+    return;
+  }
+  if (!text && !broadcastAudioUrl) {
+    err.style.display = 'block'; err.textContent = 'اكتبي رسالة أو سجّلي رسالة صوتية';
+    return;
+  }
+  err.style.display = 'none';
+  btn.disabled = true;
+  btn.innerHTML = '<i class="ti ti-loader-2" style="animation:msg-spin 0.8s linear infinite;"></i> جارٍ الإرسال...';
+
+  const senderName = currentUserData?.role === 'admin' ? 'إدارة متين' : (currentUserData?.name || '');
+  const recipients = [...broadcastSelected];
+
+  try {
+    for (const otherId of recipients) {
+      const cid = convId(currentUser.uid, otherId);
+      // تأكدي إن المحادثة موجودة (زي startConv)
+      await setDoc(doc(db, 'conversations', cid), {
+        participants: [currentUser.uid, otherId],
+        [`hiddenBy.${currentUser.uid}`]: false,
+        [`hiddenBy.${otherId}`]: false,
+      }, { merge: true });
+
+      const convSnap = await getDoc(doc(db, 'conversations', cid));
+      let currentUnread = convSnap.exists() ? (convSnap.data()?.unread?.[otherId] ?? 0) : 0;
+
+      if (text) {
+        await addDoc(collection(db, 'conversations', cid, 'messages'), {
+          text, senderId: currentUser.uid, senderName, senderRole: currentUserData?.role || '', sentAt: serverTimestamp(),
+        });
+        currentUnread++;
+      }
+      if (broadcastAudioUrl) {
+        await addDoc(collection(db, 'conversations', cid, 'messages'), {
+          type: 'audio', url: broadcastAudioUrl, text: '🎙️ رسالة صوتية',
+          senderId: currentUser.uid, senderName, senderRole: currentUserData?.role || '', sentAt: serverTimestamp(),
+        });
+        currentUnread++;
+      }
+
+      await setDoc(doc(db, 'conversations', cid), {
+        lastMsg: text || '🎙️ رسالة صوتية',
+        lastAt: serverTimestamp(),
+        lastSenderId: currentUser.uid,
+        [`unread.${otherId}`]: currentUnread,
+        [`unread.${currentUser.uid}`]: 0,
+      }, { merge: true });
+    }
+
+    closeBroadcastModal();
+  } catch (e) {
+    err.style.display = 'block'; err.textContent = 'حدث خطأ أثناء الإرسال: ' + (e.message || '');
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = '<i class="ti ti-send"></i> إرسال للكل';
 };
 
