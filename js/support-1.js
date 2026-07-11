@@ -1,12 +1,14 @@
-import { initializeApp }   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
+import { initializeApp, getApps, getApp }   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
 import { getFirestore, doc, getDoc, getDocs, collection,
-         addDoc, serverTimestamp, query, orderBy }
+         addDoc, serverTimestamp, query, orderBy, updateDoc }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 import { FIREBASE_CONFIG } from "./config.js";
+import { effectiveRole, mountTestModeSwitcher } from "./test-mode.js";
+import { applyCustomTheme, THEME_PRESETS } from "./custom-theme.js";
 
-const app  = initializeApp(FIREBASE_CONFIG);
+const app  = getApps().length ? getApp() : initializeApp(FIREBASE_CONFIG);
 const auth = getAuth(app);
 const db   = getFirestore(app);
 
@@ -22,19 +24,24 @@ const ROLE_EMOJI = {
 let allUsers = [];
 let currentFilter = 'all';
 let selectedUser  = null;
+let currentViewerEmail = '';
 
 // ── Auth Gate ──
 onAuthStateChanged(auth, async user => {
   if (!user) { window.location.href = '../html/login.html'; return; }
 
   const snap = await getDoc(doc(db, 'users', user.uid));
-  const role = snap.exists() ? snap.data().role : '';
+  const userData = snap.exists() ? snap.data() : {};
+  const role = effectiveRole(userData, user.email);
+  currentViewerEmail = (user.email || '').toLowerCase();
 
   if (role !== 'support' && role !== 'admin') {
     window.location.href = '../html/home.html'; return;
   }
+  mountTestModeSwitcher(userData, user.email);
+  applyCustomTheme(userData);
 
-  const name = snap.exists() ? snap.data().name || user.email : user.email;
+  const name = userData.name || user.email;
   const nameEl = document.getElementById('navUserName');
   if (nameEl) nameEl.textContent = name;
 
@@ -47,8 +54,10 @@ onAuthStateChanged(auth, async user => {
 // ── Load Users ──
 async function loadUsers() {
   try {
-    const snap = await getDocs(query(collection(db, 'users'), orderBy('createdAt', 'desc')));
+    const snap = await getDocs(collection(db, 'users'));
     allUsers = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    // الترتيب هنا بدل الاستعلام عشان أي حساب مالوش createdAt يفضل ظاهر
+    allUsers.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
     updateStats();
     renderUsers();
   } catch(e) {
@@ -127,7 +136,94 @@ window.openUser = function(uid) {
     ${selectedUser.subject ? `<div class="detail-row"><span class="detail-label">المادة</span><span class="detail-value">${selectedUser.subject}</span></div>` : ''}
   `;
   document.getElementById('msgText').value = '';
+
+  const themeBtn = document.getElementById('themeBtnInModal');
+  if (themeBtn) themeBtn.style.display = (currentViewerEmail === 'ra7matest@gmail.com') ? 'inline-block' : 'none';
+
   document.getElementById('userModal').classList.add('show');
+};
+
+// ── الثيم المخصص ──
+window.openThemeModalForSelected = function() {
+  if (!selectedUser) return;
+  document.getElementById('customThemeModal')?.remove();
+  const t = selectedUser.customTheme || {};
+  const modal = document.createElement('div');
+  modal.id = 'customThemeModal';
+  modal.style.cssText = `position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:100000;display:flex;align-items:center;justify-content:center;`;
+  modal.innerHTML = `
+    <div style="background:#fff;border-radius:14px;padding:22px;min-width:300px;max-width:90vw;max-height:85vh;overflow-y:auto;direction:rtl">
+      <h3 style="margin:0 0 14px;font-size:16px">🎨 ثيم مخصص لـ ${selectedUser.name || selectedUser.email}</h3>
+
+      <label style="display:block;margin-bottom:14px;font-size:13px">
+        ثيم جاهز (اختيار سريع)<br>
+        <select id="themePreset" onchange="applyPresetToModal(this.value)" style="width:100%;padding:8px;border-radius:8px;border:1px solid #ddd;margin-top:4px;font-size:13px">
+          <option value="">— اختاري ثيم أو عدّلي يدويًا تحت —</option>
+          ${THEME_PRESETS.map(p => `<option value="${p.id}">${p.name}</option>`).join('')}
+        </select>
+      </label>
+
+      <label style="display:block;margin-bottom:10px;font-size:13px">
+        اللون الغامق (أساسي)<br>
+        <input type="color" id="themeGreenDark" value="${t.greenDark || '#5c3d2e'}" style="width:100%;height:36px;border:none;cursor:pointer">
+      </label>
+      <label style="display:block;margin-bottom:10px;font-size:13px">
+        اللون الذهبي (التمييز)<br>
+        <input type="color" id="themeGold" value="${t.gold || '#c9a227'}" style="width:100%;height:36px;border:none;cursor:pointer">
+      </label>
+      <label style="display:block;margin-bottom:10px;font-size:13px">
+        لون الخلفية (البيج)<br>
+        <input type="color" id="themeBeige" value="${t.beige || '#f7efe3'}" style="width:100%;height:36px;border:none;cursor:pointer">
+      </label>
+      <label style="display:block;margin-bottom:16px;font-size:13px">
+        شكل زخرفي في الخلفية<br>
+        <select id="themePattern" style="width:100%;padding:8px;border-radius:8px;border:1px solid #ddd;margin-top:4px;font-size:13px">
+          <option value="none" ${(!t.pattern || t.pattern === 'none') ? 'selected' : ''}>بدون</option>
+          <option value="stars" ${t.pattern === 'stars' ? 'selected' : ''}>⭐ نجوم</option>
+          <option value="geometric" ${t.pattern === 'geometric' ? 'selected' : ''}>🔷 هندسي</option>
+          <option value="circles" ${t.pattern === 'circles' ? 'selected' : ''}>⚪ دوائر</option>
+        </select>
+      </label>
+
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button onclick="resetCustomTheme()" style="padding:8px 14px;font-size:13px;background:#fff0f0;color:#c0392b;border:1px solid #f5c6c6;border-radius:8px;cursor:pointer">استرجاع الافتراضي</button>
+        <button onclick="document.getElementById('customThemeModal').remove()" style="padding:8px 14px;font-size:13px;background:#f0f0f0;border:1px solid #ddd;border-radius:8px;cursor:pointer">إلغاء</button>
+        <button onclick="saveCustomTheme()" style="padding:8px 14px;font-size:13px;background:var(--green-dark,#5c3d2e);color:#fff;border:none;border-radius:8px;cursor:pointer">حفظ</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+};
+
+window.applyPresetToModal = function(presetId) {
+  const p = THEME_PRESETS.find(x => x.id === presetId);
+  if (!p) return;
+  document.getElementById('themeGreenDark').value = p.greenDark;
+  document.getElementById('themeGold').value = p.gold;
+  document.getElementById('themeBeige').value = p.beige;
+  document.getElementById('themePattern').value = p.pattern;
+};
+
+window.saveCustomTheme = async function() {
+  if (!selectedUser) return;
+  const customTheme = {
+    greenDark: document.getElementById('themeGreenDark').value,
+    gold: document.getElementById('themeGold').value,
+    beige: document.getElementById('themeBeige').value,
+    pattern: document.getElementById('themePattern').value,
+  };
+  await updateDoc(doc(db, 'users', selectedUser.id), { customTheme });
+  selectedUser.customTheme = customTheme;
+  document.getElementById('customThemeModal')?.remove();
+  alert('✅ اتحفظ الثيم — هيظهر للحساب أول ما يسجل دخول تاني');
+};
+
+window.resetCustomTheme = async function() {
+  if (!selectedUser) return;
+  await updateDoc(doc(db, 'users', selectedUser.id), { customTheme: {} });
+  selectedUser.customTheme = {};
+  document.getElementById('customThemeModal')?.remove();
+  alert('تم استرجاع الألوان الافتراضية');
 };
 
 window.closeModal = function() {
