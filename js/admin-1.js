@@ -27,22 +27,30 @@ const BA_DAY_SUBJECTS = {
   'الأربعاء': ['الفقه', 'الحديث', 'مقرأة متين'],
   'الخميس':   ['التفسير', 'العقيدة', 'مقرأة متين'],
 };
-// بتوحّد اختلافات كتابة الهمزة على الألف (الإثنين/الاثنين/الأثنين) والمسافات الزايدة،
-// عشان اسم اليوم/الشيت لو اتكتب بتهجئة مختلفة شوية يفضل يتطابق صح مع جدول المواد
+// بتوحّد اختلافات كتابة الهمزة على الألف، والتشكيل، والرموز الخفية (RTL marks/BOM)،
+// وعلامات الترقيم والمسافات الزايدة، عشان اسم اليوم لو اتكتب بأي شكل قريب يفضل يتطابق صح مع جدول المواد
 function normalizeDayKey(day) {
-  return (day || '').trim().replace(/[أإآ]/g, 'ا').replace(/\s+/g, '');
+  return (day || '')
+    .replace(/[\u200B-\u200F\uFEFF\u061C]/g, '')   // رموز خفية (RTL/LTR marks, BOM)
+    .replace(/[\u064B-\u065F\u0670]/g, '')          // كل علامات التشكيل العربية
+    .replace(/[أإآٱ]/g, 'ا')                        // توحيد أشكال الألف
+    .replace(/[ىي]/g, 'ي')                          // توحيد الياء
+    .replace(/ة/g, 'ه')                             // توحيد التاء المربوطة
+    .replace(/[\s\u00A0.:،,\-–—_]+/g, '')           // مسافات وعلامات ترقيم شائعة
+    .trim();
 }
 const BA_DAY_SUBJECTS_LOOKUP = {};
 Object.keys(BA_DAY_SUBJECTS).forEach(k => { BA_DAY_SUBJECTS_LOOKUP[normalizeDayKey(k)] = BA_DAY_SUBJECTS[k]; });
 function getDaySubjects(day) {
   return BA_DAY_SUBJECTS_LOOKUP[normalizeDayKey(day)] || BA_DAY_SUBJECTS[day] || _baAllSubjects;
 }
-// بترجع أقرب اسم يوم رسمي معروف (من ATT_MSG_DAY_NAMES) لأي تهجئة قريبة (زي "الإثنين" ← "الاثنين")،
-// عشان اسم اليوم يفضل موحّد في كل مكان (العرض، مطابقة المواد، الحفظ في قاعدة البيانات)
+// بترجع أقرب اسم يوم رسمي معروف لأي تهجئة أو صياغة قريبة (مطابقة تامة أولاً، وإلا مطابقة جزئية/احتواء)
 function canonicalDayName(day) {
   const norm = normalizeDayKey(day);
+  if (!norm) return day;
   const known = (typeof ATT_MSG_DAY_NAMES !== 'undefined' ? ATT_MSG_DAY_NAMES : Object.keys(BA_DAY_SUBJECTS));
-  const match = known.find(d => normalizeDayKey(d) === norm);
+  let match = known.find(d => normalizeDayKey(d) === norm);
+  if (!match) match = known.find(d => norm.includes(normalizeDayKey(d)) || normalizeDayKey(d).includes(norm));
   return match || day;
 }
 function baSubjectsForCurrentDay() {
@@ -3039,7 +3047,8 @@ window.parseAttendanceExcelUI = async () => {
       const dayCols = [];
       for (let c = 1; c < header.length; c++) {
         const label = String(header[c] || '').trim();
-        if (EA_DAY_OFFSETS[label] !== undefined) dayCols.push({ col: c, day: canonicalDayName(label) });
+        const canonDay = canonicalDayName(label);
+        if (EA_DAY_OFFSETS[canonDay] !== undefined) dayCols.push({ col: c, day: canonDay });
       }
       if (!dayCols.length) return; // شيت مفيهوش أعمدة أيام معروفة — تجاهليه
 
