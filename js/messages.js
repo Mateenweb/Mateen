@@ -1062,16 +1062,30 @@ function renderBroadcastRecipients() {
   staff.forEach(u => { (groups[u.role] ||= []).push(u); });
   const roleOrder = ['admin', 'support', 'supervisor', 'teacher', 'mateen', 'student'];
 
-  el.innerHTML = roleOrder.filter(r => groups[r]).map(r => `
-    <div style="font-size:11px;font-weight:700;color:var(--text-mid);margin:6px 0 4px">${ROLE_LABELS[r] || r}</div>
+  el.innerHTML = roleOrder.filter(r => groups[r]).map(r => {
+    const allInRoleSelected = groups[r].every(u => broadcastSelected.has(u.id));
+    return `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin:6px 0 4px">
+      <span style="font-size:11px;font-weight:700;color:var(--text-mid)">${ROLE_LABELS[r] || r} (${groups[r].length})</span>
+      <button onclick="toggleBroadcastRoleAll('${r}')" style="background:none;border:none;color:var(--green-dark);font-size:11px;cursor:pointer;font-family:inherit">
+        ${allInRoleSelected ? 'إلغاء تحديد الكل' : 'تحديد الكل'}
+      </button>
+    </div>
     ${groups[r].map(u => `
       <label style="display:flex;align-items:center;gap:8px;padding:5px 4px;cursor:pointer;font-size:13px">
         <input type="checkbox" ${broadcastSelected.has(u.id) ? 'checked' : ''} onchange="toggleBroadcastRecipient('${u.id}')">
         ${avatarHtml(u.name || 'مستخدم', u.role, 26)}
         <span>${u.role === 'admin' ? 'إدارة متين' : (u.name || 'مستخدم')}</span>
       </label>`).join('')}
-  `).join('');
+  `; }).join('');
 }
+
+window.toggleBroadcastRoleAll = (role) => {
+  const inRole = allUsers.filter(u => u.role === role);
+  const allSelected = inRole.length > 0 && inRole.every(u => broadcastSelected.has(u.id));
+  inRole.forEach(u => allSelected ? broadcastSelected.delete(u.id) : broadcastSelected.add(u.id));
+  renderBroadcastRecipients();
+};
 
 window.toggleBroadcastRecipient = (uid) => {
   if (broadcastSelected.has(uid)) broadcastSelected.delete(uid);
