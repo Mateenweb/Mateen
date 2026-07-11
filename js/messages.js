@@ -227,6 +227,7 @@ async function loadAllUsers() {
       allUsers.push({ id: d.id, ...ud });
     }
   });
+  allUsers.sort((a, b) => (a.name || '').localeCompare(b.name || '', 'ar'));
 }
 
 // ── Load conversations ─────────────────────────────────────────────────────

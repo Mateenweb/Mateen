@@ -175,8 +175,10 @@ function loadTeachers() {
     if (!grid) return;
     if (snap.empty) { grid.innerHTML = '<div style="color:var(--text-mid);font-size:13px;text-align:center;padding:20px;grid-column:1/-1">لا توجد معلمات مسجلات</div>'; return; }
 
-    grid.innerHTML = snap.docs.map(d => {
-      const t = d.data();
+    grid.innerHTML = snap.docs
+      .map(d => ({ id: d.id, ...d.data() }))
+      .sort((a, b) => (a.name || '').localeCompare(b.name || '', 'ar'))
+      .map(t => {
       const subjectAr = SUBJECT_AR[t.subject] || t.subject || '—';
       const page = SUBJECT_PAGE[t.subject];
       return `
@@ -192,7 +194,7 @@ function loadTeachers() {
           </div>
           <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
             ${page ? `<a href="${page}" style="color:var(--green-dark);font-size:20px;" title="صفحة المعلمة"><i class="ti ti-external-link"></i></a>` : ''}
-            <a href="messages.html?uid=${d.id}" style="color:var(--gold);font-size:20px;" title="رسائلها"><i class="ti ti-message-circle"></i></a>
+            <a href="messages.html?uid=${t.id}" style="color:var(--gold);font-size:20px;" title="رسائلها"><i class="ti ti-message-circle"></i></a>
           </div>
         </div>`;
     }).join('');
@@ -458,6 +460,7 @@ window.filterLinkList = () => {
 
 function renderLinkList(list) {
   const el = document.getElementById('linkStudentList');
+  list = [...list].sort((a, b) => (a.name || '').localeCompare(b.name || '', 'ar'));
   if (!list.length) {
     el.innerHTML = '<div style="text-align:center;color:#aaa;padding:28px;font-family:Noto Naskh Arabic,serif">لا توجد نتائج</div>';
     return;
@@ -537,7 +540,7 @@ window.rejectUser = async id => {
 // ══════════════════════════════════════
 
 let allStudents = [];
-let stuSortAlpha = false;
+let stuSortAlpha = true;
 const stuDateParts = {};
 
 const MONTHS_HIJRI = ['محرم','صفر','ربيع الأول','ربيع الثاني','جمادى الأولى','جمادى الثانية','رجب','شعبان','رمضان','شوال','ذو القعدة','ذو الحجة'];
@@ -636,7 +639,7 @@ function renderExportStudentList() {
     (fi==='all' || s.interview===fi) &&
     (fr==='all' || s.accepted===fr) &&
     (fs==='all' || s.status===fs)
-  );
+  ).sort((a, b) => (a.name || '').localeCompare(b.name || '', 'ar'));
 
   if (!students.length) {
     list.innerHTML = '<div class="stu-empty" style="padding:14px;text-align:center;color:var(--text-mid);font-size:13px">لا توجد طالبات مطابقة</div>';
@@ -670,7 +673,8 @@ window.openAttModal = () => {
 function renderAttStudentList() {
   const list = document.getElementById('attStudentList');
   if (!list) return;
-  const students = allStudents.filter(s => s.name && s.name !== 'طالبة جديدة' && !s.archived);
+  const students = allStudents.filter(s => s.name && s.name !== 'طالبة جديدة' && !s.archived)
+    .sort((a, b) => (a.name || '').localeCompare(b.name || '', 'ar'));
   if (!students.length) {
     list.innerHTML = '<div class="stu-empty" style="padding:14px;text-align:center;color:var(--text-mid);font-size:13px">لا توجد طالبات</div>';
     return;
@@ -1256,9 +1260,8 @@ function loadAllUsers() {
     collection(db, 'users'),
     snap => {
       allUsersData = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-      // الترتيب بيتم هنا (مش عن طريق orderBy في الاستعلام) عشان أي حساب
-      // مالوش حقل createdAt (زي حساب اتعمل يدويًا) يفضل ظاهر في القائمة برضو
-      allUsersData.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+      // ترتيب أبجدي افتراضي بالاسم
+      allUsersData.sort((a, b) => (a.name || '').localeCompare(b.name || '', 'ar'));
       renderAllUsers();
       updateUsersStats();
 
@@ -1707,7 +1710,8 @@ window.closeBulkGradeModal = () => {
 
 function renderBGStudents() {
   const list = document.getElementById('bgStudentsList');
-  const students = allStudents.filter(s => s.name && s.name !== 'طالبة جديدة' && !s.archived);
+  const students = allStudents.filter(s => s.name && s.name !== 'طالبة جديدة' && !s.archived)
+    .sort((a, b) => (a.name || '').localeCompare(b.name || '', 'ar'));
   list.innerHTML = students.map(s => `
     <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-bottom:1px solid var(--border)">
       <input type="checkbox" class="bg-check" data-id="${s.id}" data-name="${esc(s.name||'')}" checked style="width:16px;height:16px;cursor:pointer"/>
@@ -2160,7 +2164,8 @@ window.baToggleSubjStatus = (btnEl, status) => {
 window.renderBAStudents = renderBAStudents;
 function renderBAStudents() {
   const list = document.getElementById('baStudentsList');
-  const students = allStudents.filter(s => s.name && s.name !== 'طالبة جديدة' && !s.archived);
+  const students = allStudents.filter(s => s.name && s.name !== 'طالبة جديدة' && !s.archived)
+    .sort((a, b) => (a.name || '').localeCompare(b.name || '', 'ar'));
   const subjectVal = document.getElementById('baSubject')?.value || '';
   const allMode = subjectVal === '__ALL__';
 
