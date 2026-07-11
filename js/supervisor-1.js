@@ -618,7 +618,7 @@ function renderStudents(list) {
               : `<span>${s.hour||'—'} ${s.ampm||''}</span>`}
           </div>
           ${s.status === 'new' ? `<div class="stu-mob-row">
-            <span class="stu-mob-label">📊 الدرجة</span>
+            <span class="stu-mob-label">📊 درجة اختبار القبول في متين</span>
             ${window._userRole==='admin'
               ? `<input type="number" min="0" max="50" value="${s.placementScore??''}" placeholder="0" class="stu-mob-score" onchange="stuField('${s.id}','placementScore',this.value===''?null:Number(this.value))">`
               : `<span>${s.placementScore!=null?s.placementScore+'/50':'—'}</span>`}
@@ -671,7 +671,7 @@ function renderStudents(list) {
       : window._userRole==='admin'
         ? `<div class="placement-wrap">
              <input type="number" class="placement-input" min="0" max="50"
-               value="${s.placementScore ?? ''}" placeholder="الدرجة"
+               value="${s.placementScore ?? ''}" placeholder="درجة اختبار القبول في متين"
                onchange="stuField('${s.id}','placementScore',this.value===''?null:Number(this.value))">
              <span class="placement-unit">/ 50</span>
            </div>`
