@@ -3124,7 +3124,7 @@ function renderEAPreview(rows) {
     const daysHtml = g.entries.map(e => {
       const periodsHtml = e.periods.map((p, pi) => `
         <span style="display:inline-flex;align-items:center;gap:3px;margin-inline-end:10px;margin-bottom:3px">
-          <span style="font-size:10px;color:var(--text-mid)">${esc(eaPeriodLabel(e.day, pi))}</span>
+          <span style="font-size:10px;color:var(--text-mid)">${esc(e.periodSubjects?.[pi] || eaPeriodLabel(e.day, pi))}</span>
           <select onchange="eaEditPeriod(${e._idx}, ${pi}, this.value)" style="font-size:11px;border:1px solid var(--border);border-radius:5px;padding:1px 3px;cursor:pointer">
             <option value="present" ${p === 'present' ? 'selected' : ''}>✅ حضور</option>
             <option value="absent" ${p === 'absent' ? 'selected' : ''}>❌ غياب</option>
@@ -3137,8 +3137,11 @@ function renderEAPreview(rows) {
         <div style="display:flex;align-items:center;flex-wrap:wrap;gap:6px;padding:6px 8px;border-bottom:1px dashed var(--border);${e.suspicious ? 'background:rgba(201,133,43,0.1)' : ''}">
           <span style="font-size:11.5px;font-weight:700;min-width:64px;flex-shrink:0">${esc(e.day)}${e.suspicious ? ' ⚠️' : ''}</span>
           <div style="display:flex;flex-wrap:wrap;flex:1;align-items:center">${periodsHtml || '<span style="font-size:11px;color:var(--text-mid)">مفيش حصص</span>'}
-            <button type="button" onclick="eaAddPeriod(${e._idx})" title="إضافة مادة لهذا اليوم"
-              style="font-size:10px;background:var(--beige2);border:1px solid var(--border);border-radius:5px;padding:2px 7px;cursor:pointer;font-family:inherit;margin-inline-end:6px">+ مادة</button>
+            <select onchange="if(this.value){eaAddPeriod(${e._idx}, this.value);this.value='';}" title="إضافة مادة لهذا اليوم"
+              style="font-size:10px;background:var(--beige2);border:1px solid var(--border);border-radius:5px;padding:2px 4px;cursor:pointer;font-family:inherit;margin-inline-end:6px">
+              <option value="">+ مادة</option>
+              ${_baAllSubjects.map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join('')}
+            </select>
           </div>
           <input type="text" value="${esc(e.note || '')}" placeholder="ملاحظة..." oninput="eaEditNote(${e._idx}, this.value)"
             style="width:120px;font-size:11px;border:1px solid var(--border);border-radius:5px;padding:3px 6px;font-family:inherit">
@@ -3161,11 +3164,13 @@ window.eaEditPeriod = (idx, periodIdx, value) => {
   if (row) row.periods[periodIdx] = value;
 };
 
-// إضافة مادة (حصة) جديدة لصف معين — بتتحط افتراضيًا "حضور" وتقدري تغيريها بعدين
-window.eaAddPeriod = (idx) => {
+// إضافة مادة (حصة) جديدة لصف معين — بتتحط باسم المادة اللي اخترتيها من القايمة، وحالتها الافتراضية "حضور"
+window.eaAddPeriod = (idx, subjectName) => {
   const row = (window._eaParsed || [])[idx];
   if (!row) return;
   row.periods.push('present');
+  row.periodSubjects = row.periodSubjects || [];
+  row.periodSubjects[row.periods.length - 1] = subjectName || '';
   renderEAPreview(window._eaParsed);
 };
 
@@ -3174,6 +3179,7 @@ window.eaRemovePeriod = (idx, periodIdx) => {
   const row = (window._eaParsed || [])[idx];
   if (!row) return;
   row.periods.splice(periodIdx, 1);
+  if (row.periodSubjects) row.periodSubjects.splice(periodIdx, 1);
   renderEAPreview(window._eaParsed);
 };
 
@@ -3204,7 +3210,7 @@ window.confirmExcelAttendance = async () => {
   try {
     await Promise.all(rows.map(r => {
       const subjects = {};
-      r.periods.forEach((status, i) => { subjects[eaPeriodLabel(r.day, i)] = status; });
+      r.periods.forEach((status, i) => { subjects[r.periodSubjects?.[i] || eaPeriodLabel(r.day, i)] = status; });
       return addDoc(collection(db, 'students', r.studentId, 'sessions'), {
         day: `${r.day} (${r.sheet})`,
         date: r.date, subjects, createdAt: Date.now(),
