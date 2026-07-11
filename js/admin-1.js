@@ -1812,7 +1812,8 @@ window.importExcelGrades = async () => {
 };
 
 function buildStudentOptions(selectedId) {
-  const sorted = [...bgActiveStudents].sort((a, b) => (a.name || '').localeCompare(b.name || '', 'ar'));
+  const activeStudents = allStudents.filter(s => s.name && s.name !== 'طالبة جديدة' && !s.archived);
+  const sorted = [...activeStudents].sort((a, b) => (a.name || '').localeCompare(b.name || '', 'ar'));
   return `<option value="">— اختاري الطالبة —</option>` +
     sorted.map(s => `<option value="${s.id}" ${s.id === selectedId ? 'selected' : ''}>${esc(s.name)}</option>`).join('');
 }
