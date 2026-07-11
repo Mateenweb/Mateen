@@ -831,10 +831,10 @@ function renderStudents(list) {
 
           ${s.status === 'new' ? `<div class="stu-mob-row">
             <span class="stu-mob-label">📊 الدرجة</span>
-            <input type="number" min="0" max="100" value="${s.placementScore ?? ''}"
+            <input type="number" min="0" max="50" value="${s.placementScore ?? ''}"
               placeholder="0" class="stu-mob-score"
               onchange="stuField('${s.id}','placementScore',this.value===''?null:Number(this.value))">
-            <span style="font-size:12px;color:#999">/ 100</span>
+            <span style="font-size:12px;color:#999">/ 50</span>
           </div>` : ''}
 
           <div class="stu-mob-actions">
@@ -875,10 +875,10 @@ function renderStudents(list) {
     </div>`;
     const placementCell = s.status === 'new'
       ? `<div class="placement-wrap">
-           <input type="number" class="placement-input" min="0" max="100"
+           <input type="number" class="placement-input" min="0" max="50"
              value="${s.placementScore ?? ''}" placeholder="الدرجة"
              onchange="stuField('${s.id}','placementScore',this.value===''?null:Number(this.value))">
-           <span class="placement-unit">/ 100</span>
+           <span class="placement-unit">/ 50</span>
          </div>`
       : `<span style="color:var(--text-mid);font-size:12px">—</span>`;
     return `<tr>
