@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+<script>
+(function(){
+  try{
+    var t=JSON.parse(localStorage.getItem('mateenCustomTheme')||'null');
+    if(!t)return;
+    var r=document.documentElement.style;
+    if(t.greenDark)r.setProperty('--green-dark',t.greenDark);
+    if(t.gold)r.setProperty('--gold',t.gold);
+    if(t.beige)r.setProperty('--beige',t.beige);
+    var patterns={
+      stars:"url(\"data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23000' fill-opacity='0.045'%3E%3Cpath d='M20 15l1.5 4.5H26l-3.6 2.8 1.4 4.5-3.8-2.8-3.8 2.8 1.4-4.5L14 19.5h4.5z'/%3E%3C/g%3E%3C/svg%3E\")",
+      geometric:"url(\"data:image/svg+xml,%3Csvg width='44' height='44' viewBox='0 0 44 44' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23000' stroke-opacity='0.05'%3E%3Cpath d='M22 2l20 20-20 20L2 22z'/%3E%3C/g%3E%3C/svg%3E\")",
+      circles:"url(\"data:image/svg+xml,%3Csvg width='36' height='36' viewBox='0 0 36 36' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='18' cy='18' r='6' fill='none' stroke='%23000' stroke-opacity='0.05'/%3E%3C/svg%3E\")"
+    };
+    var bg=patterns[t.pattern]||'';
+    if(bg){
+      document.addEventListener('DOMContentLoaded',function(){
+        document.body.style.backgroundImage=bg;
+        document.body.style.backgroundRepeat='repeat';
+      });
+    }
+  }catch(e){}
+})();
+</script>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link rel="icon" type="image/x-icon" href="../favicon.ico"/>
+<title>برنامج متين العلمي — لوحة الدعم الفني</title>
+
+<link href="../libs/fonts/arabic-fonts.css" rel="stylesheet"/>
+<link rel="stylesheet" href="../css/common.css"/>
+<link href="../css/admin.css" rel="stylesheet"/>
+<link href="../css/shared.css" rel="stylesheet"/>
+<link href="../css/mobile.css" rel="stylesheet"/>
+<link href="../css/responsive-fix.css" rel="stylesheet"/>
+<link href="../css/modals.css" rel="stylesheet"/>
+<link href="../css/islamic.css" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2/dist/tabler-icons.min.css"/>
+
+<style>
+  body { background: var(--beige); color: var(--text-dark); }
+  #authGate { display:flex; align-items:center; justify-content:center; min-height:100vh; font-size:14px; color:var(--text-mid); }
+  .main-content-hidden { display:none; }
+
+  .support-topbar {
+    display:flex; align-items:center; justify-content:space-between;
+    background: var(--green-dark); color:#fff; padding:14px 20px;
+  }
+  .support-topbar h1 { font-size:16px; margin:0; }
+  .support-topbar button {
+    background:transparent; border:1px solid rgba(255,255,255,0.4); color:#fff;
+    border-radius:8px; padding:6px 14px; font-size:13px; cursor:pointer;
+  }
+
+  .support-stats { display:flex; gap:12px; padding:16px 20px; flex-wrap:wrap; }
+  .stat-card {
+    flex:1; min-width:110px; background:#fff; border:1px solid var(--border);
+    border-radius:12px; padding:14px; text-align:center;
+  }
+  .stat-card .num { font-size:22px; font-weight:800; color: var(--green-dark); }
+  .stat-card .lbl { font-size:12px; color: var(--text-mid); margin-top:4px; }
+
+  .support-controls { padding: 0 20px 12px; display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+  #searchInput {
+    flex:1; min-width:200px; padding:10px 14px; border-radius:10px; border:1px solid var(--border);
+    font-family:inherit; font-size:13px;
+  }
+  .pill {
+    padding:7px 14px; border-radius:20px; border:1px solid var(--border); background:#fff;
+    font-size:12px; cursor:pointer; color:var(--text-mid);
+  }
+  .pill.active { background: var(--green-dark); color:#fff; border-color:var(--green-dark); }
+
+  #usersGrid { padding: 0 20px 30px; display:flex; flex-direction:column; gap:8px; }
+  .user-card {
+    display:flex; align-items:center; gap:12px; background:#fff; border:1px solid var(--border);
+    border-radius:12px; padding:12px 14px; cursor:pointer;
+  }
+  .user-avatar { font-size:26px; }
+  .user-info { flex:1; min-width:0; }
+  .user-name { font-size:14px; font-weight:700; color:var(--text-dark); }
+  .user-email { font-size:12px; color:var(--text-mid); }
+  .user-meta { display:flex; gap:6px; margin-top:6px; }
+  .badge-role {
+    font-size:11px; background: var(--beige2,#ede0cc); color:var(--text-mid);
+    border-radius:6px; padding:2px 8px;
+  }
+  .badge-status-active    { background:#d8f3dc; color:#1e7b34; }
+  .badge-status-pending   { background:#fff3cd; color:#8a6d00; }
+  .badge-status-suspended { background:#fde8e8; color:#c0392b; }
+
+  #userModal {
+    display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:9999;
+    align-items:center; justify-content:center;
+  }
+  #userModal.show { display:flex; }
+  .modal-inner { background:#fff; border-radius:16px; padding:22px; width:min(420px,92vw); max-height:88vh; overflow-y:auto; }
+  #modalName { font-size:16px; font-weight:800; margin-bottom:12px; }
+  .detail-row { display:flex; justify-content:space-between; font-size:13px; padding:6px 0; border-bottom:1px solid var(--border); }
+  .detail-label { color:var(--text-mid); }
+  .detail-value { font-weight:600; }
+  #msgText {
+    width:100%; margin-top:14px; padding:10px; border-radius:10px; border:1px solid var(--border);
+    font-family:inherit; font-size:13px; min-height:70px; resize:vertical;
+  }
+  .modal-actions { display:flex; gap:8px; margin-top:12px; justify-content:flex-end; }
+  .modal-actions button {
+    padding:8px 14px; border-radius:8px; font-size:13px; cursor:pointer; border:1px solid var(--border); background:#f5f5f5;
+  }
+  #sendBtn { background: var(--green-dark); color:#fff; border:none; }
+  #themeBtnInModal { background:#f5f0ff; color:#6c3fc5; border:1px solid #ddd0f5; }
+</style>
+</head>
+<body>
+
+<div id="authGate"><i class="ti ti-loader ti-spin"></i>&nbsp; جارٍ التحقق من الحساب...</div>
+
+<div id="mainContent" class="main-content-hidden">
+  <div class="support-topbar">
+    <h1><i class="ti ti-headset"></i> لوحة الدعم الفني — <span id="navUserName"></span></h1>
+    <button onclick="doLogout()"><i class="ti ti-logout"></i> خروج</button>
+  </div>
+
+  <div class="support-stats">
+    <div class="stat-card"><div class="num" id="sTotal">0</div><div class="lbl">إجمالي الحسابات</div></div>
+    <div class="stat-card"><div class="num" id="sActive">0</div><div class="lbl">نشطة</div></div>
+    <div class="stat-card"><div class="num" id="sPending">0</div><div class="lbl">معلّقة</div></div>
+    <div class="stat-card"><div class="num" id="sSuspended">0</div><div class="lbl">موقوفة</div></div>
+  </div>
+
+  <div class="support-controls">
+    <input id="searchInput" type="text" placeholder="ابحثي بالاسم أو البريد الإلكتروني..." oninput="renderUsers()">
+    <button class="pill active" onclick="setFilter('all', this)">الكل</button>
+    <button class="pill" onclick="setFilter('active', this)">نشطة</button>
+    <button class="pill" onclick="setFilter('pending', this)">معلّقة</button>
+    <button class="pill" onclick="setFilter('mateen', this)">بنات متين</button>
+    <button class="pill" onclick="setFilter('teacher', this)">معلمات</button>
+    <button class="pill" onclick="setFilter('supervisor', this)">مشرفات</button>
+  </div>
+
+  <div id="usersGrid"></div>
+</div>
+
+<div id="userModal">
+  <div class="modal-inner">
+    <div id="modalName"></div>
+    <div id="modalDetails"></div>
+    <textarea id="msgText" placeholder="اكتبي رسالة للمستخدمة..."></textarea>
+    <div class="modal-actions">
+      <button onclick="closeModal()">إغلاق</button>
+      <button id="themeBtnInModal" onclick="openThemeModalForSelected()" style="display:none">🎨 تغيير الثيم</button>
+      <button id="sendBtn" onclick="sendMessage()"><i class="ti ti-send"></i> إرسال</button>
+    </div>
+  </div>
+</div>
+
+<script src="../js/support-1.js" type="module"></script>
+<script type="module" src="../js/notifications.js"></script>
+<script src="../js/sw-register.js"></script>
+</body>
+</html>
