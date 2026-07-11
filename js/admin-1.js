@@ -11,7 +11,7 @@ import { exportWord, exportPdf, exportAttendanceWord, exportAttendancePdf } from
 import { fullDeleteUser } from "./delete-account.js";
 import { loadSubjectsFor } from "./subjects.js";
 import { uploadToCloudinary } from "./cloud-upload.js";
-import { effectiveRole, mountTestModeSwitcher } from "./test-mode.js";
+import { effectiveRole } from "./test-mode.js";
 import { applyCustomTheme } from "./custom-theme.js";
 
 const app  = getApps().length ? getApp() : initializeApp(FIREBASE_CONFIG);
@@ -45,7 +45,6 @@ onAuthStateChanged(auth, async user => {
   if (role !== 'admin') {
     window.location.href = '../html/home.html'; return;
   }
-  mountTestModeSwitcher(userData, user.email);
   applyCustomTheme(userData);
   document.getElementById('navUserName').textContent  = user.displayName || 'الإدارة';
   document.getElementById('authGate').style.display   = 'none';
