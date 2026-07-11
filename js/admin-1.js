@@ -12,7 +12,7 @@ import { fullDeleteUser } from "./delete-account.js";
 import { loadSubjectsFor } from "./subjects.js";
 import { uploadToCloudinary } from "./cloud-upload.js";
 import { effectiveRole, mountTestModeSwitcher } from "./test-mode.js";
-import { applyCustomTheme, THEME_PRESETS } from "./custom-theme.js";
+import { applyCustomTheme } from "./custom-theme.js";
 
 const app  = getApps().length ? getApp() : initializeApp(FIREBASE_CONFIG);
 const auth = getAuth(app);
@@ -1324,17 +1324,8 @@ window.renderAllUsers = () => {
          </button>`
       : `<span style="color:var(--text-mid);font-size:12px">—</span>`;
 
-     const themeBtn = currentViewerEmail === 'ra7matest@gmail.com'
-       ? `<button title="تغيير ثيم هذا الحساب"
-           onclick="openThemeModal('${u.id}', ${JSON.stringify(u.customTheme || {}).replace(/"/g, '&quot;')})"
-           style="padding:4px 10px;font-size:12px;background:#f5f0ff;color:#6c3fc5;border:1px solid #ddd0f5;border-radius:6px;cursor:pointer;flex-shrink:0">
-           🎨
-         </button>`
-       : '';
-
      const actionBtns = `<div style="display:flex;gap:6px;align-items:center;white-space:nowrap">
        ${toggleBtn}
-       ${themeBtn}
        <button title="حذف"
          onclick="deleteUserAccount('${u.id}','${u.name ? u.name.replace(/'/g,"\\'") : ""}')" 
          style="padding:4px 12px;font-size:12px;background:#fff0f0;color:#c0392b;border:1px solid #f5c6c6;border-radius:6px;cursor:pointer;flex-shrink:0">
@@ -1430,83 +1421,6 @@ window.adminUnlinkStudent = async (userId, studentId) => {
   if (!confirm('فك الربط بين هذا الحساب وملف الطالبة؟')) return;
   await updateDoc(doc(db, 'students', studentId), { uid: '' });
   showToast('تم فك الربط');
-};
-
-window.openThemeModal = (uid, currentTheme) => {
-  document.getElementById('customThemeModal')?.remove();
-  const t = currentTheme || {};
-  const modal = document.createElement('div');
-  modal.id = 'customThemeModal';
-  modal.style.cssText = `position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:99999;display:flex;align-items:center;justify-content:center;`;
-  modal.innerHTML = `
-    <div style="background:#fff;border-radius:14px;padding:22px;min-width:300px;max-width:90vw;max-height:85vh;overflow-y:auto;direction:rtl">
-      <h3 style="margin:0 0 14px;font-size:16px">🎨 ثيم مخصص لهذا الحساب</h3>
-
-      <label style="display:block;margin-bottom:14px;font-size:13px">
-        ثيم جاهز (اختيار سريع)<br>
-        <select id="themePreset" onchange="applyPresetToModal(this.value)" style="width:100%;padding:8px;border-radius:8px;border:1px solid #ddd;margin-top:4px;font-size:13px">
-          <option value="">— اختاري ثيم أو عدّلي يدويًا تحت —</option>
-          ${THEME_PRESETS.map(p => `<option value="${p.id}">${p.name}</option>`).join('')}
-        </select>
-      </label>
-
-      <label style="display:block;margin-bottom:10px;font-size:13px">
-        اللون الغامق (أساسي)<br>
-        <input type="color" id="themeGreenDark" value="${t.greenDark || '#5c3d2e'}" style="width:100%;height:36px;border:none;cursor:pointer">
-      </label>
-      <label style="display:block;margin-bottom:10px;font-size:13px">
-        اللون الذهبي (التمييز)<br>
-        <input type="color" id="themeGold" value="${t.gold || '#c9a227'}" style="width:100%;height:36px;border:none;cursor:pointer">
-      </label>
-      <label style="display:block;margin-bottom:10px;font-size:13px">
-        لون الخلفية (البيج)<br>
-        <input type="color" id="themeBeige" value="${t.beige || '#f7efe3'}" style="width:100%;height:36px;border:none;cursor:pointer">
-      </label>
-      <label style="display:block;margin-bottom:16px;font-size:13px">
-        شكل زخرفي في الخلفية<br>
-        <select id="themePattern" style="width:100%;padding:8px;border-radius:8px;border:1px solid #ddd;margin-top:4px;font-size:13px">
-          <option value="none" ${(!t.pattern || t.pattern === 'none') ? 'selected' : ''}>بدون</option>
-          <option value="stars" ${t.pattern === 'stars' ? 'selected' : ''}>⭐ نجوم</option>
-          <option value="geometric" ${t.pattern === 'geometric' ? 'selected' : ''}>🔷 هندسي</option>
-          <option value="circles" ${t.pattern === 'circles' ? 'selected' : ''}>⚪ دوائر</option>
-        </select>
-      </label>
-
-      <div style="display:flex;gap:8px;justify-content:flex-end">
-        <button onclick="resetCustomTheme('${uid}')" style="padding:8px 14px;font-size:13px;background:#fff0f0;color:#c0392b;border:1px solid #f5c6c6;border-radius:8px;cursor:pointer">استرجاع الافتراضي</button>
-        <button onclick="document.getElementById('customThemeModal').remove()" style="padding:8px 14px;font-size:13px;background:#f0f0f0;border:1px solid #ddd;border-radius:8px;cursor:pointer">إلغاء</button>
-        <button onclick="saveCustomTheme('${uid}')" style="padding:8px 14px;font-size:13px;background:var(--green-dark,#5c3d2e);color:#fff;border:none;border-radius:8px;cursor:pointer">حفظ</button>
-      </div>
-    </div>
-  `;
-  document.body.appendChild(modal);
-};
-
-window.applyPresetToModal = (presetId) => {
-  const p = THEME_PRESETS.find(x => x.id === presetId);
-  if (!p) return;
-  document.getElementById('themeGreenDark').value = p.greenDark;
-  document.getElementById('themeGold').value = p.gold;
-  document.getElementById('themeBeige').value = p.beige;
-  document.getElementById('themePattern').value = p.pattern;
-};
-
-window.saveCustomTheme = async (uid) => {
-  const customTheme = {
-    greenDark: document.getElementById('themeGreenDark').value,
-    gold: document.getElementById('themeGold').value,
-    beige: document.getElementById('themeBeige').value,
-    pattern: document.getElementById('themePattern').value,
-  };
-  await updateDoc(doc(db, 'users', uid), { customTheme });
-  document.getElementById('customThemeModal')?.remove();
-  showToast('✅ اتحفظ الثيم — هيظهر للحساب أول ما يسجل دخول تاني');
-};
-
-window.resetCustomTheme = async (uid) => {
-  await updateDoc(doc(db, 'users', uid), { customTheme: {} });
-  document.getElementById('customThemeModal')?.remove();
-  showToast('تم استرجاع الألوان الافتراضية');
 };
 
 window.suspendUser = async id => {
