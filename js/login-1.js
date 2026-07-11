@@ -24,8 +24,12 @@ onAuthStateChanged(auth, async user => {
     const snap = await getDoc(doc(db, 'users', user.uid));
     const data = snap.exists() ? snap.data() : {};
     const status = data.status || 'active';
-    // If الحساب معلق — لا تعمل redirect (بيتم signOut تلقائي في doRegister)
+    // If الحساب معلق أو موقوف أو مرفوض — لا تعمل redirect، وسجّلي خروجها لو موقوفة/مرفوضة
     if (status === 'pending') return;
+    if (status === 'suspended' || status === 'rejected') {
+      await auth.signOut();
+      return;
+    }
     const role = data.role || 'student';
     let redirect = 'home.html';
 
