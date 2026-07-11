@@ -830,7 +830,7 @@ function renderStudents(list) {
           </div>
 
           ${s.status === 'new' ? `<div class="stu-mob-row">
-            <span class="stu-mob-label">📊 الدرجة</span>
+            <span class="stu-mob-label">📊 درجة اختبار القبول في متين</span>
             <input type="number" min="0" max="50" value="${s.placementScore ?? ''}"
               placeholder="0" class="stu-mob-score"
               onchange="stuField('${s.id}','placementScore',this.value===''?null:Number(this.value))">
@@ -876,7 +876,7 @@ function renderStudents(list) {
     const placementCell = s.status === 'new'
       ? `<div class="placement-wrap">
            <input type="number" class="placement-input" min="0" max="50"
-             value="${s.placementScore ?? ''}" placeholder="الدرجة"
+             value="${s.placementScore ?? ''}" placeholder="درجة اختبار القبول في متين"
              onchange="stuField('${s.id}','placementScore',this.value===''?null:Number(this.value))">
            <span class="placement-unit">/ 50</span>
          </div>`
