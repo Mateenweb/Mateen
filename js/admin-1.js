@@ -2129,7 +2129,7 @@ window.openBulkAttModal = () => {
   const modal = document.getElementById('bulkAttModal');
   modal.style.display = 'flex';
   const dateInput = document.getElementById('baDate');
-  if (dateInput && !dateInput.value) dateInput.value = new Date().toISOString().slice(0, 10);
+  if (dateInput && !dateInput.value) dateInput.value = todayLocalISO();
   baSyncDayFromDate();
   renderBAStudents();
 };
@@ -2387,7 +2387,7 @@ const ATT_MSG_DAY_NAMES = ['الأحد', 'الاثنين', 'الثلاثاء', '
 
 window.openPasteAttModal = () => {
   document.getElementById('pasteAttModal').style.display = 'flex';
-  document.getElementById('paDate').value = new Date().toISOString().slice(0, 10);
+  document.getElementById('paDate').value = todayLocalISO();
   document.getElementById('paMessage').value = '';
   document.getElementById('paPreviewSection').style.display = 'none';
   window._paParsed = null;
@@ -2936,10 +2936,24 @@ window.confirmResetSelected = async () => {
 // ══════════════════════════════════════════════════════════════
 const EA_DAY_OFFSETS = { 'الأحد': 0, 'الاثنين': 1, 'الإثنين': 1, 'الثلاثاء': 2, 'الأربعاء': 3, 'الخميس': 4, 'الجمعة': 5, 'السبت': 6 };
 
+// تاريخ اليوم بتوقيت الجهاز المحلي (من غير تحويل لـ UTC) — بديل آمن لـ new Date().toISOString()
+function todayLocalISO() {
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
 function eaAddDays(dateStr, days) {
   const d = new Date(dateStr + 'T00:00:00');
   d.setDate(d.getDate() + days);
-  return d.toISOString().slice(0, 10);
+  // ملحوظة: متستخدميش toISOString() هنا — بتحوّل للتوقيت العالمي (UTC)
+  // وبما إن توقيت مصر أسبق من UTC، كانت بتزوّق التاريخ يوم للخلف كل مرة تتنادى فيها
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
 }
 
 window.openExcelAttModal = () => {
