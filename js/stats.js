@@ -201,25 +201,26 @@ window.renderGradesTab = function () {
 
 // ── Tab: Subjects ────────────────────────────
 function renderSubjectsTab() {
-  const SUBJECTS = ['تفسير', 'فقه', 'عقيدة', 'حديث', 'قرآن'];
+  const SUBJECTS = ['التفسير', 'الفقه', 'العقيدة', 'الحديث', 'مقرأة متين'];
   const grid = document.getElementById('subjectsList');
 
   const subjStats = {};
-  SUBJECTS.forEach(sub => subjStats[sub] = { present: 0, absent: 0 });
+  SUBJECTS.forEach(sub => subjStats[normalizeSubjectName(sub)] = { present: 0, absent: 0 });
 
   allStudents.forEach(s => {
     s.sessions.forEach(sess => {
       Object.entries(sess.subjects || {}).forEach(([subj, val]) => {
-        if (subjStats[subj]) {
-          if (val === 'present') subjStats[subj].present++;
-          else if (val === 'absent') subjStats[subj].absent++;
+        const key = subjStats[normalizeSubjectName(subj)] ? normalizeSubjectName(subj) : null;
+        if (key) {
+          if (val === 'present') subjStats[key].present++;
+          else if (val === 'absent') subjStats[key].absent++;
         }
       });
     });
   });
 
   grid.innerHTML = SUBJECTS.map(sub => {
-    const { present, absent } = subjStats[sub];
+    const { present, absent } = subjStats[normalizeSubjectName(sub)];
     const total = present + absent;
     const pct   = total ? Math.round(present / total * 100) : null;
     return `
