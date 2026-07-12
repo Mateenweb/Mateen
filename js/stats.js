@@ -10,7 +10,7 @@ import { getAuth, onAuthStateChanged }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
 import { FIREBASE_CONFIG } from './config.js';
 import { loadSubjectsFor } from './subjects.js';
-import { exportAttendanceExcel, exportAttendanceWord, exportAttendancePdf } from './export.js';
+import { exportAttendanceExcel, exportAttendanceWord, exportAttendancePdf, exportGenericExcel, exportGenericWord, exportGenericPdf } from './export.js';
 
 const app  = getApps().length ? getApp() : initializeApp(FIREBASE_CONFIG);
 const db   = getFirestore(app);
@@ -316,20 +316,130 @@ window.switchTab = function (name) {
 // ── تصدير بيانات الحضور المعروضة في الصفحة (Excel / Word / PDF) ──
 window.toggleStatsExportMenu = function () {
   const menu = document.getElementById('statsExportMenu');
-  if (!menu) return;
-  menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+  const btn  = document.getElementById('statsExportBtn');
+  if (!menu || !btn) return;
+  const willOpen = menu.style.display === 'none' || !menu.style.display;
+  if (willOpen) {
+    // position:fixed محسوبة من موضع الزرار الفعلي، عشان القايمة متتقطعش
+    // بسبب overflow:hidden على هيدر الصفحة (اللي لازم يفضل موجود عشان الزخرفة)
+    const r = btn.getBoundingClientRect();
+    menu.style.top  = (r.bottom + 6) + 'px';
+    menu.style.left = Math.max(8, r.left) + 'px';
+    // إقفال أي submenu مفتوحة من قبل
+    document.querySelectorAll('.stats-export-sub').forEach(s => s.style.display = 'none');
+  }
+  menu.style.display = willOpen ? 'block' : 'none';
+};
+
+window.toggleStatsExportSub = function (key, ev) {
+  ev.stopPropagation();
+  document.querySelectorAll('.stats-export-sub').forEach(s => {
+    if (s.id !== 'sub_' + key) s.style.display = 'none';
+  });
+  const sub = document.getElementById('sub_' + key);
+  if (sub) sub.style.display = sub.style.display === 'block' ? 'none' : 'block';
 };
 
 document.addEventListener('click', (e) => {
   const menu = document.getElementById('statsExportMenu');
-  const btn = e.target.closest('button[onclick="toggleStatsExportMenu()"]');
-  if (menu && !btn && !menu.contains(e.target)) menu.style.display = 'none';
+  const btn  = document.getElementById('statsExportBtn');
+  if (menu && btn && !btn.contains(e.target) && !menu.contains(e.target)) {
+    menu.style.display = 'none';
+    document.querySelectorAll('.stats-export-sub').forEach(s => s.style.display = 'none');
+  }
 });
 
+// ── الحضور التفصيلي (زي ما كان) ──
 window.statsExport = async function (type) {
   document.getElementById('statsExportMenu').style.display = 'none';
   if (!allStudents.length) { alert('لا توجد بيانات للتصدير بعد'); return; }
   if (type === 'excel') await exportAttendanceExcel(allStudents);
   else if (type === 'word') await exportAttendanceWord(allStudents);
   else if (type === 'pdf') await exportAttendancePdf(allStudents);
+};
+
+// ── الدرجات ──
+function buildGradesRows() {
+  return allStudents
+    .map(s => ({ name: s.name || '—', avg: getGradeAvg(s, '') }))
+    .filter(x => x.avg !== null)
+    .sort((a, b) => b.avg - a.avg)
+    .map((x, i) => [i + 1, x.name, x.avg + '%']);
+}
+window.statsExportGrades = async function (format) {
+  document.getElementById('statsExportMenu').style.display = 'none';
+  const rows = buildGradesRows();
+  const headers = ['#', 'الطالبة', 'المتوسط'];
+  if (!rows.length) { alert('لا توجد درجات للتصدير بعد'); return; }
+  if (format === 'excel') await exportGenericExcel('الدرجات', 'الدرجات', headers, rows);
+  else if (format === 'word') await exportGenericWord('الدرجات', 'ترتيب الدرجات', headers, rows);
+  else if (format === 'pdf') await exportGenericPdf('الدرجات', 'ترتيب الدرجات', headers, rows);
+};
+
+// ── الأعلى حضورًا ──
+function buildTopAttendanceRows() {
+  return allStudents
+    .map(s => ({ name: s.name || '—', pct: getAttPct(s), excused: getAttCounts(s).excused }))
+    .filter(x => x.pct !== null)
+    .sort((a, b) => b.pct - a.pct || a.excused - b.excused)
+    .map((x, i) => [i + 1, x.name, x.pct + '%']);
+}
+window.statsExportTopAttendance = async function (format) {
+  document.getElementById('statsExportMenu').style.display = 'none';
+  const rows = buildTopAttendanceRows();
+  const headers = ['#', 'الطالبة', 'نسبة الحضور'];
+  if (!rows.length) { alert('لا توجد بيانات حضور للتصدير بعد'); return; }
+  if (format === 'excel') await exportGenericExcel('الأعلى_حضورا', 'الأعلى حضورًا', headers, rows);
+  else if (format === 'word') await exportGenericWord('الأعلى_حضورا', 'ترتيب الأعلى حضورًا', headers, rows);
+  else if (format === 'pdf') await exportGenericPdf('الأعلى_حضورا', 'ترتيب الأعلى حضورًا', headers, rows);
+};
+
+// ── الأكثر غيابًا ──
+function buildMostAbsentRows() {
+  return allStudents
+    .map(s => ({ name: s.name || '—', absent: getAttCounts(s).absent }))
+    .filter(x => x.absent > 0)
+    .sort((a, b) => b.absent - a.absent)
+    .map((x, i) => [i + 1, x.name, x.absent]);
+}
+window.statsExportMostAbsent = async function (format) {
+  document.getElementById('statsExportMenu').style.display = 'none';
+  const rows = buildMostAbsentRows();
+  const headers = ['#', 'الطالبة', 'عدد أيام الغياب'];
+  if (!rows.length) { alert('لا توجد غيابات مسجلة للتصدير'); return; }
+  if (format === 'excel') await exportGenericExcel('الأكثر_غيابا', 'الأكثر غيابًا', headers, rows);
+  else if (format === 'word') await exportGenericWord('الأكثر_غيابا', 'ترتيب الأكثر غيابًا', headers, rows);
+  else if (format === 'pdf') await exportGenericPdf('الأكثر_غيابا', 'ترتيب الأكثر غيابًا', headers, rows);
+};
+
+// ── إحصائيات المواد ──
+function buildSubjectsRows() {
+  const SUBJECTS = ['التفسير', 'الفقه', 'العقيدة', 'الحديث', 'مقرأة متين'];
+  const subjStats = {};
+  SUBJECTS.forEach(sub => subjStats[normalizeSubjectName(sub)] = { present: 0, absent: 0 });
+  allStudents.forEach(s => {
+    s.sessions.forEach(sess => {
+      Object.entries(sess.subjects || {}).forEach(([subj, val]) => {
+        const key = subjStats[normalizeSubjectName(subj)] ? normalizeSubjectName(subj) : null;
+        if (key) {
+          if (val === 'present') subjStats[key].present++;
+          else if (val === 'absent') subjStats[key].absent++;
+        }
+      });
+    });
+  });
+  return SUBJECTS.map(sub => {
+    const { present, absent } = subjStats[normalizeSubjectName(sub)];
+    const total = present + absent;
+    const pct = total ? Math.round(present / total * 100) : null;
+    return [sub, present, absent, pct !== null ? pct + '%' : '—'];
+  });
+}
+window.statsExportSubjects = async function (format) {
+  document.getElementById('statsExportMenu').style.display = 'none';
+  const rows = buildSubjectsRows();
+  const headers = ['المادة', 'حضور', 'غياب', 'نسبة الحضور'];
+  if (format === 'excel') await exportGenericExcel('إحصائيات_المواد', 'المواد', headers, rows);
+  else if (format === 'word') await exportGenericWord('إحصائيات_المواد', 'إحصائيات المواد', headers, rows);
+  else if (format === 'pdf') await exportGenericPdf('إحصائيات_المواد', 'إحصائيات المواد', headers, rows);
 };
