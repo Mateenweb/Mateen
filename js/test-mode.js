@@ -11,20 +11,20 @@ const TEST_MODE_EMAILS = [
   'ra7matest@gmail.com',
 ];
 
-const TEST_MODE_ROLES = ['admin', 'teacher', 'supervisor', 'student'];
+const TEST_MODE_ROLES = ['admin', 'teacher', 'supervisor', 'mateen'];
 
 const ROLE_HOME = {
   admin:      '../html/admin.html',
   teacher:    '../html/teacher-tafseer.html',
   supervisor: '../html/supervisor.html',
-  student:    '../html/student-general.html'
+  mateen:     '../html/home.html'
 };
 
 const ROLE_LABELS = {
   admin:      '👑 أدمن',
   teacher:    '📗 معلمة',
   supervisor: '🕊️ مشرفة',
-  student:    '🎓 طالبة'
+  mateen:     '🧕 بنت متين'
 };
 
 function isTestAccount(email) {
