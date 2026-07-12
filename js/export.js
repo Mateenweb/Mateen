@@ -539,7 +539,9 @@ export async function exportGenericExcel(fileLabel, sheetName, headers, rows) {
     return obj;
   });
   const wb = utils.book_new();
+  wb.Workbook = { Views: [{ RTL: true }] };
   const ws = utils.json_to_sheet(jsonRows);
+  ws['!cols'] = headers.map(() => ({ wch: 22 }));
   utils.book_append_sheet(wb, ws, sheetName);
   writeFile(wb, `متين_${fileLabel}.xlsx`);
   showToast('تم التصدير Excel ✅');
@@ -585,12 +587,15 @@ export async function exportAttendanceExcel(studentsData, includeSummary=true) {
   const subjects = [...allSubjects];
 
   const wb = utils.book_new();
+  // خلي الملف كله يفتح من اليمين لليسار في Excel
+  wb.Workbook = { Views: [{ RTL: true }] };
 
   if (includeSummary) {
     const summaryRows = buildAttSummaryStats(studentsData).map(r => ({
       'الطالبة': r.name, 'حضور': r.present, 'غياب': r.absent, 'نسبة الحضور %': r.pct
     }));
     const wsSummary = utils.json_to_sheet(summaryRows);
+    wsSummary['!cols'] = [{ wch: 28 }, { wch: 10 }, { wch: 10 }, { wch: 16 }];
     utils.book_append_sheet(wb, wsSummary, 'ملخص');
   }
 
@@ -601,12 +606,17 @@ export async function exportAttendanceExcel(studentsData, includeSummary=true) {
       const row = { 'الطالبة': st.name, 'اليوم': se.day || '', 'التاريخ': se.date || '' };
       subjects.forEach(s => {
         const v = (se.subjects || {})[s];
-        row[s] = v === 'present' ? 'حضور' : v === 'absent' ? 'غياب' : '';
+        row[s] = v === 'present' ? 'حضور' : v === 'absent' ? 'غياب' : v === 'excused' ? 'عذر' : '';
       });
       detailRows.push(row);
     });
   });
   const wsDetail = utils.json_to_sheet(detailRows);
+  // عرض ثابت للأعمدة عشان النص مايتقطعش
+  wsDetail['!cols'] = [
+    { wch: 28 }, { wch: 12 }, { wch: 14 },
+    ...subjects.map(() => ({ wch: 14 })),
+  ];
   utils.book_append_sheet(wb, wsDetail, 'سجل الحضور');
 
   writeFile(wb, 'متين_حضور_غياب.xlsx');
