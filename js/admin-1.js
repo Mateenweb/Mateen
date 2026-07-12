@@ -7,7 +7,7 @@ import { getFirestore, collection, addDoc, deleteDoc, doc,
          onSnapshot, query, orderBy, where, getDoc, updateDoc, getDocs, serverTimestamp }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 import { FIREBASE_CONFIG } from "./config.js";
-import { exportWord, exportPdf, exportAttendanceWord, exportAttendancePdf } from "./export.js";
+import { exportWord, exportPdf, exportAttendanceWord, exportAttendancePdf, exportAttendanceExcel } from "./export.js";
 import { fullDeleteUser } from "./delete-account.js";
 import { loadSubjectsFor } from "./subjects.js";
 import { uploadToCloudinary } from "./cloud-upload.js";
@@ -722,9 +722,24 @@ window.attSelectAll = (checked) => {
   document.querySelectorAll('#attStudentList input[type="checkbox"]').forEach(cb => cb.checked = checked);
 };
 
+window.attQuickRange = (days) => {
+  const toEl = document.getElementById('attTo');
+  const fromEl = document.getElementById('attFrom');
+  if (days === 0) { fromEl.value = ''; toEl.value = ''; return; }
+  const today = new Date();
+  const from = new Date(today);
+  from.setDate(today.getDate() - days);
+  const fmt = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  toEl.value = fmt(today);
+  fromEl.value = fmt(from);
+};
+
 window.doAttExport = async (type) => {
   const mode = document.getElementById('attMode')?.value || 'perStudent';
   const checked = [...document.querySelectorAll('.att-check:checked')];
+  const fromDate = document.getElementById('attFrom')?.value || '';
+  const toDate = document.getElementById('attTo')?.value || '';
+  const includeSummary = document.getElementById('attIncludeSummary')?.checked ?? true;
 
   if (!checked.length) { showToast('اختاري طالبة واحدة على الأقل'); return; }
 
@@ -745,15 +760,19 @@ window.doAttExport = async (type) => {
       const sid  = cb.dataset.id;
       const name = cb.dataset.name;
       const sessSnap = await getDocs(collection(db, 'students', sid, 'sessions'));
-      const sessions = sessSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+      let sessions = sessSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+      if (fromDate) sessions = sessions.filter(se => (se.date || '') >= fromDate);
+      if (toDate)   sessions = sessions.filter(se => (se.date || '') <= toDate);
       return { name, sessions };
     }));
 
-    if (type === 'word') {
-      await exportAttendanceWord(studentsData, mode);
+    if (type === 'excel') {
+      await exportAttendanceExcel(studentsData, includeSummary);
+    } else if (type === 'word') {
+      await exportAttendanceWord(studentsData, mode, includeSummary);
     } else {
       if (!preOpenedWin) { showToast('المتصفح منع فتح نافذة الطباعة — فعّلي السماح بالنوافذ المنبثقة وحاولي تاني'); return; }
-      await exportAttendancePdf(studentsData, mode, preOpenedWin);
+      await exportAttendancePdf(studentsData, mode, preOpenedWin, includeSummary);
     }
 
     window.closeAttModal();
