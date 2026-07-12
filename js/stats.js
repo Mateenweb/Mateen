@@ -78,7 +78,7 @@ function renderSummary() {
   const avgAtt  = attPcts.length ? Math.round(attPcts.reduce((a,b) => a+b, 0) / attPcts.length) : null;
 
   // avg grades
-  const gradePcts = allStudents.map(getGradeAvg).filter(v => v !== null);
+  const gradePcts = allStudents.map(s => getGradeAvg(s)).filter(v => v !== null);
   const avgGrade  = gradePcts.length ? Math.round(gradePcts.reduce((a,b) => a+b, 0) / gradePcts.length) : null;
 
   document.getElementById('sumStudents').textContent = allStudents.length;
