@@ -250,8 +250,8 @@ function renderRankingTab() {
     .map(s => ({ s, pct: getAttPct(s), excused: getAttCounts(s).excused }))
     .filter(x => x.pct !== null)
     // الترتيب الأساسي بالنسبة، وعند التعادل اللي عندها اعتذار أقل تتقدّم
-    .sort((a, b) => b.pct - a.pct || a.excused - b.excused)
-    .slice(0, 10);
+    .sort((a, b) => b.pct - a.pct || a.excused - b.excused);
+  // (من غير حد أقصى — كل الطالبات، مش أفضل 10 بس)
 
   document.getElementById('rankAttList').innerHTML = byAtt.length
     ? byAtt.map(({ s, pct, excused }, i) => `
