@@ -102,14 +102,15 @@ function getAttPct(s) {
 }
 
 function getAttCounts(s) {
-  let present = 0, absent = 0;
+  let present = 0, absent = 0, excused = 0;
   s.sessions.forEach(sess => {
     Object.values(sess.subjects || {}).forEach(v => {
       if (v === 'present') present++;
       else if (v === 'absent') absent++;
+      else if (v === 'excused') excused++;
     });
   });
-  return { present, absent };
+  return { present, absent, excused };
 }
 
 // مطابقة مرنة لاسم المادة — بتتجاهل بادئة "ال" واختلافات الألف/التاء المربوطة/الياء
@@ -246,16 +247,18 @@ function renderSubjectsTab() {
 function renderRankingTab() {
   // Top attendance
   const byAtt = allStudents
-    .map(s => ({ s, pct: getAttPct(s) }))
+    .map(s => ({ s, pct: getAttPct(s), excused: getAttCounts(s).excused }))
     .filter(x => x.pct !== null)
-    .sort((a, b) => b.pct - a.pct)
+    // الترتيب الأساسي بالنسبة، وعند التعادل اللي عندها اعتذار أقل تتقدّم
+    .sort((a, b) => b.pct - a.pct || a.excused - b.excused)
     .slice(0, 10);
 
   document.getElementById('rankAttList').innerHTML = byAtt.length
-    ? byAtt.map(({ s, pct }, i) => `
+    ? byAtt.map(({ s, pct, excused }, i) => `
         <div class="rank-item">
           <div class="rank-num ${medalClass(i)}">${i + 1}</div>
           ${studentLink(s)}
+          ${excused > 0 ? `<span title="${excused} اعتذار" style="font-size:11px;color:#c9852b;margin-inline-end:6px">🔸 ${excused} اعتذار</span>` : ''}
           <div class="rank-val">${pct}%</div>
         </div>`).join('')
     : '<div class="empty-rank">لا توجد بيانات</div>';
