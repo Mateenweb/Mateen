@@ -10,6 +10,7 @@ import { getAuth, onAuthStateChanged }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
 import { FIREBASE_CONFIG } from './config.js';
 import { loadSubjectsFor } from './subjects.js';
+import { exportAttendanceExcel, exportAttendanceWord, exportAttendancePdf } from './export.js';
 
 const app  = getApps().length ? getApp() : initializeApp(FIREBASE_CONFIG);
 const db   = getFirestore(app);
@@ -311,3 +312,24 @@ window.switchTab = function (name) {
 
 // ── Start ─────────────────────────────────────
 // (loadAll() بيتناthis من جوه onAuthStateChanged above بعد Validation from the صلاحية)
+
+// ── تصدير بيانات الحضور المعروضة في الصفحة (Excel / Word / PDF) ──
+window.toggleStatsExportMenu = function () {
+  const menu = document.getElementById('statsExportMenu');
+  if (!menu) return;
+  menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+};
+
+document.addEventListener('click', (e) => {
+  const menu = document.getElementById('statsExportMenu');
+  const btn = e.target.closest('button[onclick="toggleStatsExportMenu()"]');
+  if (menu && !btn && !menu.contains(e.target)) menu.style.display = 'none';
+});
+
+window.statsExport = async function (type) {
+  document.getElementById('statsExportMenu').style.display = 'none';
+  if (!allStudents.length) { alert('لا توجد بيانات للتصدير بعد'); return; }
+  if (type === 'excel') await exportAttendanceExcel(allStudents);
+  else if (type === 'word') await exportAttendanceWord(allStudents);
+  else if (type === 'pdf') await exportAttendancePdf(allStudents);
+};
