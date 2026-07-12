@@ -50,19 +50,24 @@ export function mountTestModeSwitcher(userData, email) {
   const current = effectiveRole(userData, email);
   const box = document.createElement('div');
   box.id = 'testModeSwitcher';
-  box.style.cssText = `
-    position:fixed; bottom:16px; left:16px; z-index:99999;
+  // !important عشان محدش يقدر يكسر الـ fixed حتى لو حاجة تانية في الصفحة
+  // (زي القائمة الجانبية وقت ما بتتفتح) بتعمل transform على عنصر أعلى منها
+  box.setAttribute('style', `
+    position:fixed !important; bottom:16px !important; left:16px !important;
+    z-index:2147483647 !important;
     background:#1a1a1a; color:#fff; border-radius:12px; padding:10px 14px;
     box-shadow:0 4px 16px rgba(0,0,0,0.35); font-family:inherit; font-size:13px;
     display:flex; align-items:center; gap:8px; direction:rtl;
-  `;
+  `);
   box.innerHTML = `
     <span style="opacity:0.75">🧪 اختبار كـ:</span>
     <select id="testModeSelect" style="background:#2a2a2a;color:#fff;border:1px solid #444;border-radius:6px;padding:4px 8px;font-family:inherit;font-size:13px;cursor:pointer">
       ${TEST_MODE_ROLES.map(r => `<option value="${r}" ${r === current ? 'selected' : ''}>${ROLE_LABELS[r] || r}</option>`).join('')}
     </select>
   `;
-  document.body.appendChild(box);
+  // بتتلزّق مباشرة في <html> مش في <body>، عشان لو الـ body نفسه بيتعمله
+  // transform (زي وقت فتح القائمة الجانبية) الأداة تفضل ملزّقة صح في الشاشة
+  document.documentElement.appendChild(box);
 
   document.getElementById('testModeSelect').addEventListener('change', (e) => {
     const chosen = e.target.value;
