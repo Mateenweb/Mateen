@@ -150,7 +150,7 @@ function barNameLink(s) {
 function renderAttTab() {
   const list = document.getElementById('attList');
   const data = allStudents
-    .map(s => ({ s, pct: getAttPct(s) }))
+    .map(s => ({ s, pct: getAttPct(s), excused: getAttCounts(s).excused }))
     .filter(x => x.pct !== null)
     .sort((a, b) => b.pct - a.pct);
 
@@ -159,11 +159,12 @@ function renderAttTab() {
     return;
   }
 
-  list.innerHTML = data.map(({ s, pct }) => {
+  list.innerHTML = data.map(({ s, pct, excused }) => {
     const color = pct >= 75 ? 'green' : pct >= 50 ? 'blue' : 'red';
     return `
       <div class="bar-item">
         ${barNameLink(s)}
+        ${excused > 0 ? `<span title="${excused} اعتذار" style="font-size:11px;color:#c9852b;margin-inline-end:6px">🔸 ${excused}</span>` : ''}
         <div class="bar-track">
           <div class="bar-fill ${color}" style="width:${pct}%"></div>
         </div>
