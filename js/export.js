@@ -510,6 +510,67 @@ export async function exportAttendancePdf(studentsData, mode='perStudent', preOp
   showToast('تم فتح نافذة الطباعة ✅');
 }
 
+// ══════════════════════════════════════════════════
+//  تصدير عام لأي جدول بيانات بسيط (الدرجات، الترتيب، المواد)
+//  headers: أسماء الأعمدة، rows: array من arrays بنفس ترتيب الأعمدة
+// ══════════════════════════════════════════════════
+function buildGenericHtmlPage(title, headers, rows) {
+  const headCells = headers.map(h => `<th>${h}</th>`).join('');
+  const bodyRows = rows.map(r => `<tr>${r.map(c => `<td>${c ?? ''}</td>`).join('')}</tr>`).join('');
+  return `<div class="att-page">
+    ${watermarkHtml()}
+    ${attHeaderHtml()}
+    <div class="att-title">${title}</div>
+    <div class="att-subtitle">${todayH} — ${todayG}</div>
+    <table>
+      <thead><tr>${headCells}</tr></thead>
+      <tbody>${bodyRows}</tbody>
+    </table>
+  </div>`;
+}
+
+export async function exportGenericExcel(fileLabel, sheetName, headers, rows) {
+  if (!rows.length) { showToast('لا توجد بيانات للتصدير'); return; }
+  showToast('جارٍ تجهيز ملف Excel...');
+  const { utils, writeFile } = await import('https://cdn.sheetjs.com/xlsx-0.20.3/package/xlsx.mjs');
+  const jsonRows = rows.map(r => {
+    const obj = {};
+    headers.forEach((h, i) => obj[h] = r[i] ?? '');
+    return obj;
+  });
+  const wb = utils.book_new();
+  const ws = utils.json_to_sheet(jsonRows);
+  utils.book_append_sheet(wb, ws, sheetName);
+  writeFile(wb, `متين_${fileLabel}.xlsx`);
+  showToast('تم التصدير Excel ✅');
+}
+
+export async function exportGenericWord(fileLabel, title, headers, rows) {
+  if (!rows.length) { showToast('لا توجد بيانات للتصدير'); return; }
+  const html = buildAttHtmlWord(buildGenericHtmlPage(title, headers, rows));
+  const blob = new Blob(['\uFEFF' + html], {
+    type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document;charset=utf-8'
+  });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `متين_${fileLabel}.doc`;
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a);
+  showToast('تم التصدير Word ✅');
+}
+
+export async function exportGenericPdf(fileLabel, title, headers, rows, preOpenedWin = null) {
+  if (!rows.length) { showToast('لا توجد بيانات للتصدير'); return; }
+  const html = buildAttHtmlPrint(buildGenericHtmlPage(title, headers, rows));
+  const win = preOpenedWin || window.open('', '_blank');
+  if (!win) { showToast('المتصفح منع فتح نافذة الطباعة — فعّلي السماح بالنوافذ المنبثقة'); return; }
+  win.document.open();
+  win.document.write(html);
+  win.document.close();
+  win.focus();
+  setTimeout(() => { win.print(); }, 800);
+  showToast('تم فتح نافذة الطباعة ✅');
+}
 // ── تصدير Excel — شيت واحد مسطّح (بدون مفهوم "صفحات") + شيت ملخص اختياري ──
 export async function exportAttendanceExcel(studentsData, includeSummary=true) {
   if (!studentsData.length) { showToast('لا توجد بيانات للتصدير'); return; }
