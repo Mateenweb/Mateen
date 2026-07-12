@@ -299,6 +299,39 @@ function chipAtt(v) {
  * ]
  * mode: 'perStudent' = صفحة لكل طالبة | 'perWeek' = صفحة لكل أسبوع (كل الطالبات والمواد) | 'perSubject' = صفحة لكل مادة
  */
+function buildAttSummaryStats(studentsData) {
+  return studentsData.map(st => {
+    let p = 0, a = 0;
+    (st.sessions || []).forEach(se => {
+      Object.values(se.subjects || {}).forEach(v => {
+        if (v === 'present') p++; else if (v === 'absent') a++;
+      });
+    });
+    const total = p + a;
+    const pct = total ? Math.round((p / total) * 100) : 0;
+    return { name: st.name, present: p, absent: a, pct };
+  });
+}
+
+function buildAttSummaryPage(studentsData) {
+  const stats = buildAttSummaryStats(studentsData);
+  const rows = stats.map((r, i) =>
+    `<tr><td>${i + 1}</td><td class="td-name">${r.name}</td><td>${r.present}✔</td><td>${r.absent}✖</td><td>${r.pct}%</td></tr>`
+  ).join('');
+
+  return `<div class="att-page">
+    ${watermarkHtml()}
+    ${attHeaderHtml()}
+    <div class="att-title">سجل الحضور والغياب</div>
+    <div class="att-subtitle">ملخص إجمالي</div>
+    <table>
+      <thead><tr><th>#</th><th class="td-name">الطالبة</th><th>حضور</th><th>غياب</th><th>نسبة الحضور</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+    <div class="att-footer"><span>برنامج متين العلمي</span><span>◆</span><span>${stats.length} طالبة</span></div>
+  </div>`;
+}
+
 function buildAttPages(studentsData, mode) {
   // اجمع كل Subjects الموجودة
   const allSubjects = new Set();
@@ -448,9 +481,10 @@ function buildAttPages(studentsData, mode) {
   }
 }
 
-export async function exportAttendanceWord(studentsData, mode='perStudent') {
+export async function exportAttendanceWord(studentsData, mode='perStudent', includeSummary=true) {
   if (!studentsData.length) { showToast('لا توجد بيانات للتصدير'); return; }
-  const html = buildAttHtmlWord(buildAttPages(studentsData, mode));
+  const summaryHtml = includeSummary ? buildAttSummaryPage(studentsData) : '';
+  const html = buildAttHtmlWord(summaryHtml + buildAttPages(studentsData, mode));
   const blob = new Blob(['\uFEFF'+html], {
     type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document;charset=utf-8'
   });
@@ -462,9 +496,10 @@ export async function exportAttendanceWord(studentsData, mode='perStudent') {
   showToast('تم التصدير Word ✅');
 }
 
-export async function exportAttendancePdf(studentsData, mode='perStudent', preOpenedWin=null) {
+export async function exportAttendancePdf(studentsData, mode='perStudent', preOpenedWin=null, includeSummary=true) {
   if (!studentsData.length) { showToast('لا توجد بيانات للتصدير'); return; }
-  const html = buildAttHtmlPrint(buildAttPages(studentsData, mode));
+  const summaryHtml = includeSummary ? buildAttSummaryPage(studentsData) : '';
+  const html = buildAttHtmlPrint(summaryHtml + buildAttPages(studentsData, mode));
   const win = preOpenedWin || window.open('', '_blank');
   if (!win) { showToast('المتصفح منع فتح نافذة الطباعة — فعّلي السماح بالنوافذ المنبثقة'); return; }
   win.document.open();
@@ -473,4 +508,46 @@ export async function exportAttendancePdf(studentsData, mode='perStudent', preOp
   win.focus();
   setTimeout(() => { win.print(); }, 800);
   showToast('تم فتح نافذة الطباعة ✅');
+}
+
+// ── تصدير Excel — شيت واحد مسطّح (بدون مفهوم "صفحات") + شيت ملخص اختياري ──
+export async function exportAttendanceExcel(studentsData, includeSummary=true) {
+  if (!studentsData.length) { showToast('لا توجد بيانات للتصدير'); return; }
+  showToast('جارٍ تجهيز ملف Excel...');
+
+  const { utils, writeFile } = await import('https://cdn.sheetjs.com/xlsx-0.20.3/package/xlsx.mjs');
+
+  const allSubjects = new Set();
+  studentsData.forEach(st =>
+    (st.sessions || []).forEach(se => Object.keys(se.subjects || {}).forEach(k => allSubjects.add(k)))
+  );
+  const subjects = [...allSubjects];
+
+  const wb = utils.book_new();
+
+  if (includeSummary) {
+    const summaryRows = buildAttSummaryStats(studentsData).map(r => ({
+      'الطالبة': r.name, 'حضور': r.present, 'غياب': r.absent, 'نسبة الحضور %': r.pct
+    }));
+    const wsSummary = utils.json_to_sheet(summaryRows);
+    utils.book_append_sheet(wb, wsSummary, 'ملخص');
+  }
+
+  const detailRows = [];
+  studentsData.forEach(st => {
+    const sessions = [...(st.sessions || [])].sort((a, b) => (a.date || '') < (b.date || '') ? -1 : 1);
+    sessions.forEach(se => {
+      const row = { 'الطالبة': st.name, 'اليوم': se.day || '', 'التاريخ': se.date || '' };
+      subjects.forEach(s => {
+        const v = (se.subjects || {})[s];
+        row[s] = v === 'present' ? 'حضور' : v === 'absent' ? 'غياب' : '';
+      });
+      detailRows.push(row);
+    });
+  });
+  const wsDetail = utils.json_to_sheet(detailRows);
+  utils.book_append_sheet(wb, wsDetail, 'سجل الحضور');
+
+  writeFile(wb, 'متين_حضور_غياب.xlsx');
+  showToast('تم التصدير Excel ✅');
 }
