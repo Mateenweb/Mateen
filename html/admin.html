@@ -681,6 +681,21 @@
         </select>
       </div>
       <hr class="m-hr">
+      <!-- الفترة الزمنية -->
+      <div class="m-block">
+        <div class="m-label-row">الفترة الزمنية (اختياري — سيبيها فاضية لتصدير كل الفترة):</div>
+        <div style="display:flex;gap:10px;align-items:center">
+          <input type="date" id="attFrom" class="m-select" style="flex:1">
+          <span style="color:var(--text-mid);font-size:12px">إلى</span>
+          <input type="date" id="attTo" class="m-select" style="flex:1">
+        </div>
+        <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">
+          <button type="button" onclick="attQuickRange(7)" class="m-btn-select-all" style="font-size:11px">آخر أسبوع</button>
+          <button type="button" onclick="attQuickRange(30)" class="m-btn-select-all" style="font-size:11px">آخر شهر</button>
+          <button type="button" onclick="attQuickRange(0)" class="m-btn-deselect-all" style="font-size:11px">كل الفترة</button>
+        </div>
+      </div>
+      <hr class="m-hr">
       <!-- Select students -->
       <div class="m-label-row">اختاري الطالبات:</div>
       <div class="m-select-row">
@@ -690,9 +705,15 @@
       <div id="attStudentList" class="m-student-list m-student-list-lg">
         <!-- تُبنى بـ JS -->
       </div>
+      <hr class="m-hr">
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer">
+        <input type="checkbox" id="attIncludeSummary" checked/>
+        إضافة صفحة ملخص إجمالي (نسبة حضور كل طالبة) في البداية
+      </label>
     </div>
     <!-- Footer -->
     <div class="m-foot">
+      <button onclick="doAttExport('excel')" class="m-btn-word">📊 Excel</button>
       <button onclick="doAttExport('word')" class="m-btn-word">⬇️ Word</button>
       <button onclick="doAttExport('pdf')"  class="m-btn-pdf">🖨️ PDF</button>
       <button onclick="closeAttModal()"     class="m-btn-cancel">إلغاء</button>
