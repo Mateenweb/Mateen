@@ -89,13 +89,26 @@ async function loadStudents(subjLabel) {
     const withStudentDoc = await Promise.all(snap.docs.map(async d => {
       const s = d.data();
       let sid = null;
+      let archived = false;
       try {
         const stuQ = query(collection(db, 'students'), where('uid', '==', d.id));
         const stuSnap = await getDocs(stuQ);
-        if (!stuSnap.empty) sid = stuSnap.docs[0].id;
+        if (!stuSnap.empty) {
+          sid = stuSnap.docs[0].id;
+          archived = !!stuSnap.docs[0].data().archived;
+        }
       } catch (e) { /* تجاهل — تعرض بدون درجات */ }
-      return { uid: d.id, name: s.name || '—', email: s.email || '', sid };
+      return { uid: d.id, name: s.name || '—', email: s.email || '', sid, archived };
     }));
+
+    // استبعاد الطالبات المؤرشفات — الأرشفة بتتم في مجموعة students، مش users،
+    // فمينفعش نستبعدهم من نفس استعلام Firestore الأول، لازم فلترة إضافية هنا
+    const activeStudents = withStudentDoc.filter(s => !s.archived);
+
+    if (!activeStudents.length) {
+      listEl.innerHTML = '<div class="stu-empty"><i class="ti ti-users-group"></i><span>لا توجد طالبات ملتحقات بهذه المادة بعد.</span></div>';
+      return;
+    }
 
     const gradeIdParticipation = 'participation_' + subjLabel;
     const gradeIdFinal = 'final_' + subjLabel;
