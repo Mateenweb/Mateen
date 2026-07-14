@@ -4,6 +4,7 @@ import { getFirestore, doc, getDoc, getDocs, addDoc, setDoc,
          collection, query, where, orderBy, serverTimestamp }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 import { FIREBASE_CONFIG } from "./config.js";
+import { effectiveRole } from "./test-mode.js";
 
 // ملاحظة: منطق Sidebar (auth state, روابط Admin، الخروج) بالكامل
 // أصبح في home-1.js only — هذا الFile مسؤول عن Form التواصل only
@@ -20,7 +21,7 @@ onAuthStateChanged(auth, async (user) => {
   const ctName = document.getElementById('ctName');
   if (!ctName || !user) return;
   const snap = await getDoc(doc(db, 'users', user.uid));
-  const role = snap.exists() ? snap.data().role : '';
+  const role = snap.exists() ? effectiveRole(snap.data(), user.email) : '';
   if (role === 'admin') {
     ctName.value = 'إدارة متين';
     ctName.readOnly = true;
