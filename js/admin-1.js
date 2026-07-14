@@ -11,6 +11,7 @@ import { exportWord, exportPdf, exportAttendanceWord, exportAttendancePdf, expor
 import { fullDeleteUser } from "./delete-account.js";
 import { loadSubjectsFor } from "./subjects.js";
 import { uploadToCloudinary } from "./cloud-upload.js";
+import { effectiveRole, mountTestModeSwitcher } from "./test-mode.js";
 
 const app  = getApps().length ? getApp() : initializeApp(FIREBASE_CONFIG);
 const auth = getAuth(app);
@@ -63,12 +64,13 @@ onAuthStateChanged(auth, async user => {
   if (!user) { window.location.href = '../html/login.html'; return; }
   const snap = await getDoc(doc(db, 'users', user.uid));
   const userData = snap.exists() ? snap.data() : {};
-  const role = userData.role || 'student';
+  const role = effectiveRole(userData, user.email) || 'student';
   currentUserRole = role;
   currentViewerEmail = (user.email || '').toLowerCase();
   if (role !== 'admin') {
     window.location.href = '../html/home.html'; return;
   }
+  mountTestModeSwitcher(userData, user.email);
   document.getElementById('navUserName').textContent  = user.displayName || 'الإدارة';
   document.getElementById('authGate').style.display   = 'none';
   document.getElementById('mainContent').classList.remove('main-content-hidden');
