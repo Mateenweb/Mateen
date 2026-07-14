@@ -9,6 +9,7 @@ import { getFirestore, doc, getDoc, collection, getDocs, query, orderBy }
 import { getAuth, onAuthStateChanged }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
 import { FIREBASE_CONFIG } from './config.js';
+import { effectiveRole, mountTestModeSwitcher } from './test-mode.js';
 
 const app  = initializeApp(FIREBASE_CONFIG);
 const db   = getFirestore(app);
@@ -22,8 +23,9 @@ onAuthStateChanged(auth, async user => {
   if (!snap.exists()) { window.location.href = '../html/login.html'; return; }
 
   const userData = snap.data();
-  const role     = userData.role   || '';
+  const role     = effectiveRole(userData, user.email);
   const status   = userData.status || '';
+  mountTestModeSwitcher(userData, user.email);
 
   if (status === 'pending' || status === 'suspended') {
     window.location.href = '../html/home.html'; return;
@@ -33,7 +35,7 @@ onAuthStateChanged(auth, async user => {
   if (role === 'admin' || role === 'supervisor') {
     document.getElementById('authGate').style.display    = 'none';
     document.getElementById('mainContent').style.display = 'block';
-    initStudentView(userData);
+    initStudentView(userData, role);
     return;
   }
 
@@ -41,7 +43,7 @@ onAuthStateChanged(auth, async user => {
   if (role === 'teacher') {
     document.getElementById('authGate').style.display    = 'none';
     document.getElementById('mainContent').style.display = 'block';
-    initStudentView(userData);
+    initStudentView(userData, role);
     return;
   }
 
@@ -49,7 +51,7 @@ onAuthStateChanged(auth, async user => {
   window.location.href = '../html/home.html';
 });
 
-function initStudentView(userData = {}) {
+function initStudentView(userData = {}, effRole = userData.role || '') {
 
 // ── Get number from URL ───────────────────────
 const hashParams = new URLSearchParams(location.hash.replace(/^#/, ''));
@@ -93,7 +95,7 @@ async function loadAll() {
   ]);
 
   // Teacher (f): تشوف but/only طالباتها only
-  if (userData.role === 'teacher') {
+  if (effRole === 'teacher') {
     const teacherSubject = userData.subject || '';
     if (!snap.exists() || snap.data().teacherId !== teacherSubject) {
       showError('ليس لديكِ صلاحية لعرض هذه الصفحة');
@@ -143,4 +145,7 @@ async function loadAll() {
   renderStats(sessions, grades);
   renderSessions(sessions);
   renderGrades(grades);
+}
+
+loadAll();
 }
