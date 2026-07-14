@@ -5,6 +5,7 @@ import { getAuth, onAuthStateChanged }
 import { getFirestore, collection, query, orderBy, onSnapshot, addDoc, getDoc, doc, updateDoc, deleteDoc, arrayUnion, getDocs, setDoc }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 import { FIREBASE_CONFIG } from "./config.js";
+import { effectiveRole, mountTestModeSwitcher } from "./test-mode.js";
 import { renderAssignmentsSection, renderLectureAssignmentControls } from "./assignments-ui.js";
 import { deleteAssignmentsForMaterial } from "./assignments.js";
 window.refreshAssignmentsFor = (materialId, course) => {
@@ -521,8 +522,9 @@ onAuthStateChanged(auth, async user => {
   }
   const snap = await getDoc(doc(db, 'users', user.uid));
   const data = snap.exists() ? snap.data() : {};
-  const role = data.role || '';
+  const role = effectiveRole(data, user.email) || '';
   currentUserRole = role;
+  mountTestModeSwitcher(data, user.email);
 
   if (role === 'teacher') {
     const teacherSubject = data.subject || '';
