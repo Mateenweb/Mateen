@@ -57,6 +57,15 @@ onAuthStateChanged(auth, async user => {
   await loadStudents(subjLabel);
 });
 
+// بتطبّع الاسم الكامل عشان تقدر تقارن أسماء بينها اختلافات بسيطة (مسافات/همزات/تاء مربوطة)
+function normalizeStuName(name) {
+  return (name || '')
+    .replace(/[أإآا]/g, 'ا').replace(/[ةه]/g, 'ه').replace(/[يى]/g, 'ي')
+    .replace(/[\u064B-\u065F]/g, '')
+    .replace(/\s+/g, '')
+    .trim();
+}
+
 // بتجيب درجة موجودة بالفعل (لو اتسجلت قبل كده) عشان تتعرض في الخانة كقيمة مبدئية
 async function getExistingScore(sid, gradeId) {
   try {
@@ -86,18 +95,28 @@ async function loadStudents(subjLabel) {
     }
 
     // كل طالبة (مادة/متين) لازم نلاقي سجلها المرتبط في مجموعة students عشان نقدر نسجل درجتها
+    // الأولوية: ربط uid الرسمي (لو موجود) — وإلا مطابقة بالاسم تلقائيًا كبديل
+    const allStudentsSnap = await getDocs(collection(db, 'students'));
+    const byUid = new Map();
+    const byName = new Map();
+    allStudentsSnap.docs.forEach(sd => {
+      const sData = sd.data();
+      if (sData.archived) return;
+      if (sData.uid) byUid.set(sData.uid, sd.id);
+      const norm = normalizeStuName(sData.name || '');
+      if (norm && !byName.has(norm)) byName.set(norm, sd.id);
+    });
+
     const withStudentDoc = await Promise.all(snap.docs.map(async d => {
       const s = d.data();
-      let sid = null;
+      let sid = byUid.get(d.id) || byName.get(normalizeStuName(s.name || '')) || null;
       let archived = false;
-      try {
-        const stuQ = query(collection(db, 'students'), where('uid', '==', d.id));
-        const stuSnap = await getDocs(stuQ);
-        if (!stuSnap.empty) {
-          sid = stuSnap.docs[0].id;
-          archived = !!stuSnap.docs[0].data().archived;
-        }
-      } catch (e) { /* تجاهل — تعرض بدون درجات */ }
+      if (sid) {
+        try {
+          const sDoc = await getDoc(doc(db, 'students', sid));
+          archived = sDoc.exists() ? !!sDoc.data().archived : false;
+        } catch (e) { /* تجاهل — تعرض بدون درجات */ }
+      }
       return { uid: d.id, name: s.name || '—', email: s.email || '', sid, archived };
     }));
 
@@ -140,7 +159,7 @@ async function loadStudents(subjLabel) {
               <span style="color:var(--text-mid)">/ ${FINAL_TOTAL}</span>
             </label>
           </div>`
-        : `<div style="margin-top:6px;font-size:11px;color:#c9852b">⚠️ الحساب مش مربوط بسجل طالبة — كلّمي الإدارة عشان تربطه أول ما ترصدي درجتها</div>`;
+        : `<div style="margin-top:6px;font-size:11px;color:#c9852b">⚠️ مقدرناش نلاقي سجل طالبة بنفس الاسم بالظبط في قايمة الإدارة — تأكدي إن الاسم مطابق تمامًا، أو كلّمي الإدارة تربطه يدويًا</div>`;
 
       return `
         <div class="stu-row" style="display:flex;align-items:flex-start;gap:12px;padding:12px 16px;border:1px solid var(--border);border-radius:12px;margin-bottom:10px;background:var(--white)">
