@@ -113,7 +113,7 @@ async function loadStudents(subjLabel) {
     const gradeIdParticipation = 'participation_' + subjLabel;
     const gradeIdFinal = 'final_' + subjLabel;
 
-    const rowsHtml = await Promise.all(withStudentDoc.map(async s => {
+    const rowsHtml = await Promise.all(activeStudents.map(async s => {
       let partVal = '', finalVal = '';
       if (s.sid) {
         [partVal, finalVal] = await Promise.all([
