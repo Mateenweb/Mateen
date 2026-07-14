@@ -7,6 +7,7 @@ import { initNotifications, initAdminNotifications } from "./notifications.js";
 import { getFirestore, doc, getDoc }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 import { FIREBASE_CONFIG } from "./config.js";
+import { effectiveRole, mountTestModeSwitcher } from "./test-mode.js";
 
 const app  = getApps().length ? getApp() : initializeApp(FIREBASE_CONFIG);
 const auth = getAuth(app);
@@ -60,10 +61,12 @@ onAuthStateChanged(auth, async user => {
   initNotifications(user.uid);
 
   const snap   = await getDoc(doc(db, 'users', user.uid));
-  const role    = snap.exists() ? snap.data().role    : 'student';
+  const userData = snap.exists() ? snap.data() : {};
+  const role    = snap.exists() ? effectiveRole(userData, user.email) : 'student';
   const status  = snap.exists() ? snap.data().status  : 'pending';
   const subject = snap.exists() ? snap.data().subject || '' : '';
   const name   = user.displayName || user.email.split('@')[0];
+  mountTestModeSwitcher(userData, user.email);
 
   document.getElementById('sidebarName').textContent = 'مرحباً، ' + name;
   document.getElementById('sidebarRole').textContent =
