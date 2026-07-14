@@ -11,6 +11,7 @@ import { getAuth, onAuthStateChanged }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
 import { FIREBASE_CONFIG } from './config.js';
 import { loadSubjectsFor } from './subjects.js';
+import { effectiveRole, mountTestModeSwitcher } from './test-mode.js';
 
 // ── Firebase Init ────────────────────────────
 const app  = initializeApp(FIREBASE_CONFIG);
@@ -25,8 +26,9 @@ onAuthStateChanged(auth, async user => {
   if (!snap.exists()) { window.location.href = '../html/login.html'; return; }
 
   const userData = snap.data();
-  const role     = userData.role   || '';
+  const role     = effectiveRole(userData, user.email);
   const status   = userData.status || '';
+  mountTestModeSwitcher(userData, user.email);
 
   if (status === 'pending' || status === 'suspended') {
     window.location.href = '../html/home.html'; return;
