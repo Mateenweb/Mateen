@@ -2,6 +2,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/fireba
 import { getFirestore, collection, doc, getDoc, getDocs, addDoc, deleteDoc, query, where, orderBy, onSnapshot, serverTimestamp, updateDoc, setDoc, deleteField } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
 import { FIREBASE_CONFIG } from "./config.js";
+import { effectiveRole, mountTestModeSwitcher } from "./test-mode.js";
 import { deletePendingNotificationsForConv } from "./notifications.js";
 
 const app  = initializeApp(FIREBASE_CONFIG);
@@ -99,9 +100,11 @@ onAuthStateChanged(auth, async user => {
   if (data.status === 'pending' || data.status === 'suspended') {
     window.location.href = '../html/home.html'; return;
   }
+  data.role = effectiveRole(data, user.email);
 
   currentUser     = user;
   currentUserData = data;
+  mountTestModeSwitcher(data, user.email);
 
   const authGateEl = document.getElementById('authGate');
   const mainContentEl = document.getElementById('mainContent');
