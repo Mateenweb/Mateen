@@ -228,6 +228,7 @@ import { getAuth, onAuthStateChanged }
 import { getFirestore, doc, getDoc, collection, query, where, getDocs }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 import { FIREBASE_CONFIG } from "../js/config.js";
+import { effectiveRole, mountTestModeSwitcher } from "../js/test-mode.js";
 
 const app  = getApps().length ? getApp() : initializeApp(FIREBASE_CONFIG);
 const auth = getAuth(app);
@@ -285,13 +286,14 @@ onAuthStateChanged(auth, async user => {
   try {
     const userSnap = await getDoc(doc(db, 'users', user.uid));
     const userData = userSnap.exists() ? userSnap.data() : {};
-    const role     = userData.role    || '';
+    const role     = effectiveRole(userData, user.email);
     const subject  = userData.subject || '';
 
     if (!['teacher','admin','supervisor'].includes(role)) {
       location.href = 'home.html';
       return;
     }
+    mountTestModeSwitcher(userData, user.email);
 
     const subjectAr = SUBJECT_MAP[subject] || subject;
 
