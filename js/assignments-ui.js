@@ -22,9 +22,6 @@ let _currentUserRole = null;
 let _currentUserSubjects = [];
 let _currentUserId = null;
 
-// خريطة: lectureId -> [{id, title}, ...] المواد اللي جوه كل محاضرة (لعرضها كخيارات هدف في مودال الإضافة)
-const lecTargetsMap = {};
-
 let _resolveRoleReady;
 const roleReady = new Promise(res => { _resolveRoleReady = res; });
 
@@ -58,42 +55,45 @@ async function uploadFile(file) {
 }
 
 // ── HTML قسم الواجبات جوه كارت المادة ─────────────────────────
-// showAddButtons=false: يعرض الواجبات/الاختبارات الموجودة فقط بدون أزرار إضافة (لما الإضافة بقت مركزية من زرار المحاضرة)
-export async function renderAssignmentsSection(materialId, course, containerId, showAddButtons = true) {
+export async function renderAssignmentsSection(materialId, course, containerId) {
   await roleReady;
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
   const canManage = canManageAssignments(course);
-  const assignments = await getAssignmentsForMaterial(materialId);
-
-  const containers = document.querySelectorAll(`#${CSS.escape(containerId)}, [data-asg-container="${materialId}"]`);
-  if (!containers.length) return;
-
-  let html = `<div style="margin-top:10px;border-top:1px dashed var(--border);padding-top:10px">`;
-
-  if (assignments.length === 0 && (!canManage || !showAddButtons)) {
-    containers.forEach(c => c.innerHTML = '');
+  let assignments;
+  try {
+    assignments = await getAssignmentsForMaterial(materialId);
+  } catch (e) {
+    console.error('[Assignments] فشل جلب الواجبات:', e.code, e.message);
+    container.innerHTML = canManage
+      ? `<div style="margin-top:10px;border-top:1px dashed var(--border);padding-top:10px;font-size:12px;color:#e74c3c">
+          ⚠️ تعذّر تحميل قسم الواجبات (${e.code || e.message}). راجعي صلاحيات Firestore على كولكشن assignments.
+        </div>`
+      : '';
     return;
   }
 
-  if (canManage && showAddButtons) {
-    html += `<div style="display:flex;gap:8px;margin-bottom:8px">
-      <button onclick="window.openAddAssignmentModal('${materialId}','${course}','homework')"
-        style="flex:1;padding:8px;border:1px dashed var(--gold);background:transparent;color:var(--green-dark);border-radius:8px;font-family:inherit;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px">
-        <i class="ti ti-clipboard-plus"></i> إضافة واجب
-      </button>
-      <button onclick="window.openAddAssignmentModal('${materialId}','${course}','exam')"
-        style="flex:1;padding:8px;border:1px dashed var(--gold);background:transparent;color:var(--green-dark);border-radius:8px;font-family:inherit;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px">
-        <i class="ti ti-pencil-check"></i> إضافة اختبار
-      </button>
-    </div>`;
+  let html = `<div style="margin-top:10px;border-top:1px dashed var(--border);padding-top:10px">`;
+
+  if (assignments.length === 0 && !canManage) {
+    container.innerHTML = '';
+    return;
+  }
+
+  if (canManage) {
+    html += `<button onclick="window.openAddAssignmentModal('${materialId}','${course}')"
+      style="width:100%;padding:8px;border:1px dashed var(--gold);background:transparent;color:var(--green-dark);border-radius:8px;font-family:inherit;font-size:12px;cursor:pointer;margin-bottom:8px;display:flex;align-items:center;justify-content:center;gap:6px">
+      <i class="ti ti-clipboard-plus"></i> إضافة واجب
+    </button>`;
   }
 
   for (const a of assignments) {
     const dl = getDeadlineStatus(a.deadline);
-    const isExam = a.kind === 'exam';
     html += `
       <div style="background:rgba(92,61,46,0.05);border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:8px;cursor:pointer" onclick="window.openAssignmentDetail('${a.id}','${course}')">
         <div style="display:flex;justify-content:space-between;align-items:start;gap:8px">
-          <div style="font-size:13px;font-weight:700;color:var(--green-dark)">${isExam ? '✍️' : '📝'} ${a.title}</div>
+          <div style="font-size:13px;font-weight:700;color:var(--green-dark)">📝 ${a.title}</div>
           ${canManage ? `<button onclick="event.stopPropagation();window.removeAssignment('${a.id}','${materialId}','${course}')" style="background:none;border:none;color:#e74c3c;cursor:pointer;padding:2px"><i class="ti ti-trash" style="font-size:14px"></i></button>` : ''}
         </div>
         <div style="font-size:11px;color:${dl.color};margin-top:4px">⏰ ${dl.text}</div>
@@ -101,59 +101,8 @@ export async function renderAssignmentsSection(materialId, course, containerId, 
   }
 
   html += `</div>`;
-  containers.forEach(c => c.innerHTML = html);
+  container.innerHTML = html;
 }
-
-// ── شارة واجب/اختبار مختصرة جنب رقم المحاضرة (مش مرتبطة بمادة معينة) ──
-// targets: [{id, title}, ...] المواد المكوّنة لهذه المحاضرة — تتحفظ عشان تستخدم كخيارات هدف لما تتفتح مودال الإضافة
-export async function renderLectureAssignmentControls(lectureId, course, containerId, targets = []) {
-  await roleReady;
-  lecTargetsMap[lectureId] = targets;
-  const canManage = canManageAssignments(course);
-  const assignments = await getAssignmentsForMaterial(lectureId);
-
-  const containers = document.querySelectorAll(`#${CSS.escape(containerId)}, [data-lec-asg-container="${lectureId}"]`);
-  if (!containers.length) return;
-
-  if (assignments.length === 0 && !canManage) {
-    containers.forEach(c => c.innerHTML = '');
-    return;
-  }
-
-  let html = assignments.map(a => `
-    <span style="display:inline-flex;align-items:center;gap:2px;background:rgba(201,162,39,0.15);border-radius:6px;padding:1px 4px;">
-      <span onclick="event.stopPropagation();window.openAssignmentDetail('${a.id}','${course}')" title="${a.kind === 'exam' ? 'اختبار' : 'واجب'}: ${a.title}" style="cursor:pointer;font-size:13px">${a.kind === 'exam' ? '✅' : '📝'}</span>
-      ${canManage ? `<span onclick="event.stopPropagation();window.removeAssignment('${a.id}','${lectureId}','${course}')" title="حذف" style="cursor:pointer;color:#e74c3c;font-size:10px;font-weight:700">✕</span>` : ''}
-    </span>`).join('');
-
-  if (canManage) {
-    html += `
-      <span style="position:relative;display:inline-flex">
-        <button onclick="event.stopPropagation();window.toggleLecAsgMenu(this)"
-          style="background:var(--green-dark,#5c3d2e);border:none;color:#fff;border-radius:6px;width:22px;height:22px;font-size:14px;font-weight:700;line-height:1;cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,0.25)">+</button>
-        <div class="lec-asg-menu" style="display:none;position:absolute;top:24px;right:0;background:var(--bg-card,#fff);border:1px solid var(--border);border-radius:8px;box-shadow:0 4px 14px rgba(0,0,0,0.15);z-index:60;min-width:130px;overflow:hidden">
-          <div onclick="event.stopPropagation();this.parentElement.style.display='none';window.openAddAssignmentModal('${lectureId}','${course}','homework')"
-            style="padding:8px 12px;font-size:12px;cursor:pointer;white-space:nowrap;color:var(--text-mid)">📝 إضافة واجب</div>
-          <div onclick="event.stopPropagation();this.parentElement.style.display='none';window.openAddAssignmentModal('${lectureId}','${course}','exam')"
-            style="padding:8px 12px;font-size:12px;cursor:pointer;white-space:nowrap;border-top:1px solid var(--border);color:var(--text-mid)">✅ إضافة اختبار</div>
-        </div>
-      </span>`;
-  }
-
-  containers.forEach(c => c.innerHTML = html);
-}
-
-
-window.toggleLecAsgMenu = (btn) => {
-  const menu = btn.nextElementSibling;
-  const wasOpen = menu && menu.style.display === 'block';
-  document.querySelectorAll('.lec-asg-menu').forEach(el => el.style.display = 'none');
-  if (menu) menu.style.display = wasOpen ? 'none' : 'block';
-};
-
-document.addEventListener('click', () => {
-  document.querySelectorAll('.lec-asg-menu').forEach(el => el.style.display = 'none');
-});
 
 // ── Modal إضافة واجب ───────────────────────────────────────────
 function ensureModalsExist() {
@@ -163,17 +112,13 @@ function ensureModalsExist() {
   <div id="addAssignmentModal" class="modal-overlay" onclick="if(event.target===this)this.classList.remove('show')" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center">
     <div class="modal-box" style="width:min(94vw,460px);background:var(--bg-card,#fff);border-radius:16px;padding:20px;max-height:90vh;overflow-y:auto">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
-        <span id="addAssignmentModalTitle" style="font-size:16px;font-weight:700">إضافة واجب جديد</span>
+        <span style="font-size:16px;font-weight:700">إضافة واجب جديد</span>
         <button onclick="document.getElementById('addAssignmentModal').classList.remove('show')" style="background:none;border:none;font-size:20px;cursor:pointer">✕</button>
       </div>
       <div style="display:flex;flex-direction:column;gap:12px">
-        <div id="asgTargetWrap" style="display:none">
-          <label style="font-size:12px;color:var(--text-mid)">إضافة لـ</label>
-          <select id="asgTarget" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;font-family:inherit;margin-top:4px;box-sizing:border-box"></select>
-        </div>
         <input id="asgTitle" type="text" placeholder="عنوان الواجب" style="padding:10px;border:1px solid var(--border);border-radius:8px;font-family:inherit"/>
         <textarea id="asgDesc" rows="3" placeholder="وصف الواجب (اختياري)" style="padding:10px;border:1px solid var(--border);border-radius:8px;font-family:inherit"></textarea>
-        <div id="asgSubmissionOptions" style="display:flex;flex-direction:column;gap:6px">
+        <div style="display:flex;flex-direction:column;gap:6px">
           <label style="font-size:12px;color:var(--text-mid)">وسيلة التسليم المسموحة</label>
           <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer">
             <input type="checkbox" id="asgAllowFile" checked/> 📎 رفع ملف/صورة
@@ -182,15 +127,11 @@ function ensureModalsExist() {
             <input type="checkbox" id="asgAllowText" checked/> ✍️ كتابة نص
           </label>
         </div>
-        <div id="asgExamLinkWrap" style="display:none">
-          <label style="font-size:12px;color:var(--text-mid)">رابط الاختبار</label>
-          <input id="asgExamLink" type="url" placeholder="https://..." style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;font-family:inherit;margin-top:4px;box-sizing:border-box"/>
-        </div>
         <div>
           <label style="font-size:12px;color:var(--text-mid)">الموعد النهائي للتسليم</label>
           <input id="asgDeadline" type="datetime-local" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;font-family:inherit;margin-top:4px"/>
         </div>
-        <button id="addAssignmentSubmitBtn" onclick="window.submitAddAssignment()" style="background:linear-gradient(135deg,#2c1a0e,#5c3d2e);color:#e8c96a;border:none;border-radius:10px;padding:11px;font-family:inherit;font-size:14px;cursor:pointer;font-weight:600">
+        <button onclick="window.submitAddAssignment()" style="background:linear-gradient(135deg,#2c1a0e,#5c3d2e);color:#e8c96a;border:none;border-radius:10px;padding:11px;font-family:inherit;font-size:14px;cursor:pointer;font-weight:600">
           نشر الواجب
         </button>
       </div>
@@ -214,83 +155,45 @@ function ensureModalsExist() {
   document.body.insertAdjacentHTML('beforeend', modalsHTML);
 }
 
-window.openAddAssignmentModal = (materialId, course, kind = 'homework') => {
+window.openAddAssignmentModal = (materialId, course) => {
   ensureModalsExist();
-  const isExam = kind === 'exam';
-
-  const targets = lecTargetsMap[materialId] || [];
-  const targetWrap = document.getElementById('asgTargetWrap');
-  const targetSel  = document.getElementById('asgTarget');
-  if (targets.length) {
-    targetSel.innerHTML = `<option value="${materialId}">🗂️ المحاضرة كاملة</option>` +
-      targets.map(t => `<option value="${t.id}">${(t.title || 'بدون عنوان').replace(/</g,'&lt;')}</option>`).join('');
-    targetWrap.style.display = 'block';
-  } else {
-    targetSel.innerHTML = '';
-    targetWrap.style.display = 'none';
-  }
-
   document.getElementById('asgTitle').value = '';
-  document.getElementById('asgTitle').placeholder = isExam ? 'عنوان الاختبار' : 'عنوان الواجب';
   document.getElementById('asgDesc').value = '';
-  document.getElementById('asgDesc').placeholder = isExam ? 'وصف الاختبار (اختياري)' : 'وصف الواجب (اختياري)';
   document.getElementById('asgAllowFile').checked = true;
   document.getElementById('asgAllowText').checked = true;
   document.getElementById('asgDeadline').value = '';
-  document.getElementById('asgExamLink').value = '';
-  document.getElementById('asgSubmissionOptions').style.display = isExam ? 'none' : 'flex';
-  document.getElementById('asgExamLinkWrap').style.display = isExam ? 'block' : 'none';
-  document.getElementById('addAssignmentModalTitle').textContent = isExam ? 'إضافة اختبار جديد' : 'إضافة واجب جديد';
-  document.getElementById('addAssignmentSubmitBtn').textContent = isExam ? 'نشر الاختبار' : 'نشر الواجب';
   document.getElementById('addAssignmentModal').dataset.materialId = materialId;
   document.getElementById('addAssignmentModal').dataset.course = course;
-  document.getElementById('addAssignmentModal').dataset.kind = kind;
   document.getElementById('addAssignmentModal').classList.add('show');
 };
 
 window.submitAddAssignment = async () => {
   const modal = document.getElementById('addAssignmentModal');
-  const kind = modal.dataset.kind === 'exam' ? 'exam' : 'homework';
-  const label = kind === 'exam' ? 'الاختبار' : 'الواجب';
-  const targetSel = document.getElementById('asgTarget');
-  const materialId = (targetSel && targetSel.options.length) ? targetSel.value : modal.dataset.materialId;
   const title = document.getElementById('asgTitle').value.trim();
-  if (!title) { alert('اكتبي عنوان ' + label); return; }
-
-  let allowFile = false, allowText = false, examLink = '';
-  if (kind === 'exam') {
-    examLink = document.getElementById('asgExamLink').value.trim();
-    if (!examLink) { alert('اكتبي رابط الاختبار'); return; }
-    if (!/^https?:\/\//i.test(examLink)) { alert('الرابط لازم يبدأ بـ https:// أو http://'); return; }
-  } else {
-    allowFile = document.getElementById('asgAllowFile').checked;
-    allowText = document.getElementById('asgAllowText').checked;
-    if (!allowFile && !allowText) { alert('اختاري وسيلة تسليم واحدة على الأقل'); return; }
-  }
+  if (!title) { alert('اكتبي عنوان الواجب'); return; }
+  const allowFile = document.getElementById('asgAllowFile').checked;
+  const allowText = document.getElementById('asgAllowText').checked;
+  if (!allowFile && !allowText) { alert('اختاري وسيلة تسليم واحدة على الأقل'); return; }
   const deadline = document.getElementById('asgDeadline').value;
 
   try {
     await addAssignment({
-      materialId,
+      materialId: modal.dataset.materialId,
       course: modal.dataset.course,
       title,
       description: document.getElementById('asgDesc').value.trim(),
-      allowFile, allowText, deadline, kind, examLink
+      allowFile, allowText, deadline
     });
     modal.classList.remove('show');
-    if (window.refreshAssignmentsFor) window.refreshAssignmentsFor(materialId, modal.dataset.course);
-    // لو الهدف كان محاضرة كاملة والمادة المختارة فعليًا مختلفة، حدّثي شارة المحاضرة كمان
-    if (window.refreshAssignmentsFor && materialId !== modal.dataset.materialId) {
-      window.refreshAssignmentsFor(modal.dataset.materialId, modal.dataset.course);
-    }
-    alert('✅ تم نشر ' + label);
+    if (window.refreshAssignmentsFor) window.refreshAssignmentsFor(modal.dataset.materialId, modal.dataset.course);
+    alert('✅ تم نشر الواجب');
   } catch (e) {
     alert('خطأ: ' + e.message);
   }
 };
 
 window.removeAssignment = async (assignmentId, materialId, course) => {
-  if (!confirm('متأكدة من الحذف؟ هيتمسح مع كل الردود.')) return;
+  if (!confirm('متأكدة من حذف الواجب؟ هيتمسح مع كل الردود.')) return;
   await deleteAssignment(assignmentId);
   if (window.refreshAssignmentsFor) window.refreshAssignmentsFor(materialId, course);
 };
@@ -310,23 +213,9 @@ window.openAssignmentDetail = async (assignmentId, course) => {
   const asgSnap = await gd(d(db, 'assignments', assignmentId));
   if (!asgSnap.exists()) { body.innerHTML = '<div>الواجب غير موجود</div>'; return; }
   const asg = { id: asgSnap.id, ...asgSnap.data() };
-  const isExam = asg.kind === 'exam';
 
-  document.getElementById('asgDetailTitle').textContent = (isExam ? '✍️ ' : '📝 ') + asg.title;
+  document.getElementById('asgDetailTitle').textContent = '📝 ' + asg.title;
   const dl = getDeadlineStatus(asg.deadline);
-
-  if (isExam) {
-    // ── الاختبار: مجرد رابط بره المنصة، مفيش تسليم ولا تقييم ──
-    body.innerHTML = `
-      <div style="font-size:13px;color:var(--text-mid);margin-bottom:10px">${asg.description || ''}</div>
-      <div style="font-size:12px;color:${dl.color};margin-bottom:14px">⏰ ${dl.text}</div>
-      <a href="${asg.examLink}" target="_blank" rel="noopener"
-        style="display:flex;align-items:center;justify-content:center;gap:8px;background:linear-gradient(135deg,#2c1a0e,#5c3d2e);color:#e8c96a;border:none;border-radius:10px;padding:12px;font-family:inherit;font-size:14px;cursor:pointer;font-weight:600;text-decoration:none">
-        <i class="ti ti-external-link"></i> ابدئي الاختبار
-      </a>
-      ${canManage ? `<button onclick="window.removeAssignment('${asg.id}','${asg.materialId}','${course}');document.getElementById('assignmentDetailModal').classList.remove('show')" style="width:100%;margin-top:10px;background:none;border:1px solid #e74c3c;color:#e74c3c;border-radius:10px;padding:9px;font-family:inherit;font-size:13px;cursor:pointer">حذف الاختبار</button>` : ''}`;
-    return;
-  }
 
   if (canManage) {
     // ── واجهة المعلمة: كل الردود ──
