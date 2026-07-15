@@ -401,7 +401,7 @@ onAuthStateChanged(auth, async user => {
     const role     = effectiveRole(userData, user.email);
     const subject  = userData.subject || '';
 
-    if (!['teacher','admin','supervisor','support'].includes(role)) {
+    if (!['teacher','admin','support'].includes(role)) {
       location.href = 'home.html';
       return;
     }
