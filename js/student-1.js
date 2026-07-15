@@ -547,14 +547,32 @@ function renderGrades(grades) {
     return;
   }
 
+  // درجات المشاركة/النهائية اللي المعلمة بتسجلها بنفس آلية الدرجات العادية —
+  // مستبعدة من العرض التلقائي بناءً على طلب، وبتتجاب بس لما الأدمن يدوس
+  // على زرار 'جلب درجة المشاركة' لكل مادة (شوفي fetchParticipationGrade تحت)
+  const isTeacherGrade = g => g.label === 'المشاركة' || g.label === 'الدرجة النهائية';
+  const visibleGrades = grades.filter(g => !isTeacherGrade(g));
+
+  if (!visibleGrades.length && !_isAdmin) {
+    list.innerHTML = '<div class="stu-empty"><i class="ti ti-school-off"></i><span>لا توجد درجات مسجلة</span></div>';
+    return;
+  }
+
   // تجميع الدرجات حسب المادة — كل مادة في قسم لوحده
   const groups = {};
   const order = []; // نحافظ على ترتيب ظهور أول مادة زي ما جاءت في البيانات
-  grades.forEach(g => {
+  visibleGrades.forEach(g => {
     const subj = g.subject || 'أخرى';
     if (!groups[subj]) { groups[subj] = []; order.push(subj); }
     groups[subj].push(g);
   });
+  // لو مادة عندها بس درجة مشاركة/نهائية (اتفلترت فوق) بس مفيهاش درجات
+  // عادية، لازم برضه تظهر كقسم فاضي عشان زرار الجلب يبان للأدمن
+  if (_isAdmin) {
+    [...new Set(grades.map(g => g.subject).filter(Boolean))].forEach(subj => {
+      if (!groups[subj]) { groups[subj] = []; order.push(subj); }
+    });
+  }
 
   list.innerHTML = order.map(subj => {
     const subjGrades = groups[subj];
@@ -582,6 +600,8 @@ function renderGrades(grades) {
       </div>`;
     }).join('');
 
+    const fetchBtnId = `fetch-teacher-grade-${subj.replace(/[^a-zA-Z0-9أ-ي]/g, '')}`;
+
     return `
       <div class="grade-subject-group" style="margin-bottom:16px">
         <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 4px;border-bottom:2px solid var(--gold,#c9a227);margin-bottom:8px">
@@ -592,11 +612,56 @@ function renderGrades(grades) {
           </div>
         </div>
         ${cardsHtml}
+        ${_isAdmin ? `
+        <div id="${fetchBtnId}">
+          <button onclick="fetchTeacherGrade('${subj}','${fetchBtnId}')" style="width:100%;margin-top:6px;padding:7px;border:1px dashed var(--gold,#c9a227);background:transparent;color:var(--green-dark);border-radius:8px;font-family:inherit;font-size:12px;cursor:pointer">
+            📥 جلب درجة المشاركة والنهائية من المعلمة
+          </button>
+        </div>` : ''}
       </div>`;
   }).join('');
 }
 
-// ── Render Certificates ────────────────────────
+// جلب درجة المشاركة والنهائية من عند المعلمة (بالضغط، مش تلقائي)
+window.fetchTeacherGrade = async (subject, containerId) => {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  container.innerHTML = '<div style="text-align:center;padding:8px"><i class="ti ti-loader spin" style="font-size:16px;color:var(--text-mid)"></i></div>';
+
+  try {
+    const [partSnap, finalSnap] = await Promise.all([
+      getDoc(doc(db, 'students', _studentId, 'grades', 'participation_' + subject)),
+      getDoc(doc(db, 'students', _studentId, 'grades', 'final_' + subject)),
+    ]);
+
+    const rows = [];
+    if (partSnap.exists()) rows.push({ id: partSnap.id, ...partSnap.data() });
+    if (finalSnap.exists()) rows.push({ id: finalSnap.id, ...finalSnap.data() });
+
+    if (!rows.length) {
+      container.innerHTML = '<div style="text-align:center;color:var(--text-mid);font-size:12px;padding:8px">لا توجد درجة مشاركة أو نهائية مسجلة من المعلمة لهذه المادة</div>';
+      return;
+    }
+
+    container.innerHTML = rows.map(g => {
+      const pct = g.total ? Math.round(g.score / g.total * 100) : null;
+      const cls = pct === null ? '' : pct >= 75 ? 'high' : pct >= 50 ? 'mid' : 'low';
+      return `<div class="grade-card" style="border-color:var(--gold,#c9a227)">
+        <div class="grade-label-wrap">
+          <div class="grade-label-text">${g.label} <span style="font-size:10px;color:var(--text-mid);font-weight:400">(من المعلمة)</span></div>
+        </div>
+        <div class="grade-score-wrap">
+          ${pct !== null ? `<span class="grade-pct ${cls}">${pct}%</span>` : ''}
+          <span class="grade-num">${g.score}</span>
+          <span class="grade-total">/ ${g.total}</span>
+        </div>
+      </div>`;
+    }).join('');
+  } catch (e) {
+    console.error('fetchTeacherGrade:', e);
+    container.innerHTML = '<div style="text-align:center;color:#c0392b;font-size:12px;padding:8px">حصل خطأ أثناء الجلب، حاولي تاني</div>';
+  }
+};
 function renderCerts(items) {
   const list = document.getElementById('certsList');
   if (!items.length) {
