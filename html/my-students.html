@@ -286,40 +286,45 @@ function normalizeStuName(name) {
 }
 
 // بتجيب درجة موجودة بالفعل (لو اتسجلت قبل كده) عشان تتعرض في الخانة كقيمة مبدئية
-async function getExistingScore(sid, gradeId) {
+async function getExistingGrade(sid, gradeId) {
   try {
     const gSnap = await getDoc(doc(db, 'students', sid, 'grades', gradeId));
-    return gSnap.exists() ? gSnap.data().score : '';
+    return gSnap.exists() ? { score: gSnap.data().score, total: gSnap.data().total } : { score: '', total: '' };
   } catch (e) {
-    return '';
+    return { score: '', total: '' };
   }
 }
 
-// بتتنادى لما المعلمة تكتب درجة وتخرج من الخانة
-window.saveTeacherGrade = async (input) => {
-  const sid     = input.dataset.sid;
-  const gradeId = input.dataset.gradeId;
-  const subject = input.dataset.subject;
-  const total   = Number(input.dataset.total);
-  const label   = 'المشاركة';
-  const raw     = input.value.trim();
+// بتتنادى لما المعلمة تكتب درجة المشاركة أو "من كام" وتخرج من الخانة — بتاخد الاتنين مع بعض
+window.savePartGrade = async (sid, subject) => {
+  const scoreInput = document.getElementById(`partScore-${sid}-${subject}`);
+  const totalInput = document.getElementById(`partTotal-${sid}-${subject}`);
+  if (!scoreInput || !totalInput) return;
 
-  input.disabled = true;
+  const rawScore = scoreInput.value.trim();
+  const rawTotal = totalInput.value.trim();
+  if (rawScore === '' || rawTotal === '') return; // لسه محتاجة القيمتين مع بعض
+
+  const total = Math.max(1, Number(rawTotal));
+  const score = Math.max(0, Math.min(total, Number(rawScore)));
+  scoreInput.value = score;
+  totalInput.value = total;
+
+  scoreInput.disabled = true; totalInput.disabled = true;
   try {
-    if (raw === '') { input.disabled = false; return; }
-    const score = Math.max(0, Math.min(total, Number(raw)));
-    input.value = score;
-    await setDoc(doc(db, 'students', sid, 'grades', gradeId), {
-      label, subject, score, total,
+    await setDoc(doc(db, 'students', sid, 'grades', 'participation_' + subject), {
+      label: 'المشاركة', subject, score, total,
       updatedAt: serverTimestamp(),
     }, { merge: true });
-    input.style.borderColor = '#2e8b57';
-    setTimeout(() => { input.style.borderColor = ''; }, 1200);
+    [scoreInput, totalInput].forEach(el => {
+      el.style.borderColor = '#2e8b57';
+      setTimeout(() => { el.style.borderColor = ''; }, 1200);
+    });
   } catch (e) {
-    console.error('saveTeacherGrade:', e);
+    console.error('savePartGrade:', e);
     alert('حصل خطأ أثناء حفظ الدرجة، حاولي تاني');
   } finally {
-    input.disabled = false;
+    scoreInput.disabled = false; totalInput.disabled = false;
   }
 };
 
@@ -330,14 +335,15 @@ async function studentRowHTML(s, subjectAr) {
   let gradesHtml = `<div class="student-no-link">⚠️ مقدرناش نلاقي سجل طالبة بنفس الاسم — كلّمي الإدارة</div>`;
   if (s.sid && subjectAr) {
     const gradeIdParticipation = 'participation_' + subjectAr;
-    const partVal = await getExistingScore(s.sid, gradeIdParticipation);
+    const existing = await getExistingGrade(s.sid, gradeIdParticipation);
     gradesHtml = `
       <div class="student-grades">
         <label>مشاركة
-          <input type="number" min="0" max="${PARTICIPATION_TOTAL}" value="${partVal}" placeholder="0"
-            data-sid="${s.sid}" data-grade-id="${gradeIdParticipation}" data-subject="${subjectAr}" data-total="${PARTICIPATION_TOTAL}"
-            onchange="saveTeacherGrade(this)">
-          <span>/ ${PARTICIPATION_TOTAL}</span>
+          <input type="number" min="0" id="partScore-${s.sid}-${subjectAr}" value="${existing.score}" placeholder="الدرجة"
+            onchange="savePartGrade('${s.sid}','${subjectAr}')" style="width:56px">
+          <span>من</span>
+          <input type="number" min="1" id="partTotal-${s.sid}-${subjectAr}" value="${existing.total}" placeholder="${PARTICIPATION_TOTAL}"
+            onchange="savePartGrade('${s.sid}','${subjectAr}')" style="width:56px">
         </label>
       </div>`;
   } else if (!subjectAr) {
