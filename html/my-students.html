@@ -231,6 +231,10 @@
     <span id="subjectName">...</span>
   </div>
 
+  <select id="subjectPicker" class="search-box" style="display:none;margin-bottom:20px" onchange="onSubjectPickerChange()">
+    <option value="">— اختاري المادة لعرض/تسجيل درجاتها —</option>
+  </select>
+
   <input class="search-box" id="searchInput" placeholder="🔍 ابحثي باسم الطالبة..." type="text" oninput="filterStudents()" style="display:none;">
 
   <div id="loadingState" class="loading-state">
@@ -363,6 +367,11 @@ async function studentRowHTML(s, subjectAr) {
     </div>`;
 }
 
+window.onSubjectPickerChange = () => {
+  window._subjectAr = document.getElementById('subjectPicker').value || '';
+  window.filterStudents();
+};
+
 window.filterStudents = async () => {
   const q        = document.getElementById('searchInput').value.trim().toLowerCase();
   const filtered = q ? allStudents.filter(s => (s.name || '').toLowerCase().includes(q)) : allStudents;
@@ -392,7 +401,7 @@ onAuthStateChanged(auth, async user => {
     const role     = effectiveRole(userData, user.email);
     const subject  = userData.subject || '';
 
-    if (!['teacher','admin','supervisor'].includes(role)) {
+    if (!['teacher','admin','supervisor','support'].includes(role)) {
       location.href = 'home.html';
       return;
     }
@@ -403,6 +412,13 @@ onAuthStateChanged(auth, async user => {
     if (subjectAr) {
       document.getElementById('subjectBadge').style.display = 'inline-flex';
       document.getElementById('subjectName').textContent    = subjectAr;
+    } else if (role !== 'teacher') {
+      // مفيش مادة ثابتة على الحساب (أدمن/مشرفة/دعم) — هاتي قائمة اختيار
+      const picker = document.getElementById('subjectPicker');
+      const uniqueSubjects = [...new Set(Object.values(SUBJECT_MAP))];
+      picker.innerHTML = '<option value="">— اختاري المادة لعرض/تسجيل درجاتها —</option>' +
+        uniqueSubjects.map(s => `<option value="${s}">${s}</option>`).join('');
+      picker.style.display = 'block';
     }
 
     // اربطي كل حساب "مادة/متين" بسجله الحقيقي، والمصدر الأساسي للاسم وحالة الأرشفة هو جدول students
