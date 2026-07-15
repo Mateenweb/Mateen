@@ -547,10 +547,10 @@ function renderGrades(grades) {
     return;
   }
 
-  // درجات المشاركة/النهائية اللي المعلمة بتسجلها بنفس آلية الدرجات العادية —
+  // درجة المشاركة اللي المعلمة بتسجلها بنفس آلية الدرجات العادية —
   // مستبعدة من العرض التلقائي بناءً على طلب، وبتتجاب بس لما الأدمن يدوس
-  // على زرار 'جلب درجة المشاركة' لكل مادة (شوفي fetchParticipationGrade تحت)
-  const isTeacherGrade = g => g.label === 'المشاركة' || g.label === 'الدرجة النهائية';
+  // على زرار 'جلب درجة المشاركة' لكل مادة (شوفي fetchTeacherGrade تحت)
+  const isTeacherGrade = g => g.label === 'المشاركة';
   const visibleGrades = grades.filter(g => !isTeacherGrade(g));
 
   if (!visibleGrades.length && !_isAdmin) {
@@ -615,38 +615,31 @@ function renderGrades(grades) {
         ${_isAdmin ? `
         <div id="${fetchBtnId}">
           <button onclick="fetchTeacherGrade('${subj}','${fetchBtnId}')" style="width:100%;margin-top:6px;padding:7px;border:1px dashed var(--gold,#c9a227);background:transparent;color:var(--green-dark);border-radius:8px;font-family:inherit;font-size:12px;cursor:pointer">
-            📥 جلب درجة المشاركة والنهائية من المعلمة
+            📥 جلب درجة المشاركة من المعلمة
           </button>
         </div>` : ''}
       </div>`;
   }).join('');
 }
 
-// جلب درجة المشاركة والنهائية من عند المعلمة (بالضغط، مش تلقائي)
+// جلب درجة المشاركة من عند المعلمة (بالضغط، مش تلقائي)
 window.fetchTeacherGrade = async (subject, containerId) => {
   const container = document.getElementById(containerId);
   if (!container) return;
   container.innerHTML = '<div style="text-align:center;padding:8px"><i class="ti ti-loader spin" style="font-size:16px;color:var(--text-mid)"></i></div>';
 
   try {
-    const [partSnap, finalSnap] = await Promise.all([
-      getDoc(doc(db, 'students', _studentId, 'grades', 'participation_' + subject)),
-      getDoc(doc(db, 'students', _studentId, 'grades', 'final_' + subject)),
-    ]);
+    const partSnap = await getDoc(doc(db, 'students', _studentId, 'grades', 'participation_' + subject));
 
-    const rows = [];
-    if (partSnap.exists()) rows.push({ id: partSnap.id, ...partSnap.data() });
-    if (finalSnap.exists()) rows.push({ id: finalSnap.id, ...finalSnap.data() });
-
-    if (!rows.length) {
-      container.innerHTML = '<div style="text-align:center;color:var(--text-mid);font-size:12px;padding:8px">لا توجد درجة مشاركة أو نهائية مسجلة من المعلمة لهذه المادة</div>';
+    if (!partSnap.exists()) {
+      container.innerHTML = '<div style="text-align:center;color:var(--text-mid);font-size:12px;padding:8px">لا توجد درجة مشاركة مسجلة من المعلمة لهذه المادة</div>';
       return;
     }
 
-    container.innerHTML = rows.map(g => {
-      const pct = g.total ? Math.round(g.score / g.total * 100) : null;
-      const cls = pct === null ? '' : pct >= 75 ? 'high' : pct >= 50 ? 'mid' : 'low';
-      return `<div class="grade-card" style="border-color:var(--gold,#c9a227)">
+    const g = { id: partSnap.id, ...partSnap.data() };
+    const pct = g.total ? Math.round(g.score / g.total * 100) : null;
+    const cls = pct === null ? '' : pct >= 75 ? 'high' : pct >= 50 ? 'mid' : 'low';
+    container.innerHTML = `<div class="grade-card" style="border-color:var(--gold,#c9a227)">
         <div class="grade-label-wrap">
           <div class="grade-label-text">${g.label} <span style="font-size:10px;color:var(--text-mid);font-weight:400">(من المعلمة)</span></div>
         </div>
@@ -656,7 +649,6 @@ window.fetchTeacherGrade = async (subject, containerId) => {
           <span class="grade-total">/ ${g.total}</span>
         </div>
       </div>`;
-    }).join('');
   } catch (e) {
     console.error('fetchTeacherGrade:', e);
     container.innerHTML = '<div style="text-align:center;color:#c0392b;font-size:12px;padding:8px">حصل خطأ أثناء الجلب، حاولي تاني</div>';
