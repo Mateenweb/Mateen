@@ -81,41 +81,36 @@
   .search-box:focus { outline: none; border-color: var(--gold); }
   .students-grid {
     display: none;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: 16px;
+    flex-direction: column;
+    gap: 10px;
   }
   .students-grid.visible {
-    display: grid;
+    display: flex;
   }
   .student-card {
     background: var(--white);
     border: 1px solid var(--border);
     border-radius: 14px;
-    padding: 18px;
+    padding: 14px 18px;
     display: flex;
     align-items: center;
     gap: 14px;
-    transition: box-shadow 0.2s;
-    cursor: pointer;
+    flex-wrap: wrap;
   }
-  .student-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
   .student-avatar {
-    width: 48px; height: 48px;
+    width: 44px; height: 44px;
     border-radius: 50%;
     background: var(--beige);
     border: 2px solid var(--gold);
     display: flex; align-items: center; justify-content: center;
-    font-size: 22px;
+    font-size: 20px;
     flex-shrink: 0;
   }
-  .student-info { flex: 1; min-width: 0; }
+  .student-info { flex: 1; min-width: 160px; }
   .student-name {
     font-size: 14px;
     font-weight: 700;
     color: var(--text-dark);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
   }
   .student-year {
     font-size: 12px;
@@ -131,11 +126,37 @@
   }
   .status-active  { background: #e8f5e9; color: #2e7d32; }
   .status-pending { background: #fff8e1; color: #f57f17; }
+  .student-grades {
+    display: flex;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+  .student-grades label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--text-mid);
+  }
+  .student-grades input {
+    width: 56px;
+    padding: 5px 6px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 12px;
+    text-align: center;
+  }
+  .student-no-link {
+    font-size: 11px;
+    color: #c9852b;
+    flex-shrink: 0;
+    max-width: 220px;
+  }
   .empty-state {
     text-align: center;
     padding: 60px 20px;
     color: var(--text-mid);
-    grid-column: 1/-1;
   }
   .empty-state i { font-size: 40px; margin-bottom: 12px; display: block; }
   .loading-state {
@@ -225,7 +246,7 @@ import { initializeApp, getApps, getApp }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
 import { getAuth, onAuthStateChanged }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, collection, query, where, getDocs }
+import { getFirestore, doc, getDoc, setDoc, serverTimestamp, collection, query, where, getDocs }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 import { FIREBASE_CONFIG } from "../js/config.js";
 import { effectiveRole, mountTestModeSwitcher } from "../js/test-mode.js";
@@ -233,6 +254,9 @@ import { effectiveRole, mountTestModeSwitcher } from "../js/test-mode.js";
 const app  = getApps().length ? getApp() : initializeApp(FIREBASE_CONFIG);
 const auth = getAuth(app);
 const db   = getFirestore(app);
+
+const PARTICIPATION_TOTAL = 20;
+const FINAL_TOTAL = 100;
 
 let allStudents = [];
 
@@ -249,9 +273,84 @@ const SUBJECT_MAP = {
 function show(id)  { document.getElementById(id).style.display = ''; }
 function hide(id)  { document.getElementById(id).style.display = 'none'; }
 
-function studentCardHTML(s) {
+// بتطبّع الاسم عشان تقدر تقارن أسماء بينها اختلافات بسيطة (مسافات/همزات/تاء مربوطة)
+function normalizeStuName(name) {
+  return (name || '')
+    .replace(/[أإآا]/g, 'ا').replace(/[ةه]/g, 'ه').replace(/[يى]/g, 'ي')
+    .replace(/[\u064B-\u065F]/g, '')
+    .replace(/\s+/g, '')
+    .trim();
+}
+
+// بتجيب درجة موجودة بالفعل (لو اتسجلت قبل كده) عشان تتعرض في الخانة كقيمة مبدئية
+async function getExistingScore(sid, gradeId) {
+  try {
+    const gSnap = await getDoc(doc(db, 'students', sid, 'grades', gradeId));
+    return gSnap.exists() ? gSnap.data().score : '';
+  } catch (e) {
+    return '';
+  }
+}
+
+// بتتنادى لما المعلمة تكتب درجة وتخرج من الخانة
+window.saveTeacherGrade = async (input) => {
+  const sid     = input.dataset.sid;
+  const gradeId = input.dataset.gradeId;
+  const subject = input.dataset.subject;
+  const total   = Number(input.dataset.total);
+  const label   = gradeId.startsWith('participation_') ? 'المشاركة' : 'الدرجة النهائية';
+  const raw     = input.value.trim();
+
+  input.disabled = true;
+  try {
+    if (raw === '') { input.disabled = false; return; }
+    const score = Math.max(0, Math.min(total, Number(raw)));
+    input.value = score;
+    await setDoc(doc(db, 'students', sid, 'grades', gradeId), {
+      label, subject, score, total,
+      updatedAt: serverTimestamp(),
+    }, { merge: true });
+    input.style.borderColor = '#2e8b57';
+    setTimeout(() => { input.style.borderColor = ''; }, 1200);
+  } catch (e) {
+    console.error('saveTeacherGrade:', e);
+    alert('حصل خطأ أثناء حفظ الدرجة، حاولي تاني');
+  } finally {
+    input.disabled = false;
+  }
+};
+
+async function studentRowHTML(s, subjectAr) {
   const statusClass = s.status === 'active' ? 'status-active' : 'status-pending';
   const statusText  = s.status === 'active' ? 'مفعّلة' : 'بانتظار التفعيل';
+
+  let gradesHtml = `<div class="student-no-link">⚠️ مقدرناش نلاقي سجل طالبة بنفس الاسم — كلّمي الإدارة</div>`;
+  if (s.sid && subjectAr) {
+    const gradeIdParticipation = 'participation_' + subjectAr;
+    const gradeIdFinal = 'final_' + subjectAr;
+    const [partVal, finalVal] = await Promise.all([
+      getExistingScore(s.sid, gradeIdParticipation),
+      getExistingScore(s.sid, gradeIdFinal),
+    ]);
+    gradesHtml = `
+      <div class="student-grades">
+        <label>مشاركة
+          <input type="number" min="0" max="${PARTICIPATION_TOTAL}" value="${partVal}" placeholder="0"
+            data-sid="${s.sid}" data-grade-id="${gradeIdParticipation}" data-subject="${subjectAr}" data-total="${PARTICIPATION_TOTAL}"
+            onchange="saveTeacherGrade(this)">
+          <span>/ ${PARTICIPATION_TOTAL}</span>
+        </label>
+        <label>النهائي
+          <input type="number" min="0" max="${FINAL_TOTAL}" value="${finalVal}" placeholder="0"
+            data-sid="${s.sid}" data-grade-id="${gradeIdFinal}" data-subject="${subjectAr}" data-total="${FINAL_TOTAL}"
+            onchange="saveTeacherGrade(this)">
+          <span>/ ${FINAL_TOTAL}</span>
+        </label>
+      </div>`;
+  } else if (!subjectAr) {
+    gradesHtml = '';
+  }
+
   return `
     <div class="student-card">
       <div class="student-avatar">🧕</div>
@@ -260,17 +359,21 @@ function studentCardHTML(s) {
         <div class="student-year">${s.year ? 'السنة: ' + s.year : ''}</div>
         <span class="student-status ${statusClass}">${statusText}</span>
       </div>
+      ${gradesHtml}
     </div>`;
 }
 
-window.filterStudents = () => {
+window.filterStudents = async () => {
   const q        = document.getElementById('searchInput').value.trim().toLowerCase();
   const filtered = q ? allStudents.filter(s => (s.name || '').toLowerCase().includes(q)) : allStudents;
   const grid     = document.getElementById('studentsGrid');
   grid.classList.add('visible');
-  grid.innerHTML = filtered.length === 0
-    ? `<div class="empty-state"><i class="ti ti-user-off"></i>لا توجد طالبات مطابقة للبحث</div>`
-    : filtered.map(studentCardHTML).join('');
+  if (filtered.length === 0) {
+    grid.innerHTML = `<div class="empty-state"><i class="ti ti-user-off"></i>لا توجد طالبات مطابقة للبحث</div>`;
+    return;
+  }
+  const rows = await Promise.all(filtered.map(s => studentRowHTML(s, window._subjectAr)));
+  grid.innerHTML = rows.join('');
 };
 
 function showError(msg) {
@@ -313,7 +416,28 @@ onAuthStateChanged(auth, async user => {
       );
     }
 
+    // اربطي كل حساب بسجله الحقيقي في مجموعة students (uid لو موجود، وإلا مطابقة بالاسم)
+    // واستبعدي أي طالبة اتعمللها أرشفة
+    const allStudentsSnap = await getDocs(collection(db, 'students'));
+    const byUid = new Map();
+    const byName = new Map();
+    allStudentsSnap.docs.forEach(sd => {
+      const sData = sd.data();
+      if (sData.archived) return;
+      if (sData.uid) byUid.set(sData.uid, sd.id);
+      const norm = normalizeStuName(sData.name || '');
+      if (norm && !byName.has(norm)) byName.set(norm, sd.id);
+    });
+    const archivedSids = new Set(
+      allStudentsSnap.docs.filter(sd => sd.data().archived).map(sd => sd.id)
+    );
+
+    allDocs = allDocs
+      .map(s => ({ ...s, sid: byUid.get(s.id) || byName.get(normalizeStuName(s.name || '')) || null }))
+      .filter(s => !(s.sid && archivedSids.has(s.sid)));
+
     allStudents = allDocs;
+    window._subjectAr = subjectAr;
 
     // Hide loading وShow باقي العناصر
     hide('loadingState');
@@ -321,7 +445,7 @@ onAuthStateChanged(auth, async user => {
     document.getElementById('pageSub').innerHTML =
       `الطالبات المسجلات في مادتك <span class="count-badge">${allStudents.length}</span>`;
 
-    window.filterStudents();
+    await window.filterStudents();
 
   } catch(e) {
     console.error('[طالباتي] خطأ:', e);
