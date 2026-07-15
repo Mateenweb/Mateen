@@ -26,7 +26,6 @@ const SUBJ_LABELS = {
 
 // الدرجة الكلية الافتراضية لكل نوع — قابلة للتعديل من هنا لو احتجتِ أرقام تانية
 const PARTICIPATION_TOTAL = 20;
-const FINAL_TOTAL = 100;
 
 onAuthStateChanged(auth, async user => {
   if (!user) { window.location.href = '../html/login.html'; return; }
@@ -131,15 +130,11 @@ async function loadStudents(subjLabel) {
     }
 
     const gradeIdParticipation = 'participation_' + subjLabel;
-    const gradeIdFinal = 'final_' + subjLabel;
 
     const rowsHtml = await Promise.all(activeStudents.map(async s => {
-      let partVal = '', finalVal = '';
+      let partVal = '';
       if (s.sid) {
-        [partVal, finalVal] = await Promise.all([
-          getExistingScore(s.sid, gradeIdParticipation),
-          getExistingScore(s.sid, gradeIdFinal),
-        ]);
+        partVal = await getExistingScore(s.sid, gradeIdParticipation);
       }
       const gradeInputs = s.sid ? `
           <div style="display:flex;gap:10px;margin-top:8px">
@@ -150,14 +145,6 @@ async function loadStudents(subjLabel) {
                 onchange="saveTeacherGrade(this)"
                 style="width:56px;padding:4px 6px;border:1px solid var(--border);border-radius:6px;font-family:inherit;font-size:12px;text-align:center">
               <span style="color:var(--text-mid)">/ ${PARTICIPATION_TOTAL}</span>
-            </label>
-            <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-mid)">
-              النهائي
-              <input type="number" min="0" max="${FINAL_TOTAL}" value="${finalVal}" placeholder="0"
-                data-sid="${s.sid}" data-grade-id="${gradeIdFinal}" data-subject="${subjLabel}" data-total="${FINAL_TOTAL}"
-                onchange="saveTeacherGrade(this)"
-                style="width:64px;padding:4px 6px;border:1px solid var(--border);border-radius:6px;font-family:inherit;font-size:12px;text-align:center">
-              <span style="color:var(--text-mid)">/ ${FINAL_TOTAL}</span>
             </label>
           </div>`
         : `<div style="margin-top:6px;font-size:11px;color:#c9852b">⚠️ مقدرناش نلاقي سجل طالبة بنفس الاسم بالظبط في قايمة الإدارة — تأكدي إن الاسم مطابق تمامًا، أو كلّمي الإدارة تربطه يدويًا</div>`;
@@ -189,7 +176,7 @@ window.saveTeacherGrade = async (input) => {
   const gradeId = input.dataset.gradeId;
   const subject = input.dataset.subject;
   const total   = Number(input.dataset.total);
-  const label   = gradeId.startsWith('participation_') ? 'المشاركة' : 'الدرجة النهائية';
+  const label   = 'المشاركة';
   const raw     = input.value.trim();
 
   input.disabled = true;
@@ -204,7 +191,7 @@ window.saveTeacherGrade = async (input) => {
     const ref = doc(db, 'students', sid, 'grades', gradeId);
     // لازم نتأكد إن createdAt متسجل (ولو أول مرة بس) — من غيره الدرجة
     // بتتستبعد تلقائيًا من استعلام orderBy('createdAt') في صفحة الطالبة
-    // فتفضل درجة المشاركة/النهائية مش ظاهرة ليها خالص
+    // فتفضل درجة المشاركة مش ظاهرة ليها خالص
     const existing = await getDoc(ref);
     const payload = { label, subject, score, total, updatedAt: serverTimestamp() };
     if (!existing.exists() || !existing.data().createdAt) {
