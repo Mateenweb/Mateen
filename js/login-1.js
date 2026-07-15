@@ -30,7 +30,10 @@ function checkAccountStatus(status) {
 }
 
 function computeBaseRedirect(role, subject) {
-  if (role === 'teacher') return subject ? `teacher-${subject}.html` : 'home.html';
+  if (role === 'teacher') {
+    if (subject === 'ithraiyat') return 'teacher-students.html'; // مالهاش صفحة محتوى مخصصة زي باقي المواد
+    return subject ? `teacher-${subject}.html` : 'home.html';
+  }
   return 'home.html'; // student, mateen, admin, supervisor
 }
 
