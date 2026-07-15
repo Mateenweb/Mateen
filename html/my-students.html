@@ -405,36 +405,37 @@ onAuthStateChanged(auth, async user => {
       document.getElementById('subjectName').textContent    = subjectAr;
     }
 
-    // جلب Studentات
-    const snap    = await getDocs(query(collection(db, 'users'), where('role', '==', 'mateen')));
-    let   allDocs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-
-    // Teacher (f): فلتر على مادتها only
-    if (role === 'teacher' && subjectAr) {
-      allDocs = allDocs.filter(s =>
-        Array.isArray(s.enrolledSubjects) && s.enrolledSubjects.includes(subjectAr)
-      );
-    }
-
-    // اربطي كل حساب بسجله الحقيقي في مجموعة students (uid لو موجود، وإلا مطابقة بالاسم)
-    // واستبعدي أي طالبة اتعمللها أرشفة
-    const allStudentsSnap = await getDocs(collection(db, 'students'));
-    const byUid = new Map();
-    const byName = new Map();
-    allStudentsSnap.docs.forEach(sd => {
-      const sData = sd.data();
-      if (sData.archived) return;
-      if (sData.uid) byUid.set(sData.uid, sd.id);
-      const norm = normalizeStuName(sData.name || '');
-      if (norm && !byName.has(norm)) byName.set(norm, sd.id);
+    // اربطي كل حساب "مادة/متين" بسجله الحقيقي، والمصدر الأساسي للاسم وحالة الأرشفة هو جدول students
+    const usersSnap = await getDocs(query(collection(db, 'users'), where('role', '==', 'mateen')));
+    const usersByUid = new Map();
+    usersSnap.docs.forEach(d => usersByUid.set(d.id, { id: d.id, ...d.data() }));
+    const usersByName = new Map();
+    usersSnap.docs.forEach(d => {
+      const norm = normalizeStuName(d.data().name || '');
+      if (norm && !usersByName.has(norm)) usersByName.set(norm, d.id);
     });
-    const archivedSids = new Set(
-      allStudentsSnap.docs.filter(sd => sd.data().archived).map(sd => sd.id)
-    );
 
-    allDocs = allDocs
-      .map(s => ({ ...s, sid: byUid.get(s.id) || byName.get(normalizeStuName(s.name || '')) || null }))
-      .filter(s => !(s.sid && archivedSids.has(s.sid)));
+    const studentsSnap = await getDocs(collection(db, 'students'));
+    let allDocs = studentsSnap.docs
+      .filter(sd => !sd.data().archived) // الأرشفة بتتفلتر من هنا مباشرة
+      .map(sd => {
+        const sData = sd.data();
+        const linkedUid = sData.uid || usersByName.get(normalizeStuName(sData.name || '')) || null;
+        const userData  = linkedUid ? usersByUid.get(linkedUid) : null;
+        return {
+          id: linkedUid || sd.id,
+          sid: sd.id,
+          name: sData.name || userData?.name || '—',
+          email: userData?.email || '',
+          status: userData?.status || 'pending',
+          enrolledSubjects: userData?.enrolledSubjects || [],
+        };
+      });
+
+    // Teacher (f): فلتر على مادتها only — بس الطالبات اللي عندهم حساب مربوط ومسجلين في المادة دي
+    if (role === 'teacher' && subjectAr) {
+      allDocs = allDocs.filter(s => s.enrolledSubjects.includes(subjectAr));
+    }
 
     allStudents = allDocs;
     window._subjectAr = subjectAr;
