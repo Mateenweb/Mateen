@@ -416,7 +416,8 @@ onAuthStateChanged(auth, async user => {
     const teacherPageMap = {
       'tafseer':'teacher-tafseer.html','fiqh':'teacher-fiqh.html',
       'aqeedah':'teacher-aqeedah.html','hadith':'teacher-hadeeth.html',
-      'quran':'teacher-quran1.html','quran1':'teacher-quran1.html','quran2':'teacher-quran2.html'
+      'quran':'teacher-quran1.html','quran1':'teacher-quran1.html','quran2':'teacher-quran2.html',
+      'ithraiyat':'teacher-students.html'
     };
     const teacherPage = teacherPageMap[subject] || 'teacher-profile.html';
     if (navProfileBtn) { navProfileBtn.href = teacherPage; navProfileBtn.classList.remove('d-none'); }
