@@ -24,9 +24,6 @@ const SUBJ_LABELS = {
   ithraiyat: 'الإثرائيات',
 };
 
-// الدرجة الكلية الافتراضية لكل نوع — قابلة للتعديل من هنا لو احتجتِ أرقام تانية
-const PARTICIPATION_TOTAL = 20;
-
 onAuthStateChanged(auth, async user => {
   if (!user) { window.location.href = '../html/login.html'; return; }
 
@@ -67,12 +64,12 @@ function normalizeStuName(name) {
 }
 
 // بتجيب درجة موجودة بالفعل (لو اتسجلت قبل كده) عشان تتعرض في الخانة كقيمة مبدئية
-async function getExistingGrade(sid, gradeId) {
+async function getExistingScore(sid, gradeId) {
   try {
     const gSnap = await getDoc(doc(db, 'students', sid, 'grades', gradeId));
-    return gSnap.exists() ? { score: gSnap.data().score, total: gSnap.data().total } : { score: '', total: '' };
+    return gSnap.exists() ? gSnap.data().score : '';
   } catch (e) {
-    return { score: '', total: '' };
+    return '';
   }
 }
 
@@ -132,19 +129,15 @@ async function loadStudents(subjLabel) {
     const gradeIdParticipation = 'participation_' + subjLabel;
 
     const rowsHtml = await Promise.all(activeStudents.map(async s => {
-      let existing = { score: '', total: '' };
+      let partVal = '';
       if (s.sid) {
-        existing = await getExistingGrade(s.sid, gradeIdParticipation);
+        partVal = await getExistingScore(s.sid, gradeIdParticipation);
       }
       const gradeInputs = s.sid ? `
           <div style="display:flex;gap:10px;margin-top:8px">
             <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-mid)">
               مشاركة
-              <input type="number" min="0" id="partScore-${s.sid}-${subjLabel}" value="${existing.score}" placeholder="الدرجة"
-                onchange="savePartGrade('${s.sid}','${subjLabel}')"
-                style="width:56px;padding:4px 6px;border:1px solid var(--border);border-radius:6px;font-family:inherit;font-size:12px;text-align:center">
-              <span style="color:var(--text-mid)">من</span>
-              <input type="number" min="1" id="partTotal-${s.sid}-${subjLabel}" value="${existing.total}" placeholder="${PARTICIPATION_TOTAL}"
+              <input type="number" min="0" id="partScore-${s.sid}-${subjLabel}" value="${partVal}" placeholder="0"
                 onchange="savePartGrade('${s.sid}','${subjLabel}')"
                 style="width:56px;padding:4px 6px;border:1px solid var(--border);border-radius:6px;font-family:inherit;font-size:12px;text-align:center">
             </label>
@@ -172,42 +165,36 @@ async function loadStudents(subjLabel) {
   }
 }
 
-// بتتنادى لما المعلمة تكتب درجة المشاركة أو "من كام" وتخرج من الخانة — بتحفظ/تحدّث نفس الدرجة (مش تضيف درجة جديدة كل مرة)
+// بتتنادى لما المعلمة تكتب درجة المشاركة وتخرج من الخانة — مفيش توتال خالص، رقم بس — بتحفظ/تحدّث نفس الدرجة (مش تضيف درجة جديدة كل مرة)
 window.savePartGrade = async (sid, subject) => {
   const scoreInput = document.getElementById(`partScore-${sid}-${subject}`);
-  const totalInput = document.getElementById(`partTotal-${sid}-${subject}`);
-  if (!scoreInput || !totalInput) return;
+  if (!scoreInput) return;
 
-  const rawScore = scoreInput.value.trim();
-  const rawTotal = totalInput.value.trim();
-  if (rawScore === '' || rawTotal === '') return; // لسه محتاجة القيمتين مع بعض
+  const raw = scoreInput.value.trim();
+  if (raw === '') return;
 
-  const total = Math.max(1, Number(rawTotal));
-  const score = Math.max(0, Math.min(total, Number(rawScore)));
+  const score = Math.max(0, Number(raw));
   scoreInput.value = score;
-  totalInput.value = total;
 
-  scoreInput.disabled = true; totalInput.disabled = true;
+  scoreInput.disabled = true;
   try {
     const ref = doc(db, 'students', sid, 'grades', 'participation_' + subject);
     // لازم نتأكد إن createdAt متسجل (ولو أول مرة بس) — من غيره الدرجة
     // بتتستبعد تلقائيًا من استعلام orderBy('createdAt') في صفحة الطالبة
     // فتفضل درجة المشاركة مش ظاهرة ليها خالص
     const existing = await getDoc(ref);
-    const payload = { label: 'المشاركة', subject, score, total, updatedAt: serverTimestamp() };
+    const payload = { label: 'المشاركة', subject, score, updatedAt: serverTimestamp() };
     if (!existing.exists() || !existing.data().createdAt) {
       payload.createdAt = serverTimestamp();
     }
     await setDoc(ref, payload, { merge: true });
-    [scoreInput, totalInput].forEach(el => {
-      el.style.borderColor = '#2e8b57';
-      setTimeout(() => { el.style.borderColor = ''; }, 1200);
-    });
+    scoreInput.style.borderColor = '#2e8b57';
+    setTimeout(() => { scoreInput.style.borderColor = ''; }, 1200);
   } catch (e) {
     console.error('savePartGrade:', e);
     alert('حصل خطأ أثناء حفظ الدرجة، حاولي تاني');
   } finally {
-    scoreInput.disabled = false; totalInput.disabled = false;
+    scoreInput.disabled = false;
   }
 };
 
