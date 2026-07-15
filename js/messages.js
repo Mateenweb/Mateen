@@ -226,6 +226,8 @@ async function loadAllUsers() {
   allUsers = [];
   snap.forEach(d => {
     const ud = d.data();
+    // معلمة الإثرائيات مستثناة من الرسائل بناءً على طلب صريح
+    if (ud.role === 'teacher' && ud.subject === 'ithraiyat') return;
     if (d.id !== currentUser.uid && (ud.status === 'active' || ud.role === 'admin')) {
       allUsers.push({ id: d.id, ...ud });
     }
