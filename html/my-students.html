@@ -260,7 +260,6 @@ const auth = getAuth(app);
 const db   = getFirestore(app);
 
 const PARTICIPATION_TOTAL = 20;
-const FINAL_TOTAL = 100;
 
 let allStudents = [];
 
@@ -302,7 +301,7 @@ window.saveTeacherGrade = async (input) => {
   const gradeId = input.dataset.gradeId;
   const subject = input.dataset.subject;
   const total   = Number(input.dataset.total);
-  const label   = gradeId.startsWith('participation_') ? 'المشاركة' : 'الدرجة النهائية';
+  const label   = 'المشاركة';
   const raw     = input.value.trim();
 
   input.disabled = true;
@@ -331,11 +330,7 @@ async function studentRowHTML(s, subjectAr) {
   let gradesHtml = `<div class="student-no-link">⚠️ مقدرناش نلاقي سجل طالبة بنفس الاسم — كلّمي الإدارة</div>`;
   if (s.sid && subjectAr) {
     const gradeIdParticipation = 'participation_' + subjectAr;
-    const gradeIdFinal = 'final_' + subjectAr;
-    const [partVal, finalVal] = await Promise.all([
-      getExistingScore(s.sid, gradeIdParticipation),
-      getExistingScore(s.sid, gradeIdFinal),
-    ]);
+    const partVal = await getExistingScore(s.sid, gradeIdParticipation);
     gradesHtml = `
       <div class="student-grades">
         <label>مشاركة
@@ -343,12 +338,6 @@ async function studentRowHTML(s, subjectAr) {
             data-sid="${s.sid}" data-grade-id="${gradeIdParticipation}" data-subject="${subjectAr}" data-total="${PARTICIPATION_TOTAL}"
             onchange="saveTeacherGrade(this)">
           <span>/ ${PARTICIPATION_TOTAL}</span>
-        </label>
-        <label>النهائي
-          <input type="number" min="0" max="${FINAL_TOTAL}" value="${finalVal}" placeholder="0"
-            data-sid="${s.sid}" data-grade-id="${gradeIdFinal}" data-subject="${subjectAr}" data-total="${FINAL_TOTAL}"
-            onchange="saveTeacherGrade(this)">
-          <span>/ ${FINAL_TOTAL}</span>
         </label>
       </div>`;
   } else if (!subjectAr) {
