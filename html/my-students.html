@@ -259,8 +259,6 @@ const app  = getApps().length ? getApp() : initializeApp(FIREBASE_CONFIG);
 const auth = getAuth(app);
 const db   = getFirestore(app);
 
-const PARTICIPATION_TOTAL = 20;
-
 let allStudents = [];
 
 const SUBJECT_MAP = {
@@ -286,45 +284,39 @@ function normalizeStuName(name) {
 }
 
 // بتجيب درجة موجودة بالفعل (لو اتسجلت قبل كده) عشان تتعرض في الخانة كقيمة مبدئية
-async function getExistingGrade(sid, gradeId) {
+async function getExistingScore(sid, gradeId) {
   try {
     const gSnap = await getDoc(doc(db, 'students', sid, 'grades', gradeId));
-    return gSnap.exists() ? { score: gSnap.data().score, total: gSnap.data().total } : { score: '', total: '' };
+    return gSnap.exists() ? gSnap.data().score : '';
   } catch (e) {
-    return { score: '', total: '' };
+    return '';
   }
 }
 
-// بتتنادى لما المعلمة تكتب درجة المشاركة أو "من كام" وتخرج من الخانة — بتاخد الاتنين مع بعض
+// بتتنادى لما المعلمة تكتب درجة المشاركة وتخرج من الخانة — مفيش توتال خالص، رقم بس
 window.savePartGrade = async (sid, subject) => {
   const scoreInput = document.getElementById(`partScore-${sid}-${subject}`);
-  const totalInput = document.getElementById(`partTotal-${sid}-${subject}`);
-  if (!scoreInput || !totalInput) return;
+  if (!scoreInput) return;
 
-  const rawScore = scoreInput.value.trim();
-  const rawTotal = totalInput.value.trim();
-  if (rawScore === '' || rawTotal === '') return; // لسه محتاجة القيمتين مع بعض
+  const raw = scoreInput.value.trim();
+  if (raw === '') return;
 
-  const total = Math.max(1, Number(rawTotal));
-  const score = Math.max(0, Math.min(total, Number(rawScore)));
+  const score = Math.max(0, Number(raw));
   scoreInput.value = score;
-  totalInput.value = total;
 
-  scoreInput.disabled = true; totalInput.disabled = true;
+  scoreInput.disabled = true;
   try {
     await setDoc(doc(db, 'students', sid, 'grades', 'participation_' + subject), {
-      label: 'المشاركة', subject, score, total,
+      label: 'المشاركة', subject, score,
       updatedAt: serverTimestamp(),
     }, { merge: true });
-    [scoreInput, totalInput].forEach(el => {
-      el.style.borderColor = '#2e8b57';
-      setTimeout(() => { el.style.borderColor = ''; }, 1200);
-    });
+    scoreInput.style.borderColor = '#2e8b57';
+    setTimeout(() => { scoreInput.style.borderColor = ''; }, 1200);
   } catch (e) {
     console.error('savePartGrade:', e);
     alert('حصل خطأ أثناء حفظ الدرجة، حاولي تاني');
   } finally {
-    scoreInput.disabled = false; totalInput.disabled = false;
+    scoreInput.disabled = false;
   }
 };
 
@@ -335,14 +327,11 @@ async function studentRowHTML(s, subjectAr) {
   let gradesHtml = `<div class="student-no-link">⚠️ مقدرناش نلاقي سجل طالبة بنفس الاسم — كلّمي الإدارة</div>`;
   if (s.sid && subjectAr) {
     const gradeIdParticipation = 'participation_' + subjectAr;
-    const existing = await getExistingGrade(s.sid, gradeIdParticipation);
+    const partVal = await getExistingScore(s.sid, gradeIdParticipation);
     gradesHtml = `
       <div class="student-grades">
         <label>مشاركة
-          <input type="number" min="0" id="partScore-${s.sid}-${subjectAr}" value="${existing.score}" placeholder="الدرجة"
-            onchange="savePartGrade('${s.sid}','${subjectAr}')" style="width:56px">
-          <span>من</span>
-          <input type="number" min="1" id="partTotal-${s.sid}-${subjectAr}" value="${existing.total}" placeholder="${PARTICIPATION_TOTAL}"
+          <input type="number" min="0" id="partScore-${s.sid}-${subjectAr}" value="${partVal}" placeholder="0"
             onchange="savePartGrade('${s.sid}','${subjectAr}')" style="width:56px">
         </label>
       </div>`;
