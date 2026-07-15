@@ -510,6 +510,14 @@ window.executeDeleteMat = async () => {
   btn.innerHTML = '<i class="ti ti-trash"></i> تأكيد الحذف';
 };
 
+// المعلمة بتتسجل بمعرف إنجليزي (data.subject زي "tafseer")، لكن اسم المادة في المحتوى نفسه
+// (materials.course) بالعربي زي "التفسير" — من غير الترجمة دي، أي معلمة معندهاش صلاحية
+// تضيف محتوى لمادتها لإن المقارنة كانت بتتم بين قيمتين مختلفتين شكلًا
+const SUBJECT_ID_TO_AR = {
+  tafseer: 'التفسير', fiqh: 'الفقه', aqeedah: 'العقيدة', hadeeth: 'الحديث',
+  quran1: 'مقرأة متين', quran2: 'مقرأة متين', ithraiyat: 'الإثرائيات',
+};
+
 // تحthisد دور Userة
 onAuthStateChanged(auth, async user => {
   if (!user) {
@@ -528,7 +536,8 @@ onAuthStateChanged(auth, async user => {
 
   if (role === 'teacher') {
     const teacherSubject = data.subject || '';
-    currentUserSubjects = teacherSubject ? [teacherSubject] : [];
+    const arSubject = SUBJECT_ID_TO_AR[teacherSubject] || teacherSubject;
+    currentUserSubjects = teacherSubject ? [arSubject] : [];
   } else {
     currentUserSubjects = Array.isArray(data.enrolledSubjects) ? data.enrolledSubjects : [];
   }
