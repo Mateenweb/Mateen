@@ -562,6 +562,8 @@ function renderGrades(grades) {
     const subjAvg = valid.length
       ? Math.round(valid.reduce((s, g) => s + g.score/g.total*100, 0) / valid.length)
       : null;
+    const totalScore = valid.reduce((s, g) => s + Number(g.score || 0), 0);
+    const totalMax    = valid.reduce((s, g) => s + Number(g.total || 0), 0);
 
     const cardsHtml = subjGrades.map(g => {
       const pct   = g.total ? Math.round(g.score / g.total * 100) : null;
@@ -584,7 +586,10 @@ function renderGrades(grades) {
       <div class="grade-subject-group" style="margin-bottom:16px">
         <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 4px;border-bottom:2px solid var(--gold,#c9a227);margin-bottom:8px">
           <span style="font-size:14px;font-weight:700;color:var(--green-dark)">${subj}</span>
-          ${subjAvg !== null ? `<span class="grade-pct ${subjAvg>=75?'high':subjAvg>=50?'mid':'low'}" style="font-size:12px">متوسط: ${subjAvg}%</span>` : ''}
+          <div style="display:flex;align-items:center;gap:8px">
+            ${totalMax > 0 ? `<span style="font-size:12px;color:var(--text-mid);font-weight:600">الإجمالي: ${totalScore}/${totalMax}</span>` : ''}
+            ${subjAvg !== null ? `<span class="grade-pct ${subjAvg>=75?'high':subjAvg>=50?'mid':'low'}" style="font-size:12px">${subjAvg}%</span>` : ''}
+          </div>
         </div>
         ${cardsHtml}
       </div>`;

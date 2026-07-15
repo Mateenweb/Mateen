@@ -200,10 +200,17 @@ window.saveTeacherGrade = async (input) => {
     }
     const score = Math.max(0, Math.min(total, Number(raw)));
     input.value = score;
-    await setDoc(doc(db, 'students', sid, 'grades', gradeId), {
-      label, subject, score, total,
-      updatedAt: serverTimestamp(),
-    }, { merge: true });
+
+    const ref = doc(db, 'students', sid, 'grades', gradeId);
+    // لازم نتأكد إن createdAt متسجل (ولو أول مرة بس) — من غيره الدرجة
+    // بتتستبعد تلقائيًا من استعلام orderBy('createdAt') في صفحة الطالبة
+    // فتفضل درجة المشاركة/النهائية مش ظاهرة ليها خالص
+    const existing = await getDoc(ref);
+    const payload = { label, subject, score, total, updatedAt: serverTimestamp() };
+    if (!existing.exists() || !existing.data().createdAt) {
+      payload.createdAt = serverTimestamp();
+    }
+    await setDoc(ref, payload, { merge: true });
     input.style.borderColor = '#2e8b57';
     setTimeout(() => { input.style.borderColor = ''; }, 1200);
   } catch (e) {
