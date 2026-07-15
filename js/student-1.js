@@ -637,16 +637,12 @@ window.fetchTeacherGrade = async (subject, containerId) => {
     }
 
     const g = { id: partSnap.id, ...partSnap.data() };
-    const pct = g.total ? Math.round(g.score / g.total * 100) : null;
-    const cls = pct === null ? '' : pct >= 75 ? 'high' : pct >= 50 ? 'mid' : 'low';
     container.innerHTML = `<div class="grade-card" style="border-color:var(--gold,#c9a227)">
         <div class="grade-label-wrap">
           <div class="grade-label-text">${g.label} <span style="font-size:10px;color:var(--text-mid);font-weight:400">(من المعلمة)</span></div>
         </div>
         <div class="grade-score-wrap">
-          ${pct !== null ? `<span class="grade-pct ${cls}">${pct}%</span>` : ''}
           <span class="grade-num">${g.score}</span>
-          <span class="grade-total">/ ${g.total}</span>
         </div>
       </div>`;
   } catch (e) {
