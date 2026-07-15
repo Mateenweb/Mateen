@@ -546,22 +546,48 @@ function renderGrades(grades) {
     list.innerHTML = '<div class="stu-empty"><i class="ti ti-school-off"></i><span>لا توجد درجات مسجلة</span></div>';
     return;
   }
-  list.innerHTML = grades.map(g => {
-    const pct   = g.total ? Math.round(g.score / g.total * 100) : null;
-    const cls   = pct === null ? '' : pct >= 75 ? 'high' : pct >= 50 ? 'mid' : 'low';
-    const pctEl = pct !== null ? `<span class="grade-pct ${cls}">${pct}%</span>` : '';
-    return `<div class="grade-card">
-      <div class="grade-label-wrap">
-        <div class="grade-label-text">${g.label || 'اختبار'}</div>
-        ${g.subject ? `<span class="grade-subject-tag">${g.subject}</span>` : ''}
-      </div>
-      <div class="grade-score-wrap">
-        ${pctEl}
-        <span class="grade-num">${g.score}</span>
-        <span class="grade-total">/ ${g.total}</span>
-        ${_isAdmin ? `<button onclick="deleteGrade('${_studentId}','${g.id}')" style="background:none;border:none;color:#c0392b;cursor:pointer;font-size:15px;padding:0 4px;opacity:0.7" title="حذف"><i class="ti ti-trash"></i></button>` : ''}
-      </div>
-    </div>`;
+
+  // تجميع الدرجات حسب المادة — كل مادة في قسم لوحده
+  const groups = {};
+  const order = []; // نحافظ على ترتيب ظهور أول مادة زي ما جاءت في البيانات
+  grades.forEach(g => {
+    const subj = g.subject || 'أخرى';
+    if (!groups[subj]) { groups[subj] = []; order.push(subj); }
+    groups[subj].push(g);
+  });
+
+  list.innerHTML = order.map(subj => {
+    const subjGrades = groups[subj];
+    const valid = subjGrades.filter(g => g.total > 0);
+    const subjAvg = valid.length
+      ? Math.round(valid.reduce((s, g) => s + g.score/g.total*100, 0) / valid.length)
+      : null;
+
+    const cardsHtml = subjGrades.map(g => {
+      const pct   = g.total ? Math.round(g.score / g.total * 100) : null;
+      const cls   = pct === null ? '' : pct >= 75 ? 'high' : pct >= 50 ? 'mid' : 'low';
+      const pctEl = pct !== null ? `<span class="grade-pct ${cls}">${pct}%</span>` : '';
+      return `<div class="grade-card">
+        <div class="grade-label-wrap">
+          <div class="grade-label-text">${g.label || 'اختبار'}</div>
+        </div>
+        <div class="grade-score-wrap">
+          ${pctEl}
+          <span class="grade-num">${g.score}</span>
+          <span class="grade-total">/ ${g.total}</span>
+          ${_isAdmin ? `<button onclick="deleteGrade('${_studentId}','${g.id}')" style="background:none;border:none;color:#c0392b;cursor:pointer;font-size:15px;padding:0 4px;opacity:0.7" title="حذف"><i class="ti ti-trash"></i></button>` : ''}
+        </div>
+      </div>`;
+    }).join('');
+
+    return `
+      <div class="grade-subject-group" style="margin-bottom:16px">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 4px;border-bottom:2px solid var(--gold,#c9a227);margin-bottom:8px">
+          <span style="font-size:14px;font-weight:700;color:var(--green-dark)">${subj}</span>
+          ${subjAvg !== null ? `<span class="grade-pct ${subjAvg>=75?'high':subjAvg>=50?'mid':'low'}" style="font-size:12px">متوسط: ${subjAvg}%</span>` : ''}
+        </div>
+        ${cardsHtml}
+      </div>`;
   }).join('');
 }
 
