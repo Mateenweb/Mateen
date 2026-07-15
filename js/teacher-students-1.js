@@ -67,12 +67,12 @@ function normalizeStuName(name) {
 }
 
 // بتجيب درجة موجودة بالفعل (لو اتسجلت قبل كده) عشان تتعرض في الخانة كقيمة مبدئية
-async function getExistingScore(sid, gradeId) {
+async function getExistingGrade(sid, gradeId) {
   try {
     const gSnap = await getDoc(doc(db, 'students', sid, 'grades', gradeId));
-    return gSnap.exists() ? gSnap.data().score : '';
+    return gSnap.exists() ? { score: gSnap.data().score, total: gSnap.data().total } : { score: '', total: '' };
   } catch (e) {
-    return '';
+    return { score: '', total: '' };
   }
 }
 
@@ -132,19 +132,21 @@ async function loadStudents(subjLabel) {
     const gradeIdParticipation = 'participation_' + subjLabel;
 
     const rowsHtml = await Promise.all(activeStudents.map(async s => {
-      let partVal = '';
+      let existing = { score: '', total: '' };
       if (s.sid) {
-        partVal = await getExistingScore(s.sid, gradeIdParticipation);
+        existing = await getExistingGrade(s.sid, gradeIdParticipation);
       }
       const gradeInputs = s.sid ? `
           <div style="display:flex;gap:10px;margin-top:8px">
             <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-mid)">
               مشاركة
-              <input type="number" min="0" max="${PARTICIPATION_TOTAL}" value="${partVal}" placeholder="0"
-                data-sid="${s.sid}" data-grade-id="${gradeIdParticipation}" data-subject="${subjLabel}" data-total="${PARTICIPATION_TOTAL}"
-                onchange="saveTeacherGrade(this)"
+              <input type="number" min="0" id="partScore-${s.sid}-${subjLabel}" value="${existing.score}" placeholder="الدرجة"
+                onchange="savePartGrade('${s.sid}','${subjLabel}')"
                 style="width:56px;padding:4px 6px;border:1px solid var(--border);border-radius:6px;font-family:inherit;font-size:12px;text-align:center">
-              <span style="color:var(--text-mid)">/ ${PARTICIPATION_TOTAL}</span>
+              <span style="color:var(--text-mid)">من</span>
+              <input type="number" min="1" id="partTotal-${s.sid}-${subjLabel}" value="${existing.total}" placeholder="${PARTICIPATION_TOTAL}"
+                onchange="savePartGrade('${s.sid}','${subjLabel}')"
+                style="width:56px;padding:4px 6px;border:1px solid var(--border);border-radius:6px;font-family:inherit;font-size:12px;text-align:center">
             </label>
           </div>`
         : `<div style="margin-top:6px;font-size:11px;color:#c9852b">⚠️ مقدرناش نلاقي سجل طالبة بنفس الاسم بالظبط في قايمة الإدارة — تأكدي إن الاسم مطابق تمامًا، أو كلّمي الإدارة تربطه يدويًا</div>`;
@@ -170,41 +172,42 @@ async function loadStudents(subjLabel) {
   }
 }
 
-// بتتنادى لما المعلمة تكتب درجة وتخرج من الخانة — بتحفظ/تحدّث نفس الدرجة (مش تضيف درجة جديدة كل مرة)
-window.saveTeacherGrade = async (input) => {
-  const sid     = input.dataset.sid;
-  const gradeId = input.dataset.gradeId;
-  const subject = input.dataset.subject;
-  const total   = Number(input.dataset.total);
-  const label   = 'المشاركة';
-  const raw     = input.value.trim();
+// بتتنادى لما المعلمة تكتب درجة المشاركة أو "من كام" وتخرج من الخانة — بتحفظ/تحدّث نفس الدرجة (مش تضيف درجة جديدة كل مرة)
+window.savePartGrade = async (sid, subject) => {
+  const scoreInput = document.getElementById(`partScore-${sid}-${subject}`);
+  const totalInput = document.getElementById(`partTotal-${sid}-${subject}`);
+  if (!scoreInput || !totalInput) return;
 
-  input.disabled = true;
+  const rawScore = scoreInput.value.trim();
+  const rawTotal = totalInput.value.trim();
+  if (rawScore === '' || rawTotal === '') return; // لسه محتاجة القيمتين مع بعض
+
+  const total = Math.max(1, Number(rawTotal));
+  const score = Math.max(0, Math.min(total, Number(rawScore)));
+  scoreInput.value = score;
+  totalInput.value = total;
+
+  scoreInput.disabled = true; totalInput.disabled = true;
   try {
-    if (raw === '') {
-      input.disabled = false;
-      return;
-    }
-    const score = Math.max(0, Math.min(total, Number(raw)));
-    input.value = score;
-
-    const ref = doc(db, 'students', sid, 'grades', gradeId);
+    const ref = doc(db, 'students', sid, 'grades', 'participation_' + subject);
     // لازم نتأكد إن createdAt متسجل (ولو أول مرة بس) — من غيره الدرجة
     // بتتستبعد تلقائيًا من استعلام orderBy('createdAt') في صفحة الطالبة
     // فتفضل درجة المشاركة مش ظاهرة ليها خالص
     const existing = await getDoc(ref);
-    const payload = { label, subject, score, total, updatedAt: serverTimestamp() };
+    const payload = { label: 'المشاركة', subject, score, total, updatedAt: serverTimestamp() };
     if (!existing.exists() || !existing.data().createdAt) {
       payload.createdAt = serverTimestamp();
     }
     await setDoc(ref, payload, { merge: true });
-    input.style.borderColor = '#2e8b57';
-    setTimeout(() => { input.style.borderColor = ''; }, 1200);
+    [scoreInput, totalInput].forEach(el => {
+      el.style.borderColor = '#2e8b57';
+      setTimeout(() => { el.style.borderColor = ''; }, 1200);
+    });
   } catch (e) {
-    console.error('saveTeacherGrade:', e);
+    console.error('savePartGrade:', e);
     alert('حصل خطأ أثناء حفظ الدرجة، حاولي تاني');
   } finally {
-    input.disabled = false;
+    scoreInput.disabled = false; totalInput.disabled = false;
   }
 };
 
