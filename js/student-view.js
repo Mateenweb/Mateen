@@ -4,7 +4,7 @@
 
 import { initializeApp }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
-import { getFirestore, doc, getDoc, collection, getDocs, query, orderBy }
+import { getFirestore, doc, getDoc, collection, getDocs, query, orderBy, setDoc, serverTimestamp }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 import { getAuth, onAuthStateChanged }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
@@ -91,7 +91,7 @@ async function loadAll() {
   const [snap, sessSnap, gradeSnap] = await Promise.all([
     getDoc(studentRef),
     getDocs(query(collection(db, 'students', studentId, 'sessions'), orderBy('date', 'desc'))).catch(()=>({docs:[]})),
-    getDocs(collection(db, 'students', studentId, 'grades')).catch(()=>({docs:[]}))
+    getDocs(query(collection(db, 'students', studentId, 'grades'),   orderBy('createdAt', 'desc'))).catch(()=>({docs:[]}))
   ]);
 
   // Teacher (f): تشوف but/only طالباتها only
@@ -144,7 +144,116 @@ async function loadAll() {
 
   renderStats(sessions, grades);
   renderSessions(sessions);
-  renderGrades(grades);
+  renderGrades(grades, s, studentId, effRole);
+}
+
+function renderStats(sessions, grades) {
+  let present = 0, absent = 0, total = 0;
+  sessions.forEach(se => {
+    Object.values(se.subjects || {}).forEach(st => {
+      total++;
+      if (st === 'present') present++;
+      else if (st === 'absent') absent++;
+    });
+  });
+  document.getElementById('statPresent').textContent = present;
+  document.getElementById('statAbsent').textContent  = absent;
+  document.getElementById('statPct').textContent = total ? Math.round(present / total * 100) + '%' : '—';
+}
+
+function renderSessions(sessions) {
+  const list = document.getElementById('attendanceList');
+  if (!sessions.length) {
+    list.innerHTML = '<div class="empty-msg">لا توجد جلسات مسجلة بعد</div>';
+    return;
+  }
+  const icon = { present: '✔', absent: '✖', excused: '⭕' };
+  list.innerHTML = sessions.map(se => {
+    const subjRows = Object.entries(se.subjects || {}).map(([subj, st]) =>
+      `<span style="font-size:11px;margin-inline-end:8px">${subj}: ${icon[st] || st}</span>`
+    ).join('');
+    return `<div class="attendance-item" style="padding:8px 0;border-bottom:1px dashed var(--border,#eee)">
+      <div style="font-size:12px;font-weight:700">${se.day || ''} — ${se.date || ''}</div>
+      <div style="margin-top:4px">${subjRows}</div>
+    </div>`;
+  }).join('');
+}
+
+// نفس منطق خانة "مشاركة" الموجودة في صفحة المعلمة (طالباتي) — بتظهر للأدمن/المشرفة/معلمة المادة
+// عشان يقدروا يضيفوا أو يعدّلوا درجة المشاركة لكل مادة الطالبة مسجلة فيها
+async function getExistingScore(sid, gradeId) {
+  try {
+    const gSnap = await getDoc(doc(db, 'students', sid, 'grades', gradeId));
+    return gSnap.exists() ? gSnap.data().score : '';
+  } catch (e) { return ''; }
+}
+
+window.savePartGrade = async (sid, subject) => {
+  const scoreInput = document.getElementById(`partScore-${sid}-${subject}`);
+  if (!scoreInput) return;
+  const raw = scoreInput.value.trim();
+  if (raw === '') return;
+  const score = Math.max(0, Number(raw));
+  scoreInput.value = score;
+  scoreInput.disabled = true;
+  try {
+    await setDoc(doc(db, 'students', sid, 'grades', 'participation_' + subject), {
+      label: 'المشاركة', subject, score,
+      updatedAt: serverTimestamp(),
+    }, { merge: true });
+    scoreInput.style.borderColor = '#2e8b57';
+    setTimeout(() => { scoreInput.style.borderColor = ''; }, 1200);
+  } catch (e) {
+    console.error('savePartGrade:', e);
+    alert('حصل خطأ أثناء حفظ الدرجة، حاولي تاني');
+  } finally {
+    scoreInput.disabled = false;
+  }
+};
+
+async function renderGrades(grades, s, studentId, effRole) {
+  const card = document.getElementById('gradesCard');
+  card.style.display = 'block';
+
+  // خانة المشاركة القابلة للتعديل — لكل مادة الطالبة مسجلة فيها
+  const canEdit = ['admin', 'supervisor', 'teacher'].includes(effRole);
+  const partWrap = document.getElementById('participationWrap');
+  const subjects = effRole === 'teacher'
+    ? [s.teacherId].filter(Boolean)   // المعلمة تشوف مادتها بس
+    : (Array.isArray(s.enrolledSubjects) ? s.enrolledSubjects : []);
+
+  if (canEdit && subjects.length) {
+    const rows = await Promise.all(subjects.map(async subj => {
+      const val = await getExistingScore(studentId, 'participation_' + subj);
+      return `<label style="display:flex;align-items:center;justify-content:space-between;font-size:13px">
+        <span>مشاركة — ${subj}</span>
+        <input type="number" min="0" id="partScore-${studentId}-${subj}" value="${val}" placeholder="0"
+          onchange="savePartGrade('${studentId}','${subj}')"
+          style="width:70px;border:1px solid var(--border,#ccc);border-radius:6px;padding:4px 8px;text-align:center">
+      </label>`;
+    }));
+    partWrap.innerHTML = rows.join('');
+  } else {
+    partWrap.innerHTML = '';
+  }
+
+  // باقي الدرجات (اختبارات/واجبات مسجلة) — عرض فقط
+  const list = document.getElementById('gradesList');
+  const otherGrades = grades.filter(g => !g.id.startsWith('participation_'));
+  if (!otherGrades.length) {
+    list.innerHTML = '<div class="empty-msg">لا توجد درجات اختبارات مسجلة</div>';
+    return;
+  }
+  list.innerHTML = otherGrades.map(g => {
+    const pct = g.total ? Math.round((g.score / g.total) * 100) : null;
+    return `<div class="grade-item" style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px dashed var(--border,#eee)">
+      <div>
+        <span style="font-size:13px;font-weight:700">${g.label || 'اختبار'}</span>
+        <span style="font-size:11px;color:var(--text-mid,#8a6a52);margin-inline-start:6px">${g.subject || ''}</span>
+      </div>
+      <div style="font-size:13px">${g.score}${g.total ? ' / ' + g.total : ''}${pct !== null ? ` (${pct}%)` : ''}</div>
+    </div>`;
+  }).join('');
 }
 
 loadAll();
