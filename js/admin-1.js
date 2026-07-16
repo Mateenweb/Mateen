@@ -1806,8 +1806,23 @@ window.importExcelGrades = async () => {
     if (!rows.length) { showToast('الملف فارغ'); return; }
 
     const keys = Object.keys(rows[0]);
-    const nameKey  = keys.find(k => /اسم\s*الطالبة|الاسم/i.test(k)) || keys[0];
-    const scoreKey = keys.find(k => /score/i.test(k)) || keys.find(k => /الدرجة/i.test(k)) || keys[1];
+    // تنضيف رموز مخفية (RTL/LTR marks, zero-width, BOM) بتضيفها جوجل شيتس أحيانًا في العناوين
+    const clean = k => String(k).replace(/[\u200B-\u200F\u202A-\u202E\uFEFF]/g, '').trim();
+    const isTimestampCol = k => /timestamp|الطابع\s*الزمني|طابع\s*زمني/i.test(clean(k));
+    const looksNumeric = v => v !== '' && !isNaN(Number(v));
+
+    let nameKey  = keys.find(k => /اسم|name/i.test(clean(k)) && !isTimestampCol(k));
+    let scoreKey = keys.find(k => /score|درجة|الدرجه|نتيجة/i.test(clean(k)) && !isTimestampCol(k));
+
+    // Fallback: مفيش عنوان مطابق — نلاقي عمود قيمه نص (مش رقم) للاسم، وعمود قيمه رقم للدرجة
+    if (!nameKey) {
+      nameKey = keys.find(k => !isTimestampCol(k) && k !== scoreKey &&
+        rows.slice(0, 5).some(r => r[k] !== '' && !looksNumeric(r[k])));
+    }
+    if (!scoreKey) {
+      scoreKey = keys.find(k => !isTimestampCol(k) && k !== nameKey &&
+        rows.slice(0, 5).every(r => looksNumeric(r[k]) || r[k] === ''));
+    }
 
     if (!nameKey || !scoreKey) { showToast('لم يتم التعرف على أعمدة الاسم أو الدرجة في الملف'); return; }
 
