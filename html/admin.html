@@ -1005,22 +1005,13 @@
             <tbody id="bgPreviewBody"></tbody>
           </table>
         </div>
-        <div style="margin-top:8px;font-size:11px;color:var(--text-mid)">
-          <span id="bgMatchCount"></span> | 
-          <button onclick="clearExcelImport()" style="background:none;border:none;color:#c0392b;cursor:pointer;text-decoration:underline;font-family:inherit;font-size:11px">مسح</button>
+        <div style="margin-top:8px;display:flex;align-items:center;justify-content:space-between;font-size:11px;color:var(--text-mid)">
+          <span id="bgMatchCount"></span>
+          <span>
+            <button onclick="clearExcelImport()" style="background:none;border:none;color:#c0392b;cursor:pointer;text-decoration:underline;font-family:inherit;font-size:11px">مسح</button>
+            <button onclick="applyExcelImport()" style="margin-right:10px;background:var(--green-dark);color:#fff;border:none;border-radius:8px;padding:7px 16px;font-family:inherit;font-weight:600;font-size:12px;cursor:pointer">✅ تطبيق على القائمة تحت</button>
+          </span>
         </div>
-      </div>
-
-      <!-- رفع ملف Excel -->
-      <div style="margin-bottom:16px;padding:12px;background:rgba(92,61,46,0.05);border-radius:10px;border:1px dashed var(--border)">
-        <div style="font-size:13px;font-weight:600;color:var(--text-dark);margin-bottom:8px">📊 استيراد الدرجات من Excel (اختياري)</div>
-        <div style="font-size:12px;color:var(--text-mid);margin-bottom:8px">ارفعي ملف Google Forms أو Excel فيه عمود "اسم الطالبة" وعمود "Score" أو "الدرجة"</div>
-        <input type="file" id="excelGradeFile" accept=".xlsx,.xls,.csv" style="display:none" onchange="importGradesFromExcel(this)">
-        <button onclick="document.getElementById('excelGradeFile').click()" style="background:var(--green-dark);color:white;border:none;border-radius:8px;padding:7px 16px;font-family:inherit;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:6px">
-          <i class="ti ti-upload"></i> رفع ملف Excel
-        </button>
-        <div id="excelImportPreview"></div>
-        <div id="excelImportStatus" style="font-size:12px;margin-top:8px;display:none"></div>
       </div>
 
       <!-- Select students -->
