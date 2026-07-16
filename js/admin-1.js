@@ -1795,13 +1795,13 @@ window.importExcelGrades = async () => {
   const fileInput = document.getElementById('bgExcelFile');
   const file = fileInput.files[0];
   if (!file) { showToast('اختاري ملف أولاً'); return; }
-  if (typeof XLSX === 'undefined') { showToast('مكتبة قراءة Excel لم تُحمّل، حدّثي الصفحة'); return; }
 
   try {
+    const { read, utils } = await import('https://cdn.sheetjs.com/xlsx-0.20.3/package/xlsx.mjs');
     const data = await file.arrayBuffer();
-    const workbook = XLSX.read(data, { type: 'array' });
+    const workbook = read(data, { type: 'array' });
     const sheet = workbook.Sheets[workbook.SheetNames[0]];
-    const rows = XLSX.utils.sheet_to_json(sheet, { defval: '' });
+    const rows = utils.sheet_to_json(sheet, { defval: '' });
 
     if (!rows.length) { showToast('الملف فارغ'); return; }
 
@@ -2752,106 +2752,6 @@ window.confirmPasteAttendance = async () => {
   }
 };
 
-
-// ── استيراد الدرجات من Excel مع Preview ────────────────────────
-window.importGradesFromExcel = async (input) => {
-  const file = input.files[0];
-  if (!file) return;
-  const status = document.getElementById('excelImportStatus');
-  status.style.display = 'block';
-  status.style.color = 'var(--text-mid)';
-  status.textContent = '⏳ جارٍ قراءة الملف...';
-  const previewDiv = document.getElementById('excelImportPreview');
-  if (previewDiv) previewDiv.innerHTML = '';
-
-  try {
-    const { read, utils } = await import('https://cdn.sheetjs.com/xlsx-0.20.3/package/xlsx.mjs');
-    const buffer = await file.arrayBuffer();
-    const wb = read(buffer, { type: 'array' });
-    const ws = wb.Sheets[wb.SheetNames[0]];
-    const rows = utils.sheet_to_json(ws, { defval: '' });
-
-    if (rows.length === 0) { status.textContent = '❌ الملف فاضي'; status.style.color = '#e74c3c'; return; }
-
-    const keys = Object.keys(rows[0]);
-    const nameKey = keys.find(k => normalizeName(k).includes('اسم') || k.toLowerCase().includes('name'));
-    const scoreKey = keys.find(k => k.toLowerCase() === 'score' || normalizeName(k).includes('درجه'));
-
-    if (!nameKey || !scoreKey) {
-      status.textContent = `❌ مش لاقية عمود الاسم أو الدرجة. الأعمدة: ${keys.slice(0,5).join(', ')}`;
-      status.style.color = '#e74c3c'; return;
-    }
-
-    const checkboxes = document.querySelectorAll('#bgStudentsList .bg-check');
-    const previewData = [];
-
-    rows.forEach(row => {
-      const excelName = normalizeName(String(row[nameKey] || ''));
-      const score = parseFloat(row[scoreKey]) || 0;
-      if (!excelName) return;
-      let foundName = null, foundId = null;
-      checkboxes.forEach(cb => {
-        if (normalizeName(cb.dataset.name || '') === excelName) {
-          foundName = cb.dataset.name; foundId = cb.dataset.id;
-        }
-      });
-      previewData.push({ excelName: String(row[nameKey]), score, foundName, foundId });
-    });
-
-    const matchedRows = previewData.filter(r => r.foundId);
-    const unmatchedRows = previewData.filter(r => !r.foundId);
-
-    const pd = document.getElementById('excelImportPreview');
-    pd.innerHTML = `
-      <div style="margin-top:10px;border:1px solid var(--border);border-radius:10px;overflow:hidden">
-        <div style="background:rgba(39,174,96,0.08);padding:8px 12px;font-size:12px;font-weight:700;color:#27ae60">
-          ✅ ${matchedRows.length} طالبة — راجعي الدرجات قبل التأكيد
-        </div>
-        <table style="width:100%;border-collapse:collapse">
-          <thead><tr style="background:rgba(0,0,0,0.04)">
-            <th style="padding:6px 10px;font-size:12px;text-align:right">الاسم في الملف</th>
-            <th style="padding:6px 10px;font-size:12px;text-align:right">الاسم في النظام</th>
-            <th style="padding:6px 10px;font-size:12px;text-align:center">الدرجة</th>
-          </tr></thead>
-          <tbody>${matchedRows.map(r => `<tr style="border-top:1px solid var(--border)">
-            <td style="padding:6px 10px;font-size:12px">${r.excelName}</td>
-            <td style="padding:6px 10px;font-size:12px;color:var(--green-dark)">${r.foundName}</td>
-            <td style="padding:6px 10px;text-align:center">
-              <input type="number" value="${r.score}" min="0" data-preview-id="${r.foundId}"
-                style="width:60px;border:1px solid var(--border);border-radius:6px;padding:3px 6px;text-align:center;font-family:inherit;font-size:13px"/>
-            </td>
-          </tr>`).join('')}</tbody>
-        </table>
-        ${unmatchedRows.length > 0 ? `<div style="background:rgba(231,76,60,0.06);padding:8px 12px;font-size:12px;color:#e74c3c;border-top:1px solid var(--border)">
-          ❌ مش موجودات: ${unmatchedRows.map(r=>r.excelName).slice(0,5).join('، ')}${unmatchedRows.length>5?'...':''}
-        </div>` : ''}
-        <div style="padding:10px 12px;border-top:1px solid var(--border);text-align:left">
-          <button onclick="applyExcelGrades()" style="background:var(--green-dark);color:white;border:none;border-radius:8px;padding:7px 20px;font-family:inherit;font-size:13px;cursor:pointer;font-weight:600">
-            ✅ تأكيد وتطبيق الدرجات
-          </button>
-        </div>
-      </div>`;
-    status.style.display = 'none';
-
-  } catch(e) {
-    status.textContent = '❌ خطأ: ' + e.message;
-    status.style.color = '#e74c3c';
-  }
-  input.value = '';
-};
-
-window.applyExcelGrades = () => {
-  document.querySelectorAll('[data-preview-id]').forEach(input => {
-    const sid = input.dataset.previewId;
-    const score = parseFloat(input.value) || 0;
-    const cb = document.querySelector(`.bg-check[data-id="${sid}"]`);
-    const gradeInput = document.querySelector(`.bg-score[data-id="${sid}"]`);
-    if (cb) cb.checked = true;
-    if (gradeInput) gradeInput.value = score;
-  });
-  document.getElementById('excelImportPreview').innerHTML =
-    '<div style="padding:8px 12px;font-size:12px;color:#27ae60;font-weight:600">✅ تم تطبيق الدرجات — اضغطي "حفظ الدرجات"</div>';
-};
 
 // ── حذف اختبار جماعي من عند كل الطالبات ─────────────────────
 
