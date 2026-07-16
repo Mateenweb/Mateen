@@ -195,8 +195,25 @@ window.deleteSession = async id => {
 const gradesRef  = collection(db, 'students', studentId, 'grades');
 const gradeQuery = query(gradesRef, orderBy('createdAt', 'desc'));
 
-onSnapshot(gradeQuery, snap => {
-  const grades = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+// درجات المشاركة/النهائية اللي معلمة المادة بتسجلها متخفية عن الطالبة
+// لحد ما المعلمة تنشرها على مستوى المادة كلها (subjectSettings/{subject}.participationPublished)
+async function isSubjectPublished(subject) {
+  if (!subject) return true;
+  try {
+    const snap = await getDoc(doc(db, 'subjectSettings', subject));
+    return snap.exists() ? !!snap.data().participationPublished : false;
+  } catch (e) { return false; }
+}
+
+onSnapshot(gradeQuery, async snap => {
+  const allGrades = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  const isTeacherGrade = g => g.label === 'المشاركة' || g.label === 'الدرجة النهائية';
+
+  const subjectsToCheck = [...new Set(allGrades.filter(isTeacherGrade).map(g => g.subject).filter(Boolean))];
+  const publishMap = {};
+  await Promise.all(subjectsToCheck.map(async subj => { publishMap[subj] = await isSubjectPublished(subj); }));
+
+  const grades = allGrades.filter(g => !isTeacherGrade(g) || publishMap[g.subject]);
   renderGrades(grades);
   updateGradeAvg(grades);
 });
