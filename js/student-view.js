@@ -31,7 +31,7 @@ onAuthStateChanged(auth, async user => {
     window.location.href = '../html/home.html'; return;
   }
 
-  // الإدارة  and the not/don'tرفة: تشوف الكل
+  // الإدارة والمشرفة: يشوفوا كل الطالبات
   if (role === 'admin' || role === 'supervisor') {
     document.getElementById('authGate').style.display    = 'none';
     document.getElementById('mainContent').style.display = 'block';
@@ -39,7 +39,7 @@ onAuthStateChanged(auth, async user => {
     return;
   }
 
-  // Teacher (f): but/only طالباتها — Validation يتم جوه initStudentView بعد ما يتحمّل الـ student
+  // المعلمة: تشوف طالباتها بس — التحقق يتم جوه initStudentView بعد ما يتحمّل الـ student
   if (role === 'teacher') {
     document.getElementById('authGate').style.display    = 'none';
     document.getElementById('mainContent').style.display = 'block';
@@ -47,7 +47,7 @@ onAuthStateChanged(auth, async user => {
     return;
   }
 
-  // Studentات وأي حد تاني — ممنوع
+  // الطالبات وأي حد تاني — ممنوع
   window.location.href = '../html/home.html';
 });
 
@@ -57,7 +57,7 @@ function initStudentView(userData = {}, effRole = userData.role || '') {
 const hashParams = new URLSearchParams(location.hash.replace(/^#/, ''));
 const params     = new URLSearchParams(location.search);
 const studentNum = parseInt(hashParams.get('n') || params.get('n'));
-const studentDocId = params.get('id') || hashParams.get('id'); // دعم ?id= من Ifحة الإدارة
+const studentDocId = params.get('id') || hashParams.get('id'); // دعم ?id= من صفحة الإدارة
 
 function showError(msg = 'الرابط غير صحيح') {
   document.body.innerHTML = `
@@ -76,11 +76,11 @@ async function loadAll() {
   let studentId;
 
   if (studentDocId) {
-    // فتح مباشرة بالـ document ID (من Ifحة الإدارة)
+    // فتح مباشرة بالـ document ID (من صفحة الإدارة)
     studentId = studentDocId;
     history.replaceState(null, '', location.pathname);
   } else {
-    // فتح بالرقم الSortي (الطريقة القthisمة)
+    // فتح بالرقم التسلسلي (الطريقة القديمة)
     const allSnap = await getDocs(query(collection(db, 'students'), orderBy('order')));
     if (allSnap.empty || studentNum > allSnap.docs.length) { showError(); return; }
     studentId = allSnap.docs[studentNum - 1].id;
@@ -94,7 +94,7 @@ async function loadAll() {
     getDocs(query(collection(db, 'students', studentId, 'grades'),   orderBy('createdAt', 'desc'))).catch(()=>({docs:[]}))
   ]);
 
-  // Teacher (f): تشوف but/only طالباتها only
+  // المعلمة: تشوف طالباتها بس
   if (effRole === 'teacher') {
     const teacherSubject = userData.subject || '';
     if (!snap.exists() || snap.data().teacherId !== teacherSubject) {
@@ -104,7 +104,7 @@ async function loadAll() {
   }
 
   if (!snap.exists()) {
-    // Student (f) غير مربوطة بعد — نجيب بياناتها من users collection
+    // الطالبة غير مربوطة بعد — نجيب بياناتها من users collection
     if (studentDocId) {
       const userSnap = await getDoc(doc(db, 'users', studentId));
       if (userSnap.exists()) {
@@ -133,7 +133,7 @@ async function loadAll() {
   const sessions = sessSnap.docs.map(d => ({ id: d.id, ...d.data() }));
   const grades   = gradeSnap.docs.map(d => ({ id: d.id, ...d.data() }));
 
-  // Name & status - مخفية (Data الشخصية لا تظهر للnot/don'tرفة)
+  // الاسم والحالة - مخفية (البيانات الشخصية لا تظهر للمشرفة)
   document.title = 'سجل الطالبة — برنامج متين';
 
   // Notes
@@ -193,12 +193,12 @@ window.savePartGrade = async (sid, subject) => {
   if (!scoreInput) return;
   const raw = scoreInput.value.trim();
   if (raw === '') return;
-  const score = Math.max(0, Number(raw));
+  const score = Math.max(0, Math.min(10, Number(raw)));
   scoreInput.value = score;
   scoreInput.disabled = true;
   try {
     await setDoc(doc(db, 'students', sid, 'grades', 'participation_' + subject), {
-      label: 'المشاركة', subject, score,
+      label: 'المشاركة', subject, score, total: 10,
       updatedAt: serverTimestamp(),
     }, { merge: true });
     scoreInput.style.borderColor = '#2e8b57';
@@ -208,6 +208,35 @@ window.savePartGrade = async (sid, subject) => {
     alert('حصل خطأ أثناء حفظ الدرجة، حاولي تاني');
   } finally {
     scoreInput.disabled = false;
+  }
+};
+
+// ── نشر درجات المشاركة على مستوى المادة كلها (زرار واحد لكل مادة، مش لكل طالبة) ──
+async function getPublishState(subjectAr) {
+  try {
+    const snap = await getDoc(doc(db, 'subjectSettings', subjectAr));
+    return snap.exists() ? !!snap.data().participationPublished : false;
+  } catch (e) { return false; }
+}
+
+window.togglePublishParticipation = async (subjectAr) => {
+  const checkbox = document.getElementById(`publishToggle-${subjectAr}`);
+  const label    = document.getElementById(`publishLabel-${subjectAr}`);
+  if (!checkbox) return;
+  const newState = checkbox.checked;
+  checkbox.disabled = true;
+  try {
+    await setDoc(doc(db, 'subjectSettings', subjectAr), {
+      participationPublished: newState,
+      updatedAt: serverTimestamp(),
+    }, { merge: true });
+    label.textContent = newState ? 'منشورة للطالبات' : 'نشر للطالبات';
+  } catch (e) {
+    console.error('togglePublishParticipation:', e);
+    checkbox.checked = !newState;
+    alert('حصل خطأ أثناء تحديث حالة النشر، حاولي تاني');
+  } finally {
+    checkbox.disabled = false;
   }
 };
 
@@ -224,13 +253,23 @@ async function renderGrades(grades, s, studentId, effRole) {
 
   if (canEdit && subjects.length) {
     const rows = await Promise.all(subjects.map(async subj => {
-      const val = await getExistingScore(studentId, 'participation_' + subj);
-      return `<label style="display:flex;align-items:center;justify-content:space-between;font-size:13px">
-        <span>مشاركة — ${subj}</span>
-        <input type="number" min="0" id="partScore-${studentId}-${subj}" value="${val}" placeholder="0"
-          onchange="savePartGrade('${studentId}','${subj}')"
-          style="width:70px;border:1px solid var(--border,#ccc);border-radius:6px;padding:4px 8px;text-align:center">
-      </label>`;
+      const [val, published] = await Promise.all([
+        getExistingScore(studentId, 'participation_' + subj),
+        getPublishState(subj),
+      ]);
+      return `<div style="border:1px solid var(--border,#eee);border-radius:10px;padding:10px 12px;background:#fafafa">
+        <label style="display:flex;align-items:center;justify-content:space-between;font-size:13px;margin-bottom:8px">
+          <span>مشاركة — ${subj}</span>
+          <input type="number" min="0" id="partScore-${studentId}-${subj}" value="${val}" placeholder="0"
+            onchange="savePartGrade('${studentId}','${subj}')"
+            style="width:70px;border:1px solid var(--border,#ccc);border-radius:6px;padding:4px 8px;text-align:center">
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;margin:0;font-size:12px;color:#5c3d2e">
+          <input type="checkbox" id="publishToggle-${subj}" ${published ? 'checked' : ''}
+            onchange="togglePublishParticipation('${subj}')" style="width:14px;height:14px;cursor:pointer">
+          <span id="publishLabel-${subj}">${published ? 'منشورة للطالبات' : 'نشر للطالبات'}</span>
+        </label>
+      </div>`;
     }));
     partWrap.innerHTML = rows.join('');
   } else {
