@@ -91,7 +91,7 @@ async function loadAll() {
   const [snap, sessSnap, gradeSnap] = await Promise.all([
     getDoc(studentRef),
     getDocs(query(collection(db, 'students', studentId, 'sessions'), orderBy('date', 'desc'))).catch(()=>({docs:[]})),
-    getDocs(query(collection(db, 'students', studentId, 'grades'),   orderBy('createdAt', 'desc'))).catch(()=>({docs:[]}))
+    getDocs(collection(db, 'students', studentId, 'grades')).catch(()=>({docs:[]}))
   ]);
 
   // Teacher (f): تشوف but/only طالباتها only
