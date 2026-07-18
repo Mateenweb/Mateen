@@ -182,6 +182,9 @@ window.openThemeModalForSelected = function() {
           <option value="stars" ${t.pattern === 'stars' ? 'selected' : ''}>⭐ نجوم</option>
           <option value="geometric" ${t.pattern === 'geometric' ? 'selected' : ''}>🔷 هندسي</option>
           <option value="circles" ${t.pattern === 'circles' ? 'selected' : ''}>⚪ دوائر</option>
+          <option value="hearts" ${t.pattern === 'hearts' ? 'selected' : ''}>💗 قلوب</option>
+          <option value="leaves" ${t.pattern === 'leaves' ? 'selected' : ''}>🍃 ورق</option>
+          <option value="waves" ${t.pattern === 'waves' ? 'selected' : ''}>🌊 موج</option>
         </select>
       </label>
 
