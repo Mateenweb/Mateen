@@ -130,6 +130,22 @@
     display: flex;
     gap: 12px;
     flex-shrink: 0;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .exam-grades-wrap {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .exam-grade-pill {
+    font-size: 11px;
+    color: var(--green-dark);
+    background: var(--beige);
+    border: 1px solid var(--gold);
+    border-radius: 20px;
+    padding: 3px 10px;
+    white-space: nowrap;
   }
   .student-grades label {
     display: flex;
@@ -301,7 +317,22 @@ async function getExistingScore(sid, gradeId) {
     return '';
   }
 }
-
+// بتجيب درجات الاختبارات (اللي بتضيفها الإدارة من admin.html) الخاصة بمادة المعلمة —
+// عرض فقط، مفيش تعديل هنا. بنستبعد سجل المشاركة لأنه ليه خانة منفصلة فوق.
+async function getExamGrades(sid, subjectAr) {
+  try {
+    const snap = await getDocs(query(
+      collection(db, 'students', sid, 'grades'),
+      where('subject', '==', subjectAr)
+    ));
+    return snap.docs
+      .filter(d => d.id !== 'participation_' + subjectAr && d.data().label !== 'المشاركة')
+      .map(d => d.data());
+  } catch (e) {
+    console.error('getExamGrades:', e);
+    return [];
+  }
+}
 // بتتنادى لما المعلمة تكتب درجة المشاركة وتخرج من الخانة
 window.savePartGrade = async (sid, subject) => {
   const scoreInput = document.getElementById(`partScore-${sid}-${subject}`);
@@ -374,10 +405,21 @@ async function studentRowHTML(s, subjectAr) {
   const statusClass = s.status === 'active' ? 'status-active' : 'status-pending';
   const statusText  = s.status === 'active' ? 'مفعّلة' : 'بانتظار التفعيل';
 
-  let gradesHtml = `<div class="student-no-link">⚠️ مقدرناش نلاقي سجل طالبة بنفس الاسم — كلّمي الإدارة</div>`;
+let gradesHtml = `<div class="student-no-link">⚠️ مقدرناش نلاقي سجل طالبة بنفس الاسم — كلّمي الإدارة</div>`;
   if (s.sid && subjectAr) {
     const gradeIdParticipation = 'participation_' + subjectAr;
-    const partVal = await getExistingScore(s.sid, gradeIdParticipation);
+    const [partVal, examGrades] = await Promise.all([
+      getExistingScore(s.sid, gradeIdParticipation),
+      getExamGrades(s.sid, subjectAr),
+    ]);
+
+    const examGradesHtml = examGrades.length
+      ? examGrades.map(g => `
+        <span class="exam-grade-pill" title="${g.label || 'اختبار'}">
+          ${g.label || 'اختبار'}: ${g.score ?? '—'}${g.total ? ' / ' + g.total : ''}
+        </span>`).join('')
+      : '';
+
     gradesHtml = `
       <div class="student-grades">
         <label>مشاركة
@@ -385,6 +427,7 @@ async function studentRowHTML(s, subjectAr) {
             onchange="savePartGrade('${s.sid}','${subjectAr}')" style="width:56px">
           <span style="font-size:11px;color:var(--text-mid,#8a6a52)">/ ${PARTICIPATION_TOTAL}</span>
         </label>
+        ${examGradesHtml ? `<div class="exam-grades-wrap">${examGradesHtml}</div>` : ''}
       </div>`;
   } else if (!subjectAr) {
     gradesHtml = '';
