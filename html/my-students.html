@@ -512,30 +512,36 @@ onAuthStateChanged(auth, async user => {
     });
 
     const studentsSnap = await getDocs(collection(db, 'students'));
-    let allDocs = studentsSnap.docs
-      .filter(sd => !sd.data().archived) // archived students are excluded right here
-      .map(sd => {
-        const sData = sd.data();
-        const linkedUid = sData.uid || usersByName.get(normalizeStuName(sData.name || '')) || null;
-        const userData  = linkedUid ? usersByUid.get(linkedUid) : null;
-        return {
-          id: linkedUid || sd.id,
-          sid: sd.id,
-          name: sData.name || userData?.name || '—',
-          email: userData?.email || '',
-          status: userData?.status || 'pending',
-          enrolledSubjects: userData?.enrolledSubjects || [],
-        };
-      });
+    // من غير فلترة أرشفة هنا — بما إن نفس الطالبة ممكن يكون ليها أكتر من مستند
+    // مرتبط بنفس الحساب (زي ربط تاني اتعمل بالغلط)، لازم نجمّعهم الأول
+    // ونستبعد أي طالبة لو أي مستند من مستنداتها مؤرشف
+    let allDocsRaw = studentsSnap.docs.map(sd => {
+      const sData = sd.data();
+      const linkedUid = sData.uid || usersByName.get(normalizeStuName(sData.name || '')) || null;
+      const userData  = linkedUid ? usersByUid.get(linkedUid) : null;
+      return {
+        id: linkedUid || sd.id,
+        sid: sd.id,
+        name: sData.name || userData?.name || '—',
+        email: userData?.email || '',
+        status: userData?.status || 'pending',
+        enrolledSubjects: userData?.enrolledSubjects || [],
+        archived: !!sData.archived,
+      };
+    });
 
-    // Two different "students" documents can resolve to the same linked
-    // account (exact uid match, or fuzzy name match as a fallback) — dedupe
-    // by that identity so the same girl never shows twice in the list.
-    const seenIds = new Set();
-    allDocs = allDocs.filter(s => {
-      if (seenIds.has(s.id)) return false;
-      seenIds.add(s.id);
-      return true;
+    // اجمعي كل المستندات حسب هوية الطالبة (id)، ولو أي مستند فيها مؤرشف
+    // استبعدي الطالبة بالكامل — مش بس المستند المؤرشف نفسه
+    const byId = new Map();
+    allDocsRaw.forEach(s => {
+      if (!byId.has(s.id)) byId.set(s.id, []);
+      byId.get(s.id).push(s);
+    });
+    let allDocs = [];
+    byId.forEach(group => {
+      const anyArchived = group.some(s => s.archived);
+      if (anyArchived) return; // الطالبة مؤرشفة (من أي مستند) — تتشال بالكامل
+      allDocs.push(group[0]); // مفيش أرشفة — خدي أول مستند يمثلها
     });
 
     // Teacher (f): فلتر على مادتها only — بس الطالبات اللي عندهم حساب مربوط ومسجلين في المادة دي
