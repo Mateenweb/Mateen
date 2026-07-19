@@ -252,6 +252,7 @@ const ATT_CSS = `
   .td-name { text-align: right; font-weight: 700; color: #5c3d2e; }
   .chip-present { background:#e5f2e6; color:#1a6b36; padding:3px 12px; border-radius:20px; font-size:12.5px; font-weight:600; }
   .chip-absent  { background:#fbe9e9; color:#b71c1c; padding:3px 12px; border-radius:20px; font-size:12.5px; font-weight:600; }
+  .chip-excused { background:#fdf3e2; color:#a06a00; padding:3px 12px; border-radius:20px; font-size:12.5px; font-weight:600; }
   .chip-empty   { color:#c3ac8c; font-size:12.5px; }
   .att-footer { display:flex; justify-content:space-between; align-items:center; margin-top:18px; padding-top:12px;
     border-top:1px solid #d6c4a8; font-size:12px; color:#8a6a52; }
@@ -290,6 +291,7 @@ function buildAttHtmlPrint(pages) {
 function chipAtt(v) {
   if (v === 'present') return '<span class="chip-present">✔ حاضرة</span>';
   if (v === 'absent')  return '<span class="chip-absent">✖ غائبة</span>';
+  if (v === 'excused') return '<span class="chip-excused">⭕ اعتذار</span>';
   return '<span class="chip-empty">—</span>';
 }
 
@@ -301,22 +303,22 @@ function chipAtt(v) {
  */
 function buildAttSummaryStats(studentsData) {
   return studentsData.map(st => {
-    let p = 0, a = 0;
+    let p = 0, a = 0, e = 0;
     (st.sessions || []).forEach(se => {
       Object.values(se.subjects || {}).forEach(v => {
-        if (v === 'present') p++; else if (v === 'absent') a++;
+        if (v === 'present') p++; else if (v === 'absent') a++; else if (v === 'excused') e++;
       });
     });
     const total = p + a;
     const pct = total ? Math.round((p / total) * 100) : 0;
-    return { name: st.name, present: p, absent: a, pct };
+    return { name: st.name, present: p, absent: a, excused: e, pct };
   });
 }
 
 function buildAttSummaryPage(studentsData) {
   const stats = buildAttSummaryStats(studentsData);
   const rows = stats.map((r, i) =>
-    `<tr><td>${i + 1}</td><td class="td-name">${r.name}</td><td>${r.present}✔</td><td>${r.absent}✖</td><td>${r.pct}%</td></tr>`
+    `<tr><td>${i + 1}</td><td class="td-name">${r.name}</td><td>${r.present}✔</td><td>${r.absent}✖</td><td>${r.excused}⭕</td><td>${r.pct}%</td></tr>`
   ).join('');
 
   return `<div class="att-page">
@@ -325,7 +327,7 @@ function buildAttSummaryPage(studentsData) {
     <div class="att-title">سجل الحضور والغياب</div>
     <div class="att-subtitle">ملخص إجمالي</div>
     <table>
-      <thead><tr><th>#</th><th class="td-name">الطالبة</th><th>حضور</th><th>غياب</th><th>نسبة الحضور</th></tr></thead>
+      <thead><tr><th>#</th><th class="td-name">الطالبة</th><th>حضور</th><th>غياب</th><th>اعتذار</th><th>نسبة الحضور</th></tr></thead>
       <tbody>${rows}</tbody>
     </table>
     <div class="att-footer"><span>برنامج متين العلمي</span><span>◆</span><span>${stats.length} طالبة</span></div>
@@ -360,16 +362,17 @@ function buildAttPages(studentsData, mode) {
       const sessions = [...(st.sessions || [])].sort((a,b) => (a.date||'') < (b.date||'') ? -1 : 1);
       const subjs = subjects.length ? subjects : [...new Set(sessions.flatMap(se => Object.keys(se.subjects||{})))];
       const headCells = `<th>#</th><th>اليوم</th><th>التاريخ</th>` + subjs.map(s=>`<th>${s}</th>`).join('') + `<th>الإجمالي</th>`;
-      let totalP = 0, totalA = 0;
+      let totalP = 0, totalA = 0, totalE = 0;
       const rows = sessions.map((se, i) => {
         const subjCells = subjs.map(s => `<td>${chipAtt((se.subjects||{})[s]||'')}</td>`).join('');
         const p = subjs.filter(s => (se.subjects||{})[s]==='present').length;
         const a = subjs.filter(s => (se.subjects||{})[s]==='absent').length;
-        totalP += p; totalA += a;
-        const total = subjs.length ? `${p}✔ / ${a}✖` : '—';
+        const e = subjs.filter(s => (se.subjects||{})[s]==='excused').length;
+        totalP += p; totalA += a; totalE += e;
+        const total = subjs.length ? `${p}✔ / ${a}✖ / ${e}⭕` : '—';
         return `<tr><td>${i+1}</td><td>${se.day||''}</td><td>${se.date||''}</td>${subjCells}<td>${total}</td></tr>`;
       }).join('');
-      const summaryRow = `<tr style="background:#eef3ff;font-weight:600"><td colspan="3">الإجمالي</td>${subjs.map(()=>'<td></td>').join('')}<td>${totalP}✔ / ${totalA}✖</td></tr>`;
+      const summaryRow = `<tr style="background:#eef3ff;font-weight:600"><td colspan="3">الإجمالي</td>${subjs.map(()=>'<td></td>').join('')}<td>${totalP}✔ / ${totalA}✖ / ${totalE}⭕</td></tr>`;
 
       return `<div class="att-page">
         ${watermarkHtml()}
@@ -411,15 +414,16 @@ function buildAttPages(studentsData, mode) {
 
     return weeks.map(week => {
       const headCells = `<th>#</th><th>اليوم</th><th>التاريخ</th><th class="td-name">الطالبة</th>` + subjects.map(s=>`<th>${s}</th>`).join('') + `<th>الإجمالي</th>`;
-      let totalP = 0, totalA = 0, rowNum = 0;
+      let totalP = 0, totalA = 0, totalE = 0, rowNum = 0;
       const rows = week.dates.map(dd =>
         studentsData.map(st => {
           const se = (st.sessions||[]).find(x => (x.date||'') === dd.date);
           const subjCells = subjects.map(s => `<td>${chipAtt(se ? (se.subjects||{})[s]||'' : '')}</td>`).join('');
           const p = se ? Object.values(se.subjects||{}).filter(v=>v==='present').length : 0;
           const a = se ? Object.values(se.subjects||{}).filter(v=>v==='absent').length : 0;
-          totalP += p; totalA += a; rowNum++;
-          const total = se ? `${p}✔ / ${a}✖` : '<span class="chip-empty">—</span>';
+          const e = se ? Object.values(se.subjects||{}).filter(v=>v==='excused').length : 0;
+          totalP += p; totalA += a; totalE += e; rowNum++;
+          const total = se ? `${p}✔ / ${a}✖ / ${e}⭕` : '<span class="chip-empty">—</span>';
           return `<tr><td>${rowNum}</td><td>${dd.day||''}</td><td>${dd.date||''}</td><td class="td-name">${st.name}</td>${subjCells}<td>${total}</td></tr>`;
         }).join('')
       ).join('');
@@ -433,7 +437,7 @@ function buildAttPages(studentsData, mode) {
           <thead><tr>${headCells}</tr></thead>
           <tbody>${rows}</tbody>
         </table>
-        <div class="att-footer"><span>برنامج متين العلمي</span><span>◆</span><span>${totalP}✔ / ${totalA}✖</span></div>
+        <div class="att-footer"><span>برنامج متين العلمي</span><span>◆</span><span>${totalP}✔ / ${totalA}✖ / ${totalE}⭕</span></div>
       </div>`;
     }).join('');
 
@@ -450,13 +454,14 @@ function buildAttPages(studentsData, mode) {
     return subjList.map(subj => {
       const headCells = `<th>#</th><th>اليوم</th><th>التاريخ</th><th class="td-name">الطالبة</th><th>الحالة</th>`;
 
-      let totalP = 0, totalA = 0, rowNum = 0;
+      let totalP = 0, totalA = 0, totalE = 0, rowNum = 0;
       const rows = allDates.map(dd =>
         studentsData.map(st => {
           const se = (st.sessions||[]).find(x=>(x.date||'')===(dd.date||''));
           const v = se ? (se.subjects||{})[subj] : undefined;
           if (v === 'present') totalP++;
           if (v === 'absent') totalA++;
+          if (v === 'excused') totalE++;
           rowNum++;
           return `<tr><td>${rowNum}</td><td>${dd.day||''}</td><td>${dd.date||''}</td><td class="td-name">${st.name}</td><td>${chipAtt(v||'')}</td></tr>`;
         }).join('')
@@ -471,7 +476,7 @@ function buildAttPages(studentsData, mode) {
           <thead><tr>${headCells}</tr></thead>
           <tbody>${rows}</tbody>
         </table>
-        <div class="att-footer"><span>برنامج متين العلمي</span><span>◆</span><span>${totalP}✔ / ${totalA}✖</span></div>
+        <div class="att-footer"><span>برنامج متين العلمي</span><span>◆</span><span>${totalP}✔ / ${totalA}✖ / ${totalE}⭕</span></div>
       </div>`;
     }).join('');
 
@@ -592,10 +597,10 @@ export async function exportAttendanceExcel(studentsData, includeSummary=true) {
 
   if (includeSummary) {
     const summaryRows = buildAttSummaryStats(studentsData).map(r => ({
-      'الطالبة': r.name, 'حضور': r.present, 'غياب': r.absent, 'نسبة الحضور %': r.pct
+      'الطالبة': r.name, 'حضور': r.present, 'غياب': r.absent, 'اعتذار': r.excused, 'نسبة الحضور %': r.pct
     }));
     const wsSummary = utils.json_to_sheet(summaryRows);
-    wsSummary['!cols'] = [{ wch: 28 }, { wch: 10 }, { wch: 10 }, { wch: 16 }];
+    wsSummary['!cols'] = [{ wch: 28 }, { wch: 10 }, { wch: 10 }, { wch: 10 }, { wch: 16 }];
     utils.book_append_sheet(wb, wsSummary, 'ملخص');
   }
 
