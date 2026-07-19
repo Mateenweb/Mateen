@@ -102,6 +102,7 @@ body { background: var(--beige); font-family: 'Noto Naskh Arabic', serif; direct
 .att-chip { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; }
 .att-chip.present { background: #e8dfc8; color: #6b4f2a; }
 .att-chip.absent  { background: #f2ddd8; color: #8b3a2a; }
+.att-chip.excused { background: #f8ecd4; color: #9a6a1e; }
 .att-chip.empty   { background: var(--beige2); color: var(--text-mid); }
 
 /* Grade Item */
