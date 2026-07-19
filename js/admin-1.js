@@ -2345,6 +2345,68 @@ window.saveBulkAttendance = async () => {
 // ══════════════════════════════════════════════════════════════
 //  حذف حضور جماعي من عند كل الطالبات
 // ══════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════
+//  فحص نقص الحضور — أي يوم فيه طالبة (غير مؤرشفة) ناقصها تسجيل حضور
+// ══════════════════════════════════════════════════════════════
+window.openMissingAttModal = async () => {
+  const modal = document.getElementById('missingAttModal');
+  const list  = document.getElementById('missingAttList');
+  if (!modal) { alert('المودال مش موجود'); return; }
+
+  modal.style.display = 'flex';
+  list.innerHTML = '<div style="text-align:center;color:var(--text-mid);font-size:13px;padding:20px">جارٍ الفحص...</div>';
+
+  try {
+    const studSnap = await getDocs(collection(db, 'students'));
+    const activeStudents = studSnap.docs
+      .filter(d => !d.data().archived && d.data().name && d.data().name !== 'طالبة جديدة')
+      .map(d => ({ id: d.id, name: d.data().name }));
+
+    if (!activeStudents.length) {
+      list.innerHTML = '<div style="text-align:center;color:var(--text-mid);font-size:13px;padding:20px">مفيش طالبات نشطات</div>';
+      return;
+    }
+
+    const dateMap = {}; // date -> { day, presentIds:Set }
+    await Promise.all(activeStudents.map(async s => {
+      const sessSnap = await getDocs(collection(db, 'students', s.id, 'sessions'));
+      sessSnap.docs.forEach(se => {
+        const data = se.data();
+        const date = data.date;
+        if (!date) return;
+        if (!dateMap[date]) dateMap[date] = { day: data.day || '', presentIds: new Set() };
+        dateMap[date].presentIds.add(s.id);
+      });
+    }));
+
+    const results = [];
+    Object.keys(dateMap).forEach(date => {
+      const { day, presentIds } = dateMap[date];
+      const missing = activeStudents.filter(s => !presentIds.has(s.id));
+      // نطلع بس الأيام اللي أغلب الطالبات مسجلين فيها وناقص شوية بس (مش يوم مفيش فيه حضور خالص لحد)
+      if (missing.length && missing.length < activeStudents.length) {
+        results.push({ date, day, missing });
+      }
+    });
+
+    if (!results.length) {
+      list.innerHTML = '<div style="text-align:center;color:#1e8449;font-size:13px;padding:20px">✅ كل الطالبات عندهم حضور مسجل في كل الأيام</div>';
+      return;
+    }
+
+    results.sort((a, b) => b.date.localeCompare(a.date));
+    list.innerHTML = results.map(r => `
+      <div style="padding:10px 14px;background:rgba(230,126,34,0.08);border-radius:10px;border:1px solid rgba(230,126,34,0.3)">
+        <div style="font-size:13px;font-weight:700">${esc(r.date)}${r.day ? ` — ${esc(r.day)}` : ''}</div>
+        <div style="font-size:11px;color:var(--text-mid);margin:4px 0 6px">ناقص حضور ${r.missing.length} طالبة:</div>
+        <div style="font-size:12px;color:#c0392b">${r.missing.map(s => esc(s.name)).join('، ')}</div>
+      </div>`).join('');
+  } catch (e) {
+    list.innerHTML = `<div style="color:#e74c3c;font-size:13px;padding:20px">❌ خطأ: ${e.message}</div>`;
+    console.error('openMissingAttModal:', e);
+  }
+};
+
 window.openDeleteAttModal = async () => {
   const modal = document.getElementById('deleteAttModal');
   const list  = document.getElementById('attListToDelete');
