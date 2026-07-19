@@ -514,10 +514,17 @@ function renderSessions(sessions) {
       </div>`;
     }).join('');
 
+    const dayHtml = _isAdmin
+      ? `<input type="text" class="session-day-edit" value="${(s.day || '').replace(/"/g, '&quot;')}"
+          data-session="${s.id}" placeholder="اسم اليوم"
+          onclick="event.stopPropagation()" onchange="event.stopPropagation();updateSessionDay(this)"
+          style="border:1px solid var(--border,#e3d7c3);border-radius:6px;padding:2px 8px;font-family:inherit;font-size:13px;font-weight:700;color:inherit;width:90px;background:#fff">`
+      : (s.day || '');
+
     return `<div class="session-card">
       <div class="session-head" onclick="toggleSession('${s.id}')">
         <div>
-          <div class="session-day-date">${s.day || ''} — ${formatDate(s.date)}</div>
+          <div class="session-day-date">${dayHtml} — ${formatDate(s.date)}</div>
           <div class="session-summary">${present}/${keys.length} مواد حاضرة</div>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
@@ -553,6 +560,21 @@ window.updateAttendanceStatus = async (selectEl) => {
     showSavedToast();
   } catch (e) {
     alert('حدث خطأ أثناء تعديل الحضور');
+    console.error(e);
+  }
+};
+
+window.updateSessionDay = async (inputEl) => {
+  const sessionId = inputEl.dataset.session;
+  const newVal    = inputEl.value.trim();
+  try {
+    const studentId = new URLSearchParams(location.search).get('id');
+    await updateDoc(doc(db, 'students', studentId, 'sessions', sessionId), {
+      day: newVal,
+    });
+    showSavedToast();
+  } catch (e) {
+    alert('حدث خطأ أثناء تعديل اسم اليوم');
     console.error(e);
   }
 };
