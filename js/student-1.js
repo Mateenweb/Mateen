@@ -494,8 +494,20 @@ function renderSessions(sessions) {
     const present  = keys.filter(k => subjects[k] === 'present').length;
     const subjRows = keys.map(k => {
       const v = subjects[k];
-      const chip = v === 'present' ? 'present' : v === 'absent' ? 'absent' : 'empty';
-      const label = v === 'present' ? 'حاضرة' : v === 'absent' ? 'غائبة' : '—';
+      const chip = v === 'present' ? 'present' : v === 'absent' ? 'absent' : v === 'excused' ? 'excused' : 'empty';
+      const label = v === 'present' ? 'حاضرة' : v === 'absent' ? 'غائبة' : v === 'excused' ? 'معتذرة' : '—';
+      if (_isAdmin) {
+        return `<div class="subj-row">
+        <span class="subj-name">${k}</span>
+        <select class="att-chip ${chip}" data-session="${s.id}" data-subject="${k}"
+          onclick="event.stopPropagation()" onchange="event.stopPropagation();updateAttendanceStatus(this)"
+          style="border:none;border-radius:20px;padding:3px 10px;font-family:inherit;font-size:12px;cursor:pointer">
+          <option value="present" ${v === 'present' ? 'selected' : ''}>حاضرة</option>
+          <option value="absent" ${v === 'absent' ? 'selected' : ''}>غائبة</option>
+          <option value="excused" ${v === 'excused' ? 'selected' : ''}>معتذرة</option>
+        </select>
+      </div>`;
+      }
       return `<div class="subj-row">
         <span class="subj-name">${k}</span>
         <span class="att-chip ${chip}">${label}</span>
@@ -526,6 +538,23 @@ window.toggleSession = id => {
   document.getElementById(`subj_${id}`)?.classList.toggle('open');
   const arr = document.getElementById(`arr_${id}`);
   if (arr) arr.style.transform = arr.style.transform === 'rotate(180deg)' ? '' : 'rotate(180deg)';
+};
+
+window.updateAttendanceStatus = async (selectEl) => {
+  const sessionId = selectEl.dataset.session;
+  const subject   = selectEl.dataset.subject;
+  const newVal    = selectEl.value;
+  try {
+    const studentId = new URLSearchParams(location.search).get('id');
+    await updateDoc(doc(db, 'students', studentId, 'sessions', sessionId), {
+      [`subjects.${subject}`]: newVal,
+    });
+    selectEl.className = `att-chip ${newVal === 'present' ? 'present' : newVal === 'absent' ? 'absent' : 'excused'}`;
+    showSavedToast();
+  } catch (e) {
+    alert('حدث خطأ أثناء تعديل الحضور');
+    console.error(e);
+  }
 };
 
 window.deleteSession = async (sessionId) => {
