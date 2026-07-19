@@ -530,8 +530,8 @@ onAuthStateChanged(auth, async user => {
       };
     });
 
-    // اجمعي كل المستندات حسب هوية الطالبة (id)، ولو أي مستند فيها مؤرشف
-    // استبعدي الطالبة بالكامل — مش بس المستند المؤرشف نفسه
+    // اجمعي كل المستندات حسب هوية الطالبة (id)، ولو أي مستند فيها مؤرشف أو حسابها
+    // موقوف (suspended) استبعدي الطالبة بالكامل — مش بس المستند المؤرشف نفسه
     const byId = new Map();
     allDocsRaw.forEach(s => {
       if (!byId.has(s.id)) byId.set(s.id, []);
@@ -539,9 +539,10 @@ onAuthStateChanged(auth, async user => {
     });
     let allDocs = [];
     byId.forEach(group => {
-      const anyArchived = group.some(s => s.archived);
-      if (anyArchived) return; // الطالبة مؤرشفة (من أي مستند) — تتشال بالكامل
-      allDocs.push(group[0]); // مفيش أرشفة — خدي أول مستند يمثلها
+      const anyArchived  = group.some(s => s.archived);
+      const anySuspended = group.some(s => s.status === 'suspended');
+      if (anyArchived || anySuspended) return; // مؤرشفة أو حسابها موقوف — تتشال بالكامل
+      allDocs.push(group[0]);
     });
 
     // Teacher (f): فلتر على مادتها only — بس الطالبات اللي عندهم حساب مربوط ومسجلين في المادة دي
