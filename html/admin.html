@@ -268,7 +268,7 @@
       </button>
       <button class="actions-menu-item" onclick="openDeleteAttModal();closeActionMenus()">
         <span class="ami-icon" style="background:rgba(192,57,43,0.1);color:#c0392b"><i class="ti ti-calendar-x"></i></span>
-        <span class="ami-text"><strong>حذف حضور جماعي</strong><small>احذفي جلسة حضور من كل الطالبات</small></span>
+        <span class="ami-text"><strong>تعديل / حذف حضور جماعي</strong><small>عدّلي اسم اليوم أو احذفي جلسة من عند كل الطالبات</small></span>
       </button>
       <button class="actions-menu-item" onclick="openPasteAttModal();closeActionMenus()">
         <span class="ami-icon" style="background:rgba(155,89,182,0.12);color:#8e44ad"><i class="ti ti-message-2"></i></span>
@@ -1092,11 +1092,11 @@
 <div id="deleteAttModal" class="modal-overlay" style="display:none" onclick="if(event.target===this)this.style.display='none'">
   <div class="modal-box" style="width:min(94vw,480px)">
     <div class="modal-head">
-      <span class="m-title">🗑️ حذف حضور جماعي</span>
+      <span class="m-title">📅 تعديل / حذف حضور جماعي</span>
       <button class="m-close" onclick="document.getElementById('deleteAttModal').style.display='none'">✕</button>
     </div>
     <div class="modal-body">
-      <p style="font-size:13px;color:var(--text-mid);margin-bottom:14px">اختاري جلسة الحضور اللي عاوزة تحذفيها من عند كل الطالبات.</p>
+      <p style="font-size:13px;color:var(--text-mid);margin-bottom:14px">اختاري جلسة حضور: عدّلي اسم اليوم بتاعها أو احذفيها من عند كل الطالبات دفعة واحدة.</p>
       <div id="attListToDelete" style="display:flex;flex-direction:column;gap:8px;max-height:300px;overflow-y:auto">
         <div style="text-align:center;color:var(--text-mid);font-size:13px;padding:20px">جارٍ التحميل...</div>
       </div>

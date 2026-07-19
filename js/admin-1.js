@@ -2086,10 +2086,10 @@ window.openDeleteExamModal = async () => {
 
   try {
     // جيب كل الطالبات وكل الاختبارات بتاعتهم
-    const studSnap = await getDocs(query(collection(db, 'students'), where('archived', '!=', true)));
+    const studSnap = await getDocs(collection(db, 'students'));
     const examMap = {}; // { label_subject: [ {studentId, gradeId} ] }
 
-    await Promise.all(studSnap.docs.map(async sDoc => {
+    await Promise.all(studSnap.docs.filter(sDoc => !sDoc.data().archived).map(async sDoc => {
       const gradesSnap = await getDocs(collection(db, 'students', sDoc.id, 'grades'));
       gradesSnap.docs.forEach(g => {
         const data = g.data();
@@ -2354,10 +2354,10 @@ window.openDeleteAttModal = async () => {
   list.innerHTML = '<div style="text-align:center;color:var(--text-mid);font-size:13px;padding:20px">جارٍ التحميل...</div>';
 
   try {
-    const studSnap = await getDocs(query(collection(db, 'students'), where('archived', '!=', true)));
+    const studSnap = await getDocs(collection(db, 'students'));
     const attMap = {}; // { date|||day: [ {studentId, sessionId} ] }
 
-    await Promise.all(studSnap.docs.map(async sDoc => {
+    await Promise.all(studSnap.docs.filter(sDoc => !sDoc.data().archived).map(async sDoc => {
       const sessSnap = await getDocs(collection(db, 'students', sDoc.id, 'sessions'));
       sessSnap.docs.forEach(se => {
         const data = se.data();
@@ -2382,9 +2382,14 @@ window.openDeleteAttModal = async () => {
           <div style="font-size:13px;font-weight:700">${esc(date || '—')}${day ? ` — ${esc(day)}` : ''}</div>
           <div style="font-size:11px;color:var(--text-mid)">📊 ${entries.length} سجل حضور</div>
         </div>
-        <button onclick="deleteBulkAttendance('${encodeURIComponent(key)}')" style="background:none;border:1px solid #e74c3c;color:#e74c3c;border-radius:8px;padding:5px 12px;cursor:pointer;font-size:12px;font-family:inherit;white-space:nowrap">
-          <i class="ti ti-trash"></i> حذف
-        </button>
+        <div style="display:flex;align-items:center;flex-shrink:0">
+          <button onclick="editBulkAttendanceDay('${encodeURIComponent(key)}')" style="background:none;border:1px solid var(--green-dark);color:var(--green-dark);border-radius:8px;padding:5px 12px;cursor:pointer;font-size:12px;font-family:inherit;white-space:nowrap;margin-inline-end:6px">
+            <i class="ti ti-pencil"></i> تعديل الاسم
+          </button>
+          <button onclick="deleteBulkAttendance('${encodeURIComponent(key)}')" style="background:none;border:1px solid #e74c3c;color:#e74c3c;border-radius:8px;padding:5px 12px;cursor:pointer;font-size:12px;font-family:inherit;white-space:nowrap">
+            <i class="ti ti-trash"></i> حذف
+          </button>
+        </div>
       </div>`;
     }).join('');
 
@@ -2392,6 +2397,29 @@ window.openDeleteAttModal = async () => {
   } catch(e) {
     list.innerHTML = `<div style="color:#e74c3c;font-size:13px;padding:20px">❌ خطأ: ${e.message}</div>`;
     console.error('openDeleteAttModal:', e);
+  }
+};
+
+window.editBulkAttendanceDay = async (encodedKey) => {
+  const key = decodeURIComponent(encodedKey);
+  const [date, day] = key.split('|||');
+  const entries = window._attMapCache?.[key] || [];
+  if (!entries.length) { alert('مفيش بيانات'); return; }
+
+  const newDay = prompt(`اسم اليوم الجديد لجلسة "${date || day}" (هيتطبق على ${entries.length} طالبة):`, day || '');
+  if (newDay === null) return; // اتلغى
+  const trimmed = newDay.trim();
+  if (!trimmed) { alert('لازم تكتبي اسم اليوم'); return; }
+
+  try {
+    await Promise.all(entries.map(({ studentId, sessionId }) =>
+      updateDoc(doc(db, 'students', studentId, 'sessions', sessionId), { day: trimmed })
+    ));
+    showToast?.(`✅ اتعدّل اسم اليوم لـ ${entries.length} طالبة`);
+    openDeleteAttModal(); // إعادة تحميل القايمة
+  } catch(e) {
+    showToast?.('❌ خطأ: ' + e.message);
+    console.error('editBulkAttendanceDay:', e);
   }
 };
 
