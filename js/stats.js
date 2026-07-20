@@ -9,7 +9,7 @@ import { getFirestore, collection, getDocs, query, orderBy, doc, getDoc }
 import { getAuth, onAuthStateChanged }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
 import { FIREBASE_CONFIG } from './config.js';
-import { loadSubjectsFor } from './subjects.js';
+import { loadSubjects } from './subjects.js';
 import { exportAttendanceExcel, exportAttendanceWord, exportAttendancePdf, exportGenericExcel, exportGenericWord, exportGenericPdf } from './export.js';
 
 const app  = getApps().length ? getApp() : initializeApp(FIREBASE_CONFIG);
@@ -49,14 +49,15 @@ async function loadAll() {
   document.getElementById('loadingMsg').style.display = 'none';
   document.getElementById('mainContent').style.display = 'block';
 
-  // ملء فلتر مادة الدرجات من نفس مصدر المواد الحقيقي بدل القايمة الثابتة في الـ HTML
-  loadSubjectsFor('inExams').then(subjects => {
+  // ملء فلتر مادة الدرجات من نفس مصدر المواد الحقيقي — كل المواد بدون فلترة inExams،
+  // عشان يتطابق مع مودال "إضافة اختبار" في لوحة الأدمن اللي بياخد كل المواد بدون قيد
+  loadSubjects().then(subjects => {
     const sel = document.getElementById('gradeSubjectFilter');
     if (sel && subjects.length) {
       sel.innerHTML = '<option value="">كل المواد</option>' +
         subjects.map(s => `<option>${s}</option>`).join('');
     }
-  }).catch(e => console.error('loadSubjectsFor(inExams):', e));
+  }).catch(e => console.error('loadSubjects:', e));
 
   renderAll();
 }
