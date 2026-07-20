@@ -33,10 +33,12 @@ let allStudents = [];   // [{ id, name, sessions:[], grades:[] }]
 // ── Load All Data ────────────────────────────
 async function loadAll() {
   const studSnap = await getDocs(query(collection(db, 'students'), orderBy('order')));
-  const students = studSnap.docs.map(d => ({ id: d.id, ...d.data(), sessions: [], grades: [] }));
+  const rawDocs = studSnap.docs
+    .map(d => ({ id: d.id, ...d.data(), sessions: [], grades: [] }))
+    .filter(s => !s.archived); // استبعاد المؤرشفات من الإحصائيات
 
   // Load sessions + grades for all students in parallel
-  await Promise.all(students.map(async s => {
+  await Promise.all(rawDocs.map(async s => {
     const [sessSnap, gradeSnap] = await Promise.all([
       getDocs(collection(db, 'students', s.id, 'sessions')),
       getDocs(collection(db, 'students', s.id, 'grades'))
@@ -44,6 +46,21 @@ async function loadAll() {
     s.sessions = sessSnap.docs.map(d => ({ id: d.id, ...d.data() }));
     s.grades   = gradeSnap.docs.map(d => ({ id: d.id, ...d.data() }));
   }));
+
+  // دمج أي مستندات مكررة مرتبطة بنفس الحساب (uid) عشان نفس الطالبة ماتتحسبش
+  // مرتين، ولا تضيع حضور/درجات مسجلة على النسخة التانية من مستندها
+  const byIdentity = new Map();
+  rawDocs.forEach(s => {
+    const key = s.uid || s.id;
+    if (!byIdentity.has(key)) {
+      byIdentity.set(key, s);
+    } else {
+      const existing = byIdentity.get(key);
+      existing.sessions.push(...s.sessions);
+      existing.grades.push(...s.grades);
+    }
+  });
+  const students = [...byIdentity.values()];
 
   allStudents = students;
   document.getElementById('loadingMsg').style.display = 'none';

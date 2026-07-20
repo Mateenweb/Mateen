@@ -15,6 +15,18 @@ const app  = initializeApp(FIREBASE_CONFIG);
 const db   = getFirestore(app);
 const auth = getAuth(app);
 
+// كود المادة (المخزّن في حساب المعلمة) → الاسم العربي (المخزّن في enrolledSubjects بتاع الطالبة)
+const SUBJECT_MAP = {
+  'tafseer': 'التفسير',
+  'fiqh':    'الفقه',
+  'aqeedah': 'العقيدة',
+  'hadith':  'الحديث',
+  'hadeeth': 'الحديث',
+  'quran':   'مقرأة متين',
+  'quran1':  'مقرأة متين',
+  'quran2':  'مقرأة متين',
+};
+
 // ── Auth Guard ───────────────────────────────
 onAuthStateChanged(auth, async user => {
   if (!user) { window.location.href = '../html/login.html'; return; }
@@ -94,10 +106,11 @@ async function loadAll() {
     getDocs(query(collection(db, 'students', studentId, 'grades'),   orderBy('createdAt', 'desc'))).catch(()=>({docs:[]}))
   ]);
 
-  // المعلمة: تشوف طالباتها بس
+  // المعلمة: تشوف طالباتها بس (اللي مسجلة في مادتها فعليًا)
   if (effRole === 'teacher') {
-    const teacherSubject = userData.subject || '';
-    if (!snap.exists() || snap.data().teacherId !== teacherSubject) {
+    const teacherSubjectAr = SUBJECT_MAP[userData.subject || ''] || userData.subject || '';
+    const enrolled = Array.isArray(snap.data()?.enrolledSubjects) ? snap.data().enrolledSubjects : [];
+    if (!snap.exists() || !enrolled.includes(teacherSubjectAr)) {
       showError('ليس لديكِ صلاحية لعرض هذه الصفحة');
       return;
     }
@@ -247,9 +260,13 @@ async function renderGrades(grades, s, studentId, effRole) {
   // خانة المشاركة القابلة للتعديل — لكل مادة الطالبة مسجلة فيها
   const canEdit = ['admin', 'supervisor', 'teacher'].includes(effRole);
   const partWrap = document.getElementById('participationWrap');
+  const enrolledSubjects = Array.isArray(s.enrolledSubjects) ? s.enrolledSubjects : [];
   const subjects = effRole === 'teacher'
-    ? [s.teacherId].filter(Boolean)   // المعلمة تشوف مادتها بس
-    : (Array.isArray(s.enrolledSubjects) ? s.enrolledSubjects : []);
+    ? (() => {
+        const teacherSubjectAr = SUBJECT_MAP[userData.subject || ''] || userData.subject || '';
+        return enrolledSubjects.includes(teacherSubjectAr) ? [teacherSubjectAr] : [];
+      })()
+    : enrolledSubjects;
 
   if (canEdit && subjects.length) {
     const rows = await Promise.all(subjects.map(async subj => {

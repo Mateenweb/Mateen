@@ -18,6 +18,18 @@ const app  = initializeApp(FIREBASE_CONFIG);
 const db   = getFirestore(app);
 const auth = getAuth(app);
 
+// كود المادة (المخزّن في حساب المعلمة) → الاسم العربي (المخزّن في enrolledSubjects بتاع الطالبة)
+const SUBJECT_MAP = {
+  'tafseer': 'التفسير',
+  'fiqh':    'الفقه',
+  'aqeedah': 'العقيدة',
+  'hadith':  'الحديث',
+  'hadeeth': 'الحديث',
+  'quran':   'مقرأة متين',
+  'quran1':  'مقرأة متين',
+  'quran2':  'مقرأة متين',
+};
+
 // ── Auth Guard ───────────────────────────────
 onAuthStateChanged(auth, async user => {
   if (!user) { window.location.href = '../html/login.html'; return; }
@@ -37,7 +49,7 @@ onAuthStateChanged(auth, async user => {
   const params    = new URLSearchParams(location.search);
   const studentId = params.get('id');
 
-  // Student (f): تشوف but/only Rowحتها هي
+  // الطالبة: تشوف بياناتها هي بس
   if (role === 'student' || role === 'mateen') {
     if (!studentId || user.uid !== studentId) {
       window.location.href = '../html/home.html'; return;
@@ -46,19 +58,20 @@ onAuthStateChanged(auth, async user => {
     return;
   }
 
-  // الإدارة only: تشوف الكل
+  // الإدارة: تشوف الكل
   if (role === 'admin') {
     if (!studentId) { window.location.href = '../html/home.html'; return; }
     initPage();
     return;
   }
 
-  // Teacher (f): but/only طالباتها
+  // المعلمة: تشوف طالباتها بس (اللي مسجلة في مادتها فعليًا)
   if (role === 'teacher') {
     if (!studentId) { window.location.href = '../html/home.html'; return; }
-    const teacherSubject = userData.subject || '';
+    const teacherSubjectAr = SUBJECT_MAP[userData.subject || ''] || userData.subject || '';
     const studentSnap    = await getDoc(doc(db, 'students', studentId));
-    if (!studentSnap.exists() || studentSnap.data().teacherId !== teacherSubject) {
+    const enrolled = Array.isArray(studentSnap.data()?.enrolledSubjects) ? studentSnap.data().enrolledSubjects : [];
+    if (!studentSnap.exists() || !enrolled.includes(teacherSubjectAr)) {
       window.location.href = '../html/home.html'; return;
     }
     initPage();
