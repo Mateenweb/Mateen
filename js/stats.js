@@ -63,7 +63,7 @@ async function loadAll() {
 
 // ── Render All ───────────────────────────────
 function renderAll() {
-  renderSummary();
+  window.renderSummary();
   renderAttTab();
   renderGradesTab();
   renderSubjectsTab();
@@ -71,15 +71,16 @@ function renderAll() {
 }
 
 // ── Summary Cards ────────────────────────────
-function renderSummary() {
+window.renderSummary = function renderSummary() {
   const totalSessions = allStudents.reduce((s, st) => s + st.sessions.length, 0);
 
   // avg attendance
   const attPcts = allStudents.map(getAttPct).filter(v => v !== null);
   const avgAtt  = attPcts.length ? Math.round(attPcts.reduce((a,b) => a+b, 0) / attPcts.length) : null;
 
-  // avg grades
-  const gradePcts = allStudents.map(s => getGradeAvg(s)).filter(v => v !== null);
+  // avg grades — بتحترم فلتر المادة (لو محددة) زي تبويب الدرجات بالظبط
+  const subjectFilter = document.getElementById('gradeSubjectFilter')?.value || '';
+  const gradePcts = allStudents.map(s => getGradeAvg(s, subjectFilter)).filter(v => v !== null);
   const avgGrade  = gradePcts.length ? Math.round(gradePcts.reduce((a,b) => a+b, 0) / gradePcts.length) : null;
 
   document.getElementById('sumStudents').textContent = allStudents.length;
