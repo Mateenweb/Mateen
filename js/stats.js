@@ -157,8 +157,8 @@ function normalizeSubjectName(s) {
     .replace(/ى/g, 'ي');
 }
 
-// درجة مادة واحدة من 100: متوسط اختبارات "جزء من توتال المادة" + مجموع نقط "إضافة فوق توتال المادة"
-// ناقص خصم الحضور (20 درجة × نسبة الغياب في المادة دي بالذات)
+// درجة مادة واحدة من 100: (متوسط اختبارات "جزء من توتال المادة" من 80) + (نسبة الحضور في المادة × 20)
+// + مجموع نقط "إضافة فوق توتال المادة" (ممكن يخلي الدرجة تعدي الـ100 عادي، ده مقصود)
 function getSubjectScore(s, subject) {
   const norm = normalizeSubjectName(subject);
   const subjectGrades = s.grades.filter(g => normalizeSubjectName(g.subject) === norm);
@@ -167,13 +167,14 @@ function getSubjectScore(s, subject) {
   const bonusGrades = subjectGrades.filter(g => g.addType === 'subjectBonus');
   if (!baseGrades.length) return null;
 
-  const basePct     = baseGrades.reduce((acc, g) => acc + (g.score / g.total * 100), 0) / baseGrades.length;
-  const bonusPoints = bonusGrades.reduce((acc, g) => acc + Number(g.score || 0), 0);
+  const basePct     = baseGrades.reduce((acc, g) => acc + (g.score / g.total * 100), 0) / baseGrades.length; // 0-100%
+  const examPoints   = (basePct / 100) * 80;   // الاختبارات من 80
+  const bonusPoints  = bonusGrades.reduce((acc, g) => acc + Number(g.score || 0), 0);
 
-  const attPct       = getSubjectAttPct(s, subject);
-  const attDeduction = attPct !== null ? (1 - attPct) * 20 : 0;
+  const attPct        = getSubjectAttPct(s, subject);
+  const attendancePts = attPct !== null ? attPct * 20 : 20; // مفيش بيانات حضور = مايتخصمش حاليًا
 
-  return Math.round(basePct + bonusPoints - attDeduction);
+  return Math.round(examPoints + attendancePts + bonusPoints);
 }
 
 // درجة "التوتال العام" لطالبة: متوسط درجات كل المواد اللي عندها فيها اختبارات أساسية
