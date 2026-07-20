@@ -133,6 +133,19 @@ function getAttCounts(s) {
   return { present, absent, excused };
 }
 
+// نسبة حضور الطالبة في مادة واحدة بس (present/(present+absent)، الاعتذار مايتحسبش ضدها)
+function getSubjectAttPct(s, subject) {
+  let present = 0, total = 0;
+  s.sessions.forEach(sess => {
+    const v = (sess.subjects || {})[subject];
+    if (v === 'present' || v === 'absent') {
+      total++;
+      if (v === 'present') present++;
+    }
+  });
+  return total > 0 ? present / total : null; // null = مفيش بيانات حضور للمادة دي
+}
+
 // مطابقة مرنة لاسم المادة — بتتجاهل بادئة "ال" واختلافات الألف/التاء المربوطة/الياء
 // عشان درجات قديمة اتسجلت بأسماء مختلفة شوية (زي "تفسير" بدل "التفسير") تفضل تظهر صح في الفلتر
 function normalizeSubjectName(s) {
@@ -144,14 +157,45 @@ function normalizeSubjectName(s) {
     .replace(/ى/g, 'ي');
 }
 
+// درجة مادة واحدة من 100: متوسط اختبارات "جزء من توتال المادة" + مجموع نقط "إضافة فوق توتال المادة"
+// ناقص خصم الحضور (20 درجة × نسبة الغياب في المادة دي بالذات)
+function getSubjectScore(s, subject) {
+  const norm = normalizeSubjectName(subject);
+  const subjectGrades = s.grades.filter(g => normalizeSubjectName(g.subject) === norm);
+
+  const baseGrades  = subjectGrades.filter(g => (g.addType || 'subjectTotal') === 'subjectTotal' && g.total > 0);
+  const bonusGrades = subjectGrades.filter(g => g.addType === 'subjectBonus');
+  if (!baseGrades.length) return null;
+
+  const basePct     = baseGrades.reduce((acc, g) => acc + (g.score / g.total * 100), 0) / baseGrades.length;
+  const bonusPoints = bonusGrades.reduce((acc, g) => acc + Number(g.score || 0), 0);
+
+  const attPct       = getSubjectAttPct(s, subject);
+  const attDeduction = attPct !== null ? (1 - attPct) * 20 : 0;
+
+  return Math.round(basePct + bonusPoints - attDeduction);
+}
+
+// درجة "التوتال العام" لطالبة: متوسط درجات كل المواد اللي عندها فيها اختبارات أساسية
+// + مجموع أي نقط "إضافة للتوتال العام" فوق كده
+function getOverallScore(s) {
+  const norm = x => normalizeSubjectName(x);
+  const subjectsWithGrades = [...new Set(
+    s.grades.filter(g => (g.addType || 'subjectTotal') === 'subjectTotal').map(g => g.subject)
+  )];
+  const perSubjectScores = subjectsWithGrades.map(subj => getSubjectScore(s, subj)).filter(v => v !== null);
+  if (!perSubjectScores.length) return null;
+
+  const baseAvg = perSubjectScores.reduce((a, b) => a + b, 0) / perSubjectScores.length;
+  const overallBonusPoints = s.grades
+    .filter(g => g.addType === 'overallBonus')
+    .reduce((acc, g) => acc + Number(g.score || 0), 0);
+
+  return Math.round(baseAvg + overallBonusPoints);
+}
+
 function getGradeAvg(s, subjectFilter = '') {
-  const filterNorm = normalizeSubjectName(subjectFilter);
-  const grades = subjectFilter
-    ? s.grades.filter(g => normalizeSubjectName(g.subject) === filterNorm)
-    : s.grades;
-  const valid = grades.filter(g => g.total > 0);
-  if (!valid.length) return null;
-  return Math.round(valid.reduce((acc, g) => acc + (g.score / g.total * 100), 0) / valid.length);
+  return subjectFilter ? getSubjectScore(s, subjectFilter) : getOverallScore(s);
 }
 
 function medalClass(i) {

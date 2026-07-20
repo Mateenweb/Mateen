@@ -1960,6 +1960,7 @@ window.saveBulkGrades = async () => {
   const label   = document.getElementById('bgLabel').value.trim();
   const subject = document.getElementById('bgSubject').value;
   const total   = Number(document.getElementById('bgTotal').value);
+  const addType = document.getElementById('bgAddType')?.value || 'subjectTotal';
 
   if (!label || !total) { showToast('أدخلي اسم الاختبار والدرجة الكلية'); return; }
 
@@ -1975,7 +1976,7 @@ window.saveBulkGrades = async () => {
       const sid   = cb.dataset.id;
       const score = Number(document.querySelector(`.bg-score[data-id="${sid}"]`)?.value || 0);
       return addDoc(collection(db, 'students', sid, 'grades'), {
-        label, subject, score, total,
+        label, subject, score, total, addType,
         createdAt: serverTimestamp(),
       });
     }));
