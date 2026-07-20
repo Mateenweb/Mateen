@@ -150,6 +150,17 @@
     <div class="tab-panel active" id="tab_attendance">
       <div class="card">
         <div class="card-title">نسبة حضور الطالبات</div>
+        <div class="filter-row">
+          <label>المادة:</label>
+          <select id="attSubjectFilter" onchange="renderAttTab()">
+            <option value="">كل المواد</option>
+            <option>تفسير</option>
+            <option>فقه</option>
+            <option>عقيدة</option>
+            <option>حديث</option>
+            <option>قرآن</option>
+          </select>
+        </div>
         <div id="attList" class="bar-list"></div>
       </div>
     </div>

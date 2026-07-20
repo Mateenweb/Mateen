@@ -66,14 +66,16 @@ async function loadAll() {
   document.getElementById('loadingMsg').style.display = 'none';
   document.getElementById('mainContent').style.display = 'block';
 
-  // ملء فلتر مادة الدرجات من نفس مصدر المواد الحقيقي — كل المواد بدون فلترة inExams،
+  // ملء فلتر مادة الدرجات ومادة الحضور من نفس مصدر المواد الحقيقي — كل المواد بدون فلترة inExams،
   // عشان يتطابق مع مودال "إضافة اختبار" في لوحة الأدمن اللي بياخد كل المواد بدون قيد
   loadSubjects().then(subjects => {
-    const sel = document.getElementById('gradeSubjectFilter');
-    if (sel && subjects.length) {
-      sel.innerHTML = '<option value="">كل المواد</option>' +
-        subjects.map(s => `<option>${s}</option>`).join('');
-    }
+    const optsHtml = subjects.length
+      ? subjects.map(s => `<option>${s}</option>`).join('')
+      : '';
+    const gradeSel = document.getElementById('gradeSubjectFilter');
+    if (gradeSel && subjects.length) gradeSel.innerHTML = '<option value="">كل المواد</option>' + optsHtml;
+    const attSel = document.getElementById('attSubjectFilter');
+    if (attSel && subjects.length) attSel.innerHTML = '<option value="">كل المواد</option>' + optsHtml;
   }).catch(e => console.error('loadSubjects:', e));
 
   renderAll();
@@ -211,11 +213,34 @@ function barNameLink(s) {
   return `<a class="bar-name" href="student.html?id=${s.id}">${s.name || 'بدون اسم'}</a>`;
 }
 
+// نفس getAttCounts بس لمادة واحدة بس
+function getSubjectAttCounts(s, subject) {
+  let present = 0, absent = 0, excused = 0;
+  s.sessions.forEach(sess => {
+    const v = (sess.subjects || {})[subject];
+    if (v === 'present') present++;
+    else if (v === 'absent') absent++;
+    else if (v === 'excused') excused++;
+  });
+  return { present, absent, excused };
+}
+
 // ── Tab: Attendance ──────────────────────────
 function renderAttTab() {
-  const list = document.getElementById('attList');
+  const list   = document.getElementById('attList');
+  const filter = document.getElementById('attSubjectFilter')?.value || '';
+
   const data = allStudents
-    .map(s => ({ s, pct: getAttPct(s), excused: getAttCounts(s).excused }))
+    .map(s => {
+      if (filter) {
+        const { present, absent, excused } = getSubjectAttCounts(s, filter);
+        const total = present + absent;
+        const pct   = total > 0 ? Math.round(present / total * 100) : null;
+        const attGrade = total > 0 ? Math.round((present / total) * 20 * 10) / 10 : null; // درجة الحضور من 20
+        return { s, pct, absent, excused, attGrade };
+      }
+      return { s, pct: getAttPct(s), absent: getAttCounts(s).absent, excused: getAttCounts(s).excused, attGrade: null };
+    })
     .filter(x => x.pct !== null)
     .sort((a, b) => b.pct - a.pct);
 
@@ -224,16 +249,18 @@ function renderAttTab() {
     return;
   }
 
-  list.innerHTML = data.map(({ s, pct, excused }) => {
+  list.innerHTML = data.map(({ s, pct, absent, excused, attGrade }) => {
     const color = pct >= 75 ? 'green' : pct >= 50 ? 'blue' : 'red';
     return `
       <div class="bar-item">
         ${barNameLink(s)}
+        ${filter ? `<span style="font-size:11px;color:#b71c1c;margin-inline-end:6px">✖ ${absent} غياب</span>` : ''}
         ${excused > 0 ? `<span title="${excused} اعتذار" style="font-size:11px;color:#c9852b;margin-inline-end:6px">🔸 ${excused}</span>` : ''}
         <div class="bar-track">
           <div class="bar-fill ${color}" style="width:${pct}%"></div>
         </div>
         <div class="bar-pct">${pct}%</div>
+        ${filter && attGrade !== null ? `<span style="font-size:11px;font-weight:700;color:#1a6b36;margin-inline-start:8px;white-space:nowrap">${attGrade}/20</span>` : ''}
       </div>`;
   }).join('');
 }
