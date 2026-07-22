@@ -183,7 +183,8 @@ window.savePartGrade = async (sid, subject) => {
     // بتتستبعد تلقائيًا من استعلام orderBy('createdAt') في صفحة الطالبة
     // فتفضل درجة المشاركة مش ظاهرة ليها خالص
     const existing = await getDoc(ref);
-    const payload = { label: 'المشاركة', subject, score, updatedAt: serverTimestamp() };
+    // addType: 'subjectBonus' — تتضاف كنقط زيادة فوق درجة المادة بالرقم اللي اتكتب بالظبط، من غير سقف ثابت
+    const payload = { label: 'المشاركة', subject, score, addType: 'subjectBonus', updatedAt: serverTimestamp() };
     if (!existing.exists() || !existing.data().createdAt) {
       payload.createdAt = serverTimestamp();
     }
