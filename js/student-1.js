@@ -599,10 +599,11 @@ function renderGrades(grades) {
   }
 
   // درجة المشاركة اللي المعلمة بتسجلها بنفس آلية الدرجات العادية —
-  // مستبعدة من العرض التلقائي بناءً على طلب، وبتتجاب بس لما الأدمن يدوس
-  // على زرار 'جلب درجة المشاركة' لكل مادة (شوفي fetchTeacherGrade تحت)
+  // بتظهر تلقائيًا للأدمن بس (مش للطالبة)، وطول ما مش متطفّية (active !== false)،
+  // من غير ما تدخل في حساب "الإجمالي" الظاهر فوق كل مادة هنا (زي ما هو من قبل)
   const isTeacherGrade = g => g.label === 'المشاركة';
   const visibleGrades = grades.filter(g => !isTeacherGrade(g));
+  const participationGrades = grades.filter(g => isTeacherGrade(g) && g.active !== false);
 
   if (!visibleGrades.length && !_isAdmin) {
     list.innerHTML = '<div class="stu-empty"><i class="ti ti-school-off"></i><span>لا توجد درجات مسجلة</span></div>';
@@ -651,7 +652,16 @@ function renderGrades(grades) {
       </div>`;
     }).join('');
 
-    const fetchBtnId = `fetch-teacher-grade-${subj.replace(/[^a-zA-Z0-9أ-ي]/g, '')}`;
+    const partGrade = participationGrades.find(g => g.subject === subj);
+    const partCardHtml = (_isAdmin && partGrade) ? `<div class="grade-card" style="border-color:var(--gold,#c9a227)">
+        <div class="grade-label-wrap">
+          <div class="grade-label-text">${partGrade.label} <span style="font-size:10px;color:var(--text-mid);font-weight:400">(من المعلمة)</span></div>
+        </div>
+        <div class="grade-score-wrap">
+          <span class="grade-num">${partGrade.score}</span>
+          <button onclick="deleteGrade('${_studentId}','${partGrade.id}')" style="background:none;border:none;color:#c0392b;cursor:pointer;font-size:15px;padding:0 4px;opacity:0.7" title="حذف"><i class="ti ti-trash"></i></button>
+        </div>
+      </div>` : '';
 
     return `
       <div class="grade-subject-group" style="margin-bottom:16px">
@@ -663,44 +673,10 @@ function renderGrades(grades) {
           </div>
         </div>
         ${cardsHtml}
-        ${_isAdmin ? `
-        <div id="${fetchBtnId}">
-          <button onclick="fetchTeacherGrade('${subj}','${fetchBtnId}')" style="width:100%;margin-top:6px;padding:7px;border:1px dashed var(--gold,#c9a227);background:transparent;color:var(--green-dark);border-radius:8px;font-family:inherit;font-size:12px;cursor:pointer">
-            📥 جلب درجة المشاركة من المعلمة
-          </button>
-        </div>` : ''}
+        ${partCardHtml}
       </div>`;
   }).join('');
 }
-
-// جلب درجة المشاركة من عند المعلمة (بالضغط، مش تلقائي)
-window.fetchTeacherGrade = async (subject, containerId) => {
-  const container = document.getElementById(containerId);
-  if (!container) return;
-  container.innerHTML = '<div style="text-align:center;padding:8px"><i class="ti ti-loader spin" style="font-size:16px;color:var(--text-mid)"></i></div>';
-
-  try {
-    const partSnap = await getDoc(doc(db, 'students', _studentId, 'grades', 'participation_' + subject));
-
-    if (!partSnap.exists()) {
-      container.innerHTML = '<div style="text-align:center;color:var(--text-mid);font-size:12px;padding:8px">لا توجد درجة مشاركة مسجلة من المعلمة لهذه المادة</div>';
-      return;
-    }
-
-    const g = { id: partSnap.id, ...partSnap.data() };
-    container.innerHTML = `<div class="grade-card" style="border-color:var(--gold,#c9a227)">
-        <div class="grade-label-wrap">
-          <div class="grade-label-text">${g.label} <span style="font-size:10px;color:var(--text-mid);font-weight:400">(من المعلمة)</span></div>
-        </div>
-        <div class="grade-score-wrap">
-          <span class="grade-num">${g.score}</span>
-        </div>
-      </div>`;
-  } catch (e) {
-    console.error('fetchTeacherGrade:', e);
-    container.innerHTML = '<div style="text-align:center;color:#c0392b;font-size:12px;padding:8px">حصل خطأ أثناء الجلب، حاولي تاني</div>';
-  }
-};
 function renderCerts(items) {
   const list = document.getElementById('certsList');
   if (!items.length) {
