@@ -963,6 +963,13 @@
       <button class="m-close" onclick="closeBulkGradeModal()">✕</button>
     </div>
     <div class="modal-body">
+      <!-- اختيار اختبار موجود بالفعل لنفس المادة (بدل ما تتكرر تسميات مختلفة لنفس الاختبار) -->
+      <div style="margin-bottom:10px">
+        <label style="font-size:12px;color:var(--text-mid);display:block;margin-bottom:4px">أو اختاري اختبار موجود بالفعل (اختياري)</label>
+        <select id="bgExistingExam" onchange="bgApplyExistingExam()" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:inherit;font-size:13px">
+          <option value="">— اختبار جديد —</option>
+        </select>
+      </div>
       <!-- معلومات الاختبار -->
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px">
         <div>
@@ -971,7 +978,7 @@
         </div>
         <div>
           <label style="font-size:12px;color:var(--text-mid);display:block;margin-bottom:4px">المادة</label>
-          <select id="bgSubject" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:inherit;font-size:13px">
+          <select id="bgSubject" onchange="bgLoadExistingExams()" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:inherit;font-size:13px">
             <option value="">— اختياري —</option>
           </select>
         </div>

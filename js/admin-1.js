@@ -1748,11 +1748,60 @@ window.addEventListener("resize", () => {
 window.openBulkGradeModal = () => {
   const modal = document.getElementById('bulkGradeModal');
   modal.style.display = 'flex';
+  document.getElementById('bgExistingExam').innerHTML = '<option value="">— اختبار جديد —</option>';
   renderBGStudents();
 };
 
 window.closeBulkGradeModal = () => {
   document.getElementById('bulkGradeModal').style.display = 'none';
+};
+
+// لما تختار مادة، نجيب كل الاختبارات الموجودة بالفعل لنفس المادة عند أي طالبة،
+// عشان تختاري منهم بدل ما تكتبي اسم جديد يمكن يختلف عن التسمية القديمة ويتحسب
+// كاختبار منفصل غلط في جدول الإحصائيات
+window.bgLoadExistingExams = async () => {
+  const subject = document.getElementById('bgSubject').value;
+  const sel = document.getElementById('bgExistingExam');
+
+  if (!subject) { sel.innerHTML = '<option value="">— اختبار جديد —</option>'; return; }
+
+  sel.disabled = true;
+  sel.innerHTML = '<option value="">جارٍ التحميل...</option>';
+
+  try {
+    const students = allStudents.filter(s => s.name && s.name !== 'طالبة جديدة' && !s.archived);
+    const examMap = new Map();
+    await Promise.all(students.map(async s => {
+      const snap = await getDocs(collection(db, 'students', s.id, 'grades'));
+      snap.docs.forEach(d => {
+        const g = d.data();
+        if (g.subject !== subject) return;
+        if ((g.addType || 'subjectTotal') === 'overallBonus') return;
+        const key = g.label || 'اختبار';
+        if (!examMap.has(key)) {
+          examMap.set(key, { label: key, total: g.total || 100, addType: g.addType || 'subjectTotal' });
+        }
+      });
+    }));
+
+    const exams = [...examMap.values()];
+    sel.innerHTML = '<option value="">— اختبار جديد —</option>' +
+      exams.map(e => `<option value="${esc(e.label)}" data-total="${e.total}" data-addtype="${e.addType}">${esc(e.label)}</option>`).join('');
+  } catch (err) {
+    console.error('bgLoadExistingExams error:', err);
+    sel.innerHTML = '<option value="">— اختبار جديد —</option>';
+  } finally {
+    sel.disabled = false;
+  }
+};
+
+window.bgApplyExistingExam = () => {
+  const sel = document.getElementById('bgExistingExam');
+  const opt = sel.options[sel.selectedIndex];
+  if (!opt || !opt.value) return; // "اختبار جديد" — سيبي حقول الاسم/الدرجة/النوع زي ما هي
+  document.getElementById('bgLabel').value   = opt.value;
+  document.getElementById('bgTotal').value   = opt.dataset.total || 100;
+  document.getElementById('bgAddType').value = opt.dataset.addtype || 'subjectTotal';
 };
 
 function renderBGStudents() {

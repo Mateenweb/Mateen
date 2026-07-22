@@ -205,6 +205,10 @@ function medalClass(i) {
   return i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : 'other';
 }
 
+function esc(s) {
+  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
 function studentLink(s, label) {
   return `<a class="rank-name" href="student.html?id=${s.id}">${label || s.name || 'بدون اسم'}</a>`;
 }
@@ -270,27 +274,90 @@ window.renderGradesTab = function () {
   const filter = document.getElementById('gradeSubjectFilter').value;
   const list   = document.getElementById('gradesList');
 
-  const data = allStudents
-    .map(s => ({ s, avg: getGradeAvg(s, filter) }))
-    .filter(x => x.avg !== null)
-    .sort((a, b) => b.avg - a.avg);
+  if (!filter) {
+    // بدون فلتر مادة: نفس شريط المقارنة البسيط (التوتال العام لكل طالبة)
+    const data = allStudents
+      .map(s => ({ s, avg: getGradeAvg(s, filter) }))
+      .filter(x => x.avg !== null)
+      .sort((a, b) => b.avg - a.avg);
 
-  if (!data.length) {
-    list.innerHTML = '<div class="empty-bar">لا توجد درجات بعد</div>';
+    if (!data.length) {
+      list.innerHTML = '<div class="empty-bar">لا توجد درجات بعد</div>';
+      return;
+    }
+
+    list.innerHTML = data.map(({ s, avg }) => {
+      const color = avg >= 75 ? 'green' : avg >= 50 ? 'orange' : 'red';
+      return `
+        <div class="bar-item">
+          ${barNameLink(s)}
+          <div class="bar-track">
+            <div class="bar-fill ${color}" style="width:${avg}%"></div>
+          </div>
+          <div class="bar-pct">${avg}%</div>
+        </div>`;
+    }).join('');
     return;
   }
 
-  list.innerHTML = data.map(({ s, avg }) => {
-    const color = avg >= 75 ? 'green' : avg >= 50 ? 'orange' : 'red';
-    return `
-      <div class="bar-item">
-        ${barNameLink(s)}
-        <div class="bar-track">
-          <div class="bar-fill ${color}" style="width:${avg}%"></div>
-        </div>
-        <div class="bar-pct">${avg}%</div>
-      </div>`;
+  // فيه فلتر مادة: جدول تفصيلي — حضور المادة، درجة الحضور من 20، كل اختبار في عمود لوحده، والإجمالي
+  const norm = normalizeSubjectName(filter);
+
+  // كل الاختبارات المميزة (بالتسمية) اللي أي طالبة عندها درجة فيها للمادة دي
+  const examMap = new Map();
+  allStudents.forEach(s => {
+    s.grades
+      .filter(g => normalizeSubjectName(g.subject) === norm && (g.addType || 'subjectTotal') !== 'overallBonus')
+      .forEach(g => {
+        const key = g.label || 'اختبار';
+        const addType = g.addType || 'subjectTotal';
+        if (!examMap.has(key)) {
+          examMap.set(key, { label: key, total: g.total || 0, addType });
+        } else if ((g.total || 0) > examMap.get(key).total) {
+          examMap.get(key).total = g.total;
+        }
+      });
+  });
+  const exams = [...examMap.values()];
+
+  const rows = allStudents.map(s => {
+    const attPct   = getSubjectAttPct(s, filter);
+    const attGrade = attPct !== null ? Math.round(attPct * 20 * 10) / 10 : null;
+    const total    = getSubjectScore(s, filter);
+    if (total === null && attPct === null) return null; // مفيش أي بيانات للمادة دي خالص
+    return { s, attPct, attGrade, total };
+  }).filter(Boolean).sort((a, b) => (b.total ?? -1) - (a.total ?? -1));
+
+  if (!rows.length) {
+    list.innerHTML = '<div class="empty-bar">لا توجد بيانات لهذه المادة بعد</div>';
+    return;
+  }
+
+  const examHeaders = exams.map(e =>
+    `<th>${esc(e.label)}${e.addType === 'subjectBonus' ? ' (إضافية)' : (e.total ? ' / ' + e.total : '')}</th>`
+  ).join('');
+
+  const bodyRows = rows.map(({ s, attPct, attGrade, total }) => {
+    const examCells = exams.map(e => {
+      const g = s.grades.find(gr => normalizeSubjectName(gr.subject) === norm && (gr.label || 'اختبار') === e.label);
+      if (!g) return '<td>—</td>';
+      return e.addType === 'subjectBonus' ? `<td>+${g.score}</td>` : `<td>${g.score}/${g.total}</td>`;
+    }).join('');
+    return `<tr>
+      <td>${studentLink(s)}</td>
+      <td>${attPct !== null ? Math.round(attPct * 100) + '%' : '—'}</td>
+      <td>${attGrade !== null ? attGrade + '/20' : '—'}</td>
+      ${examCells}
+      <td><strong>${total !== null ? total : '—'}</strong></td>
+    </tr>`;
   }).join('');
+
+  list.innerHTML = `<div class="stats-table-wrap"><table>
+    <thead><tr>
+      <th>الطالبة</th><th>نسبة الحضور</th><th>درجة الحضور</th>${examHeaders}<th>الإجمالي</th>
+    </tr></thead>
+    <tbody>${bodyRows}</tbody>
+  </table></div>`;
 };
 
 // ── Tab: Subjects ────────────────────────────
