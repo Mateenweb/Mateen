@@ -2011,7 +2011,11 @@ window.saveBulkGrades = async () => {
   const total   = Number(document.getElementById('bgTotal').value);
   const addType = document.getElementById('bgAddType')?.value || 'subjectTotal';
 
-  if (!label || !total) { showToast('أدخلي اسم الاختبار والدرجة الكلية'); return; }
+  if (!label) { showToast('أدخلي اسم الاختبار'); return; }
+  if (addType === 'subjectTotal' && !total) {
+    showToast('أدخلي الدرجة الكلية — لازمة عشان تدخل في حساب توتال المادة');
+    return;
+  }
   if (!subject && (addType === 'subjectTotal' || addType === 'subjectBonus')) {
     showToast('لازم تختاري المادة، وإلا الدرجة مش هتظهر في إحصائيات أي مادة');
     return;
@@ -2222,7 +2226,11 @@ window.saveEditExam = async () => {
   const newTotal   = Number(document.getElementById('eeTotal').value);
   const newAddType = document.getElementById('eeAddType').value;
 
-  if (!newLabel || !newTotal) { showToast('أدخلي اسم الاختبار والدرجة الكلية'); return; }
+  if (!newLabel) { showToast('أدخلي اسم الاختبار'); return; }
+  if (newAddType === 'subjectTotal' && !newTotal) {
+    showToast('أدخلي الدرجة الكلية — لازمة عشان تدخل في حساب توتال المادة');
+    return;
+  }
   if (!newSubject && (newAddType === 'subjectTotal' || newAddType === 'subjectBonus')) {
     showToast('لازم تختاري المادة، وإلا الدرجة مش هتظهر في إحصائيات أي مادة');
     return;
