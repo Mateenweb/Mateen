@@ -180,11 +180,14 @@ function normalizeSubjectName(s) {
     .replace(/ى/g, 'ي');
 }
 
+// اختبار "مطفي مؤقتًا" (active: false) مايتحسبش في أي حساب، من غير ما يتحذف
+function isActive(g) { return g.active !== false; }
+
 // أقصى درجة ممكنة حاليًا لمادة معينة = مجموع "توتال" كل اختبارات "جزء من توتال المادة" المسجلة + 20 (الحضور)
 // (البونص مش داخل في أقصى درجة، لأنه زيادة برة الحساب الأساسي أصلاً)
 function getSubjectMaxPossible(s, subject) {
   const norm = normalizeSubjectName(subject);
-  const baseGrades = s.grades.filter(g => normalizeSubjectName(g.subject) === norm && (g.addType || 'subjectTotal') === 'subjectTotal' && g.total > 0);
+  const baseGrades = s.grades.filter(g => isActive(g) && normalizeSubjectName(g.subject) === norm && (g.addType || 'subjectTotal') === 'subjectTotal' && g.total > 0);
   if (!baseGrades.length) return null;
   const examsMax = baseGrades.reduce((acc, g) => acc + Number(g.total || 0), 0);
   return examsMax + 20;
@@ -194,7 +197,7 @@ function getSubjectMaxPossible(s, subject) {
 // مجموع درجات الاختبارات الحالية (بالنقط الفعلية) + درجة الحضور (من 20) + أي بونص "إضافة فوق توتال المادة"
 function getSubjectScore(s, subject) {
   const norm = normalizeSubjectName(subject);
-  const subjectGrades = s.grades.filter(g => normalizeSubjectName(g.subject) === norm);
+  const subjectGrades = s.grades.filter(g => isActive(g) && normalizeSubjectName(g.subject) === norm);
 
   const baseGrades  = subjectGrades.filter(g => (g.addType || 'subjectTotal') === 'subjectTotal' && g.total > 0);
   const bonusGrades = subjectGrades.filter(g => g.addType === 'subjectBonus');
@@ -221,14 +224,14 @@ function getSubjectPct(s, subject) {
 // + مجموع أي نقط "إضافة للتوتال العام" فوق كده
 function getOverallScore(s) {
   const subjectsWithGrades = [...new Set(
-    s.grades.filter(g => (g.addType || 'subjectTotal') === 'subjectTotal').map(g => g.subject)
+    s.grades.filter(g => isActive(g) && (g.addType || 'subjectTotal') === 'subjectTotal').map(g => g.subject)
   )];
   const perSubjectPcts = subjectsWithGrades.map(subj => getSubjectPct(s, subj)).filter(v => v !== null);
   if (!perSubjectPcts.length) return null;
 
   const baseAvg = perSubjectPcts.reduce((a, b) => a + b, 0) / perSubjectPcts.length;
   const overallBonusPoints = s.grades
-    .filter(g => g.addType === 'overallBonus')
+    .filter(g => isActive(g) && g.addType === 'overallBonus')
     .reduce((acc, g) => acc + Number(g.score || 0), 0);
 
   return Math.round(baseAvg + overallBonusPoints);
@@ -345,7 +348,7 @@ window.renderGradesTab = function () {
   const examMap = new Map();
   allStudents.forEach(s => {
     s.grades
-      .filter(g => normalizeSubjectName(g.subject) === norm && (g.addType || 'subjectTotal') !== 'overallBonus')
+      .filter(g => isActive(g) && normalizeSubjectName(g.subject) === norm && (g.addType || 'subjectTotal') !== 'overallBonus')
       .forEach(g => {
         const key = g.label || 'اختبار';
         const addType = g.addType || 'subjectTotal';

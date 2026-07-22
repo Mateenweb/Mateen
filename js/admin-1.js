@@ -2145,7 +2145,7 @@ window.openDeleteExamModal = async () => {
   try {
     // جيب كل الطالبات وكل الاختبارات بتاعتهم
     const studSnap = await getDocs(collection(db, 'students'));
-    const examMap = {}; // { label_subject: [ {studentId, gradeId} ] }
+    const examMap = {}; // { label_subject: [ {studentId, gradeId, studentName, score, active} ] }
 
     await Promise.all(studSnap.docs.filter(sDoc => !sDoc.data().archived).map(async sDoc => {
       const gradesSnap = await getDocs(collection(db, 'students', sDoc.id, 'grades'));
@@ -2154,9 +2154,13 @@ window.openDeleteExamModal = async () => {
         const key = `${data.label || 'اختبار'}|||${data.subject || ''}`;
         if (!examMap[key]) {
           examMap[key] = [];
-          examMap[key].meta = { total: data.total || 0, addType: data.addType || 'subjectTotal' };
+          examMap[key].meta = { total: data.total || 0, addType: data.addType || 'subjectTotal', active: data.active !== false };
         }
-        examMap[key].push({ studentId: sDoc.id, gradeId: g.id });
+        examMap[key].push({
+          studentId: sDoc.id, gradeId: g.id,
+          studentName: sDoc.data().name || '—',
+          score: data.score, active: data.active !== false,
+        });
       });
     }));
 
@@ -2167,13 +2171,18 @@ window.openDeleteExamModal = async () => {
 
     list.innerHTML = Object.entries(examMap).map(([key, entries]) => {
       const [label, subject] = key.split('|||');
-      return `<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:rgba(92,61,46,0.05);border-radius:10px;border:1px solid var(--border);margin-bottom:8px">
+      const isBonusType = ['subjectBonus', 'overallBonus', 'bonus'].includes(entries.meta.addType);
+      const isActive = entries.meta.active;
+      return `<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:${isActive ? 'rgba(92,61,46,0.05)' : 'rgba(150,150,150,0.08)'};border-radius:10px;border:1px solid var(--border);margin-bottom:8px;opacity:${isActive ? '1' : '0.6'}">
         <div>
-          <div style="font-size:13px;font-weight:700">${esc(label)}</div>
+          <div style="font-size:13px;font-weight:700">${esc(label)}${!isActive ? ' <span style="color:#999;font-weight:400">(مطفي مؤقتًا)</span>' : ''}</div>
           ${subject ? `<div style="font-size:11px;color:var(--text-mid)">${esc(subject)}</div>` : `<div style="font-size:11px;color:#c0392b">⚠️ بدون مادة محددة — مش هيظهر في إحصائيات أي مادة</div>`}
           <div style="font-size:11px;color:var(--text-mid)">📊 ${entries.length} طالبة</div>
         </div>
         <div style="display:flex;align-items:center;flex-shrink:0">
+          ${isBonusType ? `<button onclick="toggleBulkExamActive('${encodeURIComponent(key)}')" title="${isActive ? 'إطفاء مؤقت' : 'تشغيل تاني'}" style="background:none;border:1px solid ${isActive ? '#c9852b' : '#1e8449'};color:${isActive ? '#c9852b' : '#1e8449'};border-radius:8px;padding:5px 12px;cursor:pointer;font-size:12px;font-family:inherit;white-space:nowrap;margin-inline-end:6px">
+            <i class="ti ti-power"></i> ${isActive ? 'إطفاء' : 'تشغيل'}
+          </button>` : ''}
           <button onclick="openEditExamModal('${encodeURIComponent(key)}')" style="background:none;border:1px solid var(--green-dark);color:var(--green-dark);border-radius:8px;padding:5px 12px;cursor:pointer;font-size:12px;font-family:inherit;white-space:nowrap;margin-inline-end:6px">
             <i class="ti ti-pencil"></i> تعديل
           </button>
@@ -2189,6 +2198,24 @@ window.openDeleteExamModal = async () => {
   } catch(e) {
     list.innerHTML = `<div style="color:#e74c3c;font-size:13px;padding:20px">❌ خطأ: ${e.message}</div>`;
     console.error('openDeleteExamModal:', e);
+  }
+};
+
+window.toggleBulkExamActive = async (encodedKey) => {
+  const key = decodeURIComponent(encodedKey);
+  const entries = window._examMapCache?.[key];
+  if (!entries || !entries.length) { alert('مفيش بيانات'); return; }
+
+  const newActive = !entries.meta.active;
+  try {
+    await Promise.all(entries.map(({ studentId, gradeId }) =>
+      updateDoc(doc(db, 'students', studentId, 'grades', gradeId), { active: newActive })
+    ));
+    showToast?.(newActive ? '✅ الاختبار اشتغل تاني وبيتحسب في الدرجات' : '⏸️ الاختبار اتوقف مؤقتًا ومش بيتحسب في الدرجات');
+    openDeleteExamModal(); // إعادة تحميل القايمة
+  } catch (e) {
+    showToast?.('❌ خطأ: ' + e.message);
+    console.error('toggleBulkExamActive:', e);
   }
 };
 
@@ -2211,6 +2238,19 @@ window.openEditExamModal = async (encodedKey) => {
   document.getElementById('eeTotal').value   = meta.total || '';
   document.getElementById('eeAddType').value = meta.addType || 'subjectTotal';
   document.getElementById('eeAffectedNote').textContent = `التعديل هيتطبق على درجات ${entries.length} طالبة لهذا الاختبار`;
+
+  const scoresList = document.getElementById('eeScoresList');
+  if (scoresList) {
+    scoresList.innerHTML = [...entries]
+      .sort((a, b) => (a.studentName || '').localeCompare(b.studentName || '', 'ar'))
+      .map(e => `
+        <label style="display:flex;align-items:center;justify-content:space-between;font-size:13px;gap:8px">
+          <span>${esc(e.studentName)}</span>
+          <input type="number" class="ee-score" data-grade-id="${e.gradeId}" data-student-id="${e.studentId}"
+            value="${e.score ?? ''}" min="0"
+            style="width:80px;border:1px solid var(--border);border-radius:6px;padding:4px 8px;text-align:center">
+        </label>`).join('');
+  }
 
   window._editingExamKey = key;
   document.getElementById('editExamModal').style.display = 'flex';
@@ -2237,12 +2277,14 @@ window.saveEditExam = async () => {
   }
 
   try {
-    await Promise.all(entries.map(({ studentId, gradeId }) =>
-      updateDoc(doc(db, 'students', studentId, 'grades', gradeId), {
-        label: newLabel, subject: newSubject, total: newTotal, addType: newAddType,
-      })
-    ));
-    showToast?.(`✅ اتعدّل الاختبار لـ ${entries.length} طالبة`);
+    await Promise.all(entries.map(({ studentId, gradeId }) => {
+      const scoreInput = document.querySelector(`.ee-score[data-grade-id="${gradeId}"]`);
+      const score = scoreInput ? Number(scoreInput.value || 0) : undefined;
+      const payload = { label: newLabel, subject: newSubject, total: newTotal, addType: newAddType };
+      if (score !== undefined) payload.score = score;
+      return updateDoc(doc(db, 'students', studentId, 'grades', gradeId), payload);
+    }));
+    showToast?.(`✅ اتعدّل الاختبار ودرجاته لـ ${entries.length} طالبة`);
     document.getElementById('editExamModal').style.display = 'none';
     openDeleteExamModal(); // إعادة تحميل القايمة
   } catch (e) {
