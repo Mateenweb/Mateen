@@ -270,7 +270,7 @@ async function loadSubjectOptions() {
     // ملء bgSubject
     const bgSubject = document.getElementById('bgSubject');
     if (bgSubject) {
-      bgSubject.innerHTML = '<option value="">— اختياري —</option>' +
+      bgSubject.innerHTML = '<option value="">— اختاري المادة —</option>' +
         subjects.map(s => `<option>${s}</option>`).join('');
     }
 
@@ -2012,6 +2012,10 @@ window.saveBulkGrades = async () => {
   const addType = document.getElementById('bgAddType')?.value || 'subjectTotal';
 
   if (!label || !total) { showToast('أدخلي اسم الاختبار والدرجة الكلية'); return; }
+  if (!subject && (addType === 'subjectTotal' || addType === 'subjectBonus')) {
+    showToast('لازم تختاري المادة، وإلا الدرجة مش هتظهر في إحصائيات أي مادة');
+    return;
+  }
 
   const checked = [...document.querySelectorAll('.bg-check:checked')];
   if (!checked.length) { showToast('اختاري طالبة واحدة على الأقل'); return; }
@@ -2159,12 +2163,17 @@ window.openDeleteExamModal = async () => {
       return `<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:rgba(92,61,46,0.05);border-radius:10px;border:1px solid var(--border);margin-bottom:8px">
         <div>
           <div style="font-size:13px;font-weight:700">${esc(label)}</div>
-          ${subject ? `<div style="font-size:11px;color:var(--text-mid)">${esc(subject)}</div>` : ''}
+          ${subject ? `<div style="font-size:11px;color:var(--text-mid)">${esc(subject)}</div>` : `<div style="font-size:11px;color:#c0392b">⚠️ بدون مادة محددة — مش هيظهر في إحصائيات أي مادة</div>`}
           <div style="font-size:11px;color:var(--text-mid)">📊 ${entries.length} طالبة</div>
         </div>
-        <button onclick="deleteBulkExam('${encodeURIComponent(key)}')" style="background:none;border:1px solid #e74c3c;color:#e74c3c;border-radius:8px;padding:5px 12px;cursor:pointer;font-size:12px;font-family:inherit;white-space:nowrap">
-          <i class="ti ti-trash"></i> حذف
-        </button>
+        <div style="display:flex;align-items:center;flex-shrink:0">
+          <button onclick="editBulkExamSubject('${encodeURIComponent(key)}')" style="background:none;border:1px solid var(--green-dark);color:var(--green-dark);border-radius:8px;padding:5px 12px;cursor:pointer;font-size:12px;font-family:inherit;white-space:nowrap;margin-inline-end:6px">
+            <i class="ti ti-pencil"></i> المادة
+          </button>
+          <button onclick="deleteBulkExam('${encodeURIComponent(key)}')" style="background:none;border:1px solid #e74c3c;color:#e74c3c;border-radius:8px;padding:5px 12px;cursor:pointer;font-size:12px;font-family:inherit;white-space:nowrap">
+            <i class="ti ti-trash"></i> حذف
+          </button>
+        </div>
       </div>`;
     }).join('');
 
@@ -2173,6 +2182,29 @@ window.openDeleteExamModal = async () => {
   } catch(e) {
     list.innerHTML = `<div style="color:#e74c3c;font-size:13px;padding:20px">❌ خطأ: ${e.message}</div>`;
     console.error('openDeleteExamModal:', e);
+  }
+};
+
+window.editBulkExamSubject = async (encodedKey) => {
+  const key = decodeURIComponent(encodedKey);
+  const [label, subject] = key.split('|||');
+  const entries = window._examMapCache?.[key] || [];
+  if (!entries.length) { alert('مفيش بيانات'); return; }
+
+  const newSubject = prompt(`المادة الصحيحة لاختبار "${label}" (هتتطبق على ${entries.length} طالبة):`, subject || '');
+  if (newSubject === null) return; // اتلغى
+  const trimmed = newSubject.trim();
+  if (!trimmed) { alert('لازم تكتبي اسم المادة (اكتبيه بالظبط زي ما هو في قايمة المواد)'); return; }
+
+  try {
+    await Promise.all(entries.map(({ studentId, gradeId }) =>
+      updateDoc(doc(db, 'students', studentId, 'grades', gradeId), { subject: trimmed })
+    ));
+    showToast?.(`✅ اتعدّلت المادة لـ ${entries.length} طالبة`);
+    openDeleteExamModal(); // إعادة تحميل القايمة
+  } catch (e) {
+    showToast?.('❌ خطأ: ' + e.message);
+    console.error('editBulkExamSubject:', e);
   }
 };
 
