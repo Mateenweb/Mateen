@@ -180,8 +180,18 @@ function normalizeSubjectName(s) {
     .replace(/ى/g, 'ي');
 }
 
-// درجة مادة واحدة من 100: (متوسط اختبارات "جزء من توتال المادة" من 80) + (نسبة الحضور في المادة × 20)
-// + مجموع نقط "إضافة فوق توتال المادة" (ممكن يخلي الدرجة تعدي الـ100 عادي، ده مقصود)
+// أقصى درجة ممكنة حاليًا لمادة معينة = مجموع "توتال" كل اختبارات "جزء من توتال المادة" المسجلة + 20 (الحضور)
+// (البونص مش داخل في أقصى درجة، لأنه زيادة برة الحساب الأساسي أصلاً)
+function getSubjectMaxPossible(s, subject) {
+  const norm = normalizeSubjectName(subject);
+  const baseGrades = s.grades.filter(g => normalizeSubjectName(g.subject) === norm && (g.addType || 'subjectTotal') === 'subjectTotal' && g.total > 0);
+  if (!baseGrades.length) return null;
+  const examsMax = baseGrades.reduce((acc, g) => acc + Number(g.total || 0), 0);
+  return examsMax + 20;
+}
+
+// إجمالي مادة واحدة — جمع حقيقي بالنقط الفعلية (مش نسبة مرجّحة):
+// مجموع درجات الاختبارات الحالية (بالنقط الفعلية) + درجة الحضور (من 20) + أي بونص "إضافة فوق توتال المادة"
 function getSubjectScore(s, subject) {
   const norm = normalizeSubjectName(subject);
   const subjectGrades = s.grades.filter(g => normalizeSubjectName(g.subject) === norm);
@@ -190,27 +200,33 @@ function getSubjectScore(s, subject) {
   const bonusGrades = subjectGrades.filter(g => g.addType === 'subjectBonus');
   if (!baseGrades.length) return null;
 
-  const basePct     = baseGrades.reduce((acc, g) => acc + (g.score / g.total * 100), 0) / baseGrades.length; // 0-100%
-  const examPoints   = (basePct / 100) * 80;   // الاختبارات من 80
-  const bonusPoints  = bonusGrades.reduce((acc, g) => acc + Number(g.score || 0), 0);
+  const examPoints  = baseGrades.reduce((acc, g) => acc + Number(g.score || 0), 0); // مجموع حقيقي، من غير تطبيع لـ80
+  const bonusPoints = bonusGrades.reduce((acc, g) => acc + Number(g.score || 0), 0);
 
   const attPct        = getSubjectAttPct(s, subject);
-  const attendancePts = attPct !== null ? attPct * 20 : 20; // مفيش بيانات حضور = مايتخصمش حاليًا
+  const attendancePts = attPct !== null ? attPct * 20 : 20; // مفيش بيانات حضور = بتاخد الـ20 كاملة مؤقتًا
 
-  return Math.round(examPoints + attendancePts + bonusPoints);
+  return Math.round((examPoints + attendancePts + bonusPoints) * 10) / 10;
 }
 
-// درجة "التوتال العام" لطالبة: متوسط درجات كل المواد اللي عندها فيها اختبارات أساسية
+// النسبة % لمادة واحدة = الإجمالي ÷ أقصى درجة ممكنة حاليًا (البونص بيزوّد فوق الـ100% عادي لو موجود)
+function getSubjectPct(s, subject) {
+  const total = getSubjectScore(s, subject);
+  const max   = getSubjectMaxPossible(s, subject);
+  if (total === null || !max) return null;
+  return Math.round((total / max) * 100);
+}
+
+// درجة "التوتال العام" لطالبة: متوسط نسب % كل المواد اللي عندها فيها اختبارات أساسية
 // + مجموع أي نقط "إضافة للتوتال العام" فوق كده
 function getOverallScore(s) {
-  const norm = x => normalizeSubjectName(x);
   const subjectsWithGrades = [...new Set(
     s.grades.filter(g => (g.addType || 'subjectTotal') === 'subjectTotal').map(g => g.subject)
   )];
-  const perSubjectScores = subjectsWithGrades.map(subj => getSubjectScore(s, subj)).filter(v => v !== null);
-  if (!perSubjectScores.length) return null;
+  const perSubjectPcts = subjectsWithGrades.map(subj => getSubjectPct(s, subj)).filter(v => v !== null);
+  if (!perSubjectPcts.length) return null;
 
-  const baseAvg = perSubjectScores.reduce((a, b) => a + b, 0) / perSubjectScores.length;
+  const baseAvg = perSubjectPcts.reduce((a, b) => a + b, 0) / perSubjectPcts.length;
   const overallBonusPoints = s.grades
     .filter(g => g.addType === 'overallBonus')
     .reduce((acc, g) => acc + Number(g.score || 0), 0);
@@ -218,8 +234,10 @@ function getOverallScore(s) {
   return Math.round(baseAvg + overallBonusPoints);
 }
 
+// getGradeAvg بيرجع نسبة % دايمًا (مش الإجمالي الخام) — عشان يفضل متوافق مع كل الأماكن
+// اللي بتستخدمه كنسبة (شرائط المقارنة، الترتيب، متوسط الملخص العلوي)
 function getGradeAvg(s, subjectFilter = '') {
-  return subjectFilter ? getSubjectScore(s, subjectFilter) : getOverallScore(s);
+  return subjectFilter ? getSubjectPct(s, subjectFilter) : getOverallScore(s);
 }
 
 function medalClass(i) {
@@ -344,8 +362,10 @@ window.renderGradesTab = function () {
     const attPct   = getSubjectAttPct(s, filter);
     const attGrade = attPct !== null ? Math.round(attPct * 20 * 10) / 10 : null;
     const total    = getSubjectScore(s, filter);
+    const max      = getSubjectMaxPossible(s, filter);
+    const pct      = getSubjectPct(s, filter);
     if (total === null && attPct === null) return null; // مفيش أي بيانات للمادة دي خالص
-    return { s, attPct, attGrade, total };
+    return { s, attPct, attGrade, total, max, pct };
   }).filter(Boolean).sort((a, b) => (b.total ?? -1) - (a.total ?? -1));
 
   if (!rows.length) {
@@ -357,7 +377,7 @@ window.renderGradesTab = function () {
     `<th>${esc(e.label)}${e.addType === 'subjectBonus' ? ' (إضافية)' : (e.total ? ' / ' + e.total : '')}</th>`
   ).join('');
 
-  const bodyRows = rows.map(({ s, attPct, attGrade, total }) => {
+  const bodyRows = rows.map(({ s, attPct, attGrade, total, max, pct }) => {
     const examCells = exams.map(e => {
       const g = s.grades.find(gr => normalizeSubjectName(gr.subject) === norm && (gr.label || 'اختبار') === e.label);
       if (!g) return '<td>—</td>';
@@ -368,7 +388,7 @@ window.renderGradesTab = function () {
       <td>${attPct !== null ? Math.round(attPct * 100) + '%' : '—'}</td>
       <td>${attGrade !== null ? attGrade + '/20' : '—'}</td>
       ${examCells}
-      <td><strong>${total !== null ? total : '—'}</strong></td>
+      <td><strong>${total !== null ? total + (max ? ' / ' + max : '') : '—'}</strong>${pct !== null ? `<div style="font-size:11px;color:var(--text-mid)">${pct}%</div>` : ''}</td>
     </tr>`;
   }).join('');
 
