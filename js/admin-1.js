@@ -2148,7 +2148,10 @@ window.openDeleteExamModal = async () => {
       gradesSnap.docs.forEach(g => {
         const data = g.data();
         const key = `${data.label || 'اختبار'}|||${data.subject || ''}`;
-        if (!examMap[key]) examMap[key] = [];
+        if (!examMap[key]) {
+          examMap[key] = [];
+          examMap[key].meta = { total: data.total || 0, addType: data.addType || 'subjectTotal' };
+        }
         examMap[key].push({ studentId: sDoc.id, gradeId: g.id });
       });
     }));
@@ -2167,8 +2170,8 @@ window.openDeleteExamModal = async () => {
           <div style="font-size:11px;color:var(--text-mid)">📊 ${entries.length} طالبة</div>
         </div>
         <div style="display:flex;align-items:center;flex-shrink:0">
-          <button onclick="editBulkExamSubject('${encodeURIComponent(key)}')" style="background:none;border:1px solid var(--green-dark);color:var(--green-dark);border-radius:8px;padding:5px 12px;cursor:pointer;font-size:12px;font-family:inherit;white-space:nowrap;margin-inline-end:6px">
-            <i class="ti ti-pencil"></i> المادة
+          <button onclick="openEditExamModal('${encodeURIComponent(key)}')" style="background:none;border:1px solid var(--green-dark);color:var(--green-dark);border-radius:8px;padding:5px 12px;cursor:pointer;font-size:12px;font-family:inherit;white-space:nowrap;margin-inline-end:6px">
+            <i class="ti ti-pencil"></i> تعديل
           </button>
           <button onclick="deleteBulkExam('${encodeURIComponent(key)}')" style="background:none;border:1px solid #e74c3c;color:#e74c3c;border-radius:8px;padding:5px 12px;cursor:pointer;font-size:12px;font-family:inherit;white-space:nowrap">
             <i class="ti ti-trash"></i> حذف
@@ -2185,26 +2188,58 @@ window.openDeleteExamModal = async () => {
   }
 };
 
-window.editBulkExamSubject = async (encodedKey) => {
+window.openEditExamModal = async (encodedKey) => {
   const key = decodeURIComponent(encodedKey);
   const [label, subject] = key.split('|||');
-  const entries = window._examMapCache?.[key] || [];
-  if (!entries.length) { alert('مفيش بيانات'); return; }
+  const entries = window._examMapCache?.[key];
+  if (!entries || !entries.length) { alert('مفيش بيانات'); return; }
+  const meta = entries.meta || { total: 0, addType: 'subjectTotal' };
 
-  const newSubject = prompt(`المادة الصحيحة لاختبار "${label}" (هتتطبق على ${entries.length} طالبة):`, subject || '');
-  if (newSubject === null) return; // اتلغى
-  const trimmed = newSubject.trim();
-  if (!trimmed) { alert('لازم تكتبي اسم المادة (اكتبيه بالظبط زي ما هو في قايمة المواد)'); return; }
+  // ملء قايمة المواد
+  try {
+    const subjects = await loadSubjectsFor('inExams');
+    const sel = document.getElementById('eeSubject');
+    sel.innerHTML = '<option value="">— اختاري المادة —</option>' + subjects.map(s => `<option>${s}</option>`).join('');
+  } catch (e) { console.error('loadSubjectsFor:', e); }
+
+  document.getElementById('eeLabel').value   = label;
+  document.getElementById('eeSubject').value = subject || '';
+  document.getElementById('eeTotal').value   = meta.total || '';
+  document.getElementById('eeAddType').value = meta.addType || 'subjectTotal';
+  document.getElementById('eeAffectedNote').textContent = `التعديل هيتطبق على درجات ${entries.length} طالبة لهذا الاختبار`;
+
+  window._editingExamKey = key;
+  document.getElementById('editExamModal').style.display = 'flex';
+};
+
+window.saveEditExam = async () => {
+  const key = window._editingExamKey;
+  const entries = window._examMapCache?.[key];
+  if (!entries || !entries.length) { alert('مفيش بيانات'); return; }
+
+  const newLabel   = document.getElementById('eeLabel').value.trim();
+  const newSubject = document.getElementById('eeSubject').value;
+  const newTotal   = Number(document.getElementById('eeTotal').value);
+  const newAddType = document.getElementById('eeAddType').value;
+
+  if (!newLabel || !newTotal) { showToast('أدخلي اسم الاختبار والدرجة الكلية'); return; }
+  if (!newSubject && (newAddType === 'subjectTotal' || newAddType === 'subjectBonus')) {
+    showToast('لازم تختاري المادة، وإلا الدرجة مش هتظهر في إحصائيات أي مادة');
+    return;
+  }
 
   try {
     await Promise.all(entries.map(({ studentId, gradeId }) =>
-      updateDoc(doc(db, 'students', studentId, 'grades', gradeId), { subject: trimmed })
+      updateDoc(doc(db, 'students', studentId, 'grades', gradeId), {
+        label: newLabel, subject: newSubject, total: newTotal, addType: newAddType,
+      })
     ));
-    showToast?.(`✅ اتعدّلت المادة لـ ${entries.length} طالبة`);
+    showToast?.(`✅ اتعدّل الاختبار لـ ${entries.length} طالبة`);
+    document.getElementById('editExamModal').style.display = 'none';
     openDeleteExamModal(); // إعادة تحميل القايمة
   } catch (e) {
     showToast?.('❌ خطأ: ' + e.message);
-    console.error('editBulkExamSubject:', e);
+    console.error('saveEditExam:', e);
   }
 };
 
