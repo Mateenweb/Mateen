@@ -220,27 +220,44 @@ function getSubjectPct(s, subject) {
   return Math.round((total / max) * 100);
 }
 
-// درجة "التوتال العام" لطالبة: متوسط نسب % كل المواد اللي عندها فيها اختبارات أساسية
-// + مجموع أي نقط "إضافة للتوتال العام" فوق كده
+// أقصى درجة ممكنة حاليًا على مستوى كل المواد مع بعض = مجموع أقصى درجة لكل مادة الطالبة مسجلة فيها
+function getOverallMaxPossible(s) {
+  const subjectsWithGrades = [...new Set(
+    s.grades.filter(g => isActive(g) && (g.addType || 'subjectTotal') === 'subjectTotal').map(g => g.subject)
+  )];
+  const maxes = subjectsWithGrades.map(subj => getSubjectMaxPossible(s, subj)).filter(v => v !== null);
+  return maxes.length ? maxes.reduce((a, b) => a + b, 0) : null;
+}
+
+// "التوتال العام" لطالبة — جمع حقيقي (مش متوسط نسب): مجموع إجمالي كل مادة عندها فيها اختبارات
+// + مجموع أي نقط "إضافة للتوتال العام" فوق كده (بونص عام، من غير سقف)
 function getOverallScore(s) {
   const subjectsWithGrades = [...new Set(
     s.grades.filter(g => isActive(g) && (g.addType || 'subjectTotal') === 'subjectTotal').map(g => g.subject)
   )];
-  const perSubjectPcts = subjectsWithGrades.map(subj => getSubjectPct(s, subj)).filter(v => v !== null);
-  if (!perSubjectPcts.length) return null;
+  const perSubjectTotals = subjectsWithGrades.map(subj => getSubjectScore(s, subj)).filter(v => v !== null);
+  if (!perSubjectTotals.length) return null;
 
-  const baseAvg = perSubjectPcts.reduce((a, b) => a + b, 0) / perSubjectPcts.length;
+  const sumTotal = perSubjectTotals.reduce((a, b) => a + b, 0);
   const overallBonusPoints = s.grades
     .filter(g => isActive(g) && g.addType === 'overallBonus')
     .reduce((acc, g) => acc + Number(g.score || 0), 0);
 
-  return Math.round(baseAvg + overallBonusPoints);
+  return Math.round((sumTotal + overallBonusPoints) * 10) / 10;
+}
+
+// النسبة % العامة = التوتال العام ÷ أقصى درجة ممكنة على مستوى كل المواد
+function getOverallPct(s) {
+  const total = getOverallScore(s);
+  const max   = getOverallMaxPossible(s);
+  if (total === null || !max) return null;
+  return Math.round((total / max) * 100);
 }
 
 // getGradeAvg بيرجع نسبة % دايمًا (مش الإجمالي الخام) — عشان يفضل متوافق مع كل الأماكن
 // اللي بتستخدمه كنسبة (شرائط المقارنة، الترتيب، متوسط الملخص العلوي)
 function getGradeAvg(s, subjectFilter = '') {
-  return subjectFilter ? getSubjectPct(s, subjectFilter) : getOverallScore(s);
+  return subjectFilter ? getSubjectPct(s, subjectFilter) : getOverallPct(s);
 }
 
 function medalClass(i) {
