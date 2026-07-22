@@ -110,39 +110,60 @@ window.renderSummary = function renderSummary() {
 }
 
 // ── Helpers ──────────────────────────────────
+// بترجع كل سجلات حضور الطالبة (تاريخ + مادة + حالة) بعد تطبيق قاعدة:
+// أول 3 اعتذارات بس (إجمالي على كل موادها مع بعض، مش لكل مادة لوحدها) بيفضلوا اعتذار مايتحسبش ضدها،
+// من الاعتذار الرابع فما فوق (بترتيب التاريخ) بيتحول لغياب فعلي في حساب النسب والدرجات
+function getEffectiveEntries(s) {
+  if (s._effEntries) return s._effEntries;
+  const entries = [];
+  [...s.sessions]
+    .sort((a, b) => (a.date || '').localeCompare(b.date || ''))
+    .forEach(sess => {
+      Object.entries(sess.subjects || {}).forEach(([subject, status]) => {
+        entries.push({ subject, status, date: sess.date || '' });
+      });
+    });
+  let excusedSeen = 0;
+  entries.forEach(e => {
+    if (e.status === 'excused') {
+      excusedSeen++;
+      e.effective = excusedSeen <= 3 ? 'excused' : 'absent';
+    } else {
+      e.effective = e.status;
+    }
+  });
+  s._effEntries = entries;
+  return entries;
+}
+
 function getAttPct(s) {
   let present = 0, total = 0;
-  s.sessions.forEach(sess => {
-    Object.values(sess.subjects || {}).forEach(v => {
-      if (v === 'present' || v === 'absent') {
-        total++;
-        if (v === 'present') present++;
-      }
-    });
+  getEffectiveEntries(s).forEach(e => {
+    if (e.effective === 'present' || e.effective === 'absent') {
+      total++;
+      if (e.effective === 'present') present++;
+    }
   });
   return total > 0 ? Math.round(present / total * 100) : null;
 }
 
 function getAttCounts(s) {
   let present = 0, absent = 0, excused = 0;
-  s.sessions.forEach(sess => {
-    Object.values(sess.subjects || {}).forEach(v => {
-      if (v === 'present') present++;
-      else if (v === 'absent') absent++;
-      else if (v === 'excused') excused++;
-    });
+  getEffectiveEntries(s).forEach(e => {
+    if (e.effective === 'present') present++;
+    else if (e.effective === 'absent') absent++;
+    else if (e.effective === 'excused') excused++;
   });
   return { present, absent, excused };
 }
 
-// نسبة حضور الطالبة في مادة واحدة بس (present/(present+absent)، الاعتذار مايتحسبش ضدها)
+// نسبة حضور الطالبة في مادة واحدة بس (present/(present+absent) بعد تطبيق قاعدة الـ3 اعتذارات)
 function getSubjectAttPct(s, subject) {
   let present = 0, total = 0;
-  s.sessions.forEach(sess => {
-    const v = (sess.subjects || {})[subject];
-    if (v === 'present' || v === 'absent') {
+  getEffectiveEntries(s).filter(e => e.subject === subject).forEach(e => {
+    if (e.effective === 'present' || e.effective === 'absent') {
       total++;
-      if (v === 'present') present++;
+      if (e.effective === 'present') present++;
     }
   });
   return total > 0 ? present / total : null; // null = مفيش بيانات حضور للمادة دي
@@ -220,11 +241,10 @@ function barNameLink(s) {
 // نفس getAttCounts بس لمادة واحدة بس
 function getSubjectAttCounts(s, subject) {
   let present = 0, absent = 0, excused = 0;
-  s.sessions.forEach(sess => {
-    const v = (sess.subjects || {})[subject];
-    if (v === 'present') present++;
-    else if (v === 'absent') absent++;
-    else if (v === 'excused') excused++;
+  getEffectiveEntries(s).filter(e => e.subject === subject).forEach(e => {
+    if (e.effective === 'present') present++;
+    else if (e.effective === 'absent') absent++;
+    else if (e.effective === 'excused') excused++;
   });
   return { present, absent, excused };
 }

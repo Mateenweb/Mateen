@@ -771,12 +771,21 @@ window.deleteAward = async (studentId, awardId) => {
 };
 
 // ── Stats ─────────────────────────────────────
+// أول 3 اعتذارات بس (إجمالي على كل المواد مع بعض) بتفضل اعتذار مايتحسبش ضد النسبة،
+// من الاعتذار الرابع فما فوق (بترتيب التاريخ) بيتحول لغياب فعلي في حساب النسبة
 function updateStats(sessions) {
-  let present = 0, absent = 0, total = 0;
-  sessions.forEach(s => Object.values(s.subjects || {}).forEach(v => {
-    if (v === 'present') { present++; total++; }
-    else if (v === 'absent') { absent++; total++; }
-  }));
+  const entries = [];
+  [...sessions]
+    .sort((a, b) => (a.date || '').localeCompare(b.date || ''))
+    .forEach(s => Object.values(s.subjects || {}).forEach(v => entries.push(v)));
+
+  let excusedSeen = 0, present = 0, absent = 0, total = 0;
+  entries.forEach(v => {
+    const effective = v === 'excused' ? (++excusedSeen <= 3 ? 'excused' : 'absent') : v;
+    if (effective === 'present') { present++; total++; }
+    else if (effective === 'absent') { absent++; total++; }
+  });
+
   document.getElementById('statPresent').textContent = present;
   document.getElementById('statAbsent').textContent  = absent;
   document.getElementById('statPct').textContent     = total ? Math.round(present/total*100) + '%' : '—';
