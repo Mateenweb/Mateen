@@ -251,8 +251,8 @@
         <span class="ami-text"><strong>إضافة اختبار جماعي</strong><small>أضيفي درجات لعدة طالبات</small></span>
       </button>
       <button class="actions-menu-item" onclick="openDeleteExamModal();closeActionMenus()">
-        <span class="ami-icon" style="background:rgba(192,57,43,0.1);color:#c0392b"><i class="ti ti-trash"></i></span>
-        <span class="ami-text"><strong>حذف اختبار جماعي</strong><small>احذفي اختباراً من كل الطالبات</small></span>
+        <span class="ami-icon" style="background:rgba(192,57,43,0.1);color:#c0392b"><i class="ti ti-pencil"></i></span>
+        <span class="ami-text"><strong>تعديل / حذف اختبار جماعي</strong><small>عدّلي أو احذفي اختباراً من كل الطالبات</small></span>
       </button>
     </div>
   </div>
@@ -1409,14 +1409,59 @@ function formatSize(bytes) {
 <div id="deleteExamModal" class="modal-overlay" style="display:none" onclick="if(event.target===this)this.style.display='none'">
   <div class="modal-box" style="width:min(94vw,480px)">
     <div class="modal-head">
-      <span class="m-title">🗑️ حذف اختبار جماعي</span>
+      <span class="m-title">🗑️ تعديل / حذف اختبار جماعي</span>
       <button class="m-close" onclick="document.getElementById('deleteExamModal').style.display='none'">✕</button>
     </div>
     <div class="modal-body">
-      <p style="font-size:13px;color:var(--text-mid);margin-bottom:14px">اختاري الاختبار اللي عاوزة تحذفيه من عند كل الطالبات.</p>
+      <p style="font-size:13px;color:var(--text-mid);margin-bottom:14px">اختاري الاختبار اللي عاوزة تعدّليه أو تحذفيه من عند كل الطالبات.</p>
       <div id="examListToDelete" style="display:flex;flex-direction:column;gap:8px;max-height:300px;overflow-y:auto">
         <div style="text-align:center;color:var(--text-mid);font-size:13px;padding:20px">جارٍ التحميل...</div>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ Modal تعديل اختبار جماعي — بيعدّل اسم/مادة/توتال/طريقة حساب الاختبار لكل الطالبات اللي عندها الاختبار ده دفعة واحدة ══ -->
+<div id="editExamModal" class="modal-overlay" style="display:none" onclick="if(event.target===this)this.style.display='none'">
+  <div class="modal-box" style="width:min(94vw,480px)">
+    <div class="modal-head">
+      <span class="m-title">✏️ تعديل اختبار جماعي</span>
+      <button class="m-close" onclick="document.getElementById('editExamModal').style.display='none'">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="eeAffectedNote" style="font-size:12px;color:var(--text-mid);background:var(--beige2);border-radius:8px;padding:8px 10px;margin-bottom:14px"></div>
+
+      <div style="margin-bottom:14px">
+        <label style="font-size:12px;color:var(--text-mid);display:block;margin-bottom:4px">اسم الاختبار *</label>
+        <input id="eeLabel" type="text" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:inherit;font-size:13px"/>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+        <div>
+          <label style="font-size:12px;color:var(--text-mid);display:block;margin-bottom:4px">المادة</label>
+          <select id="eeSubject" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:inherit;font-size:13px">
+            <option value="">— اختاري المادة —</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:12px;color:var(--text-mid);display:block;margin-bottom:4px">الدرجة الكلية *</label>
+          <input id="eeTotal" type="number" min="1" max="100" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:inherit;font-size:13px"/>
+        </div>
+      </div>
+
+      <div style="margin-bottom:16px">
+        <label style="font-size:12px;color:var(--text-mid);display:block;margin-bottom:4px">الدرجة دي بتتحسب إزاي؟</label>
+        <select id="eeAddType" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:inherit;font-size:13px">
+          <option value="subjectTotal">جزء من توتال المادة (الافتراضي — بتدخل في متوسط المادة الأساسي)</option>
+          <option value="subjectBonus">إضافة فوق توتال المادة (بتتضاف كنقط زيادة على درجة المادة)</option>
+          <option value="overallBonus">إضافة للتوتال العام (بتتضاف على متوسط الطالبة العام، مش لمادة معينة)</option>
+          <option value="bonus">بونص فقط — مش بيتحسب في أي توتال (للعرض بس)</option>
+        </select>
+      </div>
+
+      <button onclick="saveEditExam()" style="width:100%;background:var(--green-dark,#5c3d2e);color:#fff;border:none;border-radius:8px;padding:10px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:700">
+        <i class="ti ti-device-floppy"></i> حفظ التعديل
+      </button>
     </div>
   </div>
 </div>
