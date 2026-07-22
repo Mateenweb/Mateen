@@ -84,7 +84,7 @@ async function loadAll() {
 // ── Render All ───────────────────────────────
 function renderAll() {
   window.renderSummary();
-  renderAttTab();
+  window.renderAttTab();
   renderGradesTab();
   renderSubjectsTab();
   renderRankingTab();
@@ -250,7 +250,7 @@ function getSubjectAttCounts(s, subject) {
 }
 
 // ── Tab: Attendance ──────────────────────────
-function renderAttTab() {
+window.renderAttTab = function renderAttTab() {
   const list   = document.getElementById('attList');
   const filter = document.getElementById('attSubjectFilter')?.value || '';
 
