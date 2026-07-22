@@ -4,7 +4,8 @@ import { initializeApp, getApps, getApp }
 import { getAuth, onAuthStateChanged, signOut }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
 import { getFirestore, collection, addDoc, deleteDoc, doc,
-         onSnapshot, query, orderBy, where, getDoc, updateDoc, getDocs, serverTimestamp }
+         onSnapshot, query, orderBy, where, getDoc, updateDoc, getDocs, serverTimestamp,
+         collectionGroup, deleteField }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 import { FIREBASE_CONFIG } from "./config.js";
 import { exportWord, exportPdf, exportAttendanceWord, exportAttendancePdf, exportAttendanceExcel } from "./export.js";
@@ -2032,10 +2033,9 @@ window.saveBulkGrades = async () => {
     await Promise.all(checked.map(cb => {
       const sid   = cb.dataset.id;
       const score = Number(document.querySelector(`.bg-score[data-id="${sid}"]`)?.value || 0);
-      return addDoc(collection(db, 'students', sid, 'grades'), {
-        label, subject, score, total, addType,
-        createdAt: serverTimestamp(),
-      });
+      const payload = { label, subject, score, addType, createdAt: serverTimestamp() };
+      if (addType === 'subjectTotal') payload.total = total; // البونص مالوش توتال ثابت خالص
+      return addDoc(collection(db, 'students', sid, 'grades'), payload);
     }));
     showToast(`✅ تم حفظ الدرجات لـ ${checked.length} طالبة`);
     closeBulkGradeModal();
@@ -2280,7 +2280,8 @@ window.saveEditExam = async () => {
     await Promise.all(entries.map(({ studentId, gradeId }) => {
       const scoreInput = document.querySelector(`.ee-score[data-grade-id="${gradeId}"]`);
       const score = scoreInput ? Number(scoreInput.value || 0) : undefined;
-      const payload = { label: newLabel, subject: newSubject, total: newTotal, addType: newAddType };
+      const payload = { label: newLabel, subject: newSubject, addType: newAddType };
+      payload.total = newAddType === 'subjectTotal' ? newTotal : deleteField(); // البونص مالوش توتال ثابت خالص
       if (score !== undefined) payload.score = score;
       return updateDoc(doc(db, 'students', studentId, 'grades', gradeId), payload);
     }));
@@ -3026,6 +3027,54 @@ window.confirmPasteAttendance = async () => {
 
 
 // ── حذف اختبار جماعي من عند كل الطالبات ─────────────────────
+
+// ── تصحيح درجات المشاركة القديمة (نقلها لنوع "بونص" بدل "جزء من توتال المادة") ──
+// إجراء لمرة واحدة: قبل كده كانت درجة المشاركة بتتسجل بـ total:10 وبدون addType،
+// فكانت بتدخل في متوسط اختبارات المادة وتبوّظه. هنا بنحوّلها لـ subjectBonus
+// (تتضاف فوق درجة المادة بالرقم زي ما هو، من غير سقف) ونشيل الـ total الثابت.
+window.fixOldParticipationGrades = async () => {
+  if (!confirm('هيتم تصحيح كل درجات المشاركة القديمة عشان تتحسب "بونص" فوق درجة المادة بدل ما تدخل في متوسط الاختبارات. الإجراء ده لمرة واحدة ومينفعش يتراجع فيه. تكملي؟')) return;
+  try {
+    const snap = await getDocs(collectionGroup(db, 'grades'));
+    let fixed = 0, checked = 0;
+    for (const d of snap.docs) {
+      if (!d.id.startsWith('participation_')) continue;
+      checked++;
+      const data = d.data();
+      if (data.addType === 'subjectBonus' && data.total === undefined) continue; // اتصحّحت قبل كده
+      await updateDoc(d.ref, { addType: 'subjectBonus', total: deleteField() });
+      fixed++;
+    }
+    alert(`تم فحص ${checked} درجة مشاركة، وتصحيح ${fixed} منها.`);
+  } catch (e) {
+    console.error('fixOldParticipationGrades:', e);
+    alert('حصل خطأ أثناء التصحيح: ' + e.message);
+  }
+};
+
+// ── تصحيح توتال اختبارات البونص اللي اتصفّر غلط (0) ──
+// إجراء لمرة واحدة: مودال "تعديل اختبار جماعي" كان بيكتب total:0 لأي اختبار نوعه
+// بونص (subjectBonus / overallBonus) لو خانة الدرجة الكلية اتسابت فاضية. هنا بنشيل
+// الـ total الغلط ده تمامًا من أي اختبار بونص لسه فيه total مسجل (0 أو غيره).
+window.fixBonusGradeTotals = async () => {
+  if (!confirm('هيتم فحص كل اختبارات "بونص" وشيل أي درجة كلية (total) اتسجلت غلط عليها. الإجراء ده لمرة واحدة ومينفعش يتراجع فيه. تكملي؟')) return;
+  try {
+    const snap = await getDocs(collectionGroup(db, 'grades'));
+    let fixed = 0, checked = 0;
+    for (const d of snap.docs) {
+      const data = d.data();
+      if (data.addType !== 'subjectBonus' && data.addType !== 'overallBonus') continue;
+      checked++;
+      if (data.total === undefined) continue; // مفيش توتال أصلًا، تمام
+      await updateDoc(d.ref, { total: deleteField() });
+      fixed++;
+    }
+    alert(`تم فحص ${checked} اختبار بونص، وتصحيح ${fixed} منه.`);
+  } catch (e) {
+    console.error('fixBonusGradeTotals:', e);
+    alert('حصل خطأ أثناء التصحيح: ' + e.message);
+  }
+};
 
 // ── مسح كل الدرجات والغياب ─────────────────────────────────────
 

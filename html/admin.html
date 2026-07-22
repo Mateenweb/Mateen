@@ -578,6 +578,17 @@
       <i class="ti ti-bug"></i> فحص الموقع الشامل
     </a>
     <div style="border-top:1px solid var(--border);padding-top:12px">
+      <div style="font-size:13px;color:var(--text-mid);margin-bottom:10px">🛠️ صيانة لمرة واحدة</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button onclick="fixOldParticipationGrades()" class="btn-add-row">
+          <i class="ti ti-wand"></i> تصحيح درجات المشاركة القديمة
+        </button>
+        <button onclick="fixBonusGradeTotals()" class="btn-add-row">
+          <i class="ti ti-wand"></i> تصحيح توتال اختبارات البونص اللي اتصفّر
+        </button>
+      </div>
+    </div>
+    <div style="border-top:1px solid var(--border);padding-top:12px">
       <div style="font-size:13px;color:var(--text-mid);margin-bottom:10px">⚠️ منطقة الخطر — هذه الإجراءات لا يمكن التراجع عنها</div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <button onclick="openResetDataModal()" class="btn-danger-solid">
