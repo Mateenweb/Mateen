@@ -2237,18 +2237,26 @@ window.openEditExamModal = async (encodedKey) => {
   document.getElementById('eeSubject').value = subject || '';
   document.getElementById('eeTotal').value   = meta.total || '';
   document.getElementById('eeAddType').value = meta.addType || 'subjectTotal';
-  document.getElementById('eeAffectedNote').textContent = `التعديل هيتطبق على درجات ${entries.length} طالبة لهذا الاختبار`;
+  // طالبات غير مؤرشفات وملهمش درجة في الاختبار ده خالص (مش موجودة في entries أصلًا)
+  const presentIds = new Set(entries.map(e => e.studentId));
+  const missing = allStudents.filter(s => s.name && s.name !== 'طالبة جديدة' && !s.archived && !presentIds.has(s.id));
+
+  document.getElementById('eeAffectedNote').textContent =
+    `التعديل هيتطبق على درجات ${entries.length} طالبة لهذا الاختبار` +
+    (missing.length ? ` — ⚠️ ${missing.length} طالبة غير مؤرشفة ملهاش درجة في الاختبار ده خالص، هتلاقيها في آخر القايمة تحت وتقدري تضيفي درجتها` : '');
 
   const scoresList = document.getElementById('eeScoresList');
   if (scoresList) {
-    scoresList.innerHTML = [...entries]
+    const existingRows = [...entries].map(e => ({ studentId: e.studentId, gradeId: e.gradeId, studentName: e.studentName, score: e.score, isNew: false }));
+    const missingRows  = missing.map(s => ({ studentId: s.id, gradeId: '', studentName: s.name || '—', score: '', isNew: true }));
+    scoresList.innerHTML = [...existingRows, ...missingRows]
       .sort((a, b) => (a.studentName || '').localeCompare(b.studentName || '', 'ar'))
       .map(e => `
         <label style="display:flex;align-items:center;justify-content:space-between;font-size:13px;gap:8px">
-          <span>${esc(e.studentName)}</span>
+          <span>${esc(e.studentName)}${e.isNew ? ' <span style="color:#c9852b">(لا توجد درجة)</span>' : ''}</span>
           <input type="number" class="ee-score" data-grade-id="${e.gradeId}" data-student-id="${e.studentId}"
             value="${e.score ?? ''}" min="0"
-            style="width:80px;border:1px solid var(--border);border-radius:6px;padding:4px 8px;text-align:center">
+            style="width:80px;border:1px solid ${e.isNew ? '#c9852b' : 'var(--border)'};border-radius:6px;padding:4px 8px;text-align:center">
         </label>`).join('');
   }
 
@@ -2277,15 +2285,27 @@ window.saveEditExam = async () => {
   }
 
   try {
-    await Promise.all(entries.map(({ studentId, gradeId }) => {
-      const scoreInput = document.querySelector(`.ee-score[data-grade-id="${gradeId}"]`);
-      const score = scoreInput ? Number(scoreInput.value || 0) : undefined;
-      const payload = { label: newLabel, subject: newSubject, addType: newAddType };
-      payload.total = newAddType === 'subjectTotal' ? newTotal : deleteField(); // البونص مالوش توتال ثابت خالص
-      if (score !== undefined) payload.score = score;
-      return updateDoc(doc(db, 'students', studentId, 'grades', gradeId), payload);
+    const scoreInputs = [...document.querySelectorAll('.ee-score')];
+    await Promise.all(scoreInputs.map(input => {
+      const gradeId   = input.dataset.gradeId;
+      const studentId = input.dataset.studentId;
+      const raw = input.value;
+
+      if (gradeId) {
+        // درجة موجودة أصلًا — تعديل
+        const payload = { label: newLabel, subject: newSubject, addType: newAddType };
+        payload.total = newAddType === 'subjectTotal' ? newTotal : deleteField();
+        if (raw !== '') payload.score = Number(raw);
+        return updateDoc(doc(db, 'students', studentId, 'grades', gradeId), payload);
+      }
+
+      // طالبة ملهاش درجة أصلًا — تتضاف بس لو المعلمة كتبت رقم في خانتها
+      if (raw === '') return Promise.resolve();
+      const payload = { label: newLabel, subject: newSubject, addType: newAddType, score: Number(raw), createdAt: serverTimestamp() };
+      if (newAddType === 'subjectTotal') payload.total = newTotal;
+      return addDoc(collection(db, 'students', studentId, 'grades'), payload);
     }));
-    showToast?.(`✅ اتعدّل الاختبار ودرجاته لـ ${entries.length} طالبة`);
+    showToast?.(`✅ اتعدّل الاختبار`);
     document.getElementById('editExamModal').style.display = 'none';
     openDeleteExamModal(); // إعادة تحميل القايمة
   } catch (e) {
