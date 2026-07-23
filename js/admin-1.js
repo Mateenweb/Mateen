@@ -2267,20 +2267,38 @@ window.openEditExamModal = async (encodedKey) => {
         const isDup = nameCounts[e.studentName] > 1;
         const tag = isDup ? dayTimeOf(e.studentId) : '';
         return `
-        <label style="display:flex;align-items:center;justify-content:space-between;font-size:13px;gap:8px">
-          <span>
-            ${esc(e.studentName)}${e.isNew ? ' <span style="color:#c9852b">(لا توجد درجة)</span>' : ''}
-            ${isDup ? `<span title="فيه أكتر من طالبة بنفس الاسم" style="display:inline-block;margin-inline-start:6px;font-size:10px;background:#fdf3e3;color:#a9720f;border-radius:10px;padding:1px 8px">⚠️ ${esc(tag || 'اسم مكرر')}</span>` : ''}
-          </span>
-          <input type="number" class="ee-score" data-grade-id="${e.gradeId}" data-student-id="${e.studentId}"
-            value="${e.score ?? ''}" min="0"
-            style="width:80px;border:1px solid ${e.isNew ? '#c9852b' : 'var(--border)'};border-radius:6px;padding:4px 8px;text-align:center">
-        </label>`;
+        <div class="ee-score-row" data-name="${esc(e.studentName)}" style="display:flex;align-items:center;justify-content:space-between;font-size:13px;gap:8px">
+          <label style="display:flex;align-items:center;justify-content:space-between;flex:1;gap:8px">
+            <span>
+              ${esc(e.studentName)}${e.isNew ? ' <span style="color:#c9852b">(لا توجد درجة)</span>' : ''}
+              ${isDup ? `<span title="فيه أكتر من طالبة بنفس الاسم" style="display:inline-block;margin-inline-start:6px;font-size:10px;background:#fdf3e3;color:#a9720f;border-radius:10px;padding:1px 8px">⚠️ ${esc(tag || 'اسم مكرر')}</span>` : ''}
+            </span>
+            <input type="number" class="ee-score" data-grade-id="${e.gradeId}" data-student-id="${e.studentId}"
+              value="${e.score ?? ''}" min="0"
+              style="width:80px;border:1px solid ${e.isNew ? '#c9852b' : 'var(--border)'};border-radius:6px;padding:4px 8px;text-align:center">
+          </label>
+          ${isDup ? `<button type="button" onclick="removeExamScoreRow(this,'${e.gradeId}','${e.studentId}')" title="احذفي الصف ده" style="background:none;border:none;color:#e74c3c;cursor:pointer;font-size:15px;padding:2px 4px">🗑️</button>` : ''}
+        </div>`;
       }).join('');
   }
 
   window._editingExamKey = key;
   document.getElementById('editExamModal').style.display = 'flex';
+};
+
+// حذف صف طالبة من قايمة الدرجات جوه مودال التعديل (مفيدة للأسماء المكررة)
+// لو الصف ده كان درجة حقيقية محفوظة، بيتحذف من قاعدة البيانات كمان مش بس من الشاشة
+window.removeExamScoreRow = async (btn, gradeId, studentId) => {
+  if (!confirm('تأكيد حذف الصف ده؟')) return;
+  if (gradeId) {
+    try {
+      await deleteDoc(doc(db, 'students', studentId, 'grades', gradeId));
+    } catch (e) {
+      alert('حصل خطأ أثناء الحذف: ' + e.message);
+      return;
+    }
+  }
+  btn.closest('.ee-score-row')?.remove();
 };
 
 window.saveEditExam = async () => {
@@ -2300,6 +2318,19 @@ window.saveEditExam = async () => {
   }
   if (!newSubject && (newAddType === 'subjectTotal' || newAddType === 'subjectBonus')) {
     showToast('لازم تختاري المادة، وإلا الدرجة مش هتظهر في إحصائيات أي مادة');
+    return;
+  }
+
+  // ما نسمحش بالحفظ لو لسه فيه أسماء مكررة (لازم تتحل الأول بزرار الحذف)، أو لو فيه خانة درجة فاضية
+  const rowNames = [...document.querySelectorAll('.ee-score-row')].map(r => r.dataset.name);
+  const dupNames = [...new Set(rowNames.filter((n, i) => rowNames.indexOf(n) !== i))];
+  if (dupNames.length) {
+    showToast(`لسه فيه أسماء مكررة (${dupNames.join('، ')}) — احذفي الصف الغلط الأول قبل الحفظ`);
+    return;
+  }
+  const emptyInputs = [...document.querySelectorAll('.ee-score')].filter(i => i.value.trim() === '');
+  if (emptyInputs.length) {
+    showToast(`فيه ${emptyInputs.length} طالبة من غير درجة — اكتبي درجتها أو احذفي صفها قبل الحفظ`);
     return;
   }
 
