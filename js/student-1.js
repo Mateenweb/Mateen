@@ -770,11 +770,20 @@ function updateStats(sessions) {
   document.getElementById('statPct').textContent     = total ? Math.round(present/total*100) + '%' : '—';
 }
 
+// متوسط الدرجات الظاهر فوق الصفحة — مطابق لمنطق صفحة الإدارة:
+// البونص (زي المشاركة أو اختبارات الإثرائيات) بيتضاف للإجمالي المكتسب، من غير ما يزوّد الأقصى الممكن
 function updateGradeAvg(grades) {
-  const valid = grades.filter(g => g.total > 0);
-  if (!valid.length) { document.getElementById('statGrade').textContent = '—'; return; }
-  const avg = valid.reduce((s, g) => s + g.score/g.total*100, 0) / valid.length;
-  document.getElementById('statGrade').textContent = Math.round(avg) + '%';
+  const base = grades.filter(g => g.active !== false && (g.addType || 'subjectTotal') === 'subjectTotal' && g.total > 0);
+  if (!base.length) { document.getElementById('statGrade').textContent = '—'; return; }
+
+  const bonusScore = grades
+    .filter(g => g.active !== false && (g.addType === 'subjectBonus' || g.addType === 'overallBonus'))
+    .reduce((s, g) => s + Number(g.score || 0), 0);
+
+  const earned = base.reduce((s, g) => s + Number(g.score || 0), 0) + bonusScore;
+  const max    = base.reduce((s, g) => s + Number(g.total || 0), 0);
+
+  document.getElementById('statGrade').textContent = max > 0 ? Math.round(earned / max * 100) + '%' : '—';
 }
 
 // ── Delete Account ────────────────────────────
