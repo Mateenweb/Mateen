@@ -626,7 +626,18 @@ function renderGrades(grades) {
     });
   }
 
-  list.innerHTML = order.map(subj => {
+  // إجمالي عام بالنقط الحقيقية (زي حساب متوسط الدرجات فوق بالظبط) — يتحط كسطر فوق قائمة المواد
+  const overallBase = grades.filter(g => g.active !== false && (g.addType || 'subjectTotal') === 'subjectTotal' && g.total > 0);
+  const overallBonusScore = grades
+    .filter(g => g.active !== false && (g.addType === 'subjectBonus' || g.addType === 'overallBonus'))
+    .reduce((s, g) => s + Number(g.score || 0), 0);
+  const overallEarned = overallBase.reduce((s, g) => s + Number(g.score || 0), 0) + overallBonusScore;
+  const overallMax     = overallBase.reduce((s, g) => s + Number(g.total || 0), 0);
+  const overallHeaderHtml = overallMax > 0
+    ? `<div style="text-align:center;font-size:15px;font-weight:700;color:var(--green-dark);padding:10px;margin-bottom:12px;background:#fff;border-radius:10px;border:1px solid var(--border)">الإجمالي: ${overallEarned}/${overallMax}</div>`
+    : '';
+
+  list.innerHTML = overallHeaderHtml + order.map(subj => {
     const subjGrades = groups[subj];
     const valid = subjGrades.filter(g => g.total > 0);
     const subjAvg = valid.length
