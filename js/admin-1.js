@@ -2586,6 +2586,96 @@ window.saveBulkAttendance = async () => {
 // ══════════════════════════════════════════════════════════════
 //  فحص نقص الحضور — أي يوم فيه طالبة (غير مؤرشفة) ناقصها تسجيل حضور
 // ══════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════
+//  فحص الأسماء المكررة — ملفات منفصلة لنفس الطالبة في كل قائمة الطالبات
+// ══════════════════════════════════════════════════════════════
+function normalizeStuName(name) {
+  return (name || '')
+    .replace(/[أإآا]/g, 'ا').replace(/[ةه]/g, 'ه').replace(/[يى]/g, 'ي')
+    .replace(/[\u064B-\u065F]/g, '')
+    .replace(/\s+/g, '')
+    .trim();
+}
+
+window.openDuplicateNamesModal = async () => {
+  const modal = document.getElementById('duplicateNamesModal');
+  const list  = document.getElementById('duplicateNamesList');
+  if (!modal) { alert('المودال مش موجود'); return; }
+
+  modal.style.display = 'flex';
+  list.innerHTML = '<div style="text-align:center;color:var(--text-mid);font-size:13px;padding:20px">جارٍ الفحص...</div>';
+
+  try {
+    const studSnap = await getDocs(collection(db, 'students'));
+    const active = studSnap.docs
+      .filter(d => !d.data().archived && d.data().name && d.data().name !== 'طالبة جديدة');
+
+    // تجميع حسب الاسم بعد التطبيع (بيتجاهل اختلافات بسيطة زي الألف/التاء المربوطة/الياء والمسافات)
+    const groups = {};
+    active.forEach(d => {
+      const norm = normalizeStuName(d.data().name);
+      if (!groups[norm]) groups[norm] = [];
+      groups[norm].push(d);
+    });
+
+    const dupGroups = Object.values(groups).filter(g => g.length > 1);
+
+    if (!dupGroups.length) {
+      list.innerHTML = '<div style="text-align:center;color:#1e8449;font-size:13px;padding:20px">✅ مفيش أسماء مكررة</div>';
+      return;
+    }
+
+    // نجيب عدد الدرجات والحضور لكل ملف عشان تقدري تحكمي أي ملف هو "الصح"
+    const rows = await Promise.all(dupGroups.map(async group => {
+      const docsInfo = await Promise.all(group.map(async d => {
+        const [gradesSnap, sessSnap] = await Promise.all([
+          getDocs(collection(db, 'students', d.id, 'grades')),
+          getDocs(collection(db, 'students', d.id, 'sessions')),
+        ]);
+        const data = d.data();
+        const dayTime = [data.day, data.hour ? `${data.hour} ${data.ampm || ''}` : ''].filter(Boolean).join(' — ');
+        return {
+          id: d.id, name: data.name, dayTime,
+          linked: !!data.uid,
+          gradesCount: gradesSnap.size, sessionsCount: sessSnap.size,
+        };
+      }));
+      return { name: group[0].data().name, docs: docsInfo };
+    }));
+
+    list.innerHTML = rows.map(({ name, docs }) => `
+      <div style="border:1px solid #c0392b;border-radius:10px;padding:12px 14px;background:rgba(192,57,43,0.04)">
+        <div style="font-size:13px;font-weight:700;margin-bottom:8px">⚠️ ${esc(name)} — ${docs.length} ملفات</div>
+        ${docs.map(dc => `
+          <div style="display:flex;align-items:center;justify-content:space-between;background:#fff;border:1px solid var(--border);border-radius:8px;padding:8px 10px;margin-bottom:6px">
+            <div style="font-size:11.5px;color:var(--text-mid)">
+              <div>${dc.dayTime ? esc(dc.dayTime) : '<span style="color:#c0392b">بدون يوم/معاد محدد</span>'}</div>
+              <div>${dc.linked ? '🔗 مرتبطة بحساب دخول' : '⚪ مش مرتبطة بأي حساب'} · 📊 ${dc.gradesCount} درجة · 📅 ${dc.sessionsCount} جلسة حضور</div>
+            </div>
+            <button onclick="deleteDuplicateStudent('${dc.id}', this)" style="background:none;border:1px solid #e74c3c;color:#e74c3c;border-radius:8px;padding:5px 10px;cursor:pointer;font-size:11.5px;font-family:inherit;white-space:nowrap;flex-shrink:0">
+              <i class="ti ti-trash"></i> حذف نهائي
+            </button>
+          </div>`).join('')}
+      </div>`).join('');
+  } catch (e) {
+    list.innerHTML = `<div style="color:#e74c3c;font-size:13px;padding:20px">❌ خطأ: ${e.message}</div>`;
+    console.error('openDuplicateNamesModal:', e);
+  }
+};
+
+window.deleteDuplicateStudent = async (studentId, btn) => {
+  if (!confirm('⚠️ حذف نهائي لملف الطالبة ده بكل درجاته وحضوره — مينفعش يترجع تاني.\nمتأكدة إن ده الملف الغلط/الناقص؟')) return;
+  if (!confirm('تأكيد أخير: هل تحذفي الملف ده نهائيًا؟')) return;
+  try {
+    await fullDeleteUser(studentId);
+    showToast('✅ اتحذف الملف نهائيًا');
+    openDuplicateNamesModal(); // إعادة تحميل القايمة
+  } catch (e) {
+    showToast('❌ خطأ: ' + e.message);
+    console.error('deleteDuplicateStudent:', e);
+  }
+};
+
 window.openMissingAttModal = async () => {
   const modal = document.getElementById('missingAttModal');
   const list  = document.getElementById('missingAttList');

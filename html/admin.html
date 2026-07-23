@@ -334,11 +334,31 @@
         <span class="ami-icon" style="background:rgba(127,140,141,0.12);color:#7f8c8d"><i class="ti ti-archive"></i></span>
         <span class="ami-text"><strong>الأرشيف</strong><small>الطالبات المؤرشفات</small></span>
       </button>
+      <button class="actions-menu-item" onclick="openDuplicateNamesModal();closeActionMenus()">
+        <span class="ami-icon" style="background:rgba(192,57,43,0.1);color:#c0392b"><i class="ti ti-users-group"></i></span>
+        <span class="ami-text"><strong>فحص الأسماء المكررة</strong><small>اكتشفي ملفات مكررة لنفس الطالبة في القائمة كلها</small></span>
+      </button>
     </div>
   </div>
 </div>
 </div>
 </div><!-- /admin-tab-students -->
+
+<!-- ══ Modal فحص الأسماء المكررة ══ -->
+<div id="duplicateNamesModal" class="modal-overlay" style="display:none" onclick="if(event.target===this)this.style.display='none'">
+  <div class="modal-box" style="width:min(94vw,540px)">
+    <div class="modal-head">
+      <span class="m-title">👯 فحص الأسماء المكررة</span>
+      <button class="m-close" onclick="document.getElementById('duplicateNamesModal').style.display='none'">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:13px;color:var(--text-mid);margin-bottom:14px">بيدوّر على أي اسمين متطابقين (أو قريبين جدًا) بين الطالبات غير المؤرشفات، عشان تكتشفي ملفات مكررة لنفس الطالبة.</p>
+      <div id="duplicateNamesList" style="display:flex;flex-direction:column;gap:12px;max-height:420px;overflow-y:auto">
+        <div style="text-align:center;color:var(--text-mid);font-size:13px;padding:20px">جارٍ الفحص...</div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- ══ TAB: ACCOUNTS ══ -->
 <div id="admin-tab-accounts" class="admin-tab-panel" style="display:none">
