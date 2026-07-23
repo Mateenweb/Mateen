@@ -333,28 +333,47 @@ window.renderGradesTab = function () {
   const list   = document.getElementById('gradesList');
 
   if (!filter) {
-    // بدون فلتر مادة: نفس شريط المقارنة البسيط (التوتال العام لكل طالبة)
-    const data = allStudents
-      .map(s => ({ s, avg: getGradeAvg(s, filter) }))
-      .filter(x => x.avg !== null)
-      .sort((a, b) => b.avg - a.avg);
+    // بدون فلتر مادة: جدول تفصيلي — عمود لكل مادة رسمية + بونص عام + الإجمالي،
+    // عشان يبان أي جزء اللي وصّل النسبة فوق الـ100% (البونص العام غالبًا)
+    const SUBJECTS = ['التفسير', 'الفقه', 'العقيدة', 'الحديث', 'مقرأة متين'];
 
-    if (!data.length) {
+    const rows = allStudents.map(s => {
+      const subjScores = SUBJECTS.map(subj => ({
+        subj, total: getSubjectScore(s, subj), max: getSubjectMaxPossible(s, subj)
+      }));
+      const overallBonus = s.grades
+        .filter(g => isActive(g) && g.addType === 'overallBonus')
+        .reduce((acc, g) => acc + Number(g.score || 0), 0);
+      const total = getOverallScore(s);
+      const max   = getOverallMaxPossible(s);
+      const pct   = getOverallPct(s);
+      if (pct === null) return null; // مفيش أي درجات خالص للطالبة دي
+      return { s, subjScores, overallBonus, total, max, pct };
+    }).filter(Boolean).sort((a, b) => b.pct - a.pct);
+
+    if (!rows.length) {
       list.innerHTML = '<div class="empty-bar">لا توجد درجات بعد</div>';
       return;
     }
 
-    list.innerHTML = data.map(({ s, avg }) => {
-      const color = avg >= 75 ? 'green' : avg >= 50 ? 'orange' : 'red';
-      return `
-        <div class="bar-item">
-          ${barNameLink(s)}
-          <div class="bar-track">
-            <div class="bar-fill ${color}" style="width:${avg}%"></div>
-          </div>
-          <div class="bar-pct">${avg}%</div>
-        </div>`;
+    const subjHeaders = SUBJECTS.map(sub => `<th>${esc(sub)}</th>`).join('');
+
+    const bodyRows = rows.map(({ s, subjScores, overallBonus, total, max, pct }) => {
+      const subjCells = subjScores.map(({ total: t, max: m }) =>
+        t !== null ? `<td>${t}${m ? '/' + m : ''}</td>` : '<td>—</td>'
+      ).join('');
+      return `<tr>
+        <td>${studentLink(s)}</td>
+        ${subjCells}
+        <td>${overallBonus ? '+' + overallBonus : '—'}</td>
+        <td><strong>${total}${max ? ' / ' + max : ''}</strong><div style="font-size:11px;color:var(--text-mid)">${pct}%</div></td>
+      </tr>`;
     }).join('');
+
+    list.innerHTML = `<div class="stats-table-wrap"><table>
+      <thead><tr><th>الطالبة</th>${subjHeaders}<th>بونص عام</th><th>الإجمالي</th></tr></thead>
+      <tbody>${bodyRows}</tbody>
+    </table></div>`;
     return;
   }
 
