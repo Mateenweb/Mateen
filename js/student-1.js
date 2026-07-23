@@ -636,17 +636,20 @@ function renderGrades(grades) {
     const totalMax    = valid.reduce((s, g) => s + Number(g.total || 0), 0);
 
     const cardsHtml = subjGrades.map(g => {
-      const pct   = g.total ? Math.round(g.score / g.total * 100) : null;
+      const hasTotal = g.total !== undefined && g.total !== null && g.total !== '';
+      const pct   = hasTotal ? Math.round(g.score / g.total * 100) : null;
       const cls   = pct === null ? '' : pct >= 75 ? 'high' : pct >= 50 ? 'mid' : 'low';
       const pctEl = pct !== null ? `<span class="grade-pct ${cls}">${pct}%</span>` : '';
+      const scoreEl = hasTotal
+        ? `<span class="grade-num">${g.score}</span><span class="grade-total">/ ${g.total}</span>`
+        : `<span class="grade-num">+${g.score}</span>`; // بونص من غير سقف — بيتضاف زي ما هو
       return `<div class="grade-card">
         <div class="grade-label-wrap">
           <div class="grade-label-text">${g.label || 'اختبار'}</div>
         </div>
         <div class="grade-score-wrap">
           ${pctEl}
-          <span class="grade-num">${g.score}</span>
-          <span class="grade-total">/ ${g.total}</span>
+          ${scoreEl}
           ${_isAdmin ? `<button onclick="deleteGrade('${_studentId}','${g.id}')" style="background:none;border:none;color:#c0392b;cursor:pointer;font-size:15px;padding:0 4px;opacity:0.7" title="حذف"><i class="ti ti-trash"></i></button>` : ''}
         </div>
       </div>`;

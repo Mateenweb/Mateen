@@ -3052,29 +3052,10 @@ window.fixOldParticipationGrades = async () => {
   }
 };
 
-// ── تصحيح توتال اختبارات البونص اللي اتصفّر غلط (0) ──
-// إجراء لمرة واحدة: مودال "تعديل اختبار جماعي" كان بيكتب total:0 لأي اختبار نوعه
-// بونص (subjectBonus / overallBonus) لو خانة الدرجة الكلية اتسابت فاضية. هنا بنشيل
-// الـ total الغلط ده تمامًا من أي اختبار بونص لسه فيه total مسجل (0 أو غيره).
-window.fixBonusGradeTotals = async () => {
-  if (!confirm('هيتم فحص كل اختبارات "بونص" وشيل أي درجة كلية (total) اتسجلت غلط عليها. الإجراء ده لمرة واحدة ومينفعش يتراجع فيه. تكملي؟')) return;
-  try {
-    const snap = await getDocs(collectionGroup(db, 'grades'));
-    let fixed = 0, checked = 0;
-    for (const d of snap.docs) {
-      const data = d.data();
-      if (data.addType !== 'subjectBonus' && data.addType !== 'overallBonus') continue;
-      checked++;
-      if (data.total === undefined) continue; // مفيش توتال أصلًا، تمام
-      await updateDoc(d.ref, { total: deleteField() });
-      fixed++;
-    }
-    alert(`تم فحص ${checked} اختبار بونص، وتصحيح ${fixed} منه.`);
-  } catch (e) {
-    console.error('fixBonusGradeTotals:', e);
-    alert('حصل خطأ أثناء التصحيح: ' + e.message);
-  }
-};
+// ملحوظة: زرار "تصحيح توتال اختبارات البونص اللي اتصفّر" اتشال — كان بيشيل
+// total من أي اختبار نوعه بونص من غير تفرقة، فمسح بيانات صحيحة لاختبارات
+// زي "الإثرائيات" اللي فعلًا محتاجة توتال ثابت. التصحيح دلوقتي بيتم يدويًا
+// من "حذف اختبار جماعي" ← تعديل، لكل اختبار على حدة.
 
 // ── مسح كل الدرجات والغياب ─────────────────────────────────────
 
