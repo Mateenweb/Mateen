@@ -2247,17 +2247,36 @@ window.openEditExamModal = async (encodedKey) => {
 
   const scoresList = document.getElementById('eeScoresList');
   if (scoresList) {
+    const dayTimeOf = (studentId) => {
+      const st = allStudents.find(x => x.id === studentId);
+      if (!st) return '';
+      return [st.day, st.hour ? `${st.hour} ${st.ampm || ''}` : ''].filter(Boolean).join(' — ');
+    };
+
     const existingRows = [...entries].map(e => ({ studentId: e.studentId, gradeId: e.gradeId, studentName: e.studentName, score: e.score, isNew: false }));
     const missingRows  = missing.map(s => ({ studentId: s.id, gradeId: '', studentName: s.name || '—', score: '', isNew: true }));
-    scoresList.innerHTML = [...existingRows, ...missingRows]
+    const allRows = [...existingRows, ...missingRows];
+
+    // اكتشاف الأسماء المكررة عشان نضيف جنبها تمييز (يوم/معاد الحصة) يفرّق بين طالبتين بنفس الاسم
+    const nameCounts = {};
+    allRows.forEach(r => { nameCounts[r.studentName] = (nameCounts[r.studentName] || 0) + 1; });
+
+    scoresList.innerHTML = allRows
       .sort((a, b) => (a.studentName || '').localeCompare(b.studentName || '', 'ar'))
-      .map(e => `
+      .map(e => {
+        const isDup = nameCounts[e.studentName] > 1;
+        const tag = isDup ? dayTimeOf(e.studentId) : '';
+        return `
         <label style="display:flex;align-items:center;justify-content:space-between;font-size:13px;gap:8px">
-          <span>${esc(e.studentName)}${e.isNew ? ' <span style="color:#c9852b">(لا توجد درجة)</span>' : ''}</span>
+          <span>
+            ${esc(e.studentName)}${e.isNew ? ' <span style="color:#c9852b">(لا توجد درجة)</span>' : ''}
+            ${isDup ? `<span title="فيه أكتر من طالبة بنفس الاسم" style="display:inline-block;margin-inline-start:6px;font-size:10px;background:#fdf3e3;color:#a9720f;border-radius:10px;padding:1px 8px">⚠️ ${esc(tag || 'اسم مكرر')}</span>` : ''}
+          </span>
           <input type="number" class="ee-score" data-grade-id="${e.gradeId}" data-student-id="${e.studentId}"
             value="${e.score ?? ''}" min="0"
             style="width:80px;border:1px solid ${e.isNew ? '#c9852b' : 'var(--border)'};border-radius:6px;padding:4px 8px;text-align:center">
-        </label>`).join('');
+        </label>`;
+      }).join('');
   }
 
   window._editingExamKey = key;
