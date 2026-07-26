@@ -163,6 +163,10 @@
               <label style="font-size:12px; color:var(--text-mid)">اليوم</label><br/>
               <input type="text" id="sessDay" placeholder="مثال: الثلاثاء" style="padding:6px 10px; border:1px solid var(--border); border-radius:8px;"/>
             </div>
+            <div>
+              <label style="font-size:12px; color:var(--text-mid)">دقائق التأخير</label><br/>
+              <input type="number" min="0" id="sessLateMinutes" value="0" style="width:90px; padding:6px 10px; border:1px solid var(--border); border-radius:8px;"/>
+            </div>
           </div>
           <div id="sessSubjects" style="display:flex; flex-direction:column; gap:8px; margin-bottom:12px;"></div>
           <div style="display:flex; gap:8px;">
@@ -331,7 +335,7 @@
   </div>
 </div>
 
-<script src="../js/student-1.js?v=2" type="module"></script>
+<script src="../js/student-1.js?v=3" type="module"></script>
   <script type="module" src="../js/notifications.js?v=20260723"></script>
   <script src="../js/sw-register.js?v=20260723"></script>
 

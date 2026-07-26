@@ -324,15 +324,18 @@ function setupSupervisorAttendance(studentId) {
     }
 
     try {
+      const lateMinutes = parseInt(document.getElementById('sessLateMinutes')?.value, 10) || 0;
       await addDoc(collection(db, 'students', studentId, 'sessions'), {
         date: dateInput.value,
         day:  dayInput.value,
         subjects,
+        lateMinutes,
         createdAt: serverTimestamp(),
       });
       form.style.display = 'none';
       getSupervisorSubjects(dayInput.value).forEach(s => subjState[s] = null);
       renderSubjRow();
+      if (document.getElementById('sessLateMinutes')) document.getElementById('sessLateMinutes').value = 0;
     } catch (e) {
       alert('حدث خطأ أثناء حفظ الحضور');
       console.error(e);
@@ -525,7 +528,15 @@ function renderSessions(sessions) {
       <div class="session-head" onclick="toggleSession('${s.id}')">
         <div>
           <div class="session-day-date">${dayHtml} — ${formatDate(s.date)}</div>
-          <div class="session-summary">${present}/${keys.length} مواد حاضرة${s.lateMinutes ? ` · ⏱ تأخير ${s.lateMinutes} دقيقة` : ''}</div>
+          <div class="session-summary">${present}/${keys.length} مواد حاضرة
+            ${_isAdmin
+              ? ` · ⏱ <input type="number" min="0" class="session-late-edit" value="${Number(s.lateMinutes || 0)}"
+                  data-session="${s.id}" onclick="event.stopPropagation()"
+                  onchange="event.stopPropagation();updateSessionLateMinutes(this)"
+                  style="width:50px;border:1px solid var(--border,#e3d7c3);border-radius:6px;padding:1px 4px;font-family:inherit;font-size:12px;text-align:center;background:#fff">
+                  دقيقة تأخير`
+              : (s.lateMinutes ? ` · ⏱ تأخير ${s.lateMinutes} دقيقة` : '')}
+          </div>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
           ${_isAdmin ? `<button onclick="event.stopPropagation();deleteSession('${s.id}')"
@@ -575,6 +586,23 @@ window.updateSessionDay = async (inputEl) => {
     showSavedToast();
   } catch (e) {
     alert('حدث خطأ أثناء تعديل اسم اليوم');
+    console.error(e);
+  }
+};
+
+window.updateSessionLateMinutes = async (inputEl) => {
+  const sessionId = inputEl.dataset.session;
+  let newVal = parseInt(inputEl.value, 10);
+  if (isNaN(newVal) || newVal < 0) newVal = 0;
+  inputEl.value = newVal;
+  try {
+    const studentId = new URLSearchParams(location.search).get('id');
+    await updateDoc(doc(db, 'students', studentId, 'sessions', sessionId), {
+      lateMinutes: newVal,
+    });
+    showSavedToast();
+  } catch (e) {
+    alert('حدث خطأ أثناء تعديل دقائق التأخير');
     console.error(e);
   }
 };
