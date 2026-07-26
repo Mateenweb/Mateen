@@ -811,6 +811,11 @@ function updateStats(sessions) {
   document.getElementById('statPct').textContent     = total ? Math.round(present/total*100) + '%' : '—';
   const lateEl = document.getElementById('statLate');
   if (lateEl) lateEl.textContent = totalLate;
+  const lateHoursEl = document.getElementById('statLateHours');
+  if (lateHoursEl) {
+    const h = Math.floor(totalLate / 60), m = totalLate % 60;
+    lateHoursEl.textContent = totalLate ? `(${h} ساعة و${m} دقيقة)` : '';
+  }
 }
 
 // متوسط الدرجات الظاهر فوق الصفحة — مطابق لمنطق صفحة الإدارة:
