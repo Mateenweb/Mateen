@@ -322,14 +322,16 @@
   </div>
 
   <div class="am-group" style="position:relative;display:inline-block">
+    <button class="btn-add-row am-menu-btn" id="notesMenuBtn" onclick="openBulkNotesModal()" style="background:var(--beige2);border-color:var(--border)">
+      <i class="ti ti-notes"></i> الملاحظات
+    </button>
+  </div>
+
+  <div class="am-group" style="position:relative;display:inline-block">
     <button class="btn-add-row am-menu-btn" id="otherMenuBtn" onclick="toggleActionMenu('otherMenu')" style="background:var(--beige2);border-color:var(--border)">
       <i class="ti ti-dots"></i> أخرى ▾
     </button>
     <div id="otherMenu" class="am-dropdown" style="display:none;position:absolute;bottom:110%;right:0;background:var(--white);border:1.5px solid var(--border);border-radius:14px;box-shadow:0 8px 32px rgba(44,26,14,0.15);padding:4px 6px 6px;min-width:230px;z-index:200;overflow:hidden">
-      <button class="actions-menu-item" onclick="openBulkNotesModal();closeActionMenus()">
-        <span class="ami-icon" style="background:rgba(230,126,34,0.12);color:#d35400"><i class="ti ti-notes"></i></span>
-        <span class="ami-text"><strong>محرر الملاحظات الجماعي</strong><small>عدّلي ملاحظات عدة طالبات مرة واحدة</small></span>
-      </button>
       <button class="actions-menu-item" onclick="showArchive();closeActionMenus()">
         <span class="ami-icon" style="background:rgba(127,140,141,0.12);color:#7f8c8d"><i class="ti ti-archive"></i></span>
         <span class="ami-text"><strong>الأرشيف</strong><small>الطالبات المؤرشفات</small></span>
