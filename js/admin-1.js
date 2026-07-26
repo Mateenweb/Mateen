@@ -1813,7 +1813,7 @@ function renderBGStudents() {
     <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-bottom:1px solid var(--border)">
       <input type="checkbox" class="bg-check" data-id="${s.id}" data-name="${esc(s.name||'')}" checked style="width:16px;height:16px;cursor:pointer"/>
       <span style="flex:1;font-size:13px;font-weight:600">${esc(s.name||'—')}</span>
-      <input type="number" class="bg-score" data-id="${s.id}" min="0" placeholder="الدرجة"
+      <input type="number" class="bg-score" data-id="${s.id}" placeholder="الدرجة"
         style="width:80px;border:1px solid var(--border);border-radius:7px;padding:5px 8px;font-family:inherit;font-size:13px;text-align:center"/>
     </div>
   `).join('');
@@ -2274,7 +2274,7 @@ window.openEditExamModal = async (encodedKey) => {
               ${isDup ? `<span title="فيه أكتر من طالبة بنفس الاسم" style="display:inline-block;margin-inline-start:6px;font-size:10px;background:#fdf3e3;color:#a9720f;border-radius:10px;padding:1px 8px">⚠️ ${esc(tag || 'اسم مكرر')}</span>` : ''}
             </span>
             <input type="number" class="ee-score" data-grade-id="${e.gradeId}" data-student-id="${e.studentId}"
-              value="${e.score ?? ''}" min="0"
+              value="${e.score ?? ''}"
               style="width:80px;border:1px solid ${e.isNew ? '#c9852b' : 'var(--border)'};border-radius:6px;padding:4px 8px;text-align:center">
           </label>
           ${isDup ? `<button type="button" onclick="removeExamScoreRow(this,'${e.gradeId}','${e.studentId}')" title="احذفي الصف ده" style="background:none;border:none;color:#e74c3c;cursor:pointer;font-size:15px;padding:2px 4px">🗑️</button>` : ''}

@@ -161,17 +161,25 @@ async function loadAll() {
 }
 
 function renderStats(sessions, grades) {
-  let present = 0, absent = 0, total = 0;
-  sessions.forEach(se => {
-    Object.values(se.subjects || {}).forEach(st => {
-      total++;
-      if (st === 'present') present++;
-      else if (st === 'absent') absent++;
-    });
+  const entries = [];
+  [...sessions]
+    .sort((a, b) => (a.date || '').localeCompare(b.date || ''))
+    .forEach(se => Object.values(se.subjects || {}).forEach(v => entries.push(v)));
+
+  let excusedSeen = 0, present = 0, absent = 0, total = 0;
+  entries.forEach(v => {
+    const effective = v === 'excused' ? (++excusedSeen <= 3 ? 'excused' : 'absent') : v;
+    if (effective === 'present') { present++; total++; }
+    else if (effective === 'absent') { absent++; total++; }
   });
+
+  const totalLate = sessions.reduce((acc, se) => acc + Number(se.lateMinutes || 0), 0);
+
   document.getElementById('statPresent').textContent = present;
   document.getElementById('statAbsent').textContent  = absent;
   document.getElementById('statPct').textContent = total ? Math.round(present / total * 100) + '%' : '—';
+  const lateEl = document.getElementById('statLate');
+  if (lateEl) lateEl.textContent = totalLate;
 }
 
 function renderSessions(sessions) {

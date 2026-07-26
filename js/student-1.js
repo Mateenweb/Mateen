@@ -804,9 +804,13 @@ function updateStats(sessions) {
     else if (effective === 'absent') { absent++; total++; }
   });
 
+  const totalLate = sessions.reduce((acc, s) => acc + Number(s.lateMinutes || 0), 0);
+
   document.getElementById('statPresent').textContent = present;
   document.getElementById('statAbsent').textContent  = absent;
   document.getElementById('statPct').textContent     = total ? Math.round(present/total*100) + '%' : '—';
+  const lateEl = document.getElementById('statLate');
+  if (lateEl) lateEl.textContent = totalLate;
 }
 
 // متوسط الدرجات الظاهر فوق الصفحة — مطابق لمنطق صفحة الإدارة:
