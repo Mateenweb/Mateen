@@ -303,22 +303,23 @@ function chipAtt(v) {
  */
 function buildAttSummaryStats(studentsData) {
   return studentsData.map(st => {
-    let p = 0, a = 0, e = 0;
+    let p = 0, a = 0, e = 0, late = 0;
     (st.sessions || []).forEach(se => {
       Object.values(se.subjects || {}).forEach(v => {
         if (v === 'present') p++; else if (v === 'absent') a++; else if (v === 'excused') e++;
       });
+      late += Number(se.lateMinutes || 0);
     });
     const total = p + a;
     const pct = total ? Math.round((p / total) * 100) : 0;
-    return { name: st.name, present: p, absent: a, excused: e, pct };
+    return { name: st.name, present: p, absent: a, excused: e, pct, late };
   });
 }
 
 function buildAttSummaryPage(studentsData) {
   const stats = buildAttSummaryStats(studentsData);
   const rows = stats.map((r, i) =>
-    `<tr><td>${i + 1}</td><td class="td-name">${r.name}</td><td>${r.present}✔</td><td>${r.absent}✖</td><td>${r.excused}⭕</td><td>${r.pct}%</td></tr>`
+    `<tr><td>${i + 1}</td><td class="td-name">${r.name}</td><td>${r.present}✔</td><td>${r.absent}✖</td><td>${r.excused}⭕</td><td>${r.pct}%</td><td>${r.late} د</td></tr>`
   ).join('');
 
   return `<div class="att-page">
@@ -327,7 +328,7 @@ function buildAttSummaryPage(studentsData) {
     <div class="att-title">سجل الحضور والغياب</div>
     <div class="att-subtitle">ملخص إجمالي</div>
     <table>
-      <thead><tr><th>#</th><th class="td-name">الطالبة</th><th>حضور</th><th>غياب</th><th>اعتذار</th><th>نسبة الحضور</th></tr></thead>
+      <thead><tr><th>#</th><th class="td-name">الطالبة</th><th>حضور</th><th>غياب</th><th>اعتذار</th><th>نسبة الحضور</th><th>إجمالي التأخير</th></tr></thead>
       <tbody>${rows}</tbody>
     </table>
     <div class="att-footer"><span>برنامج متين العلمي</span><span>◆</span><span>${stats.length} طالبة</span></div>
@@ -361,18 +362,20 @@ function buildAttPages(studentsData, mode) {
     return studentsData.map(st => {
       const sessions = [...(st.sessions || [])].sort((a,b) => (a.date||'') < (b.date||'') ? -1 : 1);
       const subjs = subjects.length ? subjects : [...new Set(sessions.flatMap(se => Object.keys(se.subjects||{})))];
-      const headCells = `<th>#</th><th>اليوم</th><th>التاريخ</th>` + subjs.map(s=>`<th>${s}</th>`).join('') + `<th>الإجمالي</th>`;
-      let totalP = 0, totalA = 0, totalE = 0;
+      const headCells = `<th>#</th><th>اليوم</th><th>التاريخ</th>` + subjs.map(s=>`<th>${s}</th>`).join('') + `<th>الإجمالي</th><th>التأخير</th>`;
+      let totalP = 0, totalA = 0, totalE = 0, totalLate = 0;
       const rows = sessions.map((se, i) => {
         const subjCells = subjs.map(s => `<td>${chipAtt((se.subjects||{})[s]||'')}</td>`).join('');
         const p = subjs.filter(s => (se.subjects||{})[s]==='present').length;
         const a = subjs.filter(s => (se.subjects||{})[s]==='absent').length;
         const e = subjs.filter(s => (se.subjects||{})[s]==='excused').length;
         totalP += p; totalA += a; totalE += e;
+        const late = Number(se.lateMinutes || 0);
+        totalLate += late;
         const total = subjs.length ? `${p}✔ / ${a}✖ / ${e}⭕` : '—';
-        return `<tr><td>${i+1}</td><td>${se.day||''}</td><td>${se.date||''}</td>${subjCells}<td>${total}</td></tr>`;
+        return `<tr><td>${i+1}</td><td>${se.day||''}</td><td>${se.date||''}</td>${subjCells}<td>${total}</td><td>${late ? late + ' د' : '—'}</td></tr>`;
       }).join('');
-      const summaryRow = `<tr style="background:#eef3ff;font-weight:600"><td colspan="3">الإجمالي</td>${subjs.map(()=>'<td></td>').join('')}<td>${totalP}✔ / ${totalA}✖ / ${totalE}⭕</td></tr>`;
+      const summaryRow = `<tr style="background:#eef3ff;font-weight:600"><td colspan="3">الإجمالي</td>${subjs.map(()=>'<td></td>').join('')}<td>${totalP}✔ / ${totalA}✖ / ${totalE}⭕</td><td>${totalLate} د</td></tr>`;
 
       return `<div class="att-page">
         ${watermarkHtml()}
@@ -413,8 +416,8 @@ function buildAttPages(studentsData, mode) {
     const weeks = Object.values(weekMap).sort((a,b) => a.start < b.start ? -1 : 1);
 
     return weeks.map(week => {
-      const headCells = `<th>#</th><th>اليوم</th><th>التاريخ</th><th class="td-name">الطالبة</th>` + subjects.map(s=>`<th>${s}</th>`).join('') + `<th>الإجمالي</th>`;
-      let totalP = 0, totalA = 0, totalE = 0, rowNum = 0;
+      const headCells = `<th>#</th><th>اليوم</th><th>التاريخ</th><th class="td-name">الطالبة</th>` + subjects.map(s=>`<th>${s}</th>`).join('') + `<th>الإجمالي</th><th>التأخير</th>`;
+      let totalP = 0, totalA = 0, totalE = 0, totalLate = 0, rowNum = 0;
       const rows = week.dates.map(dd =>
         studentsData.map(st => {
           const se = (st.sessions||[]).find(x => (x.date||'') === dd.date);
@@ -422,9 +425,10 @@ function buildAttPages(studentsData, mode) {
           const p = se ? Object.values(se.subjects||{}).filter(v=>v==='present').length : 0;
           const a = se ? Object.values(se.subjects||{}).filter(v=>v==='absent').length : 0;
           const e = se ? Object.values(se.subjects||{}).filter(v=>v==='excused').length : 0;
-          totalP += p; totalA += a; totalE += e; rowNum++;
+          const late = se ? Number(se.lateMinutes || 0) : 0;
+          totalP += p; totalA += a; totalE += e; totalLate += late; rowNum++;
           const total = se ? `${p}✔ / ${a}✖ / ${e}⭕` : '<span class="chip-empty">—</span>';
-          return `<tr><td>${rowNum}</td><td>${dd.day||''}</td><td>${dd.date||''}</td><td class="td-name">${st.name}</td>${subjCells}<td>${total}</td></tr>`;
+          return `<tr><td>${rowNum}</td><td>${dd.day||''}</td><td>${dd.date||''}</td><td class="td-name">${st.name}</td>${subjCells}<td>${total}</td><td>${late ? late + ' د' : '—'}</td></tr>`;
         }).join('')
       ).join('');
 
@@ -437,7 +441,7 @@ function buildAttPages(studentsData, mode) {
           <thead><tr>${headCells}</tr></thead>
           <tbody>${rows}</tbody>
         </table>
-        <div class="att-footer"><span>برنامج متين العلمي</span><span>◆</span><span>${totalP}✔ / ${totalA}✖ / ${totalE}⭕</span></div>
+        <div class="att-footer"><span>برنامج متين العلمي</span><span>◆</span><span>${totalP}✔ / ${totalA}✖ / ${totalE}⭕ · تأخير ${totalLate} د</span></div>
       </div>`;
     }).join('');
 
@@ -452,9 +456,9 @@ function buildAttPages(studentsData, mode) {
     }
 
     return subjList.map(subj => {
-      const headCells = `<th>#</th><th>اليوم</th><th>التاريخ</th><th class="td-name">الطالبة</th><th>الحالة</th>`;
+      const headCells = `<th>#</th><th>اليوم</th><th>التاريخ</th><th class="td-name">الطالبة</th><th>الحالة</th><th>التأخير</th>`;
 
-      let totalP = 0, totalA = 0, totalE = 0, rowNum = 0;
+      let totalP = 0, totalA = 0, totalE = 0, totalLate = 0, rowNum = 0;
       const rows = allDates.map(dd =>
         studentsData.map(st => {
           const se = (st.sessions||[]).find(x=>(x.date||'')===(dd.date||''));
@@ -462,8 +466,10 @@ function buildAttPages(studentsData, mode) {
           if (v === 'present') totalP++;
           if (v === 'absent') totalA++;
           if (v === 'excused') totalE++;
+          const late = se ? Number(se.lateMinutes || 0) : 0;
+          totalLate += late;
           rowNum++;
-          return `<tr><td>${rowNum}</td><td>${dd.day||''}</td><td>${dd.date||''}</td><td class="td-name">${st.name}</td><td>${chipAtt(v||'')}</td></tr>`;
+          return `<tr><td>${rowNum}</td><td>${dd.day||''}</td><td>${dd.date||''}</td><td class="td-name">${st.name}</td><td>${chipAtt(v||'')}</td><td>${late ? late + ' د' : '—'}</td></tr>`;
         }).join('')
       ).join('');
 
@@ -476,7 +482,7 @@ function buildAttPages(studentsData, mode) {
           <thead><tr>${headCells}</tr></thead>
           <tbody>${rows}</tbody>
         </table>
-        <div class="att-footer"><span>برنامج متين العلمي</span><span>◆</span><span>${totalP}✔ / ${totalA}✖ / ${totalE}⭕</span></div>
+        <div class="att-footer"><span>برنامج متين العلمي</span><span>◆</span><span>${totalP}✔ / ${totalA}✖ / ${totalE}⭕ · تأخير ${totalLate} د</span></div>
       </div>`;
     }).join('');
 
@@ -597,10 +603,10 @@ export async function exportAttendanceExcel(studentsData, includeSummary=true) {
 
   if (includeSummary) {
     const summaryRows = buildAttSummaryStats(studentsData).map(r => ({
-      'الطالبة': r.name, 'حضور': r.present, 'غياب': r.absent, 'اعتذار': r.excused, 'نسبة الحضور %': r.pct
+      'الطالبة': r.name, 'حضور': r.present, 'غياب': r.absent, 'اعتذار': r.excused, 'نسبة الحضور %': r.pct, 'إجمالي التأخير (دقيقة)': r.late
     }));
     const wsSummary = utils.json_to_sheet(summaryRows);
-    wsSummary['!cols'] = [{ wch: 28 }, { wch: 10 }, { wch: 10 }, { wch: 10 }, { wch: 16 }];
+    wsSummary['!cols'] = [{ wch: 28 }, { wch: 10 }, { wch: 10 }, { wch: 10 }, { wch: 16 }, { wch: 20 }];
     utils.book_append_sheet(wb, wsSummary, 'ملخص');
   }
 
@@ -613,6 +619,7 @@ export async function exportAttendanceExcel(studentsData, includeSummary=true) {
         const v = (se.subjects || {})[s];
         row[s] = v === 'present' ? 'حضور' : v === 'absent' ? 'غياب' : v === 'excused' ? 'عذر' : '';
       });
+      row['تأخير (دقيقة)'] = Number(se.lateMinutes || 0);
       detailRows.push(row);
     });
   });
@@ -621,6 +628,7 @@ export async function exportAttendanceExcel(studentsData, includeSummary=true) {
   wsDetail['!cols'] = [
     { wch: 28 }, { wch: 12 }, { wch: 14 },
     ...subjects.map(() => ({ wch: 14 })),
+    { wch: 16 },
   ];
   utils.book_append_sheet(wb, wsDetail, 'سجل الحضور');
 
