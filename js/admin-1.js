@@ -2478,9 +2478,24 @@ function renderBAStudents() {
         ? `<div style="display:flex;flex-direction:column;gap:2px">${baSubjectsForCurrentDay().map(subj => baSubjRowHtml(s.id, subj, null)).join('')}</div>`
         : `<div class="ba-status-wrap" data-id="${s.id}" data-status="" style="display:flex;gap:6px">${baBtnHtml(s.id, null)}</div>`
       }
+      <div style="display:flex;align-items:center;gap:4px;flex-shrink:0">
+        <input type="number" min="0" class="ba-late-input" data-id="${s.id}" value="0"
+          oninput="if(this.value<0)this.value=0;updateBALateTotal()"
+          title="دقائق التأخير"
+          style="width:56px;border:1px solid var(--border);border-radius:6px;padding:4px 6px;font-family:inherit;font-size:12px;text-align:center"/>
+        <span style="font-size:11px;color:var(--text-mid);white-space:nowrap">د. تأخير</span>
+      </div>
     </div>
   `).join('');
+  updateBALateTotal();
 }
+
+window.updateBALateTotal = () => {
+  const total = [...document.querySelectorAll('.ba-late-input')]
+    .reduce((sum, el) => sum + (parseInt(el.value, 10) || 0), 0);
+  const totalEl = document.getElementById('baLateTotal');
+  if (totalEl) totalEl.textContent = total;
+};
 
 window.baSelectAll = () => document.querySelectorAll('.ba-check').forEach(cb => cb.checked = true);
 window.baClearAll  = () => document.querySelectorAll('.ba-check').forEach(cb => cb.checked = false);
@@ -2564,9 +2579,11 @@ window.saveBulkAttendance = async () => {
         const status = document.querySelector(`.ba-status-wrap[data-id="${sid}"]`)?.dataset.status;
         subjectsMap = { [subject]: status };
       }
+      const lateMinutes = parseInt(document.querySelector(`.ba-late-input[data-id="${sid}"]`)?.value, 10) || 0;
       return addDoc(collection(db, 'students', sid, 'sessions'), {
         day, date,
         subjects: subjectsMap,
+        lateMinutes,
         createdAt: Date.now(),
       });
     }));

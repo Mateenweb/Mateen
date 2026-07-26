@@ -1130,6 +1130,11 @@
 
       <div id="baStudentsList" style="max-height:360px;overflow-y:auto;border:1px solid var(--border);border-radius:10px;padding:4px"></div>
 
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px;background:rgba(230,126,34,0.1);border:1px solid rgba(230,126,34,0.3);border-radius:8px;padding:8px 14px">
+        <span style="font-size:13px;font-weight:600;color:#a3552a"><i class="ti ti-clock"></i> إجمالي دقائق التأخير لهذا اليوم</span>
+        <span id="baLateTotal" style="font-size:15px;font-weight:800;color:#a3552a">0</span>
+      </div>
+
       <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:16px">
         <button onclick="closeBulkAttModal()" style="background:var(--beige2);border:1px solid var(--border);border-radius:8px;padding:9px 20px;font-family:inherit;cursor:pointer">إلغاء</button>
         <button onclick="saveBulkAttendance()" style="background:linear-gradient(135deg,#2c1a0e,#5c3d2e);color:#e8c96a;border:none;border-radius:8px;padding:9px 24px;font-family:inherit;font-weight:700;cursor:pointer"><i class="ti ti-device-floppy"></i> حفظ الحضور</button>

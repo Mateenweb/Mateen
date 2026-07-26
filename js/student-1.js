@@ -525,7 +525,7 @@ function renderSessions(sessions) {
       <div class="session-head" onclick="toggleSession('${s.id}')">
         <div>
           <div class="session-day-date">${dayHtml} — ${formatDate(s.date)}</div>
-          <div class="session-summary">${present}/${keys.length} مواد حاضرة</div>
+          <div class="session-summary">${present}/${keys.length} مواد حاضرة${s.lateMinutes ? ` · ⏱ تأخير ${s.lateMinutes} دقيقة` : ''}</div>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
           ${_isAdmin ? `<button onclick="event.stopPropagation();deleteSession('${s.id}')"
