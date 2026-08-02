@@ -101,12 +101,12 @@ window.renderSummary = function renderSummary() {
   // avg grades — بتحترم فلتر المادة (لو محددة) زي تبويب الدرجات بالظبط
   const subjectFilter = document.getElementById('gradeSubjectFilter')?.value || '';
   const gradePcts = allStudents.map(s => getGradeAvg(s, subjectFilter)).filter(v => v !== null);
-  const avgGrade  = gradePcts.length ? Math.round(gradePcts.reduce((a,b) => a+b, 0) / gradePcts.length) : null;
+  const avgGrade  = gradePcts.length ? gradePcts.reduce((a,b) => a+b, 0) / gradePcts.length : null;
 
   document.getElementById('sumStudents').textContent = allStudents.length;
   document.getElementById('sumSessions').textContent = totalSessions;
   document.getElementById('sumAvgAtt').textContent   = avgAtt   !== null ? avgAtt + '%'   : '—';
-  document.getElementById('sumAvgGrade').textContent = avgGrade !== null ? avgGrade + '%' : '—';
+  document.getElementById('sumAvgGrade').textContent = avgGrade !== null ? fmtNum(avgGrade) + '%' : '—';
 }
 
 // ── Helpers ──────────────────────────────────
@@ -209,7 +209,7 @@ function getSubjectScore(s, subject) {
   const attPct        = getSubjectAttPct(s, subject);
   const attendancePts = attPct !== null ? attPct * 20 : 20; // مفيش بيانات حضور = بتاخد الـ20 كاملة مؤقتًا
 
-  return Math.round((examPoints + attendancePts + bonusPoints) * 10) / 10;
+  return examPoints + attendancePts + bonusPoints; // من غير تقريب — الدقة الكاملة محفوظة
 }
 
 // النسبة % لمادة واحدة = الإجمالي ÷ أقصى درجة ممكنة حاليًا (البونص بيزوّد فوق الـ100% عادي لو موجود)
@@ -217,7 +217,7 @@ function getSubjectPct(s, subject) {
   const total = getSubjectScore(s, subject);
   const max   = getSubjectMaxPossible(s, subject);
   if (total === null || !max) return null;
-  return Math.round((total / max) * 100);
+  return (total / max) * 100; // من غير تقريب
 }
 
 // أقصى درجة ممكنة حاليًا على مستوى كل المواد مع بعض = مجموع أقصى درجة لكل مادة الطالبة مسجلة فيها
@@ -257,7 +257,7 @@ function getOverallScore(s) {
     .reduce((acc, g) => acc + Number(g.score || 0), 0);
   const lateDeduction = getLateDeduction(s);
 
-  return Math.round((sumTotal + overallBonusPoints - lateDeduction) * 10) / 10;
+  return sumTotal + overallBonusPoints - lateDeduction; // من غير تقريب
 }
 
 // النسبة % العامة = التوتال العام ÷ أقصى درجة ممكنة على مستوى كل المواد
@@ -265,7 +265,7 @@ function getOverallPct(s) {
   const total = getOverallScore(s);
   const max   = getOverallMaxPossible(s);
   if (total === null || !max) return null;
-  return Math.round((total / max) * 100);
+  return (total / max) * 100; // من غير تقريب
 }
 
 // getGradeAvg بيرجع نسبة % دايمًا (مش الإجمالي الخام) — عشان يفضل متوافق مع كل الأماكن
@@ -280,6 +280,13 @@ function medalClass(i) {
 
 function esc(s) {
   return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// تنسيق رقم للعرض بس (مش تقريب في الحساب نفسه) — بيسيب لحد رقمين عشريين، وبيشيل الأصفار الزيادة
+function fmtNum(n) {
+  if (n === null || n === undefined || isNaN(n)) return '—';
+  const rounded = Math.round(n * 100) / 100;
+  return rounded % 1 === 0 ? String(rounded) : String(rounded);
 }
 
 function studentLink(s, label) {
@@ -312,7 +319,7 @@ window.renderAttTab = function renderAttTab() {
         const { present, absent, excused } = getSubjectAttCounts(s, filter);
         const total = present + absent;
         const pct   = total > 0 ? Math.round(present / total * 100) : null;
-        const attGrade = total > 0 ? Math.round((present / total) * 20 * 10) / 10 : null; // درجة الحضور من 20
+        const attGrade = total > 0 ? (present / total) * 20 : null; // درجة الحضور من 20 — من غير تقريب
         return { s, pct, absent, excused, attGrade };
       }
       return { s, pct: getAttPct(s), absent: getAttCounts(s).absent, excused: getAttCounts(s).excused, attGrade: null };
@@ -335,8 +342,8 @@ window.renderAttTab = function renderAttTab() {
         <div class="bar-track">
           <div class="bar-fill ${color}" style="width:${pct}%"></div>
         </div>
-        <div class="bar-pct">${pct}%</div>
-        ${filter && attGrade !== null ? `<span style="font-size:11px;font-weight:700;color:#1a6b36;margin-inline-start:8px;white-space:nowrap">${attGrade}/20</span>` : ''}
+        <div class="bar-pct">${fmtNum(pct)}%</div>
+        ${filter && attGrade !== null ? `<span style="font-size:11px;font-weight:700;color:#1a6b36;margin-inline-start:8px;white-space:nowrap">${fmtNum(attGrade)}/20</span>` : ''}
       </div>`;
   }).join('');
 }
@@ -382,8 +389,8 @@ window.renderGradesTab = function () {
         <td>${studentLink(s)}</td>
         ${subjCells}
         <td>${overallBonus ? '+' + overallBonus : '—'}</td>
-        <td>${lateMin ? `-${Math.round(lateDed * 10) / 10}<div style="font-size:10px;color:var(--text-mid)">(${lateMin} د تأخير)</div>` : '—'}</td>
-        <td><strong>${total}${max ? ' / ' + max : ''}</strong><div style="font-size:11px;color:var(--text-mid)">${pct}%</div></td>
+        <td>${lateMin ? `-${fmtNum(lateDed)}<div style="font-size:10px;color:var(--text-mid)">(${lateMin} د تأخير)</div>` : '—'}</td>
+        <td><strong>${fmtNum(total)}${max ? ' / ' + fmtNum(max) : ''}</strong><div style="font-size:11px;color:var(--text-mid)">${fmtNum(pct)}%</div></td>
       </tr>`;
     }).join('');
 
@@ -416,7 +423,7 @@ window.renderGradesTab = function () {
 
   const rows = allStudents.map(s => {
     const attPct   = getSubjectAttPct(s, filter);
-    const attGrade = attPct !== null ? Math.round(attPct * 20 * 10) / 10 : null;
+    const attGrade = attPct !== null ? attPct * 20 : null; // من غير تقريب
     const total    = getSubjectScore(s, filter);
     const max      = getSubjectMaxPossible(s, filter);
     const pct      = getSubjectPct(s, filter);
@@ -441,10 +448,10 @@ window.renderGradesTab = function () {
     }).join('');
     return `<tr>
       <td>${studentLink(s)}</td>
-      <td>${attPct !== null ? Math.round(attPct * 100) + '%' : '—'}</td>
-      <td>${attGrade !== null ? attGrade + '/20' : '—'}</td>
+      <td>${attPct !== null ? fmtNum(attPct * 100) + '%' : '—'}</td>
+      <td>${attGrade !== null ? fmtNum(attGrade) + '/20' : '—'}</td>
       ${examCells}
-      <td><strong>${total !== null ? total + (max ? ' / ' + max : '') : '—'}</strong>${pct !== null ? `<div style="font-size:11px;color:var(--text-mid)">${pct}%</div>` : ''}</td>
+      <td><strong>${total !== null ? fmtNum(total) + (max ? ' / ' + fmtNum(max) : '') : '—'}</strong>${pct !== null ? `<div style="font-size:11px;color:var(--text-mid)">${fmtNum(pct)}%</div>` : ''}</td>
     </tr>`;
   }).join('');
 
@@ -515,7 +522,7 @@ function renderRankingTab() {
           <div class="rank-num ${medalClass(i)}">${i + 1}</div>
           ${studentLink(s)}
           ${excused > 0 ? `<span title="${excused} اعتذار" style="font-size:11px;color:#c9852b;margin-inline-end:6px">🔸 ${excused} اعتذار</span>` : ''}
-          <div class="rank-val">${pct}%</div>
+          <div class="rank-val">${fmtNum(pct)}%</div>
         </div>`).join('')
     : '<div class="empty-rank">لا توجد بيانات</div>';
 
@@ -531,7 +538,7 @@ function renderRankingTab() {
         <div class="rank-item">
           <div class="rank-num ${medalClass(i)}">${i + 1}</div>
           ${studentLink(s)}
-          <div class="rank-val">${avg}%</div>
+          <div class="rank-val">${fmtNum(avg)}%</div>
         </div>`).join('')
     : '<div class="empty-rank">لا توجد بيانات</div>';
 
