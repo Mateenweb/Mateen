@@ -362,6 +362,11 @@ window.renderGradesTab = function () {
       const subjScores = SUBJECTS.map(subj => ({
         subj, total: getSubjectScore(s, subj), max: getSubjectMaxPossible(s, subj)
       }));
+      const attScores = SUBJECTS.map(subj => {
+        const attPct = getSubjectAttPct(s, subj);
+        return attPct !== null ? attPct * 20 : null; // من غير تقريب
+      });
+      const totalAtt = attScores.reduce((acc, v) => acc + (v || 0), 0);
       const overallBonus = s.grades
         .filter(g => isActive(g) && g.addType === 'overallBonus')
         .reduce((acc, g) => acc + Number(g.score || 0), 0);
@@ -371,7 +376,7 @@ window.renderGradesTab = function () {
       const max   = getOverallMaxPossible(s);
       const pct   = getOverallPct(s);
       if (pct === null) return null; // مفيش أي درجات خالص للطالبة دي
-      return { s, subjScores, overallBonus, lateMin, lateDed, total, max, pct };
+      return { s, subjScores, attScores, totalAtt, overallBonus, lateMin, lateDed, total, max, pct };
     }).filter(Boolean).sort((a, b) => b.pct - a.pct);
 
     if (!rows.length) {
@@ -380,14 +385,18 @@ window.renderGradesTab = function () {
     }
 
     const subjHeaders = SUBJECTS.map(sub => `<th>${esc(sub)}</th>`).join('');
+    const attHeaders  = SUBJECTS.map(sub => `<th>حضور ${esc(sub)}</th>`).join('');
 
-    const bodyRows = rows.map(({ s, subjScores, overallBonus, lateMin, lateDed, total, max, pct }) => {
+    const bodyRows = rows.map(({ s, subjScores, attScores, totalAtt, overallBonus, lateMin, lateDed, total, max, pct }) => {
       const subjCells = subjScores.map(({ total: t, max: m }) =>
         t !== null ? `<td>${fmtNum(t)}${m ? '/' + fmtNum(m) : ''}</td>` : '<td>—</td>'
       ).join('');
+      const attCells = attScores.map(v => v !== null ? `<td>${fmtNum(v)}/20</td>` : '<td>—</td>').join('');
       return `<tr>
         <td>${studentLink(s)}</td>
         ${subjCells}
+        ${attCells}
+        <td><strong>${fmtNum(totalAtt)}</strong></td>
         <td>${overallBonus ? '+' + fmtNum(overallBonus) : '—'}</td>
         <td>${lateMin ? `-${fmtNum(lateDed)}<div style="font-size:10px;color:var(--text-mid)">(${lateMin} د تأخير)</div>` : '—'}</td>
         <td><strong>${fmtNum(total)}${max ? ' / ' + fmtNum(max) : ''}</strong><div style="font-size:11px;color:var(--text-mid)">${fmtNum(pct)}%</div></td>
@@ -395,7 +404,7 @@ window.renderGradesTab = function () {
     }).join('');
 
     list.innerHTML = `<div class="stats-table-wrap"><table>
-      <thead><tr><th>الطالبة</th>${subjHeaders}<th>بونص عام</th><th>خصم التأخير</th><th>الإجمالي</th></tr></thead>
+      <thead><tr><th>الطالبة</th>${subjHeaders}${attHeaders}<th>توتال درجات الحضور</th><th>بونص عام</th><th>خصم التأخير</th><th>الإجمالي</th></tr></thead>
       <tbody>${bodyRows}</tbody>
     </table></div>`;
     return;
