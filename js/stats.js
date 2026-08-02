@@ -285,8 +285,8 @@ function esc(s) {
 // تنسيق رقم للعرض بس (مش تقريب في الحساب نفسه) — بيسيب لحد رقمين عشريين، وبيشيل الأصفار الزيادة
 function fmtNum(n) {
   if (n === null || n === undefined || isNaN(n)) return '—';
-  const rounded = Math.round(n * 100) / 100;
-  return rounded % 1 === 0 ? String(rounded) : String(rounded);
+  const rounded = Math.round(n * 1000) / 1000;
+  return String(rounded);
 }
 
 function studentLink(s, label) {
