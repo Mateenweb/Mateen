@@ -16,6 +16,8 @@ import { effectiveRole, mountTestModeSwitcher } from './test-mode.js';
 const app  = getApps().length ? getApp() : initializeApp(FIREBASE_CONFIG);
 let _isAdmin = false;
 let _studentId = '';
+let _sessions = [];
+let _lastGrades = [];
 const db   = getFirestore(app);
 const auth = getAuth(app);
 
@@ -123,14 +125,18 @@ async function initPage(studentId, user, role) {
   const sessQ = query(collection(db,'students',studentId,'sessions'), orderBy('date','desc'));
   onSnapshot(sessQ, snap => {
     const sessions = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    _sessions = sessions;
     renderSessions(sessions);
     updateStats(sessions);
+    renderGrades(_lastGrades); // إعادة رسم الدرجات عشان خصم التأخير يتحدث لو الجلسات وصلت بعد الدرجات
+    updateGradeAvg(_lastGrades);
   });
 
   // Grades
   const gradeQ = query(collection(db,'students',studentId,'grades'), orderBy('createdAt','desc'));
   onSnapshot(gradeQ, snap => {
     const grades = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    _lastGrades = grades;
     renderGrades(grades);
     updateGradeAvg(grades);
   });
@@ -659,10 +665,15 @@ function renderGrades(grades) {
   const overallBonusScore = grades
     .filter(g => g.active !== false && (g.addType === 'subjectBonus' || g.addType === 'overallBonus'))
     .reduce((s, g) => s + Number(g.score || 0), 0);
-  const overallEarned = overallBase.reduce((s, g) => s + Number(g.score || 0), 0) + overallBonusScore;
+  const totalLateMinutes = _sessions.reduce((acc, se) => acc + Number(se.lateMinutes || 0), 0);
+  const lateDeduction    = Math.round((totalLateMinutes / 60) * 0.2 * 10) / 10;
+  const overallEarned = Math.round((overallBase.reduce((s, g) => s + Number(g.score || 0), 0) + overallBonusScore - lateDeduction) * 10) / 10;
   const overallMax     = overallBase.reduce((s, g) => s + Number(g.total || 0), 0);
   const overallHeaderHtml = overallMax > 0
-    ? `<div style="text-align:center;font-size:15px;font-weight:700;color:var(--green-dark);padding:10px;margin-bottom:12px;background:#fff;border-radius:10px;border:1px solid var(--border)">الإجمالي: ${overallEarned}/${overallMax}</div>`
+    ? `<div style="text-align:center;font-size:15px;font-weight:700;color:var(--green-dark);padding:10px;margin-bottom:12px;background:#fff;border-radius:10px;border:1px solid var(--border)">
+        الإجمالي: ${overallEarned}/${overallMax}
+        ${lateDeduction ? `<div style="font-size:11px;font-weight:400;color:#c0392b;margin-top:4px">(بعد خصم ${lateDeduction} درجة تأخير — ${totalLateMinutes} دقيقة)</div>` : ''}
+      </div>`
     : '';
 
   list.innerHTML = overallHeaderHtml + order.map(subj => {
@@ -820,6 +831,7 @@ function updateStats(sessions) {
 
 // متوسط الدرجات الظاهر فوق الصفحة — مطابق لمنطق صفحة الإدارة:
 // البونص (زي المشاركة أو اختبارات الإثرائيات) بيتضاف للإجمالي المكتسب، من غير ما يزوّد الأقصى الممكن
+// وخصم التأخير (0.2 درجة لكل ساعة) بيتنزل من المكتسب برضه
 function updateGradeAvg(grades) {
   const base = grades.filter(g => g.active !== false && (g.addType || 'subjectTotal') === 'subjectTotal' && g.total > 0);
   if (!base.length) { document.getElementById('statGrade').textContent = '—'; return; }
@@ -827,8 +839,9 @@ function updateGradeAvg(grades) {
   const bonusScore = grades
     .filter(g => g.active !== false && (g.addType === 'subjectBonus' || g.addType === 'overallBonus'))
     .reduce((s, g) => s + Number(g.score || 0), 0);
+  const lateDeduction = (_sessions.reduce((acc, se) => acc + Number(se.lateMinutes || 0), 0) / 60) * 0.2;
 
-  const earned = base.reduce((s, g) => s + Number(g.score || 0), 0) + bonusScore;
+  const earned = base.reduce((s, g) => s + Number(g.score || 0), 0) + bonusScore - lateDeduction;
   const max    = base.reduce((s, g) => s + Number(g.total || 0), 0);
 
   document.getElementById('statGrade').textContent = max > 0 ? Math.round(earned / max * 100) + '%' : '—';
