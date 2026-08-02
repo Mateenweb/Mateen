@@ -201,11 +201,11 @@ body {
   background: var(--white);
   border-radius: 12px;
   border: 1px solid var(--border);
-  overflow: hidden;
+  overflow-x: auto;
   margin-bottom: 16px;
 }
 
-.stats-table-wrap table { width: 100%; border-collapse: collapse; }
+.stats-table-wrap table { width: 100%; min-width: max-content; border-collapse: collapse; }
 
 .stats-table-wrap th {
   background: var(--green-dark);
@@ -213,6 +213,7 @@ body {
   padding: 10px 12px;
   font-size: 13px;
   font-family: 'Noto Naskh Arabic', serif;
+  white-space: nowrap;
 }
 
 .stats-table-wrap td {
@@ -220,6 +221,7 @@ body {
   border-bottom: 1px solid var(--border);
   font-size: 13px;
   color: var(--text-dark);
+  white-space: nowrap;
 }
 
 .stats-table-wrap tr:hover td { background: rgba(201,162,39,0.04); }
