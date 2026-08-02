@@ -383,12 +383,12 @@ window.renderGradesTab = function () {
 
     const bodyRows = rows.map(({ s, subjScores, overallBonus, lateMin, lateDed, total, max, pct }) => {
       const subjCells = subjScores.map(({ total: t, max: m }) =>
-        t !== null ? `<td>${t}${m ? '/' + m : ''}</td>` : '<td>—</td>'
+        t !== null ? `<td>${fmtNum(t)}${m ? '/' + fmtNum(m) : ''}</td>` : '<td>—</td>'
       ).join('');
       return `<tr>
         <td>${studentLink(s)}</td>
         ${subjCells}
-        <td>${overallBonus ? '+' + overallBonus : '—'}</td>
+        <td>${overallBonus ? '+' + fmtNum(overallBonus) : '—'}</td>
         <td>${lateMin ? `-${fmtNum(lateDed)}<div style="font-size:10px;color:var(--text-mid)">(${lateMin} د تأخير)</div>` : '—'}</td>
         <td><strong>${fmtNum(total)}${max ? ' / ' + fmtNum(max) : ''}</strong><div style="font-size:11px;color:var(--text-mid)">${fmtNum(pct)}%</div></td>
       </tr>`;
