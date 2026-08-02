@@ -4,7 +4,7 @@ import { initializeApp, getApps, getApp }
 import { getAuth, onAuthStateChanged, signOut }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
 import { getFirestore, collection, addDoc, deleteDoc, doc,
-         onSnapshot, query, orderBy, where, getDoc, updateDoc, getDocs, serverTimestamp,
+         onSnapshot, query, orderBy, where, getDoc, setDoc, updateDoc, getDocs, serverTimestamp,
          collectionGroup, deleteField }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 import { FIREBASE_CONFIG } from "./config.js";
@@ -613,6 +613,7 @@ onSnapshot(stuQuery, snap => {
   allStudents = snap.docs.map(d=>({id:d.id,...d.data()}));
   renderStudents(allStudents);
   updateStuStats(allStudents);
+  renderCertStudentSelect();
 });
 
 function updateStuStats(list) {
@@ -3202,6 +3203,218 @@ window.confirmPasteAttendance = async () => {
   }
 };
 
+
+// ── نظام الشهادات التلقائي ─────────────────────
+const LATE_DEDUCTION_PER_MINUTE = 0.2 / 60;
+let _certTemplate = null; // { imageUrl, fields: { name:{x,y,fontSize,color}, subject:{...}, date:{...} } }
+
+window.loadCertTemplate = async () => {
+  try {
+    const snap = await getDoc(doc(db, 'settings', 'certificateTemplate'));
+    _certTemplate = snap.exists() ? snap.data() : null;
+    renderCertTemplateUI();
+  } catch (e) { console.error('loadCertTemplate:', e); }
+};
+
+function renderCertTemplateUI() {
+  const wrap = document.getElementById('certTemplateWrap');
+  if (!wrap) return;
+  if (!_certTemplate?.imageUrl) {
+    wrap.innerHTML = `<div style="color:var(--text-mid);font-size:13px">لسه معملتيش رفع قالب شهادة.</div>`;
+    return;
+  }
+  const f = _certTemplate.fields || {};
+  const marker = (key, label, color) => f[key] ? `
+    <div style="position:absolute;left:${f[key].x}%;top:${f[key].y}%;transform:translate(-50%,-50%);background:${color};color:#fff;font-size:10px;padding:2px 6px;border-radius:10px;white-space:nowrap;pointer-events:none">${label}</div>` : '';
+  wrap.innerHTML = `
+    <div style="position:relative;display:inline-block;max-width:100%">
+      <img src="${_certTemplate.imageUrl}" id="certTemplateImg" style="max-width:100%;display:block;border-radius:8px;border:1px solid var(--border);cursor:crosshair">
+      ${marker('name', 'اسم الطالبة', '#1e8449')}
+      ${marker('subject', 'المادة/البرنامج', '#2266cc')}
+      ${marker('date', 'التاريخ', '#c9852b')}
+    </div>`;
+  document.getElementById('certTemplateImg').onclick = (e) => {
+    const rect = e.target.getBoundingClientRect();
+    const x = Number(((e.clientX - rect.left) / rect.width * 100).toFixed(2));
+    const y = Number(((e.clientY - rect.top) / rect.height * 100).toFixed(2));
+    const field = document.getElementById('certFieldToPlace').value;
+    if (!_certTemplate.fields) _certTemplate.fields = {};
+    _certTemplate.fields[field] = {
+      x, y,
+      fontSize: _certTemplate.fields[field]?.fontSize || 32,
+      color: _certTemplate.fields[field]?.color || '#000000',
+    };
+    renderCertTemplateUI();
+  };
+}
+
+window.uploadCertTemplate = async () => {
+  const file = document.getElementById('certTemplateFile')?.files?.[0];
+  if (!file) { showToast('اختاري صورة القالب الأول'); return; }
+  try {
+    showToast('جاري رفع القالب...');
+    const url = await uploadToCloudinary(file);
+    _certTemplate = { imageUrl: url, fields: (_certTemplate?.fields) || {} };
+    renderCertTemplateUI();
+    showToast('✅ اترفع القالب — دلوقتي حددي أماكن الاسم والمادة والتاريخ وبعدين احفظي');
+  } catch (e) {
+    console.error('uploadCertTemplate:', e);
+    showToast('❌ حصل خطأ في رفع القالب');
+  }
+};
+
+window.saveCertTemplate = async () => {
+  if (!_certTemplate?.imageUrl) { showToast('ارفعي القالب الأول'); return; }
+  if (!_certTemplate.fields?.name) { showToast('حددي مكان اسم الطالبة على القالب الأول'); return; }
+  try {
+    await setDoc(doc(db, 'settings', 'certificateTemplate'), _certTemplate);
+    showToast('✅ اتحفظ إعداد قالب الشهادة');
+  } catch (e) {
+    console.error('saveCertTemplate:', e);
+    showToast('❌ خطأ في الحفظ');
+  }
+};
+
+// بيرسم القالب + البيانات على canvas ويرفع الناتج Cloudinary، ويرجع رابط الصورة
+function generateCertificateImage(studentName, subjectText, dateText) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.naturalWidth;
+        canvas.height = img.naturalHeight;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+        const f = _certTemplate.fields || {};
+        const draw = (text, field) => {
+          if (!field || !text) return;
+          ctx.font = `${field.fontSize || 32}px 'Amiri', 'Noto Naskh Arabic', serif`;
+          ctx.fillStyle = field.color || '#000000';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.direction = 'rtl';
+          ctx.fillText(text, canvas.width * field.x / 100, canvas.height * field.y / 100);
+        };
+        draw(studentName, f.name);
+        draw(subjectText, f.subject);
+        draw(dateText, f.date);
+        canvas.toBlob(async (blob) => {
+          try {
+            const file = new File([blob], 'certificate.png', { type: 'image/png' });
+            resolve(await uploadToCloudinary(file));
+          } catch (err) { reject(err); }
+        }, 'image/png');
+      } catch (err) { reject(err); }
+    };
+    img.onerror = reject;
+    img.src = _certTemplate.imageUrl;
+  });
+}
+
+function renderCertStudentSelect() {
+  const sel = document.getElementById('certStudentSelect');
+  if (!sel) return;
+  const students = allStudents
+    .filter(s => s.name && s.name !== 'طالبة جديدة' && !s.archived)
+    .sort((a, b) => (a.name || '').localeCompare(b.name || '', 'ar'));
+  const current = sel.value;
+  sel.innerHTML = '<option value="">— اختاري الطالبة —</option>' +
+    students.map(s => `<option value="${s.id}">${esc(s.name)}</option>`).join('');
+  if (current) sel.value = current;
+}
+
+window.issueSingleCertificate = async () => {
+  if (!_certTemplate?.imageUrl || !_certTemplate.fields?.name) { showToast('لازم تظبطي قالب الشهادة وتحفظيه فوق الأول'); return; }
+  const studentId   = document.getElementById('certStudentSelect')?.value;
+  const subjectText = document.getElementById('certSubjectInput')?.value.trim() || '';
+  const dateText    = document.getElementById('certDateInput')?.value.trim() || new Date().toLocaleDateString('ar-EG');
+  if (!studentId) { showToast('اختاري الطالبة'); return; }
+  const student = allStudents.find(s => s.id === studentId);
+  if (!student) { showToast('الطالبة مش موجودة'); return; }
+  try {
+    showToast('جاري إصدار الشهادة...');
+    const url = await generateCertificateImage(student.name || '', subjectText, dateText);
+    await addDoc(collection(db, 'students', studentId, 'certificates'), {
+      title: subjectText || 'شهادة',
+      fileUrl: url,
+      createdAt: serverTimestamp(),
+    });
+    showToast('✅ اتصدرت الشهادة وحُطت في ملف الطالبة');
+  } catch (e) {
+    console.error('issueSingleCertificate:', e);
+    showToast('❌ حصل خطأ أثناء إصدار الشهادة');
+  }
+};
+
+// نسبة الحضور ونسبة الدرجات لطالبة — مطابق لمنطق صفحة الطالبة الشخصية، لفحص الاستحقاق
+async function getStudentEligibilityStats(studentId) {
+  const [sessSnap, gradeSnap] = await Promise.all([
+    getDocs(collection(db, 'students', studentId, 'sessions')),
+    getDocs(collection(db, 'students', studentId, 'grades')),
+  ]);
+  const sessions = sessSnap.docs.map(d => d.data());
+  const grades   = gradeSnap.docs.map(d => d.data());
+
+  let excusedSeen = 0, present = 0, total = 0;
+  const entries = [];
+  [...sessions].sort((a, b) => (a.date || '').localeCompare(b.date || ''))
+    .forEach(s => Object.values(s.subjects || {}).forEach(v => entries.push(v)));
+  entries.forEach(v => {
+    const effective = v === 'excused' ? (++excusedSeen <= 3 ? 'excused' : 'absent') : v;
+    if (effective === 'present') { present++; total++; }
+    else if (effective === 'absent') { total++; }
+  });
+  const attPct = total ? Math.round(present / total * 100) : null;
+
+  const base = grades.filter(g => g.active !== false && (g.addType || 'subjectTotal') === 'subjectTotal' && g.total > 0);
+  const bonusScore = grades
+    .filter(g => g.active !== false && (g.addType === 'subjectBonus' || g.addType === 'overallBonus'))
+    .reduce((s, g) => s + Number(g.score || 0), 0);
+  const lateDeduction = sessions.reduce((acc, se) => acc + Number(se.lateMinutes || 0), 0) * LATE_DEDUCTION_PER_MINUTE;
+  const earned = base.reduce((s, g) => s + Number(g.score || 0), 0) + bonusScore - lateDeduction;
+  const max    = base.reduce((s, g) => s + Number(g.total || 0), 0);
+  const gradePct = max > 0 ? Math.round(earned / max * 100) : null;
+
+  return { attPct, gradePct };
+}
+
+window.issueBulkCertificates = async () => {
+  if (!_certTemplate?.imageUrl || !_certTemplate.fields?.name) { showToast('لازم تظبطي قالب الشهادة وتحفظيه فوق الأول'); return; }
+  const subjectText = document.getElementById('certBulkSubjectInput')?.value.trim() || '';
+  const dateText     = document.getElementById('certBulkDateInput')?.value.trim() || new Date().toLocaleDateString('ar-EG');
+  const minAtt   = Number(document.getElementById('certMinAtt')?.value || 0);
+  const minGrade = Number(document.getElementById('certMinGrade')?.value || 0);
+
+  const students = allStudents.filter(s => s.name && s.name !== 'طالبة جديدة' && !s.archived);
+  if (!confirm(`هيتم فحص ${students.length} طالبة، وإصدار شهادة تلقائيًا لكل واحدة مستوفية الشرط (حضور ≥ ${minAtt}% ودرجات ≥ ${minGrade}%). ده ممكن ياخد وقت حسب عدد الطالبات. تكملي؟`)) return;
+
+  let checked = 0, issued = 0, failed = 0;
+  showToast('جاري الفحص والإصدار...');
+  for (const student of students) {
+    checked++;
+    try {
+      const { attPct, gradePct } = await getStudentEligibilityStats(student.id);
+      const attOk   = minAtt   <= 0 || (attPct   !== null && attPct   >= minAtt);
+      const gradeOk = minGrade <= 0 || (gradePct !== null && gradePct >= minGrade);
+      if (!attOk || !gradeOk) continue;
+      const url = await generateCertificateImage(student.name || '', subjectText, dateText);
+      await addDoc(collection(db, 'students', student.id, 'certificates'), {
+        title: subjectText || 'شهادة',
+        fileUrl: url,
+        createdAt: serverTimestamp(),
+      });
+      issued++;
+    } catch (e) {
+      console.error('issueBulkCertificates:', student.id, e);
+      failed++;
+    }
+  }
+  showToast?.(`✅ اتفحصت ${checked} طالبة، اتصدرلها ${issued} شهادة${failed ? ` (فشل ${failed})` : ''}`);
+};
+
+loadCertTemplate();
 
 // ── حذف اختبار جماعي من عند كل الطالبات ─────────────────────
 

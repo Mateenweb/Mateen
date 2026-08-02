@@ -608,6 +608,51 @@
       </div>
     </div>
     <div style="border-top:1px solid var(--border);padding-top:12px">
+      <div style="font-size:13px;color:var(--text-mid);margin-bottom:10px">🎓 نظام الشهادات التلقائي</div>
+
+      <div style="margin-bottom:12px">
+        <label style="font-size:12px;color:var(--text-mid);display:block;margin-bottom:4px">1) ارفعي قالب الشهادة (صورة)</label>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <input type="file" id="certTemplateFile" accept="image/*" style="font-size:12px">
+          <button onclick="uploadCertTemplate()" class="btn-add-row">رفع القالب</button>
+        </div>
+      </div>
+
+      <div style="margin-bottom:12px">
+        <label style="font-size:12px;color:var(--text-mid);display:block;margin-bottom:4px">2) اختاري البيانة ودوسي مكانها على الصورة، وبعدين احفظي</label>
+        <select id="certFieldToPlace" style="width:100%;max-width:260px;border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-family:inherit;font-size:13px;margin-bottom:8px">
+          <option value="name">اسم الطالبة</option>
+          <option value="subject">المادة/البرنامج</option>
+          <option value="date">التاريخ</option>
+        </select>
+        <div id="certTemplateWrap"></div>
+        <button onclick="saveCertTemplate()" class="btn-add-row" style="margin-top:8px">حفظ إعداد القالب</button>
+      </div>
+
+      <div style="margin-bottom:12px;border-top:1px dashed var(--border);padding-top:10px">
+        <label style="font-size:12px;color:var(--text-mid);display:block;margin-bottom:4px">3أ) إصدار شهادة لطالبة واحدة</label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+          <select id="certStudentSelect" style="border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-family:inherit;font-size:13px;min-width:180px"></select>
+          <input type="text" id="certSubjectInput" placeholder="اسم المادة/البرنامج" style="border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-family:inherit;font-size:13px">
+          <input type="text" id="certDateInput" placeholder="التاريخ (اختياري)" style="border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-family:inherit;font-size:13px;width:140px">
+          <button onclick="issueSingleCertificate()" class="btn-add-row">أصدري شهادة</button>
+        </div>
+      </div>
+
+      <div style="border-top:1px dashed var(--border);padding-top:10px">
+        <label style="font-size:12px;color:var(--text-mid);display:block;margin-bottom:4px">3ب) إصدار جماعي لكل المستحقات حسب شرط</label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+          <input type="text" id="certBulkSubjectInput" placeholder="اسم المادة/البرنامج" style="border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-family:inherit;font-size:13px">
+          <input type="text" id="certBulkDateInput" placeholder="التاريخ (اختياري)" style="border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-family:inherit;font-size:13px;width:140px">
+          <label style="font-size:12px;color:var(--text-mid)">أقل نسبة حضور %</label>
+          <input type="number" id="certMinAtt" value="0" min="0" max="100" style="width:70px;border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-family:inherit;font-size:13px">
+          <label style="font-size:12px;color:var(--text-mid)">أقل نسبة درجات %</label>
+          <input type="number" id="certMinGrade" value="0" min="0" max="100" style="width:70px;border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-family:inherit;font-size:13px">
+          <button onclick="issueBulkCertificates()" class="btn-add-row">أصدري لكل المستحقات</button>
+        </div>
+      </div>
+    </div>
+    <div style="border-top:1px solid var(--border);padding-top:12px">
       <div style="font-size:13px;color:var(--text-mid);margin-bottom:10px">⚠️ منطقة الخطر — هذه الإجراءات لا يمكن التراجع عنها</div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <button onclick="openResetDataModal()" class="btn-danger-solid">
