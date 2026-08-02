@@ -18,6 +18,8 @@ let _isAdmin = false;
 let _studentId = '';
 let _sessions = [];
 let _lastGrades = [];
+// معدل خصم التأخير: 0.2 درجة لكل ساعة = 0.2/60 لكل دقيقة — محسوب بالدقيقة مباشرة
+const LATE_DEDUCTION_PER_MINUTE = 0.2 / 60;
 const db   = getFirestore(app);
 const auth = getAuth(app);
 
@@ -666,7 +668,7 @@ function renderGrades(grades) {
     .filter(g => g.active !== false && (g.addType === 'subjectBonus' || g.addType === 'overallBonus'))
     .reduce((s, g) => s + Number(g.score || 0), 0);
   const totalLateMinutes = _sessions.reduce((acc, se) => acc + Number(se.lateMinutes || 0), 0);
-  const lateDeduction    = Math.round((totalLateMinutes / 60) * 0.2 * 10) / 10;
+  const lateDeduction    = Math.round(totalLateMinutes * LATE_DEDUCTION_PER_MINUTE * 10) / 10;
   const overallEarned = Math.round((overallBase.reduce((s, g) => s + Number(g.score || 0), 0) + overallBonusScore - lateDeduction) * 10) / 10;
   const overallMax     = overallBase.reduce((s, g) => s + Number(g.total || 0), 0);
   const overallHeaderHtml = overallMax > 0
@@ -839,7 +841,7 @@ function updateGradeAvg(grades) {
   const bonusScore = grades
     .filter(g => g.active !== false && (g.addType === 'subjectBonus' || g.addType === 'overallBonus'))
     .reduce((s, g) => s + Number(g.score || 0), 0);
-  const lateDeduction = (_sessions.reduce((acc, se) => acc + Number(se.lateMinutes || 0), 0) / 60) * 0.2;
+  const lateDeduction = _sessions.reduce((acc, se) => acc + Number(se.lateMinutes || 0), 0) * LATE_DEDUCTION_PER_MINUTE;
 
   const earned = base.reduce((s, g) => s + Number(g.score || 0), 0) + bonusScore - lateDeduction;
   const max    = base.reduce((s, g) => s + Number(g.total || 0), 0);

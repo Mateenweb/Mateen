@@ -228,8 +228,10 @@ function getTotalLateMinutes(s) {
 
 // خصم التأخير من التوتال العام: كل ساعة تأخير = 0.2 درجة تتخصم (على مستوى التوتال العام، مش مادة واحدة،
 // لأن التأخير مسجل على مستوى الجلسة كلها مش لكل مادة لوحدها)
+// معدل الخصم: 0.2 درجة لكل ساعة = 0.2/60 لكل دقيقة — محسوب بالدقيقة مباشرة، من غير تقريب لساعات كاملة
+const LATE_DEDUCTION_PER_MINUTE = 0.2 / 60;
 function getLateDeduction(s) {
-  return (getTotalLateMinutes(s) / 60) * 0.2;
+  return getTotalLateMinutes(s) * LATE_DEDUCTION_PER_MINUTE;
 }
 
 function getOverallMaxPossible(s) {
