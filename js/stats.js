@@ -221,6 +221,17 @@ function getSubjectPct(s, subject) {
 }
 
 // أقصى درجة ممكنة حاليًا على مستوى كل المواد مع بعض = مجموع أقصى درجة لكل مادة الطالبة مسجلة فيها
+// إجمالي دقايق التأخير لطالبة على مستوى كل جلساتها (التأخير مسجل على مستوى الجلسة كلها، مش لكل مادة لوحدها)
+function getTotalLateMinutes(s) {
+  return s.sessions.reduce((acc, se) => acc + Number(se.lateMinutes || 0), 0);
+}
+
+// خصم التأخير من التوتال العام: كل ساعة تأخير = 0.2 درجة تتخصم (على مستوى التوتال العام، مش مادة واحدة،
+// لأن التأخير مسجل على مستوى الجلسة كلها مش لكل مادة لوحدها)
+function getLateDeduction(s) {
+  return (getTotalLateMinutes(s) / 60) * 0.2;
+}
+
 function getOverallMaxPossible(s) {
   const subjectsWithGrades = [...new Set(
     s.grades.filter(g => isActive(g) && (g.addType || 'subjectTotal') === 'subjectTotal').map(g => g.subject)
@@ -230,7 +241,7 @@ function getOverallMaxPossible(s) {
 }
 
 // "التوتال العام" لطالبة — جمع حقيقي (مش متوسط نسب): مجموع إجمالي كل مادة عندها فيها اختبارات
-// + مجموع أي نقط "إضافة للتوتال العام" فوق كده (بونص عام، من غير سقف)
+// + مجموع أي نقط "إضافة للتوتال العام" فوق كده (بونص عام، من غير سقف) — ناقص خصم التأخير (0.2 درجة/ساعة)
 function getOverallScore(s) {
   const subjectsWithGrades = [...new Set(
     s.grades.filter(g => isActive(g) && (g.addType || 'subjectTotal') === 'subjectTotal').map(g => g.subject)
@@ -242,8 +253,9 @@ function getOverallScore(s) {
   const overallBonusPoints = s.grades
     .filter(g => isActive(g) && g.addType === 'overallBonus')
     .reduce((acc, g) => acc + Number(g.score || 0), 0);
+  const lateDeduction = getLateDeduction(s);
 
-  return Math.round((sumTotal + overallBonusPoints) * 10) / 10;
+  return Math.round((sumTotal + overallBonusPoints - lateDeduction) * 10) / 10;
 }
 
 // النسبة % العامة = التوتال العام ÷ أقصى درجة ممكنة على مستوى كل المواد
@@ -344,11 +356,13 @@ window.renderGradesTab = function () {
       const overallBonus = s.grades
         .filter(g => isActive(g) && g.addType === 'overallBonus')
         .reduce((acc, g) => acc + Number(g.score || 0), 0);
+      const lateMin  = getTotalLateMinutes(s);
+      const lateDed  = getLateDeduction(s);
       const total = getOverallScore(s);
       const max   = getOverallMaxPossible(s);
       const pct   = getOverallPct(s);
       if (pct === null) return null; // مفيش أي درجات خالص للطالبة دي
-      return { s, subjScores, overallBonus, total, max, pct };
+      return { s, subjScores, overallBonus, lateMin, lateDed, total, max, pct };
     }).filter(Boolean).sort((a, b) => b.pct - a.pct);
 
     if (!rows.length) {
@@ -358,7 +372,7 @@ window.renderGradesTab = function () {
 
     const subjHeaders = SUBJECTS.map(sub => `<th>${esc(sub)}</th>`).join('');
 
-    const bodyRows = rows.map(({ s, subjScores, overallBonus, total, max, pct }) => {
+    const bodyRows = rows.map(({ s, subjScores, overallBonus, lateMin, lateDed, total, max, pct }) => {
       const subjCells = subjScores.map(({ total: t, max: m }) =>
         t !== null ? `<td>${t}${m ? '/' + m : ''}</td>` : '<td>—</td>'
       ).join('');
@@ -366,12 +380,13 @@ window.renderGradesTab = function () {
         <td>${studentLink(s)}</td>
         ${subjCells}
         <td>${overallBonus ? '+' + overallBonus : '—'}</td>
+        <td>${lateMin ? `-${Math.round(lateDed * 10) / 10}<div style="font-size:10px;color:var(--text-mid)">(${lateMin} د تأخير)</div>` : '—'}</td>
         <td><strong>${total}${max ? ' / ' + max : ''}</strong><div style="font-size:11px;color:var(--text-mid)">${pct}%</div></td>
       </tr>`;
     }).join('');
 
     list.innerHTML = `<div class="stats-table-wrap"><table>
-      <thead><tr><th>الطالبة</th>${subjHeaders}<th>بونص عام</th><th>الإجمالي</th></tr></thead>
+      <thead><tr><th>الطالبة</th>${subjHeaders}<th>بونص عام</th><th>خصم التأخير</th><th>الإجمالي</th></tr></thead>
       <tbody>${bodyRows}</tbody>
     </table></div>`;
     return;
