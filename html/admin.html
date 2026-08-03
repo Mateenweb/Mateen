@@ -318,6 +318,10 @@
         <span class="ami-icon" style="background:rgba(127,140,141,0.12);color:#7f8c8d"><i class="ti ti-folders"></i></span>
         <span class="ami-text"><strong>إدارة الشهادات والإجازات</strong><small>عرض، بحث، وحذف</small></span>
       </button>
+      <button class="actions-menu-item" onclick="openAutoCertModal();closeActionMenus()">
+        <span class="ami-icon" style="background:rgba(30,132,73,0.12);color:#1e8449"><i class="ti ti-template"></i></span>
+        <span class="ami-text"><strong>نظام الشهادات التلقائي</strong><small>قالب واحد + إصدار فردي أو جماعي حسب الاستحقاق</small></span>
+      </button>
     </div>
   </div>
 
@@ -605,56 +609,6 @@
         <button onclick="fixOldParticipationGrades()" class="btn-add-row">
           <i class="ti ti-wand"></i> تصحيح درجات المشاركة القديمة
         </button>
-      </div>
-    </div>
-    <div style="border-top:1px solid var(--border);padding-top:12px">
-      <div style="font-size:13px;color:var(--text-mid);margin-bottom:10px">🎓 نظام الشهادات التلقائي</div>
-
-      <div style="margin-bottom:12px">
-        <label style="font-size:12px;color:var(--text-mid);display:block;margin-bottom:4px">1) ارفعي قالب الشهادة (صورة)</label>
-        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-          <input type="file" id="certTemplateFile" accept="image/*" style="font-size:12px">
-          <button onclick="uploadCertTemplate()" class="btn-add-row">رفع القالب</button>
-        </div>
-      </div>
-
-      <div style="margin-bottom:12px">
-        <label style="font-size:12px;color:var(--text-mid);display:block;margin-bottom:4px">2) اختاري البيانة ودوسي مكانها على الصورة، وبعدين احفظي</label>
-        <select id="certFieldToPlace" onchange="syncCertFontSizeInput()" style="width:100%;max-width:260px;border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-family:inherit;font-size:13px;margin-bottom:8px">
-          <option value="name">اسم الطالبة</option>
-          <option value="subject">المادة/البرنامج</option>
-          <option value="date">التاريخ</option>
-        </select>
-        <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
-          <label style="font-size:12px;color:var(--text-mid)">حجم خط البيانة المختارة</label>
-          <input type="number" id="certFontSize" value="60" min="8" max="300" style="width:70px;border:1px solid var(--border);border-radius:8px;padding:6px 8px;font-family:inherit;font-size:13px">
-          <button onclick="applyCertFontSize()" class="btn-add-row" style="padding:4px 10px">تطبيق</button>
-        </div>
-        <div id="certTemplateWrap"></div>
-        <button onclick="saveCertTemplate()" class="btn-add-row" style="margin-top:8px">حفظ إعداد القالب</button>
-      </div>
-
-      <div style="margin-bottom:12px;border-top:1px dashed var(--border);padding-top:10px">
-        <label style="font-size:12px;color:var(--text-mid);display:block;margin-bottom:4px">3أ) إصدار شهادة لطالبة واحدة</label>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-          <select id="certStudentSelect" style="border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-family:inherit;font-size:13px;min-width:180px"></select>
-          <input type="text" id="certSubjectInput" placeholder="اسم المادة/البرنامج" style="border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-family:inherit;font-size:13px">
-          <input type="text" id="certDateInput" placeholder="التاريخ (اختياري)" style="border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-family:inherit;font-size:13px;width:140px">
-          <button onclick="issueSingleCertificate()" class="btn-add-row">أصدري شهادة</button>
-        </div>
-      </div>
-
-      <div style="border-top:1px dashed var(--border);padding-top:10px">
-        <label style="font-size:12px;color:var(--text-mid);display:block;margin-bottom:4px">3ب) إصدار جماعي لكل المستحقات حسب شرط</label>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-          <input type="text" id="certBulkSubjectInput" placeholder="اسم المادة/البرنامج" style="border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-family:inherit;font-size:13px">
-          <input type="text" id="certBulkDateInput" placeholder="التاريخ (اختياري)" style="border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-family:inherit;font-size:13px;width:140px">
-          <label style="font-size:12px;color:var(--text-mid)">أقل نسبة حضور %</label>
-          <input type="number" id="certMinAtt" value="0" min="0" max="100" style="width:70px;border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-family:inherit;font-size:13px">
-          <label style="font-size:12px;color:var(--text-mid)">أقل نسبة درجات %</label>
-          <input type="number" id="certMinGrade" value="0" min="0" max="100" style="width:70px;border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-family:inherit;font-size:13px">
-          <button onclick="issueBulkCertificates()" class="btn-add-row">أصدري لكل المستحقات</button>
-        </div>
       </div>
     </div>
     <div style="border-top:1px solid var(--border);padding-top:12px">
@@ -1634,6 +1588,66 @@ function formatSize(bytes) {
       <div style="display:flex;gap:8px">
         <button class="btn-solid" onclick="saveBulkCertAward()"><i class="ti ti-device-floppy"></i> حفظ للمحددين</button>
         <button class="btn-outline" onclick="closeBulkCAModal()">إلغاء</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ Modal نظام الشهادات التلقائي ══ -->
+<div id="autoCertModal" class="modal-overlay" style="display:none" onclick="if(event.target===this)this.style.display='none'">
+  <div class="modal-box" style="width:min(94vw,620px);max-height:88vh;display:flex;flex-direction:column">
+    <div class="modal-head">
+      <span class="m-title">🖼️ نظام الشهادات التلقائي</span>
+      <button class="m-close" onclick="document.getElementById('autoCertModal').style.display='none'">✕</button>
+    </div>
+    <div class="modal-body" style="overflow-y:auto">
+      <div style="margin-bottom:12px">
+        <label style="font-size:12px;color:var(--text-mid);display:block;margin-bottom:4px">1) ارفعي قالب الشهادة (صورة)</label>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <input type="file" id="certTemplateFile" accept="image/*" style="font-size:12px">
+          <button onclick="uploadCertTemplate()" class="btn-add-row">رفع القالب</button>
+        </div>
+      </div>
+
+      <div style="margin-bottom:12px">
+        <label style="font-size:12px;color:var(--text-mid);display:block;margin-bottom:4px">2) اختاري البيانة ودوسي مكانها على الصورة، وبعدين احفظي</label>
+        <select id="certFieldToPlace" onchange="syncCertFontSizeInput()" style="width:100%;max-width:260px;border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-family:inherit;font-size:13px;margin-bottom:8px">
+          <option value="name">اسم الطالبة</option>
+          <option value="subject">المادة/البرنامج</option>
+          <option value="date">التاريخ</option>
+        </select>
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
+          <label style="font-size:12px;color:var(--text-mid)">حجم خط البيانة المختارة</label>
+          <input type="number" id="certFontSize" value="60" min="8" max="300" style="width:70px;border:1px solid var(--border);border-radius:8px;padding:6px 8px;font-family:inherit;font-size:13px">
+          <button onclick="applyCertFontSize()" class="btn-add-row" style="padding:4px 10px">تطبيق</button>
+        </div>
+        <div id="certTemplateWrap"></div>
+        <button onclick="saveCertTemplate()" class="btn-add-row" style="margin-top:8px">حفظ إعداد القالب</button>
+      </div>
+
+      <hr class="m-hr">
+
+      <div style="margin-bottom:12px">
+        <label style="font-size:12px;color:var(--text-mid);display:block;margin-bottom:4px">3أ) إصدار شهادة لطالبة واحدة</label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+          <select id="certStudentSelect" style="border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-family:inherit;font-size:13px;min-width:180px"></select>
+          <input type="text" id="certSubjectInput" placeholder="اسم المادة/البرنامج" style="border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-family:inherit;font-size:13px">
+          <input type="text" id="certDateInput" placeholder="التاريخ (اختياري)" style="border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-family:inherit;font-size:13px;width:140px">
+          <button onclick="issueSingleCertificate()" class="btn-add-row">أصدري شهادة</button>
+        </div>
+      </div>
+
+      <div>
+        <label style="font-size:12px;color:var(--text-mid);display:block;margin-bottom:4px">3ب) إصدار جماعي لكل المستحقات حسب شرط</label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+          <input type="text" id="certBulkSubjectInput" placeholder="اسم المادة/البرنامج" style="border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-family:inherit;font-size:13px">
+          <input type="text" id="certBulkDateInput" placeholder="التاريخ (اختياري)" style="border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-family:inherit;font-size:13px;width:140px">
+          <label style="font-size:12px;color:var(--text-mid)">أقل نسبة حضور %</label>
+          <input type="number" id="certMinAtt" value="0" min="0" max="100" style="width:70px;border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-family:inherit;font-size:13px">
+          <label style="font-size:12px;color:var(--text-mid)">أقل نسبة درجات %</label>
+          <input type="number" id="certMinGrade" value="0" min="0" max="100" style="width:70px;border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-family:inherit;font-size:13px">
+          <button onclick="issueBulkCertificates()" class="btn-add-row">أصدري لكل المستحقات</button>
+        </div>
       </div>
     </div>
   </div>

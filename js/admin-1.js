@@ -3433,6 +3433,12 @@ window.issueBulkCertificates = async () => {
   showToast?.(`✅ اتفحصت ${checked} طالبة، اتصدرلها ${issued} شهادة${failed ? ` (فشل ${failed})` : ''}`);
 };
 
+window.openAutoCertModal = () => {
+  document.getElementById('autoCertModal').style.display = 'flex';
+  renderCertTemplateUI();
+  renderCertStudentSelect();
+};
+
 loadCertTemplate();
 
 // ── حذف اختبار جماعي من عند كل الطالبات ─────────────────────
