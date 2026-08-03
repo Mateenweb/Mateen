@@ -205,7 +205,7 @@ async function runSiteTest() {
 
   for (const page of SITE_PAGES) {
     const url = base + page;
-    const result = await checkPage(url, page);
+    const result = await checkPage(url, page, SITE_PAGES);
     if (result.httpOk === false) summary.err++;
     else if (result.loadTime > 2000) summary.slow++;
     else summary.ok++;
@@ -223,6 +223,7 @@ async function runSiteTest() {
       <td style="padding:8px 10px;font-size:12px;color:${result.a11y.color}">${result.a11y.text}</td>
       <td style="padding:8px 10px;font-size:12px;color:${result.bp.color}">${result.bp.text}</td>
       <td style="padding:8px 10px;font-size:12px;color:${result.images.color}">${result.images.text}</td>
+      <td style="padding:8px 10px;font-size:12px;color:${result.links.color}">${result.links.text}</td>
       <td style="padding:8px 10px"><a href="${url}" style="font-size:12px;color:var(--gold-mid)">فتح ↗</a></td>
     </tr>`;
 
@@ -245,6 +246,7 @@ async function runSiteTest() {
           <th style="padding:8px 10px;text-align:right;font-size:11px">إمكانية الوصول ♿</th>
           <th style="padding:8px 10px;text-align:right;font-size:11px">أفضل الممارسات ✨</th>
           <th style="padding:8px 10px;text-align:right;font-size:11px">الصور 🖼️</th>
+          <th style="padding:8px 10px;text-align:right;font-size:11px">الروابط 🔗</th>
           <th style="padding:8px 10px;text-align:right;font-size:11px">رابط</th>
         </tr></thead>
         <tbody>${rows}</tbody>
@@ -291,7 +293,7 @@ function downloadAuditPDF() {
   <table>
     <thead><tr>
       <th>الصفحة</th><th>HTTP</th><th>وقت التحميل</th><th>الحجم</th><th>الأداء</th>
-      <th>SEO</th><th>إمكانية الوصول</th><th>أفضل الممارسات</th><th>الصور</th><th>رابط</th>
+      <th>SEO</th><th>إمكانية الوصول</th><th>أفضل الممارسات</th><th>الصور</th><th>الروابط</th><th>رابط</th>
     </tr></thead>
     <tbody>${data.rows}</tbody>
   </table>
@@ -304,7 +306,7 @@ function downloadAuditPDF() {
   setTimeout(() => { win.print(); }, 500);
 }
 
-async function checkPage(url, page) {
+async function checkPage(url, page, sitePages) {
   const start = performance.now();
   try {
     const res = await fetch(url, { cache: 'no-store' });
@@ -394,7 +396,26 @@ async function checkPage(url, page) {
       color: missingAlt === 0 ? '#27ae60' : '#e67e22'
     };
 
-    return { httpOk: res.ok, httpStatus: res.status, loadTime, size, perfScore, seo, a11y, bp, images };
+    // ── الروابط الداخلية (بما فيها روابط النافبار) ──
+    const anchors = [...doc.querySelectorAll('a[href]')];
+    const brokenLinks = [];
+    anchors.forEach(a => {
+      const href = (a.getAttribute('href') || '').trim();
+      if (!href || href.startsWith('#') || href.startsWith('mailto:') || href.startsWith('tel:') || href.startsWith('javascript:')) return;
+      if (/^https?:\/\//i.test(href) && !href.includes(window.location.host)) return; // رابط خارجي، مش من اختصاص الفحص ده
+      const clean = href.split('?')[0].split('#')[0];
+      const match = clean.match(/([^\/]+\.html)$/i);
+      if (!match) return; // مش رابط لصفحة .html (زي رابط لصورة أو ملف تاني)
+      const filename = match[1];
+      if (!sitePages.includes(filename)) brokenLinks.push(filename);
+    });
+    const uniqueBroken = [...new Set(brokenLinks)];
+    const links = {
+      text: uniqueBroken.length === 0 ? '✅ سليمة' : `❌ ${uniqueBroken.length}: ${uniqueBroken.slice(0,2).join('، ')}`,
+      color: uniqueBroken.length === 0 ? '#27ae60' : '#e74c3c'
+    };
+
+    return { httpOk: res.ok, httpStatus: res.status, loadTime, size, perfScore, seo, a11y, bp, images, links };
 
   } catch(e) {
     const loadTime = Math.round(performance.now() - start);
@@ -403,7 +424,8 @@ async function checkPage(url, page) {
       seo: { text: '—', color: '#aaa' },
       a11y: { text: '—', color: '#aaa' },
       bp: { text: '—', color: '#aaa' },
-      images: { text: '—', color: '#aaa' }
+      images: { text: '—', color: '#aaa' },
+      links: { text: '—', color: '#aaa' }
     };
   }
 }
