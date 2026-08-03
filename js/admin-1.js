@@ -3241,12 +3241,31 @@ function renderCertTemplateUI() {
     if (!_certTemplate.fields) _certTemplate.fields = {};
     _certTemplate.fields[field] = {
       x, y,
-      fontSize: _certTemplate.fields[field]?.fontSize || 32,
+      fontSize: _certTemplate.fields[field]?.fontSize || Number(document.getElementById('certFontSize')?.value || 60),
       color: _certTemplate.fields[field]?.color || '#000000',
     };
     renderCertTemplateUI();
+    syncCertFontSizeInput();
   };
+  syncCertFontSizeInput();
 }
+
+// خانة حجم الخط بتعرض/تعدّل حجم خط البيانة المختارة حاليًا في القائمة، وتعيد رسم المعاينة فورًا
+function syncCertFontSizeInput() {
+  const sizeInput = document.getElementById('certFontSize');
+  const fieldSel  = document.getElementById('certFieldToPlace');
+  if (!sizeInput || !fieldSel) return;
+  const current = _certTemplate?.fields?.[fieldSel.value]?.fontSize;
+  sizeInput.value = current || 60;
+}
+
+window.applyCertFontSize = () => {
+  const field = document.getElementById('certFieldToPlace')?.value;
+  const size  = Number(document.getElementById('certFontSize')?.value || 60);
+  if (!_certTemplate?.fields?.[field]) { showToast('حددي مكان البيانة دي على الصورة الأول'); return; }
+  _certTemplate.fields[field].fontSize = size;
+  renderCertTemplateUI();
+};
 
 window.uploadCertTemplate = async () => {
   const file = document.getElementById('certTemplateFile')?.files?.[0];
