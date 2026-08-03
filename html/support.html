@@ -161,7 +161,8 @@
 </div>
 
 <script>
-const SITE_PAGES = [
+// قايمة احتياطية بس — بتتستخدم لو فشل جلب قايمة الصفحات الفعلية من GitHub (مثلاً تجاوز حد الطلبات)
+const FALLBACK_SITE_PAGES = [
   'home.html','courses.html','library.html','messages.html','news.html',
   'schedule.html','student.html','admin.html','supervisor.html','about.html',
   'stats.html','student-general.html','student-view.html',
@@ -171,10 +172,31 @@ const SITE_PAGES = [
   'teacher-library.html','my-students.html','onboarding.html'
 ];
 
+// بتجيب قايمة صفحات .html الموجودة فعليًا دلوقتي في مجلد html/ بالريبو —
+// أي صفحة جديدة تتضاف للريبو هتدخل في الفحص تلقائيًا من غير ما حد يعدّل الكود هنا
+async function getSitePages() {
+  try {
+    const res = await fetch('https://api.github.com/repos/Mateenweb/Mateen/contents/html', { cache: 'no-store' });
+    if (!res.ok) throw new Error('GitHub API error: ' + res.status);
+    const items = await res.json();
+    const pages = items
+      .filter(it => it.type === 'file' && it.name.endsWith('.html') && !it.name.includes('backup'))
+      .map(it => it.name);
+    if (!pages.length) throw new Error('لا توجد صفحات في الرد');
+    return pages;
+  } catch (e) {
+    console.warn('getSitePages: fallback to hardcoded list —', e.message);
+    return FALLBACK_SITE_PAGES;
+  }
+}
+
 async function runSiteTest() {
   const btn = document.getElementById('runSiteTestBtn');
   const results = document.getElementById('siteTestResults');
   btn.disabled = true;
+  btn.innerHTML = '<i class="ti ti-loader ti-spin"></i> جارٍ جلب قايمة الصفحات...';
+
+  const SITE_PAGES = await getSitePages();
   btn.innerHTML = '<i class="ti ti-loader ti-spin"></i> جارٍ الفحص...';
 
   const base = window.location.origin + '/Mateen/html/';
