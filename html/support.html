@@ -224,6 +224,7 @@ async function runSiteTest() {
       <td style="padding:8px 10px;font-size:12px;color:${result.bp.color}">${result.bp.text}</td>
       <td style="padding:8px 10px;font-size:12px;color:${result.images.color}">${result.images.text}</td>
       <td style="padding:8px 10px;font-size:12px;color:${result.links.color}">${result.links.text}</td>
+      <td style="padding:8px 10px;font-size:12px;color:${result.ux.color}">${result.ux.text}</td>
       <td style="padding:8px 10px"><a href="${url}" style="font-size:12px;color:var(--gold-mid)">فتح ↗</a></td>
     </tr>`;
 
@@ -247,6 +248,7 @@ async function runSiteTest() {
           <th style="padding:8px 10px;text-align:right;font-size:11px">أفضل الممارسات ✨</th>
           <th style="padding:8px 10px;text-align:right;font-size:11px">الصور 🖼️</th>
           <th style="padding:8px 10px;text-align:right;font-size:11px">الروابط 🔗</th>
+          <th style="padding:8px 10px;text-align:right;font-size:11px">UI/UX 🎨</th>
           <th style="padding:8px 10px;text-align:right;font-size:11px">رابط</th>
         </tr></thead>
         <tbody>${rows}</tbody>
@@ -293,7 +295,7 @@ function downloadAuditPDF() {
   <table>
     <thead><tr>
       <th>الصفحة</th><th>HTTP</th><th>وقت التحميل</th><th>الحجم</th><th>الأداء</th>
-      <th>SEO</th><th>إمكانية الوصول</th><th>أفضل الممارسات</th><th>الصور</th><th>الروابط</th><th>رابط</th>
+      <th>SEO</th><th>إمكانية الوصول</th><th>أفضل الممارسات</th><th>الصور</th><th>الروابط</th><th>UI/UX</th><th>رابط</th>
     </tr></thead>
     <tbody>${data.rows}</tbody>
   </table>
@@ -415,7 +417,36 @@ async function checkPage(url, page, sitePages) {
       color: uniqueBroken.length === 0 ? '#27ae60' : '#e74c3c'
     };
 
-    return { httpOk: res.ok, httpStatus: res.status, loadTime, size, perfScore, seo, a11y, bp, images, links };
+    // ── UI/UX ──
+    let uxIssues = [];
+    const allIds = [...doc.querySelectorAll('[id]')].map(el => el.id);
+    const dupIds = [...new Set(allIds.filter((id, i) => allIds.indexOf(id) !== i))];
+    if (dupIds.length) uxIssues.push(`${dupIds.length} ID مكرر`);
+
+    const brokenImgs = [...imgs].filter(i => !i.getAttribute('src') || i.getAttribute('src').trim() === '').length;
+    if (brokenImgs > 0) uxIssues.push(`${brokenImgs} صورة بدون مصدر`);
+
+    const tinyText = [...doc.querySelectorAll('[style]')].filter(el => {
+      const m = (el.getAttribute('style') || '').match(/font-size\s*:\s*(\d+(?:\.\d+)?)px/i);
+      return m && parseFloat(m[1]) < 10;
+    }).length;
+    if (tinyText > 0) uxIssues.push(`${tinyText} عنصر بخط أصغر من 10px`);
+
+    const vpContent = viewportMeta?.getAttribute('content') || '';
+    if (viewportMeta && !vpContent.includes('width=device-width')) uxIssues.push('viewport بدون width=device-width');
+
+    const formsNoSubmit = [...doc.querySelectorAll('form')].filter(f =>
+      !f.querySelector('button[type="submit"], input[type="submit"], button:not([type="button"]):not([type="reset"])')
+    ).length;
+    if (formsNoSubmit > 0) uxIssues.push(`${formsNoSubmit} فورم بدون زرار إرسال واضح`);
+
+    const uxScore = Math.round((1 - Math.min(uxIssues.length, 5)/5) * 100);
+    const ux = {
+      text: uxIssues.length === 0 ? '✅ '+uxScore : '⚠️ '+uxScore+' — '+uxIssues[0],
+      color: uxScore >= 80 ? '#27ae60' : uxScore >= 50 ? '#e67e22' : '#e74c3c'
+    };
+
+    return { httpOk: res.ok, httpStatus: res.status, loadTime, size, perfScore, seo, a11y, bp, images, links, ux };
 
   } catch(e) {
     const loadTime = Math.round(performance.now() - start);
@@ -425,7 +456,8 @@ async function checkPage(url, page, sitePages) {
       a11y: { text: '—', color: '#aaa' },
       bp: { text: '—', color: '#aaa' },
       images: { text: '—', color: '#aaa' },
-      links: { text: '—', color: '#aaa' }
+      links: { text: '—', color: '#aaa' },
+      ux: { text: '—', color: '#aaa' }
     };
   }
 }
