@@ -3226,29 +3226,49 @@ function renderCertTemplateUI() {
   }
   const f = _certTemplate.fields || {};
   const marker = (key, label, color) => f[key] ? `
-    <div style="position:absolute;left:${f[key].x}%;top:${f[key].y}%;transform:translate(-50%,-50%);background:${color};color:#fff;font-size:10px;padding:2px 6px;border-radius:10px;white-space:nowrap;pointer-events:none">${label}</div>` : '';
+    <div style="position:absolute;left:${f[key].x}%;top:${f[key].y}%;width:${f[key].width}%;height:${f[key].height}%;border:2px dashed ${color};background:${color}22;pointer-events:none">
+      <span style="position:absolute;top:-18px;right:0;background:${color};color:#fff;font-size:10px;padding:1px 6px;border-radius:8px;white-space:nowrap">${label}</span>
+    </div>` : '';
   wrap.innerHTML = `
     <div style="position:relative;display:inline-block;max-width:100%">
-      <img src="${_certTemplate.imageUrl}" id="certTemplateImg" style="max-width:100%;display:block;border-radius:8px;border:1px solid var(--border);cursor:crosshair">
+      <img src="${_certTemplate.imageUrl}" id="certTemplateImg" style="max-width:100%;display:block;border-radius:8px;border:1px solid var(--border);cursor:crosshair;user-select:none">
       ${marker('name', 'اسم الطالبة', '#1e8449')}
       ${marker('subject', 'المادة/البرنامج', '#2266cc')}
       ${marker('date', 'التاريخ', '#c9852b')}
     </div>`;
-  document.getElementById('certTemplateImg').onclick = (e) => {
-    const rect = e.target.getBoundingClientRect();
-    const x = Number(((e.clientX - rect.left) / rect.width * 100).toFixed(2));
-    const y = Number(((e.clientY - rect.top) / rect.height * 100).toFixed(2));
-    const field = document.getElementById('certFieldToPlace').value;
-    if (!_certTemplate.fields) _certTemplate.fields = {};
-    _certTemplate.fields[field] = {
-      x, y,
-      fontSize: _certTemplate.fields[field]?.fontSize || Number(document.getElementById('certFontSize')?.value || 60),
-      color: _certTemplate.fields[field]?.color || '#000000',
-    };
-    renderCertTemplateUI();
-    syncCertFontSizeInput();
-  };
+  setupTemplateBoxDrag(document.getElementById('certTemplateImg'), _certTemplate, 'certFieldToPlace', 'certFontSize', renderCertTemplateUI, syncCertFontSizeInput);
   syncCertFontSizeInput();
+}
+
+// ارسمي مستطيل بالسحب (دوسي واسحبي) عشان تحددي مكان وعرض البيانة على القالب
+function setupTemplateBoxDrag(imgEl, template, fieldSelectId, fontSizeInputId, rerender, syncFontSize) {
+  if (!imgEl) return;
+  let startX = 0, startY = 0;
+  imgEl.onmousedown = (e) => {
+    e.preventDefault();
+    const rect = imgEl.getBoundingClientRect();
+    startX = (e.clientX - rect.left) / rect.width * 100;
+    startY = (e.clientY - rect.top) / rect.height * 100;
+  };
+  imgEl.onmouseup = (e) => {
+    const rect = imgEl.getBoundingClientRect();
+    const endX = (e.clientX - rect.left) / rect.width * 100;
+    const endY = (e.clientY - rect.top) / rect.height * 100;
+    let x = Math.min(startX, endX), y = Math.min(startY, endY);
+    let width  = Math.abs(endX - startX);
+    let height = Math.abs(endY - startY);
+    if (width < 3)  width  = 25; // مجرد دوسة من غير سحب — عرض افتراضي معقول
+    if (height < 2) height = 7;
+    const field = document.getElementById(fieldSelectId).value;
+    if (!template.fields) template.fields = {};
+    template.fields[field] = {
+      x, y, width, height,
+      fontSize: template.fields[field]?.fontSize || Number(document.getElementById(fontSizeInputId)?.value || 60),
+      color: template.fields[field]?.color || '#000000',
+    };
+    rerender();
+    syncFontSize();
+  };
 }
 
 // خانة حجم الخط بتعرض/تعدّل حجم خط البيانة المختارة حاليًا في القائمة، وتعيد رسم المعاينة فورًا
@@ -3310,12 +3330,21 @@ function generateCertificateImage(studentName, subjectText, dateText) {
         const f = _certTemplate.fields || {};
         const draw = (text, field) => {
           if (!field || !text) return;
-          ctx.font = `${field.fontSize || 32}px 'Amiri', 'Noto Naskh Arabic', serif`;
+          const boxW = canvas.width  * (field.width  || 25) / 100; // 25% افتراضي لو القالب اتظبط بالنظام القديم (نقطة بس)
+          const boxH = canvas.height * (field.height || 7) / 100;
+          let fontSize = field.fontSize || 60;
+          ctx.font = `${fontSize}px 'Amiri', 'Noto Naskh Arabic', serif`;
+          while (ctx.measureText(text).width > boxW && fontSize > 8) {
+            fontSize -= 2;
+            ctx.font = `${fontSize}px 'Amiri', 'Noto Naskh Arabic', serif`;
+          }
           ctx.fillStyle = field.color || '#000000';
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
           ctx.direction = 'rtl';
-          ctx.fillText(text, canvas.width * field.x / 100, canvas.height * field.y / 100);
+          const cx = canvas.width  * field.x / 100 + boxW / 2;
+          const cy = canvas.height * field.y / 100 + boxH / 2;
+          ctx.fillText(text, cx, cy);
         };
         draw(studentName, f.name);
         draw(subjectText, f.subject);
@@ -3462,28 +3491,17 @@ function renderAwardTemplateUI() {
   }
   const f = _awardTemplate.fields || {};
   const marker = (key, label, color) => f[key] ? `
-    <div style="position:absolute;left:${f[key].x}%;top:${f[key].y}%;transform:translate(-50%,-50%);background:${color};color:#fff;font-size:10px;padding:2px 6px;border-radius:10px;white-space:nowrap;pointer-events:none">${label}</div>` : '';
+    <div style="position:absolute;left:${f[key].x}%;top:${f[key].y}%;width:${f[key].width}%;height:${f[key].height}%;border:2px dashed ${color};background:${color}22;pointer-events:none">
+      <span style="position:absolute;top:-18px;right:0;background:${color};color:#fff;font-size:10px;padding:1px 6px;border-radius:8px;white-space:nowrap">${label}</span>
+    </div>` : '';
   wrap.innerHTML = `
     <div style="position:relative;display:inline-block;max-width:100%">
-      <img src="${_awardTemplate.imageUrl}" id="awardTemplateImg" style="max-width:100%;display:block;border-radius:8px;border:1px solid var(--border);cursor:crosshair">
+      <img src="${_awardTemplate.imageUrl}" id="awardTemplateImg" style="max-width:100%;display:block;border-radius:8px;border:1px solid var(--border);cursor:crosshair;user-select:none">
       ${marker('name', 'اسم الطالبة', '#1e8449')}
       ${marker('subject', 'بيان الإجازة', '#2266cc')}
       ${marker('date', 'التاريخ', '#c9852b')}
     </div>`;
-  document.getElementById('awardTemplateImg').onclick = (e) => {
-    const rect = e.target.getBoundingClientRect();
-    const x = Number(((e.clientX - rect.left) / rect.width * 100).toFixed(2));
-    const y = Number(((e.clientY - rect.top) / rect.height * 100).toFixed(2));
-    const field = document.getElementById('awardFieldToPlace').value;
-    if (!_awardTemplate.fields) _awardTemplate.fields = {};
-    _awardTemplate.fields[field] = {
-      x, y,
-      fontSize: _awardTemplate.fields[field]?.fontSize || Number(document.getElementById('awardFontSize')?.value || 60),
-      color: _awardTemplate.fields[field]?.color || '#000000',
-    };
-    renderAwardTemplateUI();
-    syncAwardFontSizeInput();
-  };
+  setupTemplateBoxDrag(document.getElementById('awardTemplateImg'), _awardTemplate, 'awardFieldToPlace', 'awardFontSize', renderAwardTemplateUI, syncAwardFontSizeInput);
   syncAwardFontSizeInput();
 }
 
@@ -3543,12 +3561,21 @@ function generateAwardImage(studentName, subjectText, dateText) {
         const f = _awardTemplate.fields || {};
         const draw = (text, field) => {
           if (!field || !text) return;
-          ctx.font = `${field.fontSize || 32}px 'Amiri', 'Noto Naskh Arabic', serif`;
+          const boxW = canvas.width  * (field.width  || 25) / 100; // 25% افتراضي لو القالب اتظبط بالنظام القديم (نقطة بس)
+          const boxH = canvas.height * (field.height || 7) / 100;
+          let fontSize = field.fontSize || 60;
+          ctx.font = `${fontSize}px 'Amiri', 'Noto Naskh Arabic', serif`;
+          while (ctx.measureText(text).width > boxW && fontSize > 8) {
+            fontSize -= 2;
+            ctx.font = `${fontSize}px 'Amiri', 'Noto Naskh Arabic', serif`;
+          }
           ctx.fillStyle = field.color || '#000000';
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
           ctx.direction = 'rtl';
-          ctx.fillText(text, canvas.width * field.x / 100, canvas.height * field.y / 100);
+          const cx = canvas.width  * field.x / 100 + boxW / 2;
+          const cy = canvas.height * field.y / 100 + boxH / 2;
+          ctx.fillText(text, cx, cy);
         };
         draw(studentName, f.name);
         draw(subjectText, f.subject);
