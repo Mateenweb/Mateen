@@ -1148,10 +1148,7 @@ async function loadManageCAEntries() {
 
 function renderManageCAList() {
   const list = document.getElementById('manageCAList');
-  const q = (document.getElementById('manageCASearch').value || '').trim().toLowerCase();
-  const filtered = q
-    ? _manageCAEntries.filter(e => (e.studentName || '').toLowerCase().includes(q) || (e.title || '').toLowerCase().includes(q))
-    : _manageCAEntries;
+  const filtered = getManageCAFiltered();
 
   if (!filtered.length) {
     list.innerHTML = `<div style="text-align:center;color:var(--text-mid);font-size:13px;padding:24px">لا توجد ${_manageCAType === 'certificates' ? 'شهادات' : 'إجازات'} مسجّلة</div>`;
@@ -1179,6 +1176,32 @@ function renderManageCAList() {
 }
 
 window.filterManageCAList = () => renderManageCAList();
+
+function getManageCAFiltered() {
+  const q = (document.getElementById('manageCASearch').value || '').trim().toLowerCase();
+  return q
+    ? _manageCAEntries.filter(e => (e.studentName || '').toLowerCase().includes(q) || (e.title || '').toLowerCase().includes(q))
+    : _manageCAEntries;
+}
+
+// حذف جماعي — بيحذف كل الشهادات/الإجازات الظاهرة حاليًا في القايمة (بعد فلترة البحث لو موجودة)
+window.manageCADeleteAllShown = async () => {
+  const filtered = getManageCAFiltered();
+  if (!filtered.length) { showToast('مفيش حاجة ظاهرة تتحذف'); return; }
+  const typeLabel = _manageCAType === 'certificates' ? 'شهادة' : 'إجازة';
+  if (!confirm(`هيتم حذف ${filtered.length} ${typeLabel} نهائيًا (كل الظاهر في القايمة دلوقتي). الإجراء ده مينفعش يتراجع فيه. متأكدة؟`)) return;
+  try {
+    showToast('جاري الحذف...');
+    await Promise.all(filtered.map(e => deleteDoc(doc(db, 'students', e.studentId, _manageCAType, e.id))));
+    const removedKeys = new Set(filtered.map(e => e.studentId + '|' + e.id));
+    _manageCAEntries = _manageCAEntries.filter(e => !removedKeys.has(e.studentId + '|' + e.id));
+    renderManageCAList();
+    showToast(`✅ اتحذف ${filtered.length} ${typeLabel}`);
+  } catch (e) {
+    console.error('manageCADeleteAllShown:', e);
+    showToast('❌ حصل خطأ أثناء الحذف الجماعي');
+  }
+};
 
 window.manageCADeleteEntry = async (studentId, entryId) => {
   if (!confirm(`متأكدة إنك عاوزة تحذفي ${_manageCAType === 'certificates' ? 'الشهادة' : 'الإجازة'} دي؟`)) return;

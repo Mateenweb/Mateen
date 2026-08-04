@@ -1726,8 +1726,13 @@ function formatSize(bytes) {
         <button id="manageCATabCerts" class="admin-tab active" style="flex:1;justify-content:center" onclick="switchManageCATab('certificates')">🎓 الشهادات</button>
         <button id="manageCATabAwards" class="admin-tab" style="flex:1;justify-content:center" onclick="switchManageCATab('awards')">📜 الإجازات</button>
       </div>
-      <input id="manageCASearch" type="text" oninput="filterManageCAList()" placeholder="🔍 بحث باسم الطالبة أو العنوان..."
-        style="width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:inherit;font-size:13px;margin-bottom:10px"/>
+      <div style="display:flex;gap:8px;margin-bottom:10px">
+        <input id="manageCASearch" type="text" oninput="filterManageCAList()" placeholder="🔍 بحث باسم الطالبة أو العنوان..."
+          style="flex:1;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:inherit;font-size:13px"/>
+        <button onclick="manageCADeleteAllShown()" style="background:#ffebee;color:#c0392b;border:1px solid #f5c6cb;border-radius:8px;padding:8px 14px;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap">
+          <i class="ti ti-trash"></i> حذف الكل الظاهر
+        </button>
+      </div>
       <div id="manageCAList" style="border:1px solid var(--border);border-radius:10px;min-height:120px"></div>
     </div>
   </div>
