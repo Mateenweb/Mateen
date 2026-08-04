@@ -614,6 +614,7 @@ onSnapshot(stuQuery, snap => {
   renderStudents(allStudents);
   updateStuStats(allStudents);
   renderCertStudentSelect();
+  renderAwardStudentSelect();
 });
 
 function updateStuStats(list) {
@@ -3440,6 +3441,209 @@ window.openAutoCertModal = () => {
 };
 
 loadCertTemplate();
+
+// ── نظام الإجازات التلقائي (زي الشهادات بالظبط، لكن بيحفظ في مجموعة awards) ──
+let _awardTemplate = null;
+
+window.loadAwardTemplate = async () => {
+  try {
+    const snap = await getDoc(doc(db, 'settings', 'awardTemplate'));
+    _awardTemplate = snap.exists() ? snap.data() : null;
+    renderAwardTemplateUI();
+  } catch (e) { console.error('loadAwardTemplate:', e); }
+};
+
+function renderAwardTemplateUI() {
+  const wrap = document.getElementById('awardTemplateWrap');
+  if (!wrap) return;
+  if (!_awardTemplate?.imageUrl) {
+    wrap.innerHTML = `<div style="color:var(--text-mid);font-size:13px">لسه معملتيش رفع قالب إجازة.</div>`;
+    return;
+  }
+  const f = _awardTemplate.fields || {};
+  const marker = (key, label, color) => f[key] ? `
+    <div style="position:absolute;left:${f[key].x}%;top:${f[key].y}%;transform:translate(-50%,-50%);background:${color};color:#fff;font-size:10px;padding:2px 6px;border-radius:10px;white-space:nowrap;pointer-events:none">${label}</div>` : '';
+  wrap.innerHTML = `
+    <div style="position:relative;display:inline-block;max-width:100%">
+      <img src="${_awardTemplate.imageUrl}" id="awardTemplateImg" style="max-width:100%;display:block;border-radius:8px;border:1px solid var(--border);cursor:crosshair">
+      ${marker('name', 'اسم الطالبة', '#1e8449')}
+      ${marker('subject', 'بيان الإجازة', '#2266cc')}
+      ${marker('date', 'التاريخ', '#c9852b')}
+    </div>`;
+  document.getElementById('awardTemplateImg').onclick = (e) => {
+    const rect = e.target.getBoundingClientRect();
+    const x = Number(((e.clientX - rect.left) / rect.width * 100).toFixed(2));
+    const y = Number(((e.clientY - rect.top) / rect.height * 100).toFixed(2));
+    const field = document.getElementById('awardFieldToPlace').value;
+    if (!_awardTemplate.fields) _awardTemplate.fields = {};
+    _awardTemplate.fields[field] = {
+      x, y,
+      fontSize: _awardTemplate.fields[field]?.fontSize || Number(document.getElementById('awardFontSize')?.value || 60),
+      color: _awardTemplate.fields[field]?.color || '#000000',
+    };
+    renderAwardTemplateUI();
+    syncAwardFontSizeInput();
+  };
+  syncAwardFontSizeInput();
+}
+
+function syncAwardFontSizeInput() {
+  const sizeInput = document.getElementById('awardFontSize');
+  const fieldSel  = document.getElementById('awardFieldToPlace');
+  if (!sizeInput || !fieldSel) return;
+  sizeInput.value = _awardTemplate?.fields?.[fieldSel.value]?.fontSize || 60;
+}
+
+window.applyAwardFontSize = () => {
+  const field = document.getElementById('awardFieldToPlace')?.value;
+  const size  = Number(document.getElementById('awardFontSize')?.value || 60);
+  if (!_awardTemplate?.fields?.[field]) { showToast('حددي مكان البيانة دي على الصورة الأول'); return; }
+  _awardTemplate.fields[field].fontSize = size;
+  renderAwardTemplateUI();
+};
+
+window.uploadAwardTemplate = async () => {
+  const file = document.getElementById('awardTemplateFile')?.files?.[0];
+  if (!file) { showToast('اختاري صورة القالب الأول'); return; }
+  try {
+    showToast('جاري رفع القالب...');
+    const url = await uploadToCloudinary(file);
+    _awardTemplate = { imageUrl: url, fields: (_awardTemplate?.fields) || {} };
+    renderAwardTemplateUI();
+    showToast('✅ اترفع القالب — دلوقتي حددي أماكن الاسم والبيان والتاريخ وبعدين احفظي');
+  } catch (e) {
+    console.error('uploadAwardTemplate:', e);
+    showToast('❌ حصل خطأ في رفع القالب');
+  }
+};
+
+window.saveAwardTemplate = async () => {
+  if (!_awardTemplate?.imageUrl) { showToast('ارفعي القالب الأول'); return; }
+  if (!_awardTemplate.fields?.name) { showToast('حددي مكان اسم الطالبة على القالب الأول'); return; }
+  try {
+    await setDoc(doc(db, 'settings', 'awardTemplate'), _awardTemplate);
+    showToast('✅ اتحفظ إعداد قالب الإجازة');
+  } catch (e) {
+    console.error('saveAwardTemplate:', e);
+    showToast('❌ خطأ في الحفظ');
+  }
+};
+
+function generateAwardImage(studentName, subjectText, dateText) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.naturalWidth;
+        canvas.height = img.naturalHeight;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+        const f = _awardTemplate.fields || {};
+        const draw = (text, field) => {
+          if (!field || !text) return;
+          ctx.font = `${field.fontSize || 32}px 'Amiri', 'Noto Naskh Arabic', serif`;
+          ctx.fillStyle = field.color || '#000000';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.direction = 'rtl';
+          ctx.fillText(text, canvas.width * field.x / 100, canvas.height * field.y / 100);
+        };
+        draw(studentName, f.name);
+        draw(subjectText, f.subject);
+        draw(dateText, f.date);
+        canvas.toBlob(async (blob) => {
+          try {
+            const file = new File([blob], 'award.png', { type: 'image/png' });
+            resolve(await uploadToCloudinary(file));
+          } catch (err) { reject(err); }
+        }, 'image/png');
+      } catch (err) { reject(err); }
+    };
+    img.onerror = reject;
+    img.src = _awardTemplate.imageUrl;
+  });
+}
+
+function renderAwardStudentSelect() {
+  const sel = document.getElementById('awardStudentSelect');
+  if (!sel) return;
+  const students = allStudents
+    .filter(s => s.name && s.name !== 'طالبة جديدة' && !s.archived)
+    .sort((a, b) => (a.name || '').localeCompare(b.name || '', 'ar'));
+  const current = sel.value;
+  sel.innerHTML = '<option value="">— اختاري الطالبة —</option>' +
+    students.map(s => `<option value="${s.id}">${esc(s.name)}</option>`).join('');
+  if (current) sel.value = current;
+}
+
+window.issueSingleAward = async () => {
+  if (!_awardTemplate?.imageUrl || !_awardTemplate.fields?.name) { showToast('لازم تظبطي قالب الإجازة وتحفظيه فوق الأول'); return; }
+  const studentId   = document.getElementById('awardStudentSelect')?.value;
+  const subjectText = document.getElementById('awardSubjectInput')?.value.trim() || '';
+  const dateText    = document.getElementById('awardDateInput')?.value.trim() || new Date().toLocaleDateString('ar-EG');
+  if (!studentId) { showToast('اختاري الطالبة'); return; }
+  const student = allStudents.find(s => s.id === studentId);
+  if (!student) { showToast('الطالبة مش موجودة'); return; }
+  try {
+    showToast('جاري إصدار الإجازة...');
+    const url = await generateAwardImage(student.name || '', subjectText, dateText);
+    await addDoc(collection(db, 'students', studentId, 'awards'), {
+      title: subjectText || 'إجازة',
+      date: dateText,
+      fileUrl: url,
+      createdAt: serverTimestamp(),
+    });
+    showToast('✅ اتصدرت الإجازة وحُطت في ملف الطالبة');
+  } catch (e) {
+    console.error('issueSingleAward:', e);
+    showToast('❌ حصل خطأ أثناء إصدار الإجازة');
+  }
+};
+
+window.issueBulkAwards = async () => {
+  if (!_awardTemplate?.imageUrl || !_awardTemplate.fields?.name) { showToast('لازم تظبطي قالب الإجازة وتحفظيه فوق الأول'); return; }
+  const subjectText = document.getElementById('awardBulkSubjectInput')?.value.trim() || '';
+  const dateText     = document.getElementById('awardBulkDateInput')?.value.trim() || new Date().toLocaleDateString('ar-EG');
+  const minAtt   = Number(document.getElementById('awardMinAtt')?.value || 0);
+  const minGrade = Number(document.getElementById('awardMinGrade')?.value || 0);
+
+  const students = allStudents.filter(s => s.name && s.name !== 'طالبة جديدة' && !s.archived);
+  if (!confirm(`هيتم فحص ${students.length} طالبة، وإصدار إجازة تلقائيًا لكل واحدة مستوفية الشرط (حضور ≥ ${minAtt}% ودرجات ≥ ${minGrade}%). ده ممكن ياخد وقت حسب عدد الطالبات. تكملي؟`)) return;
+
+  let checked = 0, issued = 0, failed = 0;
+  showToast('جاري الفحص والإصدار...');
+  for (const student of students) {
+    checked++;
+    try {
+      const { attPct, gradePct } = await getStudentEligibilityStats(student.id);
+      const attOk   = minAtt   <= 0 || (attPct   !== null && attPct   >= minAtt);
+      const gradeOk = minGrade <= 0 || (gradePct !== null && gradePct >= minGrade);
+      if (!attOk || !gradeOk) continue;
+      const url = await generateAwardImage(student.name || '', subjectText, dateText);
+      await addDoc(collection(db, 'students', student.id, 'awards'), {
+        title: subjectText || 'إجازة',
+        date: dateText,
+        fileUrl: url,
+        createdAt: serverTimestamp(),
+      });
+      issued++;
+    } catch (e) {
+      console.error('issueBulkAwards:', student.id, e);
+      failed++;
+    }
+  }
+  showToast?.(`✅ اتفحصت ${checked} طالبة، اتصدرلها ${issued} إجازة${failed ? ` (فشل ${failed})` : ''}`);
+};
+
+window.openAutoAwardModal = () => {
+  document.getElementById('autoAwardModal').style.display = 'flex';
+  renderAwardTemplateUI();
+  renderAwardStudentSelect();
+};
+
+loadAwardTemplate();
 
 // ── حذف اختبار جماعي من عند كل الطالبات ─────────────────────
 
