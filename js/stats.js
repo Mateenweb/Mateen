@@ -410,7 +410,7 @@ window.renderGradesTab = function () {
       </tr>`;
     }).join('');
 
-    list.innerHTML = `<div class="stats-table-wrap"><table>
+    list.innerHTML = `<div class="stats-table-wrap"><table class="dense-table">
       <thead><tr><th>الطالبة</th>${subjHeaders}<th>المجموع من 500</th>${attHeaders}<th>توتال درجات الحضور</th><th>بونص عام</th><th>خصم التأخير</th><th>الإجمالي</th></tr></thead>
       <tbody>${bodyRows}</tbody>
     </table></div>`;
@@ -471,7 +471,9 @@ window.renderGradesTab = function () {
     </tr>`;
   }).join('');
 
-  list.innerHTML = `<div class="stats-table-wrap"><table>
+  const totalCols = 4 + exams.length; // الطالبة + نسبة الحضور + درجة الحضور + الإجمالي + الاختبارات
+  const denseClass = totalCols > 7 ? ' class="dense-table"' : '';
+  list.innerHTML = `<div class="stats-table-wrap"><table${denseClass}>
     <thead><tr>
       <th>الطالبة</th><th>نسبة الحضور</th><th>درجة الحضور</th>${examHeaders}<th>الإجمالي</th>
     </tr></thead>
