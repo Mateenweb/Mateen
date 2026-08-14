@@ -205,23 +205,42 @@ body {
   margin-bottom: 16px;
 }
 
-.stats-table-wrap table { width: 100%; min-width: max-content; border-collapse: collapse; }
+.stats-table-wrap table { width: 100%; table-layout: auto; border-collapse: collapse; }
 
 .stats-table-wrap th {
   background: var(--green-dark);
   color: white;
-  padding: 10px 12px;
-  font-size: 13px;
+  padding: 8px 6px;
+  font-size: 12px;
   font-family: 'Noto Naskh Arabic', serif;
-  white-space: nowrap;
+  white-space: normal;
+  word-break: keep-all;
+  line-height: 1.3;
+  text-align: center;
 }
 
 .stats-table-wrap td {
-  padding: 9px 12px;
+  padding: 7px 6px;
   border-bottom: 1px solid var(--border);
-  font-size: 13px;
+  font-size: 12px;
   color: var(--text-dark);
-  white-space: nowrap;
+  white-space: normal;
+  text-align: center;
+}
+
+.stats-table-wrap td:first-child,
+.stats-table-wrap th:first-child { text-align: right; }
+
+/* لما عدد الأعمدة يكون كبير، الخط يصغر أكتر عشان الجدول كله يبان من غير سكرول */
+.stats-table-wrap table.dense-table th,
+.stats-table-wrap table.dense-table td { padding: 6px 4px; font-size: 11px; }
+
+@media (max-width: 1100px) {
+  .stats-table-wrap th, .stats-table-wrap td { font-size: 11px; padding: 6px 4px; }
+}
+
+@media (max-width: 480px) {
+  .stats-table-wrap th, .stats-table-wrap td { font-size: 10px; padding: 5px 3px; }
 }
 
 .stats-table-wrap tr:hover td { background: rgba(201,162,39,0.04); }
