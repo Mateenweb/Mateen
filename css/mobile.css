@@ -344,7 +344,10 @@ html { overflow-x: hidden; }
   .pending-table     { min-width: 680px !important; }
   #studentsTableWrap table { min-width: 560px !important; }
 
-  th, td {
+  .stu-table th, .stu-table td,
+  .mat-table th, .mat-table td,
+  .pending-table th, .pending-table td,
+  #studentsTableWrap th, #studentsTableWrap td {
     padding: 10px !important;
     font-size: 13px !important;
     white-space: nowrap !important;
