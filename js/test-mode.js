@@ -48,6 +48,9 @@ export function mountTestModeSwitcher(userData, email) {
   if (document.getElementById('testModeSwitcher')) return;
 
   const current = effectiveRole(userData, email);
+  // لو مفيش override محفوظ (أو الـ override مش من ضمن TEST_MODE_ROLES)،
+  // يبقى الحساب شغال بدوره الحقيقي (دعم عادي عادةً)
+  const noOverride = !TEST_MODE_ROLES.includes(current);
   const box = document.createElement('div');
   box.id = 'testModeSwitcher';
   // !important عشان محدش يقدر يكسر الـ fixed حتى لو حاجة تانية في الصفحة
@@ -62,6 +65,7 @@ export function mountTestModeSwitcher(userData, email) {
   box.innerHTML = `
     <span style="opacity:0.75">🧪 اختبار كـ:</span>
     <select id="testModeSelect" style="background:#2a2a2a;color:#fff;border:1px solid #444;border-radius:6px;padding:4px 8px;font-family:inherit;font-size:13px;cursor:pointer">
+      <option value="" ${noOverride ? 'selected' : ''}>🛠️ دعم عادي (بدون اختبار)</option>
       ${TEST_MODE_ROLES.map(r => `<option value="${r}" ${r === current ? 'selected' : ''}>${ROLE_LABELS[r] || r}</option>`).join('')}
     </select>
   `;
@@ -71,7 +75,11 @@ export function mountTestModeSwitcher(userData, email) {
 
   document.getElementById('testModeSelect').addEventListener('change', (e) => {
     const chosen = e.target.value;
-    localStorage.setItem('mateenTestRole', chosen);
-    window.location.href = ROLE_HOME[chosen] || '../html/home.html';
+    if (chosen) {
+      localStorage.setItem('mateenTestRole', chosen);
+    } else {
+      localStorage.removeItem('mateenTestRole');
+    }
+    window.location.href = chosen ? (ROLE_HOME[chosen] || '../html/home.html') : '../html/support.html';
   });
 }
