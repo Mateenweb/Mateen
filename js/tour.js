@@ -4,6 +4,7 @@ window.MateenTour = {
   steps: [],
   overlay: null,
   box: null,
+  _token: 0,
 
   start(steps) {
     this.steps = steps;
@@ -41,15 +42,22 @@ window.MateenTour = {
     ov.addEventListener('click', e => { if(e.target === ov) this.end(); });
   },
 
-  _show() {
+  async _show() {
     const s = this.steps[this.current];
-    const el = typeof s.el === 'string' ? document.querySelector(s.el) : s.el;
-    
+    const myTurn = ++this._token;
+
     document.getElementById('tourTitle').textContent = s.title;
     document.getElementById('tourDesc').textContent = s.desc;
     document.getElementById('tourCount').textContent = `${this.current+1} / ${this.steps.length}`;
     document.getElementById('tourPrev').style.display = this.current === 0 ? 'none' : '';
     document.getElementById('tourNext').textContent = this.current === this.steps.length-1 ? 'إنهاء ✅' : 'التالي →';
+
+    // بعض الخطوات محتاجة إجراء الأول (زي فتح القائمة الجانبية) قبل ما نلاقي العنصر
+    if (s.action) { try { await s.action(); } catch(e) {} }
+    // لو المستخدمة داست Next/Prev تاني وإحنا لسه Waitين — تجاهل النتيجة القديمة
+    if (myTurn !== this._token) return;
+
+    const el = typeof s.el === 'string' ? document.querySelector(s.el) : s.el;
 
     if (el) {
       const r = el.getBoundingClientRect();
@@ -118,8 +126,33 @@ window.MateenTour = {
 
   end() {
     document.getElementById('tourOverlay')?.remove();
+    _tourCloseSidebar();
   }
 };
+
+// ── فتح/قفل القائمة الجانبية (offcanvas) — لازم تتفتح الأول
+// قبل ما نقدر نعمل سبوت لايت على أي رابط جواها (schedule, library, ...)
+function _tourOpenSidebar() {
+  return new Promise(resolve => {
+    const el = document.getElementById('mainSidebar');
+    if (!el || !window.bootstrap) return resolve();
+    if (el.classList.contains('show')) return resolve();
+    el.addEventListener('shown.bs.offcanvas', () => resolve(), { once: true });
+    bootstrap.Offcanvas.getOrCreateInstance(el).show();
+    // fallback لو الـ event متطلقش لأي سبب
+    setTimeout(resolve, 500);
+  });
+}
+function _tourCloseSidebar() {
+  return new Promise(resolve => {
+    const el = document.getElementById('mainSidebar');
+    if (!el || !window.bootstrap) return resolve();
+    if (!el.classList.contains('show')) return resolve();
+    el.addEventListener('hidden.bs.offcanvas', () => resolve(), { once: true });
+    bootstrap.Offcanvas.getOrCreateInstance(el).hide();
+    setTimeout(resolve, 500);
+  });
+}
 
 // ── Tour Steps لكل Page ────────────────────────────────────────────────────
 window.TOUR_STEPS = {
@@ -140,10 +173,10 @@ window.TOUR_STEPS = {
   home: [
     { el:'nav', title:'شريط التنقل', desc:'من هنا تنتقلي بين أقسام الموقع بسهولة' },
     { el:'#materialsSection', title:'المواد العلمية', desc:'استكشفي مواد البرنامج: تفسير، فقه، عقيدة، حديث، ومقرأة متين' },
-    { el:'#linkSchedule', title:'جدولك الدراسي', desc:'تابعي مواعيدك المهمة من هنا' },
-    { el:'#navNewsBtn', title:'الأخبار والإعلانات', desc:'متابعة آخر أخبار وإعلانات البرنامج' },
-    { el:'#linkLibrary', title:'المكتبة', desc:'تصفحي محتوى المكتبة العلمية الخاصة بالبرنامج' },
-    { el:'.nav-msg-btn[href="messages.html"]', title:'رسائلي', desc:'من هنا تصلين لرسائلك مع المعلمات والإدارة' },
+    { el:'#linkSchedule', title:'جدولك الدراسي', desc:'تابعي مواعيدك المهمة من هنا', action: _tourOpenSidebar },
+    { el:'#navNewsBtn', title:'الأخبار والإعلانات', desc:'متابعة آخر أخبار وإعلانات البرنامج', action: _tourCloseSidebar },
+    { el:'#linkLibrary', title:'المكتبة', desc:'تصفحي محتوى المكتبة العلمية الخاصة بالبرنامج', action: _tourOpenSidebar },
+    { el:'.nav-msg-btn[href="messages.html"]', title:'رسائلي', desc:'من هنا تصلين لرسائلك مع المعلمات والإدارة', action: _tourCloseSidebar },
   ],
 
   messages: [
