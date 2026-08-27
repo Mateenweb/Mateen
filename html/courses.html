@@ -192,27 +192,46 @@
               <input id="newCourseTitle" type="text" placeholder="مثال: محاضرة تفسير سورة الفاتحة" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:14px;box-sizing:border-box;">
             </div>
             <div>
-              <label style="font-size:13px;color:var(--text-dark);display:block;margin-bottom:6px">رابط الملف / الصوت <span style="color:#c0392b">*</span></label>
+              <label style="font-size:13px;color:var(--text-dark);display:block;margin-bottom:6px">محتوى المادة <span style="color:#c0392b">*</span></label>
+
+              <!-- تبديل بين رابط / رفع ملف -->
+              <div style="display:flex;gap:8px;margin-bottom:10px;">
+                <button type="button" id="sourceModeLinkBtn" class="active" onclick="setContentSourceMode('link')"
+                  style="flex:1;padding:9px;border-radius:8px;border:1px solid var(--border);background:var(--white);font-family:inherit;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;">
+                  <i class="ti ti-link"></i> رابط
+                </button>
+                <button type="button" id="sourceModeUploadBtn" onclick="setContentSourceMode('upload')"
+                  style="flex:1;padding:9px;border-radius:8px;border:1px solid var(--border);background:var(--white);font-family:inherit;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;">
+                  <i class="ti ti-upload"></i> رفع ملف
+                </button>
+              </div>
+              <style>
+                #sourceModeLinkBtn.active, #sourceModeUploadBtn.active {
+                  background: var(--green-dark); color: #fff; border-color: var(--green-dark);
+                }
+              </style>
+
               <!-- حقل الرابط العادي -->
               <div id="urlFieldWrap">
                 <input id="newCourseUrl" type="url" placeholder="https://drive.google.com/..." style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:14px;box-sizing:border-box;">
                 <div style="font-size:11px;color:var(--text-mid);margin-top:4px">Google Drive · Dropbox · OneDrive · YouTube</div>
               </div>
-              <!-- حقل رفع صوت مباشر على Cloudinary -->
-              <div id="audioUploadWrap" style="display:none">
-                <div id="audioUploadBox" onclick="document.getElementById('audioFileInput').click()" style="border:2px dashed var(--border);border-radius:10px;padding:20px;text-align:center;cursor:pointer;background:var(--white)">
+
+              <!-- رفع الملف نفسه مباشرة على Cloudinary (أي نوع محتوى) -->
+              <div id="fileUploadWrap" style="display:none">
+                <div id="fileUploadBox" onclick="document.getElementById('contentFileInput').click()" style="border:2px dashed var(--border);border-radius:10px;padding:20px;text-align:center;cursor:pointer;background:var(--white)">
                   <i class="ti ti-upload" style="font-size:24px;color:var(--green-dark)"></i>
-                  <div style="font-size:13px;color:var(--text-mid);margin-top:6px">اضغطي لرفع الملف الصوتي</div>
-                  <div style="font-size:11px;color:var(--text-mid);margin-top:2px">MP3 · WAV · M4A · OGG</div>
+                  <div style="font-size:13px;color:var(--text-mid);margin-top:6px">اضغطي لرفع الملف</div>
+                  <div style="font-size:11px;color:var(--text-mid);margin-top:2px">PDF · Word · صوت · فيديو · صورة وغيرها</div>
                 </div>
-                <input type="file" id="audioFileInput" accept="audio/*" style="display:none" onchange="handleAudioUpload(this)">
-                <div id="audioUploadProgress" style="display:none;margin-top:10px">
+                <input type="file" id="contentFileInput" style="display:none" onchange="handleContentFileUpload(this)">
+                <div id="fileUploadProgress" style="display:none;margin-top:10px">
                   <div style="font-size:12px;color:var(--text-mid);margin-bottom:4px">جارٍ الرفع...</div>
                   <div style="height:6px;background:var(--border);border-radius:3px">
-                    <div id="audioProgressBar" style="height:100%;background:var(--green-dark);border-radius:3px;width:0%;transition:width 0.3s"></div>
+                    <div id="fileProgressBar" style="height:100%;background:var(--green-dark);border-radius:3px;width:0%;transition:width 0.3s"></div>
                   </div>
                 </div>
-                <div id="audioUploadDone" style="display:none;margin-top:8px;font-size:12px;color:#27ae60;font-weight:600">✅ تم الرفع بنجاح</div>
+                <div id="fileUploadDone" style="display:none;margin-top:8px;font-size:12px;color:#27ae60;font-weight:600">✅ تم الرفع بنجاح</div>
               </div>
             </div>
             <div>
@@ -705,9 +724,45 @@
           </select>
         </div>
         <div>
-          <label style="font-size:13px;color:var(--text-dark);display:block;margin-bottom:6px">رابط الملف <span style="color:#c0392b">*</span></label>
-          <input id="editCourseUrl" type="url" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:14px;box-sizing:border-box;">
-          <div style="font-size:11px;color:var(--text-mid);margin-top:4px">Google Drive · Dropbox · OneDrive · YouTube</div>
+          <label style="font-size:13px;color:var(--text-dark);display:block;margin-bottom:6px">محتوى المادة <span style="color:#c0392b">*</span></label>
+
+          <!-- تبديل بين رابط / رفع ملف -->
+          <div style="display:flex;gap:8px;margin-bottom:10px;">
+            <button type="button" id="editSourceModeLinkBtn" class="active" onclick="setEditContentSourceMode('link')"
+              style="flex:1;padding:9px;border-radius:8px;border:1px solid var(--border);background:var(--white);font-family:inherit;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;">
+              <i class="ti ti-link"></i> رابط
+            </button>
+            <button type="button" id="editSourceModeUploadBtn" onclick="setEditContentSourceMode('upload')"
+              style="flex:1;padding:9px;border-radius:8px;border:1px solid var(--border);background:var(--white);font-family:inherit;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;">
+              <i class="ti ti-upload"></i> رفع ملف جديد
+            </button>
+          </div>
+          <style>
+            #editSourceModeLinkBtn.active, #editSourceModeUploadBtn.active {
+              background: var(--green-dark); color: #fff; border-color: var(--green-dark);
+            }
+          </style>
+
+          <div id="editUrlFieldWrap">
+            <input id="editCourseUrl" type="url" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:14px;box-sizing:border-box;">
+            <div style="font-size:11px;color:var(--text-mid);margin-top:4px">Google Drive · Dropbox · OneDrive · YouTube</div>
+          </div>
+
+          <div id="editFileUploadWrap" style="display:none">
+            <div id="editFileUploadBox" onclick="document.getElementById('editContentFileInput').click()" style="border:2px dashed var(--border);border-radius:10px;padding:20px;text-align:center;cursor:pointer;background:var(--white)">
+              <i class="ti ti-upload" style="font-size:24px;color:var(--green-dark)"></i>
+              <div style="font-size:13px;color:var(--text-mid);margin-top:6px">اضغطي لرفع ملف بديل</div>
+              <div style="font-size:11px;color:var(--text-mid);margin-top:2px">PDF · Word · صوت · فيديو · صورة وغيرها</div>
+            </div>
+            <input type="file" id="editContentFileInput" style="display:none" onchange="handleEditContentFileUpload(this)">
+            <div id="editFileUploadProgress" style="display:none;margin-top:10px">
+              <div style="font-size:12px;color:var(--text-mid);margin-bottom:4px">جارٍ الرفع...</div>
+              <div style="height:6px;background:var(--border);border-radius:3px">
+                <div id="editFileProgressBar" style="height:100%;background:var(--green-dark);border-radius:3px;width:0%;transition:width 0.3s"></div>
+              </div>
+            </div>
+            <div id="editFileUploadDone" style="display:none;margin-top:8px;font-size:12px;color:#27ae60;font-weight:600">✅ تم الرفع بنجاح</div>
+          </div>
         </div>
         <div>
           <label style="font-size:13px;color:var(--text-dark);display:block;margin-bottom:6px">ملاحظات (اختياري)</label>
