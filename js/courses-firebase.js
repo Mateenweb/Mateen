@@ -8,6 +8,7 @@ import { FIREBASE_CONFIG } from "./config.js";
 import { effectiveRole, mountTestModeSwitcher } from "./test-mode.js";
 import { renderAssignmentsSection, renderLectureAssignmentControls } from "./assignments-ui.js";
 import { deleteAssignmentsForMaterial } from "./assignments.js";
+import { uploadToCloudinary } from "./cloud-upload.js";
 window.refreshAssignmentsFor = (materialId, course) => {
   document.querySelectorAll(`[data-asg-container="${materialId}"]`).forEach(el => {
     renderAssignmentsSection(materialId, course, el.id, false);
@@ -439,6 +440,59 @@ onSnapshot(collection(db, 'staticSubjects'), snap => {
 });
 
 // ===== Edit اWHENدة (MATERIALS) =====
+let _editUploadedContentUrl = null;
+let _editContentSourceMode = 'link';
+
+window.setEditContentSourceMode = (mode) => {
+  _editContentSourceMode = mode;
+  const urlWrap    = document.getElementById('editUrlFieldWrap');
+  const uploadWrap = document.getElementById('editFileUploadWrap');
+  const linkBtn    = document.getElementById('editSourceModeLinkBtn');
+  const uploadBtn  = document.getElementById('editSourceModeUploadBtn');
+  const isUpload = mode === 'upload';
+
+  if (urlWrap)    urlWrap.style.display    = isUpload ? 'none' : 'block';
+  if (uploadWrap) uploadWrap.style.display = isUpload ? 'block' : 'none';
+  if (linkBtn)    linkBtn.classList.toggle('active', !isUpload);
+  if (uploadBtn)  uploadBtn.classList.toggle('active', isUpload);
+};
+
+window.handleEditContentFileUpload = async (input) => {
+  const file = input.files[0];
+  if (!file) return;
+  const progressWrap = document.getElementById('editFileUploadProgress');
+  const progressBar  = document.getElementById('editFileProgressBar');
+  const doneMsg      = document.getElementById('editFileUploadDone');
+  const uploadBox    = document.getElementById('editFileUploadBox');
+
+  progressWrap.style.display = 'block';
+  doneMsg.style.display = 'none';
+  uploadBox.style.display = 'none';
+  progressBar.style.width = '0%';
+
+  try {
+    let pct = 0;
+    const tick = setInterval(() => {
+      pct = Math.min(pct + 8, 90);
+      progressBar.style.width = pct + '%';
+    }, 200);
+
+    const url = await uploadToCloudinary(file);
+    clearInterval(tick);
+    progressBar.style.width = '100%';
+
+    _editUploadedContentUrl = url;
+    progressWrap.style.display = 'none';
+    doneMsg.style.display = 'block';
+    doneMsg.textContent = '✅ تم الرفع — ' + file.name;
+
+  } catch(e) {
+    progressWrap.style.display = 'none';
+    uploadBox.style.display = 'block';
+    alert('فشل رفع الملف: ' + e.message);
+  }
+};
+
 window.openEditModal = (id) => {
   const m = allMats.find(x => x.id === id);
   if (!m) return;
@@ -450,6 +504,17 @@ window.openEditModal = (id) => {
   document.getElementById('editCourseUrl').value   = m.url;
   document.getElementById('editCourseNotes').value = m.notes || '';
   document.getElementById('editCourseErr').style.display = 'none';
+
+  // إعادة الفورم لوضع "رابط" الافتراضي (اللينك الحالي بيتعرض جاهز للتعديل)
+  _editUploadedContentUrl = null;
+  const fileInput = document.getElementById('editContentFileInput');
+  if (fileInput) fileInput.value = '';
+  const doneMsg   = document.getElementById('editFileUploadDone');
+  const uploadBox = document.getElementById('editFileUploadBox');
+  if (doneMsg)   doneMsg.style.display = 'none';
+  if (uploadBox) uploadBox.style.display = 'block';
+  setEditContentSourceMode('link');
+
   document.getElementById('editCourseModal').style.display = 'flex';
 };
 
@@ -458,13 +523,15 @@ window.submitEditCourse = async () => {
   const title = document.getElementById('editCourseTitle').value.trim();
   const course= document.getElementById('editCourseCat').value;
   const type  = document.getElementById('editCourseType').value;
-  const url   = document.getElementById('editCourseUrl').value.trim();
+  const isUpload = _editContentSourceMode === 'upload';
+  const url   = isUpload ? (_editUploadedContentUrl || document.getElementById('editCourseUrl').value.trim())
+                          : document.getElementById('editCourseUrl').value.trim();
   const notes = document.getElementById('editCourseNotes').value.trim();
   const err   = document.getElementById('editCourseErr');
 
   if (!title || !course || !url) {
     err.style.display = 'block';
-    err.textContent = 'يرجى تعبئة الحقول المطلوبة (الاسم، المادة، الرابط)';
+    err.textContent = isUpload ? 'يرجى رفع الملف أولاً' : 'يرجى تعبئة الحقول المطلوبة (الاسم، المادة، الرابط)';
     return;
   }
   err.style.display = 'none';
@@ -605,8 +672,8 @@ window.submitNewCourse = async () => {
   const title = document.getElementById('newCourseTitle').value.trim();
   const course = document.getElementById('newCourseCat').value;
   const type  = document.getElementById('newCourseType').value;
-  const isAudio = type === 'تسجيل صوتي';
-  const url   = isAudio ? (_uploadedAudioUrl || '') : document.getElementById('newCourseUrl').value.trim();
+  const isUpload = _contentSourceMode === 'upload';
+  const url   = isUpload ? (_uploadedContentUrl || '') : document.getElementById('newCourseUrl').value.trim();
   const notes = document.getElementById('newCourseNotes').value.trim();
   const err   = document.getElementById('addCourseErr');
 
@@ -629,7 +696,7 @@ window.submitNewCourse = async () => {
   }
   if (!title || !url) {
     err.style.display = 'block';
-    err.textContent = isAudio ? 'يرجى رفع الملف الصوتي أولاً' : 'يرجى تعبئة الحقول المطلوبة (الاسم، الرابط)';
+    err.textContent = isUpload ? 'يرجى رفع الملف أولاً' : 'يرجى تعبئة الحقول المطلوبة (الاسم، الرابط)';
     return;
   }
   err.style.display = 'none';
@@ -656,6 +723,16 @@ window.submitNewCourse = async () => {
     const lectureWrap = document.getElementById('newLectureNumWrap');
     if (lectureWrap) lectureWrap.style.display = 'none';
     document.getElementById('addCourseModal').style.display = 'none';
+
+    // reset upload state/UI
+    _uploadedContentUrl = null;
+    setContentSourceMode('link');
+    const doneMsg   = document.getElementById('fileUploadDone');
+    const uploadBox = document.getElementById('fileUploadBox');
+    const fileInput = document.getElementById('contentFileInput');
+    if (doneMsg)   doneMsg.style.display = 'none';
+    if (uploadBox) uploadBox.style.display = 'block';
+    if (fileInput) fileInput.value = '';
   } catch(e) {
     err.style.display = 'block';
     err.textContent = 'حدث خطأ، حاولي مرة أخرى';
@@ -1052,57 +1129,60 @@ document.addEventListener('click', () => {
   });
 }, { once: true });
 
-// ── Audio Upload to Cloudinary ─────────────────────────────────
-let _uploadedAudioUrl = null;
+// ── مصدر المحتوى: رابط أو رفع ملف مباشر ──────────────────────
+// أي نوع محتوى (محاضرة، ملخص، مرجع، فيديو، تسجيل صوتي، أخرى) ممكن
+// يتاخد إما برابط خارجي أو برفع الملف نفسه على Cloudinary.
+let _uploadedContentUrl = null;
+let _contentSourceMode = 'link'; // 'link' | 'upload'
 
-// لما يتغير نوع المحتوى — لو تسجيل صوتي يظهر upload بدل URL
-window.onCourseTypeChange = (selectEl) => {
-  const isAudio = selectEl.value === 'تسجيل صوتي';
-  const urlWrap = document.getElementById('urlFieldWrap');
-  const audioWrap = document.getElementById('audioUploadWrap');
-  if (urlWrap)   urlWrap.style.display   = isAudio ? 'none' : 'block';
-  if (audioWrap) audioWrap.style.display = isAudio ? 'block' : 'none';
-  if (!isAudio) _uploadedAudioUrl = null;
+window.setContentSourceMode = (mode) => {
+  _contentSourceMode = mode;
+  const urlWrap    = document.getElementById('urlFieldWrap');
+  const uploadWrap = document.getElementById('fileUploadWrap');
+  const linkBtn    = document.getElementById('sourceModeLinkBtn');
+  const uploadBtn  = document.getElementById('sourceModeUploadBtn');
+  const isUpload = mode === 'upload';
+
+  if (urlWrap)    urlWrap.style.display    = isUpload ? 'none' : 'block';
+  if (uploadWrap) uploadWrap.style.display = isUpload ? 'block' : 'none';
+  if (linkBtn)    linkBtn.classList.toggle('active', !isUpload);
+  if (uploadBtn)  uploadBtn.classList.toggle('active', isUpload);
+  if (!isUpload) _uploadedContentUrl = null;
 };
 
-window.handleAudioUpload = async (input) => {
+// لما يتغير نوع المحتوى لـ"تسجيل صوتي" نقترح وضع الرفع تلقائيًا (تسهيلًا فقط، تقدر تغيّريه)
+window.onCourseTypeChange = (selectEl) => {
+  if (selectEl.value === 'تسجيل صوتي' && _contentSourceMode === 'link') {
+    setContentSourceMode('upload');
+  }
+};
+
+window.handleContentFileUpload = async (input) => {
   const file = input.files[0];
   if (!file) return;
-  const progressWrap = document.getElementById('audioUploadProgress');
-  const progressBar  = document.getElementById('audioProgressBar');
-  const doneMsg      = document.getElementById('audioUploadDone');
-  const uploadBox    = document.getElementById('audioUploadBox');
+  const progressWrap = document.getElementById('fileUploadProgress');
+  const progressBar  = document.getElementById('fileProgressBar');
+  const doneMsg      = document.getElementById('fileUploadDone');
+  const uploadBox    = document.getElementById('fileUploadBox');
 
   progressWrap.style.display = 'block';
   doneMsg.style.display = 'none';
   uploadBox.style.display = 'none';
+  progressBar.style.width = '0%';
 
   try {
-    const fd = new FormData();
-    fd.append('file', file);
-    fd.append('upload_preset', 'mateen_uploads');
-    fd.append('resource_type', 'video'); // Cloudinary uses 'video' for audio too
+    // شريط تقدّم تقريبي (uploadToCloudinary بتستخدم fetch مش XHR)
+    let pct = 0;
+    const tick = setInterval(() => {
+      pct = Math.min(pct + 8, 90);
+      progressBar.style.width = pct + '%';
+    }, 200);
 
-    // Upload with XHR for progress tracking
-    const url = await new Promise((resolve, reject) => {
-      const xhr = new XMLHttpRequest();
-      xhr.open('POST', `https://api.cloudinary.com/v1_1/dqqtznoqt/video/upload`);
-      xhr.upload.onprogress = (e) => {
-        if (e.lengthComputable) {
-          const pct = Math.round(e.loaded / e.total * 100);
-          progressBar.style.width = pct + '%';
-        }
-      };
-      xhr.onload = () => {
-        const data = JSON.parse(xhr.responseText);
-        if (data.secure_url) resolve(data.secure_url);
-        else reject(new Error(data.error?.message || 'فشل الرفع'));
-      };
-      xhr.onerror = () => reject(new Error('خطأ في الشبكة'));
-      xhr.send(fd);
-    });
+    const url = await uploadToCloudinary(file);
+    clearInterval(tick);
+    progressBar.style.width = '100%';
 
-    _uploadedAudioUrl = url;
+    _uploadedContentUrl = url;
     progressWrap.style.display = 'none';
     doneMsg.style.display = 'block';
     doneMsg.textContent = '✅ تم الرفع — ' + file.name;
@@ -1110,7 +1190,7 @@ window.handleAudioUpload = async (input) => {
   } catch(e) {
     progressWrap.style.display = 'none';
     uploadBox.style.display = 'block';
-    alert('فشل رفع الصوت: ' + e.message);
+    alert('فشل رفع الملف: ' + e.message);
   }
 };
 
