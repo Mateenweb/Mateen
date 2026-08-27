@@ -18,6 +18,16 @@ let _isAdmin = false;
 let _studentId = '';
 let _sessions = [];
 let _lastGrades = [];
+
+// بتحوّل رابط Cloudinary لصيغة تجبر المتصفح ينزّل الملف بدل ما يفتحه في تاب
+// (Cloudinary بيدعم fl_attachment كـ transformation جوه الرابط)
+function forceDownloadUrl(url) {
+  if (!url) return url;
+  if (url.includes('res.cloudinary.com') && url.includes('/upload/') && !url.includes('fl_attachment')) {
+    return url.replace('/upload/', '/upload/fl_attachment/');
+  }
+  return url;
+}
 // معدل خصم التأخير: 0.2 درجة لكل ساعة = 0.2/60 لكل دقيقة — محسوب بالدقيقة مباشرة
 const LATE_DEDUCTION_PER_MINUTE = 0.2 / 60;
 const db   = getFirestore(app);
@@ -747,7 +757,10 @@ function renderCerts(items) {
         ${c.note ? (noteIsLink
           ? `<div style="margin-top:4px"><a href="${c.note.trim()}" target="_blank" rel="noopener" style="font-size:12px;color:#1a5fb4;text-decoration:underline">${c.note.trim()}</a></div>`
           : `<div style="font-size:12px;color:var(--text-mid);margin-top:4px">${c.note}</div>`) : ''}
-        ${c.fileUrl ? `<a href="${c.fileUrl}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:4px;margin-top:5px;font-size:12px;color:#1e8449;text-decoration:none;font-weight:600"><i class="ti ti-paperclip"></i> عرض الشهادة</a>` : ''}
+        ${c.fileUrl ? `<div style="display:flex;gap:12px;margin-top:5px">
+          <a href="${c.fileUrl}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:4px;font-size:12px;color:#1e8449;text-decoration:none;font-weight:600"><i class="ti ti-paperclip"></i> عرض الشهادة</a>
+          <a href="${forceDownloadUrl(c.fileUrl)}" download style="display:inline-flex;align-items:center;gap:4px;font-size:12px;color:#1a5fb4;text-decoration:none;font-weight:600"><i class="ti ti-download"></i> تحميل</a>
+        </div>` : ''}
       </div>
       <div class="grade-score-wrap">
         ${_isAdmin ? `<button onclick="deleteCert('${_studentId}','${c.id}')" style="background:none;border:none;color:#c0392b;cursor:pointer;font-size:15px;padding:0 4px;opacity:0.7" title="حذف"><i class="ti ti-trash"></i></button>` : ''}
@@ -772,7 +785,10 @@ function renderAwards(items) {
         ${a.note ? (noteIsLink
           ? `<div style="margin-top:4px"><a href="${a.note.trim()}" target="_blank" rel="noopener" style="font-size:12px;color:#1a5fb4;text-decoration:underline">${a.note.trim()}</a></div>`
           : `<div style="font-size:12px;color:var(--text-mid);margin-top:4px">${a.note}</div>`) : ''}
-        ${a.fileUrl ? `<a href="${a.fileUrl}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:4px;margin-top:5px;font-size:12px;color:#1e8449;text-decoration:none;font-weight:600"><i class="ti ti-paperclip"></i> عرض الإجازة</a>` : ''}
+        ${a.fileUrl ? `<div style="display:flex;gap:12px;margin-top:5px">
+          <a href="${a.fileUrl}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:4px;font-size:12px;color:#1e8449;text-decoration:none;font-weight:600"><i class="ti ti-paperclip"></i> عرض الإجازة</a>
+          <a href="${forceDownloadUrl(a.fileUrl)}" download style="display:inline-flex;align-items:center;gap:4px;font-size:12px;color:#1a5fb4;text-decoration:none;font-weight:600"><i class="ti ti-download"></i> تحميل</a>
+        </div>` : ''}
       </div>
       <div class="grade-score-wrap">
         ${_isAdmin ? `<button onclick="deleteAward('${_studentId}','${a.id}')" style="background:none;border:none;color:#c0392b;cursor:pointer;font-size:15px;padding:0 4px;opacity:0.7" title="حذف"><i class="ti ti-trash"></i></button>` : ''}

@@ -18,6 +18,15 @@ const app  = getApps().length ? getApp() : initializeApp(FIREBASE_CONFIG);
 const auth = getAuth(app);
 const db   = getFirestore(app);
 let allMats = [];
+
+// بتحوّل رابط Cloudinary لصيغة تجبر المتصفح ينزّل الملف بدل ما يفتحه في تاب
+function forceDownloadUrl(url) {
+  if (!url) return url;
+  if (url.includes('res.cloudinary.com') && url.includes('/upload/') && !url.includes('fl_attachment')) {
+    return url.replace('/upload/', '/upload/fl_attachment/');
+  }
+  return url;
+}
 let currentUserRole = null;
 let currentViewerEmail = '';
 let _baAllSubjects = []; // كل المواد — تستخدم كـ fallback لو اليوم مش موجود في الجدول
@@ -1165,7 +1174,10 @@ function renderManageCAList() {
         ${e.note ? (noteIsLink
           ? `<div style="margin-top:3px"><a href="${esc(e.note.trim())}" target="_blank" rel="noopener" style="font-size:11.5px;color:#1a5fb4;text-decoration:underline">${esc(e.note.trim())}</a></div>`
           : `<div style="font-size:11.5px;color:var(--text-dark);margin-top:3px">${esc(e.note)}</div>`) : ''}
-        ${e.fileUrl ? `<a href="${esc(e.fileUrl)}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:4px;margin-top:5px;font-size:11.5px;color:#1e8449;text-decoration:none;font-weight:600"><i class="ti ti-paperclip"></i> عرض الملف</a>` : ''}
+        ${e.fileUrl ? `<div style="display:flex;gap:10px;margin-top:5px">
+          <a href="${esc(e.fileUrl)}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:4px;font-size:11.5px;color:#1e8449;text-decoration:none;font-weight:600"><i class="ti ti-paperclip"></i> عرض الملف</a>
+          <a href="${esc(forceDownloadUrl(e.fileUrl))}" download style="display:inline-flex;align-items:center;gap:4px;font-size:11.5px;color:#1a5fb4;text-decoration:none;font-weight:600"><i class="ti ti-download"></i> تحميل</a>
+        </div>` : ''}
       </div>
       <button onclick="manageCADeleteEntry('${e.studentId}','${e.id}')" title="حذف" style="background:none;border:none;color:#c0392b;cursor:pointer;font-size:16px;flex-shrink:0">
         <i class="ti ti-trash"></i>
