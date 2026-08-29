@@ -88,6 +88,9 @@
     <button class="lib-tab" onclick="showSection('courses', this)">
       <span class="tab-icon">🎓</span> دورات متنوعة
     </button>
+    <button class="lib-tab" onclick="showSection('rawdat', this)">
+      <span class="tab-icon">🌸</span> رياض متين
+    </button>
   </div>
 
   <!-- ══ 1. Library متين (Subjects من Firebase) ══ -->
@@ -168,6 +171,24 @@
     </div>
   </div>
 
+  <!-- ══ 5. رياض متين ══ -->
+  <div class="lib-section" id="section-rawdat">
+    <div class="section-header">
+      <div class="section-title"><i class="ti ti-flower"></i> رياض متين</div>
+      <div class="section-desc">محتوى منوّع وخفيف للترويح والاستفادة</div>
+    </div>
+
+    <div id="rawdatGrid" class="lib-cards-grid">
+      <div class="lib-empty"><i class="ti ti-files-off" style="font-size:28px;"></i><div>لا يوجد محتوى بعد</div></div>
+    </div>
+
+    <div id="rawdatAddBtn" style="display:none;margin-top:16px;">
+      <button onclick="openAddCourseContainerModal('rawdat')" class="btn-add-lib">
+        <i class="ti ti-plus"></i> إضافة قسم جديد
+      </button>
+    </div>
+  </div>
+
 </div><!-- /main-wrap -->
 
 <!-- ══ Modal Add Content ══ -->
@@ -225,12 +246,13 @@
 <div id="addCourseContainerModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9999;align-items:center;justify-content:center;padding:16px;overflow-y:auto;">
   <div style="background:white;border-radius:16px;padding:28px;width:90%;max-width:480px;direction:rtl;max-height:90vh;overflow-y:auto;margin:auto;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
-      <div style="font-family:Amiri,serif;font-size:17px;color:var(--green-dark);font-weight:700;">🎓 إضافة دورة جديدة</div>
+      <div id="addCourseContainerTitle" style="font-family:Amiri,serif;font-size:17px;color:var(--green-dark);font-weight:700;">🎓 إضافة دورة جديدة</div>
       <button onclick="document.getElementById('addCourseContainerModal').style.display='none'" style="background:none;border:none;font-size:20px;cursor:pointer;">✕</button>
     </div>
+    <input type="hidden" id="crsKind" value="courses">
     <div style="display:flex;flex-direction:column;gap:14px;">
       <div>
-        <label style="font-size:13px;color:var(--text-dark);display:block;margin-bottom:6px">اسم الدورة <span style="color:#c0392b">*</span></label>
+        <label id="crsNameLabel" style="font-size:13px;color:var(--text-dark);display:block;margin-bottom:6px">اسم الدورة <span style="color:#c0392b">*</span></label>
         <input id="crsName" type="text" placeholder="مثال: دورة مهارات التدبر" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:14px;box-sizing:border-box;">
       </div>
       <div>
@@ -292,7 +314,7 @@
       <div id="addCourseContainerErr" style="display:none;color:#c0392b;font-size:13px;"></div>
       <button id="addCourseContainerSubmit" onclick="submitNewCourseContainer()"
         style="padding:11px;background:var(--green-dark);color:white;border:none;border-radius:8px;font-family:inherit;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;">
-        <i class="ti ti-plus"></i> إضافة الدورة
+        <i class="ti ti-plus"></i> <span id="addCourseContainerSubmitLabel">إضافة الدورة</span>
       </button>
     </div>
   </div>
