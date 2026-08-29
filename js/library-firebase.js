@@ -15,8 +15,8 @@ const db   = getFirestore(app);
 
 let currentRole = null;
 let allLibMats  = [];   // Library متين (من libraryMaterials collection — منفصل تمامًا عن materials المواد العلمية)
-let allLibExtra = {};   // الأقسام الأخرى { enrichment:[], podcast:[], courses:[] }
-let allCourses  = [];   // الدورات (من courses collection) — كل دورة عندها موادها في libraryMaterials عبر courseId
+let allLibExtra = {};   // الأقسام المسطّحة (كروت) { enrichment:[], podcast:[] }
+// allGroups: حاويات (courses/rawdat) — كل حاوية عندها موادها في libraryMaterials عبر matsField، انظر GROUP_CONFIG تحت
 
 const isAdmin = () => currentRole === 'admin' || currentRole === 'supervisor';
 
@@ -147,7 +147,7 @@ window.renderLibMats = () => {
 
 // ══ رسم الأقسام الأخرى ══
 function renderSection(section) {
-  if (section === 'courses') { renderCoursesGrid(); return; }
+  if (GROUP_CONFIG[section]) { renderGroupsGrid(section); return; }
   const gridId  = { enrichment: 'enrichmentGrid', podcast: 'podcastGrid' }[section];
   const addBtnId = { enrichment: 'enrichmentAddBtn', podcast: 'podcastAddBtn' }[section];
   const grid   = document.getElementById(gridId);
@@ -162,34 +162,59 @@ function renderSection(section) {
   if (addBtn) addBtn.style.display = isAdmin() ? 'block' : 'none';
 }
 
-// ── كارت الدورة (تايل قابل للنقر يفتح تفاصيلها) ─────────────
-function courseTileHTML(course) {
-  const icon = course.iconData || course.iconUrl
-    ? `<img src="${course.iconData || course.iconUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:12px;">`
-    : `<i class="ti ti-certificate" style="font-size:26px;color:white"></i>`;
+// ── نظام الحاويات (الدورات / رياض متين): تايلات قابلة للنقر تفتح تفاصيلها ─────
+// كل "kind" هنا (courses/rawdat) له collection خاص بالحاويات، وموادها في
+// libraryMaterials مربوطة عن طريق matsField (courseId / rawdatGroupId).
+const GROUP_CONFIG = {
+  courses: {
+    collection: 'courses', matsField: 'courseId',
+    gridId: 'coursesGrid', addBtnId: 'coursesAddBtn', icon: 'ti-certificate',
+    emptyMsg: 'لا توجد دورات مضافة بعد',
+    modalTitle: '🎓 إضافة دورة جديدة', nameLabel: 'اسم الدورة',
+    submitLabel: 'إضافة الدورة', addContentLabel: 'إضافة محتوى لهذه الدورة',
+    deleteLabel: 'حذف الدورة بالكامل', deleteConfirm: n => `هل أنتِ متأكدة من حذف دورة "${n}"؟ هيتم حذف كل محتواها كمان.`,
+  },
+  rawdat: {
+    collection: 'rawdatGroups', matsField: 'rawdatGroupId',
+    gridId: 'rawdatGrid', addBtnId: 'rawdatAddBtn', icon: 'ti-flower',
+    emptyMsg: 'لا توجد أقسام مضافة بعد',
+    modalTitle: '🌸 إضافة قسم جديد', nameLabel: 'اسم القسم',
+    submitLabel: 'إضافة القسم', addContentLabel: 'إضافة محتوى لهذا القسم',
+    deleteLabel: 'حذف القسم بالكامل', deleteConfirm: n => `هل أنتِ متأكدة من حذف قسم "${n}"؟ هيتم حذف كل محتواه كمان.`,
+  },
+};
+let allGroups = { courses: [], rawdat: [] };
+
+function groupTileHTML(item, kind) {
+  const cfg = GROUP_CONFIG[kind];
+  const icon = item.iconData || item.iconUrl
+    ? `<img src="${item.iconData || item.iconUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:12px;">`
+    : `<i class="ti ${cfg.icon}" style="font-size:26px;color:white"></i>`;
   return `
-    <div class="lib-card" onclick="openCourseDetailModal('${course.id}')" style="cursor:pointer;padding:0;overflow:hidden">
-      <div style="height:70px;background:${course.color || 'linear-gradient(135deg,#5c3d2e,#8a5e3c)'};display:flex;align-items:center;padding:0 14px;gap:10px">
+    <div class="lib-card" onclick="openGroupDetailModal('${item.id}','${kind}')" style="cursor:pointer;padding:0;overflow:hidden">
+      <div style="height:70px;background:${item.color || 'linear-gradient(135deg,#5c3d2e,#8a5e3c)'};display:flex;align-items:center;padding:0 14px;gap:10px">
         <div style="width:44px;height:44px;border-radius:10px;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0">${icon}</div>
-        <div style="color:white;font-weight:700;font-size:14px">${course.name}</div>
+        <div style="color:white;font-weight:700;font-size:14px">${item.name}</div>
       </div>
       <div class="lib-card-body" style="padding:12px">
-        <div class="lib-card-notes" style="margin:0">${course.desc || ''}</div>
+        <div class="lib-card-notes" style="margin:0">${item.desc || ''}</div>
         <div style="font-size:11px;color:var(--text-mid);margin-top:6px;display:flex;gap:10px">
-          ${course.meetings ? `<span><i class="ti ti-calendar-event"></i> ${course.meetings}</span>` : ''}
-          ${course.weeks ? `<span><i class="ti ti-hourglass"></i> ${course.weeks}</span>` : ''}
+          ${item.meetings ? `<span><i class="ti ti-calendar-event"></i> ${item.meetings}</span>` : ''}
+          ${item.weeks ? `<span><i class="ti ti-hourglass"></i> ${item.weeks}</span>` : ''}
         </div>
       </div>
     </div>`;
 }
 
-function renderCoursesGrid() {
-  const grid = document.getElementById('coursesGrid');
-  const addBtn = document.getElementById('coursesAddBtn');
+function renderGroupsGrid(kind) {
+  const cfg = GROUP_CONFIG[kind];
+  const grid = document.getElementById(cfg.gridId);
+  const addBtn = document.getElementById(cfg.addBtnId);
   if (!grid) return;
-  grid.innerHTML = allCourses.length
-    ? allCourses.map(courseTileHTML).join('')
-    : '<div class="lib-empty"><i class="ti ti-files-off" style="font-size:28px;"></i><div>لا توجد دورات مضافة بعد</div></div>';
+  const items = allGroups[kind] || [];
+  grid.innerHTML = items.length
+    ? items.map(it => groupTileHTML(it, kind)).join('')
+    : `<div class="lib-empty"><i class="ti ti-files-off" style="font-size:28px;"></i><div>${cfg.emptyMsg}</div></div>`;
   if (addBtn) addBtn.style.display = isAdmin() ? 'block' : 'none';
 }
 
@@ -199,7 +224,7 @@ function renderCoursesGrid() {
 onSnapshot(query(collection(db, 'libraryMaterials'), orderBy('addedAt', 'desc')), snap => {
   allLibMats = snap.docs.map(d => ({ id: d.id, ...d.data() }));
   window.renderLibMats();
-  if (window._openCourseId) window.openCourseDetailModal(window._openCourseId, true);
+  if (window._openGroupId) window.openGroupDetailModal(window._openGroupId, window._openGroupKind, true);
 });
 
 // 2. الأقسام الأخرى — من libraryItems collection
@@ -212,10 +237,12 @@ onSnapshot(query(collection(db, 'libraryItems'), orderBy('addedAt', 'desc')), sn
   ['enrichment', 'podcast'].forEach(renderSection);
 });
 
-// 3. الدورات — من courses collection (كل دورة زي مادة مصغّرة بموادها الخاصة)
-onSnapshot(query(collection(db, 'courses'), orderBy('addedAt', 'asc')), snap => {
-  allCourses = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-  renderCoursesGrid();
+// 3. حاويات الدورات ورياض متين
+Object.keys(GROUP_CONFIG).forEach(kind => {
+  onSnapshot(query(collection(db, GROUP_CONFIG[kind].collection), orderBy('addedAt', 'asc')), snap => {
+    allGroups[kind] = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderGroupsGrid(kind);
+  });
 });
 
 // ══ Auth ══
@@ -227,10 +254,10 @@ onAuthStateChanged(auth, async user => {
   }
   window.renderLibMats();
   ['enrichment', 'podcast'].forEach(renderSection);
-  renderCoursesGrid();
+  Object.keys(GROUP_CONFIG).forEach(renderGroupsGrid);
 });
 
-// ── رقم المحاضرة: تحديث القايمة حسب المادة/الدورة المختارة ────
+// ── رقم المحاضرة: تحديث القايمة حسب المادة/الحاوية المختارة ────
 window.updateLibLectureOptions = () => {
   const section = document.getElementById('addLibSection')?.value;
   const sel = document.getElementById('addLibLecture');
@@ -240,9 +267,10 @@ window.updateLibLectureOptions = () => {
   if (section === 'mateen-lib') {
     const subj = document.getElementById('addLibSubject')?.value;
     relevantMats = allLibMats.filter(m => m.course === subj && m.lectureNumber != null);
-  } else if (section === 'courses') {
-    const courseId = document.getElementById('addLibCourseId')?.value;
-    relevantMats = allLibMats.filter(m => m.courseId === courseId && m.lectureNumber != null);
+  } else if (GROUP_CONFIG[section]) {
+    const groupId = document.getElementById('addLibCourseId')?.value;
+    const field = GROUP_CONFIG[section].matsField;
+    relevantMats = allLibMats.filter(m => m[field] === groupId && m.lectureNumber != null);
   }
   const nums = [...new Set(relevantMats.map(m => m.lectureNumber))].sort((a, b) => a - b);
 
@@ -261,8 +289,13 @@ window.updateLibLectureOptions = () => {
   };
 };
 
-// ── الدورات: إنشاء دورة جديدة (نفس حقول المادة الرئيسية) ──────
-window.openAddCourseContainerModal = () => {
+// ── حاويات الدورات/رياض متين: إنشاء حاوية جديدة ────────────────
+window.openAddCourseContainerModal = (kind = 'courses') => {
+  const cfg = GROUP_CONFIG[kind];
+  document.getElementById('crsKind').value = kind;
+  document.getElementById('addCourseContainerTitle').textContent = cfg.modalTitle;
+  document.getElementById('crsNameLabel').innerHTML = `${cfg.nameLabel} <span style="color:#c0392b">*</span>`;
+  document.getElementById('addCourseContainerSubmitLabel').textContent = cfg.submitLabel;
   ['crsName','crsIconData','crsIconUrl','crsDesc','crsMeetings','crsWeeks','crsLevel'].forEach(id => {
     const el = document.getElementById(id); if (el) el.value = '';
   });
@@ -272,11 +305,13 @@ window.openAddCourseContainerModal = () => {
 };
 
 window.submitNewCourseContainer = async () => {
+  const kind = document.getElementById('crsKind').value || 'courses';
+  const cfg  = GROUP_CONFIG[kind];
   const name = document.getElementById('crsName').value.trim();
   const desc = document.getElementById('crsDesc').value.trim();
   const err  = document.getElementById('addCourseContainerErr');
   if (!name || !desc) {
-    err.style.display = 'block'; err.textContent = 'يرجى تعبئة اسم الدورة والوصف على الأقل';
+    err.style.display = 'block'; err.textContent = `يرجى تعبئة ${cfg.nameLabel} والوصف على الأقل`;
     return;
   }
   err.style.display = 'none';
@@ -284,7 +319,7 @@ window.submitNewCourseContainer = async () => {
   btn.disabled = true; btn.innerHTML = '<i class="ti ti-loader"></i> جاري الإضافة...';
 
   try {
-    await addDoc(collection(db, 'courses'), {
+    await addDoc(collection(db, cfg.collection), {
       name,
       desc,
       iconData: document.getElementById('crsIconData').value || '',
@@ -300,60 +335,62 @@ window.submitNewCourseContainer = async () => {
   } catch (e) {
     err.style.display = 'block'; err.textContent = 'حدث خطأ، حاولي مرة أخرى';
   }
-  btn.disabled = false; btn.innerHTML = '<i class="ti ti-plus"></i> إضافة الدورة';
+  btn.disabled = false; btn.innerHTML = `<i class="ti ti-plus"></i> <span id="addCourseContainerSubmitLabel">${cfg.submitLabel}</span>`;
 };
 
-// ── الدورات: فتح تفاصيل دورة معينة وموادها مقسّمة لمحاضرات ────
-window.openCourseDetailModal = (courseId, keepOpenSilent) => {
-  const course = allCourses.find(c => c.id === courseId);
-  if (!course) return;
-  window._openCourseId = courseId;
+// ── فتح تفاصيل حاوية معينة وموادها مقسّمة لمحاضرات ────
+window.openGroupDetailModal = (groupId, kind = 'courses', keepOpenSilent) => {
+  const cfg = GROUP_CONFIG[kind];
+  const item = (allGroups[kind] || []).find(c => c.id === groupId);
+  if (!item) return;
+  window._openGroupId = groupId;
+  window._openGroupKind = kind;
 
-  const mats = allLibMats.filter(m => m.courseId === courseId);
-  const icon = course.iconData || course.iconUrl
-    ? `<img src="${course.iconData || course.iconUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:12px;">`
-    : `<i class="ti ti-certificate" style="font-size:30px;color:white"></i>`;
+  const mats = allLibMats.filter(m => m[cfg.matsField] === groupId);
+  const icon = item.iconData || item.iconUrl
+    ? `<img src="${item.iconData || item.iconUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:12px;">`
+    : `<i class="ti ${cfg.icon}" style="font-size:30px;color:white"></i>`;
 
   const matsHTML = mats.length
-    ? libMatsGroupedHTML(mats, 'courses')
-    : '<div class="lib-empty"><i class="ti ti-files-off" style="font-size:24px;"></i><div>لا يوجد محتوى في هذه الدورة بعد</div></div>';
+    ? libMatsGroupedHTML(mats, kind)
+    : '<div class="lib-empty"><i class="ti ti-files-off" style="font-size:24px;"></i><div>لا يوجد محتوى هنا بعد</div></div>';
 
   document.getElementById('courseDetailModalBody').innerHTML = `
-    <div style="background:${course.color || 'linear-gradient(135deg,#5c3d2e,#8a5e3c)'};padding:20px;border-radius:16px 16px 0 0;display:flex;align-items:center;gap:14px;position:relative">
-      <button onclick="document.getElementById('courseDetailModal').style.display='none';window._openCourseId=null" style="position:absolute;top:12px;left:12px;background:rgba(255,255,255,0.2);border:none;color:white;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:16px">✕</button>
+    <div style="background:${item.color || 'linear-gradient(135deg,#5c3d2e,#8a5e3c)'};padding:20px;border-radius:16px 16px 0 0;display:flex;align-items:center;gap:14px;position:relative">
+      <button onclick="document.getElementById('courseDetailModal').style.display='none';window._openGroupId=null" style="position:absolute;top:12px;left:12px;background:rgba(255,255,255,0.2);border:none;color:white;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:16px">✕</button>
       <div style="width:56px;height:56px;border-radius:12px;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0">${icon}</div>
       <div>
-        <div style="color:white;font-weight:700;font-size:17px;font-family:Amiri,serif">${course.name}</div>
-        <div style="color:rgba(255,255,255,0.85);font-size:12px;margin-top:2px">${course.desc || ''}</div>
+        <div style="color:white;font-weight:700;font-size:17px;font-family:Amiri,serif">${item.name}</div>
+        <div style="color:rgba(255,255,255,0.85);font-size:12px;margin-top:2px">${item.desc || ''}</div>
       </div>
     </div>
     <div style="padding:18px">
       ${isAdmin() ? `
-        <button onclick="openAddLibModal('courses','${courseId}')" class="btn-add-lib" style="margin-bottom:16px">
-          <i class="ti ti-plus"></i> إضافة محتوى لهذه الدورة
+        <button onclick="openAddLibModal('${kind}','${groupId}')" class="btn-add-lib" style="margin-bottom:16px">
+          <i class="ti ti-plus"></i> ${cfg.addContentLabel}
         </button>` : ''}
-      <div class="lib-cards-grid" style="padding:0">${mats.length ? '' : ''}</div>
       ${matsHTML}
       ${isAdmin() ? `
-        <button onclick="confirmDeleteCourse('${courseId}','${course.name.replace(/'/g,"\\'")}')" style="margin-top:16px;width:100%;padding:8px;border:1px solid #c0392b;background:transparent;color:#c0392b;border-radius:8px;font-family:inherit;font-size:13px;cursor:pointer">
-          <i class="ti ti-trash"></i> حذف الدورة بالكامل
+        <button onclick="confirmDeleteGroup('${groupId}','${item.name.replace(/'/g,"\\'")}','${kind}')" style="margin-top:16px;width:100%;padding:8px;border:1px solid #c0392b;background:transparent;color:#c0392b;border-radius:8px;font-family:inherit;font-size:13px;cursor:pointer">
+          <i class="ti ti-trash"></i> ${cfg.deleteLabel}
         </button>` : ''}
     </div>`;
 
   if (!keepOpenSilent) document.getElementById('courseDetailModal').style.display = 'flex';
 };
 
-window.confirmDeleteCourse = async (courseId, name) => {
-  if (!confirm(`هل أنتِ متأكدة من حذف دورة "${name}"؟ هيتم حذف كل محتواها كمان.`)) return;
+window.confirmDeleteGroup = async (groupId, name, kind = 'courses') => {
+  const cfg = GROUP_CONFIG[kind];
+  if (!confirm(cfg.deleteConfirm(name))) return;
   try {
-    const mats = allLibMats.filter(m => m.courseId === courseId);
+    const mats = allLibMats.filter(m => m[cfg.matsField] === groupId);
     for (const m of mats) {
       await deleteAssignmentsForMaterial(m.id);
       await deleteDoc(doc(db, 'libraryMaterials', m.id));
     }
-    await deleteDoc(doc(db, 'courses', courseId));
+    await deleteDoc(doc(db, cfg.collection, groupId));
     document.getElementById('courseDetailModal').style.display = 'none';
-    window._openCourseId = null;
+    window._openGroupId = null;
   } catch (e) {
     alert('حدث خطأ أثناء الحذف: ' + e.message);
   }
@@ -396,10 +433,11 @@ window.submitAddLib = async () => {
         ...(lectureNumber != null ? { lectureNumber } : {}),
         addedAt: Date.now(),
       });
-    } else if (section === 'courses') {
-      const courseId = document.getElementById('addLibCourseId').value;
+    } else if (GROUP_CONFIG[section]) {
+      const groupId = document.getElementById('addLibCourseId').value;
+      const field = GROUP_CONFIG[section].matsField;
       await addDoc(collection(db, 'libraryMaterials'), {
-        title, type, url, notes, courseId,
+        title, type, url, notes, [field]: groupId,
         ...(lectureNumber != null ? { lectureNumber } : {}),
         addedAt: Date.now(),
       });
@@ -416,7 +454,7 @@ window.submitAddLib = async () => {
 // ══ Edit ══
 const editCache = {};
 window.openEditLib = async (id, section) => {
-  let item = [...allLibMats, ...(allLibExtra.enrichment||[]), ...(allLibExtra.podcast||[]), ...(allLibExtra.courses||[])].find(m => m.id === id);
+  let item = [...allLibMats, ...(allLibExtra.enrichment||[]), ...(allLibExtra.podcast||[])].find(m => m.id === id);
   if (!item) return;
   editCache.section = section;
   document.getElementById('editLibId').value    = id;
@@ -442,7 +480,7 @@ window.submitEditLib = async () => {
   btn.disabled = true; btn.innerHTML = '<i class="ti ti-loader"></i> جاري الحفظ...';
 
   try {
-    const colName = (editCache.section === 'mateen-lib' || editCache.section === 'courses') ? 'libraryMaterials' : 'libraryItems';
+    const colName = (editCache.section === 'mateen-lib' || GROUP_CONFIG[editCache.section]) ? 'libraryMaterials' : 'libraryItems';
     await updateDoc(doc(db, colName, id), { title, type, url, notes });
     document.getElementById('editLibModal').style.display = 'none';
   } catch(e) {
@@ -463,7 +501,7 @@ window.openDeleteLib = (id, title, section) => {
 
 window.executeDeleteLib = async () => {
   const id  = deleteCache.id;
-  const col = (deleteCache.section === 'mateen-lib' || deleteCache.section === 'courses') ? 'libraryMaterials' : 'libraryItems';
+  const col = (deleteCache.section === 'mateen-lib' || GROUP_CONFIG[deleteCache.section]) ? 'libraryMaterials' : 'libraryItems';
   const btn = document.getElementById('deleteLibConfirm');
   btn.disabled = true; btn.innerHTML = '<i class="ti ti-loader"></i>';
   try {

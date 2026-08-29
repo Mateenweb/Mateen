@@ -22,6 +22,7 @@ window.openAddLibModal = (section, courseId) => {
     'enrichment': 'إضافة محتوى إثرائي',
     'podcast':    'إضافة حلقة بودكاست',
     'courses':    'إضافة محتوى للدورة',
+    'rawdat':     'إضافة محتوى لرياض متين',
   };
   document.getElementById('addLibSection').value = section;
   document.getElementById('addLibCourseId').value = courseId || '';
@@ -39,9 +40,9 @@ window.openAddLibModal = (section, courseId) => {
       (window.currentLibFilter && window.currentLibFilter !== 'all') ? window.currentLibFilter : '';
   }
 
-  // حقل "رقم المحاضرة" يظهر لمكتبة متين والدورات (مش للإثرائي/البودكاست)
+  // حقل "رقم المحاضرة" يظهر لمكتبة متين والحاويات (الدورات/رياض متين) — مش للإثرائي/البودكاست
   const lecWrap = document.getElementById('libLectureWrap');
-  if (lecWrap) lecWrap.style.display = (section === 'mateen-lib' || section === 'courses') ? 'block' : 'none';
+  if (lecWrap) lecWrap.style.display = (section === 'mateen-lib' || section === 'courses' || section === 'rawdat') ? 'block' : 'none';
   if (window.updateLibLectureOptions) window.updateLibLectureOptions();
 
   document.getElementById('addLibModal').style.display = 'flex';
