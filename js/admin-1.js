@@ -153,14 +153,69 @@ window.closeArchiveModal = () => {
 };
 window.doLogout = () => signOut(auth).then(() => window.location.href = '../html/login.html');
 
+// ── مصدر محتوى المادة: رابط أو رفع ملف مباشر ──────────────────
+let _matUploadedUrl = null;
+let _matSourceMode = 'link';
+
+window.setMatSourceMode = (mode) => {
+  _matSourceMode = mode;
+  const urlWrap    = document.getElementById('fUrlFieldWrap');
+  const uploadWrap = document.getElementById('fFileUploadWrap');
+  const linkBtn    = document.getElementById('fSourceModeLinkBtn');
+  const uploadBtn  = document.getElementById('fSourceModeUploadBtn');
+  const isUpload = mode === 'upload';
+
+  if (urlWrap)    urlWrap.style.display    = isUpload ? 'none' : 'block';
+  if (uploadWrap) uploadWrap.style.display = isUpload ? 'block' : 'none';
+  if (linkBtn)    linkBtn.classList.toggle('active', !isUpload);
+  if (uploadBtn)  uploadBtn.classList.toggle('active', isUpload);
+  if (!isUpload) _matUploadedUrl = null;
+};
+
+window.handleMatFileUpload = async (input) => {
+  const file = input.files[0];
+  if (!file) return;
+  const progressWrap = document.getElementById('fFileUploadProgress');
+  const progressBar  = document.getElementById('fFileProgressBar');
+  const doneMsg      = document.getElementById('fFileUploadDone');
+  const uploadBox     = document.getElementById('fFileUploadBox');
+
+  progressWrap.style.display = 'block';
+  doneMsg.style.display = 'none';
+  uploadBox.style.display = 'none';
+  progressBar.style.width = '0%';
+
+  try {
+    let pct = 0;
+    const tick = setInterval(() => {
+      pct = Math.min(pct + 8, 90);
+      progressBar.style.width = pct + '%';
+    }, 200);
+
+    const url = await uploadToCloudinary(file);
+    clearInterval(tick);
+    progressBar.style.width = '100%';
+
+    _matUploadedUrl = url;
+    progressWrap.style.display = 'none';
+    doneMsg.style.display = 'block';
+    doneMsg.textContent = '✅ تم الرفع — ' + file.name;
+  } catch (e) {
+    progressWrap.style.display = 'none';
+    uploadBox.style.display = 'block';
+    alert('فشل رفع الملف: ' + e.message);
+  }
+};
+
 // ── ADD ───────────────────────────────────────────────
 window.doAdd = async () => {
   hideErr();
-  const url    = document.getElementById('fUrl').value.trim();
+  const isUpload = _matSourceMode === 'upload';
+  const url    = isUpload ? (_matUploadedUrl || '') : document.getElementById('fUrl').value.trim();
   const course = document.getElementById('fCourse').value;
   const title  = document.getElementById('fTitle').value.trim();
-  if (!url)    { showErr('يرجى إدخال رابط الملف'); return; }
-  if (!url.startsWith('http')) { showErr('الرابط يجب أن يبدأ بـ https://'); return; }
+  if (!url)    { showErr(isUpload ? 'يرجى رفع الملف أولاً' : 'يرجى إدخال رابط الملف'); return; }
+  if (!isUpload && !url.startsWith('http')) { showErr('الرابط يجب أن يبدأ بـ https://'); return; }
   if (!course) { showErr('يرجى اختيار المادة'); return; }
   if (!title)  { showErr('يرجى إدخال عنوان المادة'); return; }
 
@@ -180,6 +235,11 @@ window.doAdd = async () => {
     showToast('✓ تمت إضافة المادة بنجاح');
     ['fUrl','fTitle','fNotes'].forEach(id => document.getElementById(id).value = '');
     document.getElementById('fCourse').value = '';
+    _matUploadedUrl = null;
+    setMatSourceMode('link');
+    document.getElementById('fFileUploadDone').style.display = 'none';
+    document.getElementById('fFileUploadBox').style.display = 'block';
+    document.getElementById('fContentFileInput').value = '';
   } catch(e) { showErr('خطأ: ' + e.message); }
 
   btn.disabled = false;
