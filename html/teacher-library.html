@@ -132,16 +132,32 @@
           </div>
           <div class="t-field">
             <label>النوع</label>
-            <select id="resType">
+            <select id="resType" onchange="onResTypeChange()">
               <option value="pdf">PDF</option>
               <option value="link">رابط</option>
               <option value="note">ملاحظة</option>
             </select>
           </div>
         </div>
-        <div class="t-field">
+        <div id="resContentFieldWrap" class="t-field">
           <label>الرابط أو المحتوى</label>
           <textarea id="resContent" placeholder="الرابط أو النص..."></textarea>
+        </div>
+        <div id="resFileUploadWrap" class="t-field" style="display:none">
+          <label>رفع ملف</label>
+          <div id="resFileUploadBox" onclick="document.getElementById('resContentFileInput').click()" style="border:2px dashed var(--border,#e0d5c5);border-radius:10px;padding:20px;text-align:center;cursor:pointer;">
+            <i class="ti ti-upload" style="font-size:24px;color:var(--green-dark,#5c3d2e)"></i>
+            <div style="font-size:13px;color:var(--text-mid);margin-top:6px">اضغطي لرفع الملف</div>
+            <div style="font-size:11px;color:var(--text-mid);margin-top:2px">PDF · Word · صورة وغيرها</div>
+          </div>
+          <input type="file" id="resContentFileInput" style="display:none" onchange="handleResFileUpload(this)">
+          <div id="resFileUploadProgress" style="display:none;margin-top:10px">
+            <div style="font-size:12px;color:var(--text-mid);margin-bottom:4px">جارٍ الرفع...</div>
+            <div style="height:6px;background:var(--border,#e0d5c5);border-radius:3px">
+              <div id="resFileProgressBar" style="height:100%;background:var(--green-dark,#5c3d2e);border-radius:3px;width:0%;transition:width 0.3s"></div>
+            </div>
+          </div>
+          <div id="resFileUploadDone" style="display:none;margin-top:8px;font-size:12px;color:#27ae60;font-weight:600">✅ تم الرفع بنجاح</div>
         </div>
         <div style="display:flex;gap:10px">
           <button class="t-submit" onclick="saveResource()"><i class="ti ti-check"></i> حفظ</button>

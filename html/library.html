@@ -226,8 +226,43 @@
         </select>
       </div>
       <div>
-        <label style="font-size:13px;color:var(--text-dark);display:block;margin-bottom:6px;">الرابط <span style="color:#c0392b">*</span></label>
-        <input id="addLibUrl" type="url" placeholder="https://..." style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:14px;box-sizing:border-box;">
+        <label style="font-size:13px;color:var(--text-dark);display:block;margin-bottom:6px;">محتوى المادة <span style="color:#c0392b">*</span></label>
+
+        <div style="display:flex;gap:8px;margin-bottom:10px;">
+          <button type="button" id="libSourceModeLinkBtn" class="active" onclick="setLibSourceMode('link')"
+            style="flex:1;padding:9px;border-radius:8px;border:1px solid var(--border);background:var(--white);font-family:inherit;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;">
+            <i class="ti ti-link"></i> رابط
+          </button>
+          <button type="button" id="libSourceModeUploadBtn" onclick="setLibSourceMode('upload')"
+            style="flex:1;padding:9px;border-radius:8px;border:1px solid var(--border);background:var(--white);font-family:inherit;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;">
+            <i class="ti ti-upload"></i> رفع ملف
+          </button>
+        </div>
+        <style>
+          #libSourceModeLinkBtn.active, #libSourceModeUploadBtn.active {
+            background: var(--green-dark); color: #fff; border-color: var(--green-dark);
+          }
+        </style>
+
+        <div id="libUrlFieldWrap">
+          <input id="addLibUrl" type="url" placeholder="https://..." style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:14px;box-sizing:border-box;">
+        </div>
+
+        <div id="libFileUploadWrap" style="display:none">
+          <div id="libFileUploadBox" onclick="document.getElementById('libContentFileInput').click()" style="border:2px dashed var(--border);border-radius:10px;padding:20px;text-align:center;cursor:pointer;background:var(--white)">
+            <i class="ti ti-upload" style="font-size:24px;color:var(--green-dark)"></i>
+            <div style="font-size:13px;color:var(--text-mid);margin-top:6px">اضغطي لرفع الملف</div>
+            <div style="font-size:11px;color:var(--text-mid);margin-top:2px">PDF · Word · صوت · فيديو · صورة وغيرها</div>
+          </div>
+          <input type="file" id="libContentFileInput" style="display:none" onchange="handleLibFileUpload(this)">
+          <div id="libFileUploadProgress" style="display:none;margin-top:10px">
+            <div style="font-size:12px;color:var(--text-mid);margin-bottom:4px">جارٍ الرفع...</div>
+            <div style="height:6px;background:var(--border);border-radius:3px">
+              <div id="libFileProgressBar" style="height:100%;background:var(--green-dark);border-radius:3px;width:0%;transition:width 0.3s"></div>
+            </div>
+          </div>
+          <div id="libFileUploadDone" style="display:none;margin-top:8px;font-size:12px;color:#27ae60;font-weight:600">✅ تم الرفع بنجاح</div>
+        </div>
       </div>
       <div>
         <label style="font-size:13px;color:var(--text-dark);display:block;margin-bottom:6px;">ملاحظة (اختياري)</label>
@@ -345,8 +380,43 @@
         </select>
       </div>
       <div>
-        <label style="font-size:13px;color:var(--text-dark);display:block;margin-bottom:6px;">الرابط</label>
-        <input id="editLibUrl" type="url" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:14px;box-sizing:border-box;">
+        <label style="font-size:13px;color:var(--text-dark);display:block;margin-bottom:6px;">محتوى المادة</label>
+
+        <div style="display:flex;gap:8px;margin-bottom:10px;">
+          <button type="button" id="editLibSourceModeLinkBtn" class="active" onclick="setEditLibSourceMode('link')"
+            style="flex:1;padding:9px;border-radius:8px;border:1px solid var(--border);background:var(--white);font-family:inherit;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;">
+            <i class="ti ti-link"></i> رابط
+          </button>
+          <button type="button" id="editLibSourceModeUploadBtn" onclick="setEditLibSourceMode('upload')"
+            style="flex:1;padding:9px;border-radius:8px;border:1px solid var(--border);background:var(--white);font-family:inherit;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;">
+            <i class="ti ti-upload"></i> رفع ملف جديد
+          </button>
+        </div>
+        <style>
+          #editLibSourceModeLinkBtn.active, #editLibSourceModeUploadBtn.active {
+            background: var(--green-dark); color: #fff; border-color: var(--green-dark);
+          }
+        </style>
+
+        <div id="editLibUrlFieldWrap">
+          <input id="editLibUrl" type="url" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:14px;box-sizing:border-box;">
+        </div>
+
+        <div id="editLibFileUploadWrap" style="display:none">
+          <div id="editLibFileUploadBox" onclick="document.getElementById('editLibContentFileInput').click()" style="border:2px dashed var(--border);border-radius:10px;padding:20px;text-align:center;cursor:pointer;background:var(--white)">
+            <i class="ti ti-upload" style="font-size:24px;color:var(--green-dark)"></i>
+            <div style="font-size:13px;color:var(--text-mid);margin-top:6px">اضغطي لرفع ملف بديل</div>
+            <div style="font-size:11px;color:var(--text-mid);margin-top:2px">PDF · Word · صوت · فيديو · صورة وغيرها</div>
+          </div>
+          <input type="file" id="editLibContentFileInput" style="display:none" onchange="handleEditLibFileUpload(this)">
+          <div id="editLibFileUploadProgress" style="display:none;margin-top:10px">
+            <div style="font-size:12px;color:var(--text-mid);margin-bottom:4px">جارٍ الرفع...</div>
+            <div style="height:6px;background:var(--border);border-radius:3px">
+              <div id="editLibFileProgressBar" style="height:100%;background:var(--green-dark);border-radius:3px;width:0%;transition:width 0.3s"></div>
+            </div>
+          </div>
+          <div id="editLibFileUploadDone" style="display:none;margin-top:8px;font-size:12px;color:#27ae60;font-weight:600">✅ تم الرفع بنجاح</div>
+        </div>
       </div>
       <div>
         <label style="font-size:13px;color:var(--text-dark);display:block;margin-bottom:6px;">ملاحظة</label>
