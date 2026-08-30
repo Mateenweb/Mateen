@@ -480,12 +480,46 @@
 <div class="err-msg" id="errMsg"><i class="ti ti-alert-circle"></i><span id="errText"></span></div>
 <div class="add-form">
 <div class="field">
-<label>رابط الملف <span class="required-star">*</span></label>
+<label>محتوى المادة <span class="required-star">*</span></label>
+<div style="display:flex;gap:8px;margin-bottom:10px;">
+  <button type="button" id="fSourceModeLinkBtn" class="active" onclick="setMatSourceMode('link')"
+    style="flex:1;padding:9px;border-radius:8px;border:1px solid var(--border);background:var(--white);font-family:inherit;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;">
+    <i class="ti ti-link"></i> رابط
+  </button>
+  <button type="button" id="fSourceModeUploadBtn" onclick="setMatSourceMode('upload')"
+    style="flex:1;padding:9px;border-radius:8px;border:1px solid var(--border);background:var(--white);font-family:inherit;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;">
+    <i class="ti ti-upload"></i> رفع ملف
+  </button>
+</div>
+<style>
+  #fSourceModeLinkBtn.active, #fSourceModeUploadBtn.active {
+    background: var(--green-dark,#5c3d2e); color: #fff; border-color: var(--green-dark,#5c3d2e);
+  }
+</style>
+
+<div id="fUrlFieldWrap">
 <div class="link-wrap">
 <i class="ti ti-link"></i>
 <input id="fUrl" placeholder="https://drive.google.com/file/d/..." type="url"/>
 </div>
 <div class="link-hint">Google Drive · Dropbox · OneDrive · YouTube · أي رابط مباشر</div>
+</div>
+
+<div id="fFileUploadWrap" style="display:none">
+  <div id="fFileUploadBox" onclick="document.getElementById('fContentFileInput').click()" style="border:2px dashed var(--border);border-radius:10px;padding:20px;text-align:center;cursor:pointer;background:var(--white)">
+    <i class="ti ti-upload" style="font-size:24px;color:var(--green-dark,#5c3d2e)"></i>
+    <div style="font-size:13px;color:var(--text-mid);margin-top:6px">اضغطي لرفع الملف</div>
+    <div style="font-size:11px;color:var(--text-mid);margin-top:2px">PDF · Word · صوت · فيديو · صورة وغيرها</div>
+  </div>
+  <input type="file" id="fContentFileInput" style="display:none" onchange="handleMatFileUpload(this)">
+  <div id="fFileUploadProgress" style="display:none;margin-top:10px">
+    <div style="font-size:12px;color:var(--text-mid);margin-bottom:4px">جارٍ الرفع...</div>
+    <div style="height:6px;background:var(--border);border-radius:3px">
+      <div id="fFileProgressBar" style="height:100%;background:var(--green-dark,#5c3d2e);border-radius:3px;width:0%;transition:width 0.3s"></div>
+    </div>
+  </div>
+  <div id="fFileUploadDone" style="display:none;margin-top:8px;font-size:12px;color:#27ae60;font-weight:600">✅ تم الرفع بنجاح</div>
+</div>
 </div>
 <div class="form-row">
 <div class="field">
