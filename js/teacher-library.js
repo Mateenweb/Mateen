@@ -2,6 +2,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/fireba
 import { getFirestore, collection, doc, getDoc, getDocs, addDoc, deleteDoc, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
 import { FIREBASE_CONFIG } from "./config.js";
+import { uploadToCloudinary } from "./cloud-upload.js";
 
 const app  = initializeApp(FIREBASE_CONFIG);
 const db   = getFirestore(app);
@@ -85,6 +86,56 @@ window.filterRes = (btn, type) => {
 
 window.showAddResource = () => {
   document.getElementById('addResourceForm').style.display = 'block';
+  window.onResTypeChange();
+};
+
+// نوع "PDF" بيديها اختيار رفع ملف مباشر بالإضافة للرابط
+window.onResTypeChange = () => {
+  const type = document.getElementById('resType').value;
+  const fileWrap = document.getElementById('resFileUploadWrap');
+  const contentLabel = document.querySelector('#resContentFieldWrap label');
+  if (type === 'pdf') {
+    fileWrap.style.display = 'block';
+    contentLabel.textContent = 'أو الصقي رابط الملف (اختياري لو رفعتِ ملف)';
+  } else {
+    fileWrap.style.display = 'none';
+    contentLabel.textContent = 'الرابط أو المحتوى';
+  }
+};
+
+window.handleResFileUpload = async (input) => {
+  const file = input.files[0];
+  if (!file) return;
+  const progressWrap = document.getElementById('resFileUploadProgress');
+  const progressBar  = document.getElementById('resFileProgressBar');
+  const doneMsg      = document.getElementById('resFileUploadDone');
+  const uploadBox    = document.getElementById('resFileUploadBox');
+
+  progressWrap.style.display = 'block';
+  doneMsg.style.display = 'none';
+  uploadBox.style.display = 'none';
+  progressBar.style.width = '0%';
+
+  try {
+    let pct = 0;
+    const tick = setInterval(() => {
+      pct = Math.min(pct + 8, 90);
+      progressBar.style.width = pct + '%';
+    }, 200);
+
+    const url = await uploadToCloudinary(file);
+    clearInterval(tick);
+    progressBar.style.width = '100%';
+
+    document.getElementById('resContent').value = url;
+    progressWrap.style.display = 'none';
+    doneMsg.style.display = 'block';
+    doneMsg.textContent = '✅ تم الرفع — ' + file.name;
+  } catch (e) {
+    progressWrap.style.display = 'none';
+    uploadBox.style.display = 'block';
+    alert('فشل رفع الملف: ' + e.message);
+  }
 };
 
 window.saveResource = async () => {
@@ -101,6 +152,12 @@ window.saveResource = async () => {
     document.getElementById('addResourceForm').style.display = 'none';
     document.getElementById('resTitle').value   = '';
     document.getElementById('resContent').value = '';
+    const doneMsg = document.getElementById('resFileUploadDone');
+    const uploadBox = document.getElementById('resFileUploadBox');
+    const fileInput = document.getElementById('resContentFileInput');
+    if (doneMsg)   doneMsg.style.display = 'none';
+    if (uploadBox) uploadBox.style.display = 'block';
+    if (fileInput) fileInput.value = '';
     loadResources();
   } catch(e) {
     alert('حدث خطأ أثناء الحفظ');
