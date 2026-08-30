@@ -46,5 +46,14 @@ window.openAddLibModal = (section, courseId) => {
   if (window.updateLibLectureOptions) window.updateLibLectureOptions();
 
   document.getElementById('addLibModal').style.display = 'flex';
+
+  // إعادة الفورم لوضع "رابط" الافتراضي في كل مرة تُفتح فيها
+  const fileInput = document.getElementById('libContentFileInput');
+  if (fileInput) fileInput.value = '';
+  const doneMsg   = document.getElementById('libFileUploadDone');
+  const uploadBox = document.getElementById('libFileUploadBox');
+  if (doneMsg)   doneMsg.style.display = 'none';
+  if (uploadBox) uploadBox.style.display = 'block';
+  if (window.setLibSourceMode) window.setLibSourceMode('link');
 };
 
