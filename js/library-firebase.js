@@ -8,6 +8,7 @@ import { getFirestore, collection, onSnapshot, addDoc, updateDoc,
 import { FIREBASE_CONFIG } from "./config.js";
 import { renderAssignmentsSection } from "./assignments-ui.js";
 import { deleteAssignmentsForMaterial } from "./assignments.js";
+import { uploadToCloudinary } from "./cloud-upload.js";
 
 const app  = getApps().length ? getApp() : initializeApp(FIREBASE_CONFIG);
 const auth = getAuth(app);
@@ -397,16 +398,71 @@ window.confirmDeleteGroup = async (groupId, name, kind = 'courses') => {
 };
 
 // ══ Add Content ══
+// مصدر المحتوى: رابط أو رفع ملف مباشر
+let _libUploadedUrl = null;
+let _libSourceMode = 'link';
+
+window.setLibSourceMode = (mode) => {
+  _libSourceMode = mode;
+  const urlWrap    = document.getElementById('libUrlFieldWrap');
+  const uploadWrap = document.getElementById('libFileUploadWrap');
+  const linkBtn    = document.getElementById('libSourceModeLinkBtn');
+  const uploadBtn  = document.getElementById('libSourceModeUploadBtn');
+  const isUpload = mode === 'upload';
+
+  if (urlWrap)    urlWrap.style.display    = isUpload ? 'none' : 'block';
+  if (uploadWrap) uploadWrap.style.display = isUpload ? 'block' : 'none';
+  if (linkBtn)    linkBtn.classList.toggle('active', !isUpload);
+  if (uploadBtn)  uploadBtn.classList.toggle('active', isUpload);
+  if (!isUpload) _libUploadedUrl = null;
+};
+
+window.handleLibFileUpload = async (input) => {
+  const file = input.files[0];
+  if (!file) return;
+  const progressWrap = document.getElementById('libFileUploadProgress');
+  const progressBar  = document.getElementById('libFileProgressBar');
+  const doneMsg      = document.getElementById('libFileUploadDone');
+  const uploadBox    = document.getElementById('libFileUploadBox');
+
+  progressWrap.style.display = 'block';
+  doneMsg.style.display = 'none';
+  uploadBox.style.display = 'none';
+  progressBar.style.width = '0%';
+
+  try {
+    let pct = 0;
+    const tick = setInterval(() => {
+      pct = Math.min(pct + 8, 90);
+      progressBar.style.width = pct + '%';
+    }, 200);
+
+    const url = await uploadToCloudinary(file);
+    clearInterval(tick);
+    progressBar.style.width = '100%';
+
+    _libUploadedUrl = url;
+    progressWrap.style.display = 'none';
+    doneMsg.style.display = 'block';
+    doneMsg.textContent = '✅ تم الرفع — ' + file.name;
+  } catch (e) {
+    progressWrap.style.display = 'none';
+    uploadBox.style.display = 'block';
+    alert('فشل رفع الملف: ' + e.message);
+  }
+};
+
 window.submitAddLib = async () => {
   const section = document.getElementById('addLibSection').value;
   const title   = document.getElementById('addLibTitle').value.trim();
   const type    = document.getElementById('addLibType').value;
-  const url     = document.getElementById('addLibUrl').value.trim();
+  const isUpload = _libSourceMode === 'upload';
+  const url     = isUpload ? (_libUploadedUrl || '') : document.getElementById('addLibUrl').value.trim();
   const notes   = document.getElementById('addLibNotes').value.trim();
   const err     = document.getElementById('addLibErr');
   const btn     = document.getElementById('addLibSubmit');
 
-  if (!title || !url) { err.style.display='block'; err.textContent='العنوان والرابط مطلوبان'; return; }
+  if (!title || !url) { err.style.display='block'; err.textContent = isUpload ? 'يرجى رفع الملف أولاً' : 'العنوان والرابط مطلوبان'; return; }
   if (section === 'mateen-lib' && !document.getElementById('addLibSubject').value) {
     err.style.display='block'; err.textContent='اختاري المادة'; return;
   }
@@ -445,6 +501,14 @@ window.submitAddLib = async () => {
       await addDoc(collection(db, 'libraryItems'), { title, type, url, notes, section, addedAt: Date.now() });
     }
     document.getElementById('addLibModal').style.display = 'none';
+    _libUploadedUrl = null;
+    setLibSourceMode('link');
+    const fdone = document.getElementById('libFileUploadDone');
+    const fbox  = document.getElementById('libFileUploadBox');
+    const finput = document.getElementById('libContentFileInput');
+    if (fdone) fdone.style.display = 'none';
+    if (fbox)  fbox.style.display = 'block';
+    if (finput) finput.value = '';
   } catch(e) {
     err.style.display = 'block'; err.textContent = 'خطأ: ' + e.message;
   }
@@ -453,6 +517,58 @@ window.submitAddLib = async () => {
 
 // ══ Edit ══
 const editCache = {};
+let _editLibUploadedUrl = null;
+let _editLibSourceMode = 'link';
+
+window.setEditLibSourceMode = (mode) => {
+  _editLibSourceMode = mode;
+  const urlWrap    = document.getElementById('editLibUrlFieldWrap');
+  const uploadWrap = document.getElementById('editLibFileUploadWrap');
+  const linkBtn    = document.getElementById('editLibSourceModeLinkBtn');
+  const uploadBtn  = document.getElementById('editLibSourceModeUploadBtn');
+  const isUpload = mode === 'upload';
+
+  if (urlWrap)    urlWrap.style.display    = isUpload ? 'none' : 'block';
+  if (uploadWrap) uploadWrap.style.display = isUpload ? 'block' : 'none';
+  if (linkBtn)    linkBtn.classList.toggle('active', !isUpload);
+  if (uploadBtn)  uploadBtn.classList.toggle('active', isUpload);
+};
+
+window.handleEditLibFileUpload = async (input) => {
+  const file = input.files[0];
+  if (!file) return;
+  const progressWrap = document.getElementById('editLibFileUploadProgress');
+  const progressBar  = document.getElementById('editLibFileProgressBar');
+  const doneMsg      = document.getElementById('editLibFileUploadDone');
+  const uploadBox    = document.getElementById('editLibFileUploadBox');
+
+  progressWrap.style.display = 'block';
+  doneMsg.style.display = 'none';
+  uploadBox.style.display = 'none';
+  progressBar.style.width = '0%';
+
+  try {
+    let pct = 0;
+    const tick = setInterval(() => {
+      pct = Math.min(pct + 8, 90);
+      progressBar.style.width = pct + '%';
+    }, 200);
+
+    const url = await uploadToCloudinary(file);
+    clearInterval(tick);
+    progressBar.style.width = '100%';
+
+    _editLibUploadedUrl = url;
+    progressWrap.style.display = 'none';
+    doneMsg.style.display = 'block';
+    doneMsg.textContent = '✅ تم الرفع — ' + file.name;
+  } catch (e) {
+    progressWrap.style.display = 'none';
+    uploadBox.style.display = 'block';
+    alert('فشل رفع الملف: ' + e.message);
+  }
+};
+
 window.openEditLib = async (id, section) => {
   let item = [...allLibMats, ...(allLibExtra.enrichment||[]), ...(allLibExtra.podcast||[])].find(m => m.id === id);
   if (!item) return;
@@ -463,6 +579,17 @@ window.openEditLib = async (id, section) => {
   document.getElementById('editLibUrl').value   = item.url   || '';
   document.getElementById('editLibNotes').value = item.notes || '';
   document.getElementById('editLibErr').style.display = 'none';
+
+  // إعادة الفورم لوضع "رابط" الافتراضي (اللينك الحالي بيتعرض جاهز للتعديل)
+  _editLibUploadedUrl = null;
+  const fileInput = document.getElementById('editLibContentFileInput');
+  if (fileInput) fileInput.value = '';
+  const doneMsg   = document.getElementById('editLibFileUploadDone');
+  const uploadBox = document.getElementById('editLibFileUploadBox');
+  if (doneMsg)   doneMsg.style.display = 'none';
+  if (uploadBox) uploadBox.style.display = 'block';
+  setEditLibSourceMode('link');
+
   document.getElementById('editLibModal').style.display = 'flex';
 };
 
@@ -470,12 +597,14 @@ window.submitEditLib = async () => {
   const id    = document.getElementById('editLibId').value;
   const title = document.getElementById('editLibTitle').value.trim();
   const type  = document.getElementById('editLibType').value;
-  const url   = document.getElementById('editLibUrl').value.trim();
+  const isUpload = _editLibSourceMode === 'upload';
+  const url   = isUpload ? (_editLibUploadedUrl || document.getElementById('editLibUrl').value.trim())
+                          : document.getElementById('editLibUrl').value.trim();
   const notes = document.getElementById('editLibNotes').value.trim();
   const err   = document.getElementById('editLibErr');
   const btn   = document.getElementById('editLibSubmit');
 
-  if (!title || !url) { err.style.display='block'; err.textContent='العنوان والرابط مطلوبان'; return; }
+  if (!title || !url) { err.style.display='block'; err.textContent = isUpload ? 'يرجى رفع الملف أولاً' : 'العنوان والرابط مطلوبان'; return; }
   err.style.display = 'none';
   btn.disabled = true; btn.innerHTML = '<i class="ti ti-loader"></i> جاري الحفظ...';
 
@@ -488,6 +617,7 @@ window.submitEditLib = async () => {
   }
   btn.disabled = false; btn.innerHTML = '<i class="ti ti-device-floppy"></i> حفظ';
 };
+
 
 // ══ Delete ══
 const deleteCache = {};
