@@ -138,8 +138,7 @@ window.openUser = function(uid) {
   document.getElementById('msgText').value = '';
 
   const themeBtn = document.getElementById('themeBtnInModal');
-  if (themeBtn) themeBtn.style.display = (currentViewerEmail === 'ra7matest@gmail.com') ? 'inline-block' : 'none';
-
+ if (themeBtn) themeBtn.style.display = (currentViewerEmail === 'rahmaahmed56kishk@outlook.com') ? 'inline-block' : 'none';
   document.getElementById('userModal').classList.add('show');
 };
 
