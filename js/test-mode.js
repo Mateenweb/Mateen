@@ -8,7 +8,7 @@
 // الحسابات المسموح لها بوضع الاختبار — الإضافة هنا في الكود بس،
 // مفيش أي واجهة أو زرار في لوحة الأدمن يفعّلها أو يوريها لحد.
 const TEST_MODE_EMAILS = [
-  'ra7matest@gmail.com',
+  'rahmaahmed56kishk@outlook.com',
 ];
 
 const TEST_MODE_ROLES = ['admin', 'teacher', 'supervisor', 'mateen'];
