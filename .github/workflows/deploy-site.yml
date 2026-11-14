@@ -1,0 +1,92 @@
+name: Deploy Site to mateen.academy
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - 'functions/**'
+      - 'docs/**'
+      - 'docs-user-guide.md'
+      - 'README.md'
+      - 'COMMITS.sh'
+      - '.github/workflows/deploy-functions.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-mateen-academy
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup SSH
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          SSH_HOST: ${{ secrets.DEPLOY_HOST }}
+          SSH_USER: ${{ secrets.DEPLOY_USER }}
+          SSH_PORT: ${{ secrets.DEPLOY_PORT }}
+        run: |
+          set -euo pipefail
+          test -n "${SSH_PRIVATE_KEY:-}" || { echo "Missing secret DEPLOY_SSH_KEY"; exit 1; }
+          test -n "${SSH_HOST:-}" || { echo "Missing secret DEPLOY_HOST"; exit 1; }
+          test -n "${SSH_USER:-}" || { echo "Missing secret DEPLOY_USER"; exit 1; }
+          PORT="${SSH_PORT:-22}"
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -p "$PORT" -H "$SSH_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+          {
+            echo "Host mateen-deploy"
+            echo "  HostName $SSH_HOST"
+            echo "  User $SSH_USER"
+            echo "  Port $PORT"
+            echo "  IdentityFile ~/.ssh/deploy_key"
+            echo "  StrictHostKeyChecking yes"
+            echo "  IdentitiesOnly yes"
+          } > ~/.ssh/config
+          chmod 600 ~/.ssh/config
+
+      - name: Deploy with rsync
+        run: |
+          set -euo pipefail
+          rsync -az --delete \
+            --exclude '.git/' \
+            --exclude '.github/' \
+            --exclude 'functions/node_modules/' \
+            --exclude 'docs/' \
+            --exclude 'COMMITS.sh' \
+            --exclude 'deploy-functions.bat' \
+            --exclude '.cursor/' \
+            --exclude '.specify/' \
+            -e 'ssh' \
+            ./ mateen-deploy:/var/www/mateen/
+
+      - name: Fix permissions and reload Apache
+        run: |
+          set -euo pipefail
+          ssh mateen-deploy 'bash -s' <<'EOF'
+          set -euo pipefail
+          chown -R www-data:www-data /var/www/mateen
+          find /var/www/mateen -type d -exec chmod 755 {} \;
+          find /var/www/mateen -type f -exec chmod 644 {} \;
+          # Keep /Mateen GitHub Pages path compatibility if missing
+          if ! grep -q 'Alias /Mateen' /etc/apache2/sites-enabled/mateen.academy-le-ssl.conf 2>/dev/null; then
+            echo "Warning: Alias /Mateen not found in Apache SSL vhost"
+          fi
+          apache2ctl configtest
+          systemctl reload apache2
+          curl -sI https://mateen.academy/ | head -5
+          curl -sI https://mateen.academy/html/home.html | head -5
+          EOF
+
+      - name: Smoke test
+        run: |
+          set -euo pipefail
+          code=$(curl -s -o /dev/null -w "%{http_code}" https://mateen.academy/html/home.html)
+          echo "home.html => $code"
+          test "$code" = "200"
