@@ -1494,7 +1494,7 @@ window.renderAllUsers = () => {
              <i class="ti ti-unlink"></i>
            </button>
          </div>`
-      : (u.role === 'mateen' || (u.email && u.email.toLowerCase() === 'ra7matest@gmail.com'))
+      : (u.role === 'mateen' || (u.email && u.email.toLowerCase() === 'rahmaahmed56kishk@outlook.com'))
         ? `<button onclick="adminOpenLinkModal('${u.id}','${(u.name||'').replace(/'/g,"\'")}') "
              style="padding:3px 10px;font-size:11px;background:transparent;color:var(--gold);border:1px solid var(--gold);border-radius:6px;cursor:pointer">
              <i class="ti ti-link"></i> ربط
